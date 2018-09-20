@@ -67,19 +67,44 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         return (l, t)
 
     def evolve_amplitudes(self, t_start, t_end, num_timesteps):
-        t = t_start
+        time = t_start
         h = (t_end - t_start) / (num_timesteps - 1)
         self._l_0 = self._get_lambda_copy()
         self._t_0 = self._get_t_copy()
 
-        l = self._l_0
-        t = self._t_0
-        while t < t_end:
-            u = (l, t)
+        _l = self._l_0
+        _t = self._t_0
+        while time < t_end:
+            l_1 = [l_i.copy() for l_i in _l]
+            t_1 = [t_i.copy() for t_i in _t]
+            k_1_l, k_1_t = self._timestep((l_1, t_1), time)
 
-            k_1 = self._timestep(u, t + h)
+            l_2 = [l_i + h * k_1 / 2.0 for l_i, k_1 in zip(l_1, k_1_l)]
+            t_2 = [t_i + h * k_1 / 2.0 for t_i, k_1 in zip(t_1, k_1_t)]
+            k_2_l, k_2_t = self._timestep((l_2, t_2), time + h / 2.0)
 
-            t += h
+            l_3 = [l_i + h * k_2 / 2.0 for l_i, k_2 in zip(l_1, k_2_l)]
+            t_3 = [t_i + h * k_2 / 2.0 for t_i, k_2 in zip(t_1, k_2_t)]
+            k_3_l, k_3_t = self._timestep((l_3, t_3), time + h / 2.0)
+
+            l_4 = [l_i + h * k_3 / 2.0 for l_i, k_3 in zip(l_1, k_3_l)]
+            t_4 = [t_i + h * k_3 / 2.0 for t_i, k_3 in zip(t_1, k_3_t)]
+            k_4_l, k_4_t = self._timestep((l_4, t_4), time + h)
+
+            _l = [
+                l_i + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+                for l_1, k_1, k_2, k_3, k_4 in zip(
+                    l_1, k_1_l, k_2_l, k_3_l, k_4_l
+                )
+            ]
+            _t = [
+                t_i + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+                for t_1, k_1, k_2, k_3, k_4 in zip(
+                    t_1, k_1_t, k_2_t, k_3_t, k_4_t
+                )
+            ]
+
+            time += h
 
     def compute_one_body_density(self, spf):
         rho_qp = self._compute_one_body_density_matrix()
