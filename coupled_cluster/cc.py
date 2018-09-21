@@ -106,7 +106,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
             time += h
 
-    def compute_one_body_density(self, spf):
+    def compute_one_body_density(self):
         rho_qp = self._compute_one_body_density_matrix()
 
         if self.verbose and np.abs(np.trace(rho_qp) - self.n) > 1e-8:
@@ -118,10 +118,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             )
 
         rho_qp_reduced = rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
-        rho = np.zeros(spf.shape[0])
+        rho = np.zeros(self.system.spf.shape[1])
 
         for i in range(len(rho)):
-            rho[i] += np.dot(spf[i].conj(), np.dot(rho_qp_reduced, spf[i]))
+            rho[i] += np.dot(
+                self.system.spf[:, i].conj(),
+                np.dot(rho_qp_reduced, self.system.spf[:, i]),
+            )
 
         return rho
 
