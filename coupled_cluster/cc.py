@@ -1,5 +1,6 @@
 import abc
 import numpy as np
+import tqdm
 
 
 class CoupledCluster(metaclass=abc.ABCMeta):
@@ -71,29 +72,34 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         return (l, t)
 
     def evolve_amplitudes(self, t_start, t_end, num_timesteps):
-        time = t_start
+        prob = np.zeros(num_timesteps, dtype=np.complex128)
+        time = np.zeros(num_timesteps)
+
+        time[0] = t_start
         h = (t_end - t_start) / (num_timesteps - 1)
+
         self._l_0 = self._get_lambda_copy()
         self._t_0 = self._get_t_copy()
+        prob[0] = self._compute_time_evolution_probability()
 
         _l = self._l_0
         _t = self._t_0
-        while time < t_end:
+        for i in tqdm.tqdm(range(1, num_timesteps)):
             l_1 = [l_i.copy() for l_i in _l]
             t_1 = [t_i.copy() for t_i in _t]
-            k_1_l, k_1_t = self._timestep((l_1, t_1), time)
+            k_1_l, k_1_t = self._timestep((l_1, t_1), time[i])
 
             l_2 = [l_i + h * k_1 / 2.0 for l_i, k_1 in zip(l_1, k_1_l)]
             t_2 = [t_i + h * k_1 / 2.0 for t_i, k_1 in zip(t_1, k_1_t)]
-            k_2_l, k_2_t = self._timestep((l_2, t_2), time + h / 2.0)
+            k_2_l, k_2_t = self._timestep((l_2, t_2), time[i] + h / 2.0)
 
             l_3 = [l_i + h * k_2 / 2.0 for l_i, k_2 in zip(l_1, k_2_l)]
             t_3 = [t_i + h * k_2 / 2.0 for t_i, k_2 in zip(t_1, k_2_t)]
-            k_3_l, k_3_t = self._timestep((l_3, t_3), time + h / 2.0)
+            k_3_l, k_3_t = self._timestep((l_3, t_3), time[i] + h / 2.0)
 
             l_4 = [l_i + h * k_3 / 2.0 for l_i, k_3 in zip(l_1, k_3_l)]
             t_4 = [t_i + h * k_3 / 2.0 for t_i, k_3 in zip(t_1, k_3_t)]
-            k_4_l, k_4_t = self._timestep((l_4, t_4), time + h)
+            k_4_l, k_4_t = self._timestep((l_4, t_4), time[i] + h)
 
             _l = [
                 l_i + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
@@ -108,7 +114,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
                 )
             ]
 
-            time += h
+            self._set_l(_l)
+            self._set_t(_t)
+
+            time[i] = i * h
+            prob[i] = self._compute_time_evolution_probability()
+
+        return prob, time
 
     def compute_one_body_density(self):
         rho_qp = self._compute_one_body_density_matrix()
