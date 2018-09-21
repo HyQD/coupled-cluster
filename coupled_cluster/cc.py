@@ -24,11 +24,11 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def _compute_amplitudes(self):
+    def _compute_amplitudes(self, theta, iterative=True):
         pass
 
     @abc.abstractmethod
-    def _compute_lambda_amplitudes(self, theta):
+    def _compute_lambda_amplitudes(self, theta, iterative=True):
         pass
 
     @abc.abstractmethod
@@ -58,10 +58,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.system.evolve_in_time(time)
 
-        # TODO: Remember to include the diagonal in h/f when calling these
-        # functions.
-        self._compute_amplitudes(0)
-        self._compute_lambda_amplitudes(0)
+        self._compute_amplitudes(0, iterative=False)
+        self._compute_lambda_amplitudes(0, iterative=False)
 
         l = list(map(lambda l: 1j * l, self._get_lambda_copy()))
         t = list(map(lambda t: -1j * t, self._get_t_copy()))
@@ -161,7 +159,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
                     )
                 )
 
-            self._compute_lambda_amplitudes(theta)
+            self._compute_lambda_amplitudes(theta, iterative=True)
             diff_l_1 = np.amax(np.abs(self.l_1 - l_1))
             diff_l_2 = np.amax(np.abs(self.l_2 - l_2))
 
@@ -184,7 +182,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if self.verbose:
                 print("Iteration: {0}\tEnergy: {1}".format(iterations, energy))
 
-            self._compute_amplitudes(theta)
+            self._compute_amplitudes(theta, iterative=True)
             energy_prev = energy
             energy = self._compute_energy()
             diff = abs(energy - energy_prev)

@@ -154,10 +154,10 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         return energy + self.compute_reference_energy()
 
-    def _compute_amplitudes(self, theta):
+    def _compute_amplitudes(self, theta, iterative=True):
         self._compute_effective_amplitudes()
-        self._compute_intermediates()
-        self._compute_ccsd_amplitude_s()
+        self._compute_intermediates(iterative=iterative)
+        self._compute_ccsd_amplitude_s(iterative=iterative)
         self._compute_ccsd_amplitude_d()
 
         amplitude_scaling_one_body(self.rhs_1, self.f, self.m, self.n)
@@ -166,7 +166,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np.add((1 - theta) * self.rhs_1, theta * self.t_1, out=self.t_1)
         np.add((1 - theta) * self.rhs_2, theta * self.t_2, out=self.t_2)
 
-    def _compute_lambda_amplitudes(self, theta):
+    def _compute_lambda_amplitudes(self, theta, iterative=True):
         self._compute_effective_three_body_intermediates()
         self._compute_lambda_intermediates()
         self._compute_ccsd_lambda_amplitudes_s()
@@ -210,12 +210,17 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             self.t_2, self.l_2, axes=((0, 1, 3), (2, 3, 1))
         )
 
-    def _compute_ccsd_amplitude_s(self):
+    def _compute_ccsd_amplitude_s(self, iterative):
         o, v = self.o, self.v
+
+        f = self.off_diag_f
+
+        if not iterative:
+            f = self.f
 
         self.rhs_1.fill(0)
 
-        self.rhs_1 += self.off_diag_f[v, o]
+        self.rhs_1 += f[v, o]
         self.rhs_1 += np.dot(self.F_pp, self.t_1)
         self.rhs_1 -= np.dot(self.t_1, self.F_hh)
         self.rhs_1 += np.einsum(
@@ -358,13 +363,18 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         term -= term.swapaxes(0, 1)
         self.rhs_2_lambda -= term
 
-    def _compute_intermediates(self):
+    def _compute_intermediates(self, iterative):
         o, v = self.o, self.v
+
+        f = self.off_diag_f
+
+        if not iterative:
+            f = self.f
 
         # One-body intermediate F_{ae}
         self.F_pp.fill(0)
-        self.F_pp += self.off_diag_f[v, v]
-        self.F_pp -= 0.5 * np.dot(self.t_1, self.off_diag_f[o, v])
+        self.F_pp += f[v, v]
+        self.F_pp -= 0.5 * np.dot(self.t_1, f[o, v])
         self.F_pp += np.tensordot(
             self.u[v, o, v, v], self.t_1, axes=((1, 3), (1, 0))
         )
@@ -374,8 +384,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         # One-body intermediate F_{mi}
         self.F_hh.fill(0)
-        self.F_hh += self.off_diag_f[o, o]
-        self.F_hh += 0.5 * np.dot(self.off_diag_f[o, v], self.t_1)
+        self.F_hh += f[o, o]
+        self.F_hh += 0.5 * np.dot(f[o, v], self.t_1)
         self.F_hh += np.einsum(
             "en, mnie -> mi", self.t_1, self.u[o, o, o, v], optimize=True
         )
@@ -385,7 +395,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         # One-body intermediate F_{me}
         self.F_hp.fill(0)
-        self.F_hp += self.off_diag_f[o, v]
+        self.F_hp += f[o, v]
         self.F_hp += np.einsum(
             "fn, mnef -> me", self.t_1, self.u[o, o, v, v], optimize=True
         )
