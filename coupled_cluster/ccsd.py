@@ -18,49 +18,49 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.off_diag_f = self.f.copy()
         np.fill_diagonal(self.off_diag_f, 0)
 
-        self.rhs_1 = np.zeros((m, n))
-        self.rhs_2 = np.zeros((m, m, n, n))
+        self.rhs_1 = np.zeros((m, n), dtype=np.complex128)
+        self.rhs_2 = np.zeros((m, m, n, n), dtype=np.complex128)
 
-        self.rhs_1_lambda = np.zeros((n, m))
-        self.rhs_2_lambda = np.zeros((n, n, m, m))
+        self.rhs_1_lambda = np.zeros((n, m), dtype=np.complex128)
+        self.rhs_2_lambda = np.zeros((n, n, m, m), dtype=np.complex128)
 
-        self.t_1 = np.zeros((m, n))
-        self.t_2 = np.zeros((m, m, n, n))
+        self.t_1 = np.zeros((m, n), dtype=np.complex128)
+        self.t_2 = np.zeros((m, m, n, n), dtype=np.complex128)
 
-        self.l_1 = np.zeros((n, m))
-        self.l_2 = np.zeros((n, n, m, m))
+        self.l_1 = np.zeros((n, m), dtype=np.complex128)
+        self.l_2 = np.zeros((n, n, m, m), dtype=np.complex128)
 
-        self.xi = np.zeros((m, m, n, n))
-        self.tau = np.zeros((m, m, n, n))
+        self.xi = np.zeros((m, m, n, n), dtype=np.complex128)
+        self.tau = np.zeros((m, m, n, n), dtype=np.complex128)
 
-        self.G_pp = np.zeros((m, m))
-        self.G_hh = np.zeros((n, n))
+        self.G_pp = np.zeros((m, m), dtype=np.complex128)
+        self.G_hh = np.zeros((n, n), dtype=np.complex128)
 
         # Intermediates for t amplitudes
-        self.F_pp = np.zeros((m, m))
-        self.F_hh = np.zeros((n, n))
-        self.F_hp = np.zeros((n, m))
+        self.F_pp = np.zeros((m, m), dtype=np.complex128)
+        self.F_hh = np.zeros((n, n), dtype=np.complex128)
+        self.F_hp = np.zeros((n, m), dtype=np.complex128)
 
-        self.W_hhhh = np.zeros((n, n, n, n))
-        self.W_pppp = np.zeros((m, m, m, m))
-        self.W_hpph = np.zeros((n, m, m, n))
+        self.W_hhhh = np.zeros((n, n, n, n), dtype=np.complex128)
+        self.W_pppp = np.zeros((m, m, m, m), dtype=np.complex128)
+        self.W_hpph = np.zeros((n, m, m, n), dtype=np.complex128)
 
         # Intermediates for lambda amplitudes
-        self.F_pp_lambda = np.zeros((m, m))
-        self.F_hh_lambda = np.zeros((n, n))
+        self.F_pp_lambda = np.zeros((m, m), dtype=np.complex128)
+        self.F_hh_lambda = np.zeros((n, n), dtype=np.complex128)
         self.F_hp_lambda = self.F_hp
 
-        self.W_hhhh_lambda = np.zeros((n, n, n, n))
-        self.W_pppp_lambda = np.zeros((m, m, m, m))
-        self.W_hpph_lambda = np.zeros((n, m, m, n))
-        self.W_hhhp_lambda = np.zeros((n, n, n, m))
-        self.W_phpp_lambda = np.zeros((m, n, m, m))
-        self.W_hphh_lambda = np.zeros((n, m, n, n))
-        self.W_ppph_lambda = np.zeros((m, m, m, n))
+        self.W_hhhh_lambda = np.zeros((n, n, n, n), dtype=np.complex128)
+        self.W_pppp_lambda = np.zeros((m, m, m, m), dtype=np.complex128)
+        self.W_hpph_lambda = np.zeros((n, m, m, n), dtype=np.complex128)
+        self.W_hhhp_lambda = np.zeros((n, n, n, m), dtype=np.complex128)
+        self.W_phpp_lambda = np.zeros((m, n, m, m), dtype=np.complex128)
+        self.W_hphh_lambda = np.zeros((n, m, n, n), dtype=np.complex128)
+        self.W_ppph_lambda = np.zeros((m, m, m, n), dtype=np.complex128)
 
         self._compute_initial_guess()
 
-        self.rho_qp = np.zeros((self.l, self.l))
+        self.rho_qp = np.zeros((self.l, self.l), dtype=np.complex128)
 
     def _get_t_copy(self):
         return [self.t_1.copy(), self.t_2.copy()]
