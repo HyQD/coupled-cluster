@@ -58,6 +58,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.system.evolve_in_time(time)
 
+        # TODO: Remember to include the diagonal in h/f when calling these
+        # functions.
         self._compute_amplitudes(0)
         self._compute_lambda_amplitudes(0)
 
