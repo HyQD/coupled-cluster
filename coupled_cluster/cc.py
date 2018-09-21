@@ -95,13 +95,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
             _l = [
                 l_i + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
-                for l_1, k_1, k_2, k_3, k_4 in zip(
+                for l_i, k_1, k_2, k_3, k_4 in zip(
                     l_1, k_1_l, k_2_l, k_3_l, k_4_l
                 )
             ]
             _t = [
                 t_i + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
-                for t_1, k_1, k_2, k_3, k_4 in zip(
+                for t_i, k_1, k_2, k_3, k_4 in zip(
                     t_1, k_1_t, k_2_t, k_3_t, k_4_t
                 )
             ]
