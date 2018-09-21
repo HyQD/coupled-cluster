@@ -8,6 +8,7 @@ __pycache__/
 
 # C extensions
 *.so
+cc_helper.c
 
 # Distribution / packaging
 .Python
