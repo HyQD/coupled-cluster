@@ -32,6 +32,10 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def _compute_time_evolution_probability(self):
+        pass
+
+    @abc.abstractmethod
     def _compute_one_body_density_matrix(self):
         pass
 

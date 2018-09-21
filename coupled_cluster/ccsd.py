@@ -105,6 +105,40 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np.copyto(self.l_1, self.rhs_1_lambda)
         np.copyto(self.l_2, self.rhs_2_lambda)
 
+    def _compute_time_evolution_probability(self):
+        t_1_0, t_2_0 = self._t_0
+        l_1_0, l_2_0 = self._l_0
+
+        psi_t_0 = 1
+        psi_t_0 += np.einsum("ia, ai ->", self.l_1, t_1_0)
+        psi_t_0 -= np.einsum("ia, ai ->", self.l_1, self.t_1)
+        psi_t_0 += 0.25 * np.einsum("ijab, abij ->", self.l_2, t_2_0)
+        psi_t_0 -= 0.5 * np.einsum(
+            "ijab, aj, bi ->", self.l_2, t_1_0, t_1_0, optimize=True
+        )
+        psi_t_0 -= np.einsum(
+            "ijab, ai, bj ->", self.l_2, self.t_1, t_1_0, optimize=True
+        )
+        psi_t_0 -= 0.5 * np.einsum(
+            "ijab, aj, bi ->", self.l_2, self.t_1, self.t_1, optimize=True
+        )
+        psi_t_0 -= 0.25 * np.einsum("ijab, abij ->", self.l_2, self.t_2)
+
+        psi_0_t = 1
+        psi_0_t += np.einsum("ia, ai ->", l_1_0, self.t_1)
+        psi_0_t -= np.einsum("ia, ai ->", l_1_0, t_1_0)
+        psi_0_t += 0.25 * np.einsum("ijab, abij ->", l_2_0, self.t_2)
+        psi_0_t -= 0.5 * np.einsum(
+            "ijab, aj, bi ->", l_2_0, t_1_0, t_1_0, optimize=True
+        )
+        psi_0_t -= np.einsum("ijab, ai, bj ->", l_2_0, self.t_1, t_1_0)
+        psi_0_t -= 0.5 * np.einsum(
+            "ijab, aj, bi ->", l_2_0, self.t_1, self.t_1, optimize=True
+        )
+        psi_0_t -= 0.25 * np.einsum("ijab, abij ->", l_2_0, t_2_0)
+
+        return psi_t_0 * psi_0_t
+
     def _compute_one_body_density_matrix(self):
         o, v = self.o, self.v
 
