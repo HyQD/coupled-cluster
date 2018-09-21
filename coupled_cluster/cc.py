@@ -51,12 +51,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def _set_l(self, l):
         pass
 
-    def _timestep(self, u, t):
+    def _timestep(self, u, time):
         l, t = u
         self._set_t(t)
         self._set_l(l)
 
-        self.system.evolve_in_time(t)
+        self.system.evolve_in_time(time)
 
         self._compute_amplitudes(0)
         self._compute_lambda_amplitudes(0)
