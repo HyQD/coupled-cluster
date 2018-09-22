@@ -195,10 +195,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self._compute_ccsd_amplitude_d()
 
         if not iterative:
-            np.copyto(self.t_1, self.rhs_1)
-            np.copyto(self.t_2, self.rhs_2)
-
-            return
+            return [self.rhs_1.copy(), self.rhs_2.copy()]
 
         amplitude_scaling_one_body(self.rhs_1, self.f, self.m, self.n)
         amplitude_scaling_two_body(self.rhs_2, self.f, self.m, self.n)
@@ -213,10 +210,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self._compute_ccsd_lambda_amplitudes_d()
 
         if not iterative:
-            np.copyto(self.l_1, self.rhs_1_lambda)
-            np.copyto(self.l_2, self.rhs_2_lambda)
-
-            return
+            return [self.rhs_1_lambda.copy(), self.rhs_2_lambda.copy()]
 
         amplitude_scaling_one_body_lambda(
             self.rhs_1_lambda, self.f, self.m, self.n
