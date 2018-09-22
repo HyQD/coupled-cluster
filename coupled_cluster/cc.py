@@ -56,20 +56,21 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def _set_l(self, l):
         pass
 
-    def _timestep(self, u, time):
-        l, t = u
-        self._set_t(t)
-        self._set_l(l)
+    def _timestep(self, l_i, t_i, time):
+        self._set_l(l_i)
+        self._set_t(t_i)
 
         self.system.evolve_in_time(time)
 
-        self._compute_amplitudes(0, iterative=False)
-        self._compute_lambda_amplitudes(0, iterative=False)
+        t_new = [
+            -1j * t_x for t_x in self._compute_amplitudes(0, iterative=False)
+        ]
+        l_new = [
+            1j * l_x
+            for l_x in self._compute_lambda_amplitudes(0, iterative=False)
+        ]
 
-        l = list(map(lambda l: 1j * l, self._get_lambda_copy()))
-        t = list(map(lambda t: -1j * t, self._get_t_copy()))
-
-        return (l, t)
+        return (l_new, t_new)
 
     def evolve_amplitudes(self, t_start, t_end, num_timesteps):
         prob = np.zeros(num_timesteps, dtype=np.complex128)
@@ -82,42 +83,43 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self._t_0 = self._get_t_copy()
         prob[0] = self._compute_time_evolution_probability()
 
-        _l = self._l_0
-        _t = self._t_0
+        assert abs(prob[0].real - 1.0) < 1e-8
+
+        l_i = self._l_0
+        t_i = self._t_0
         for i in tqdm.tqdm(range(1, num_timesteps)):
-            l_1 = [l_i.copy() for l_i in _l]
-            t_1 = [t_i.copy() for t_i in _t]
-            k_1_l, k_1_t = self._timestep((l_1, t_1), time[i])
-
-            l_2 = [l_i + h * k_1 / 2.0 for l_i, k_1 in zip(l_1, k_1_l)]
-            t_2 = [t_i + h * k_1 / 2.0 for t_i, k_1 in zip(t_1, k_1_t)]
-            k_2_l, k_2_t = self._timestep((l_2, t_2), time[i] + h / 2.0)
-
-            l_3 = [l_i + h * k_2 / 2.0 for l_i, k_2 in zip(l_1, k_2_l)]
-            t_3 = [t_i + h * k_2 / 2.0 for t_i, k_2 in zip(t_1, k_2_t)]
-            k_3_l, k_3_t = self._timestep((l_3, t_3), time[i] + h / 2.0)
-
-            l_4 = [l_i + h * k_3 / 2.0 for l_i, k_3 in zip(l_1, k_3_l)]
-            t_4 = [t_i + h * k_3 / 2.0 for t_i, k_3 in zip(t_1, k_3_t)]
-            k_4_l, k_4_t = self._timestep((l_4, t_4), time[i] + h)
-
-            _l = [
-                l_i + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
-                for l_i, k_1, k_2, k_3, k_4 in zip(
-                    l_1, k_1_l, k_2_l, k_3_l, k_4_l
-                )
-            ]
-            _t = [
-                t_i + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
-                for t_i, k_1, k_2, k_3, k_4 in zip(
-                    t_1, k_1_t, k_2_t, k_3_t, k_4_t
-                )
-            ]
-
-            self._set_l(_l)
-            self._set_t(_t)
-
             time[i] = i * h
+
+            k_1_l, k_1_t = self._timestep(l_i, t_i, time[i])
+
+            l_i2 = [l_x + h * k_1 / 2.0 for l_x, k_1 in zip(l_i, k_1_l)]
+            t_i2 = [t_x + h * k_1 / 2.0 for t_x, k_1 in zip(t_i, k_1_t)]
+            k_2_l, k_2_t = self._timestep(l_i2, t_i2, time[i] + h / 2.0)
+
+            l_i3 = [l_x + h * k_2 / 2.0 for l_x, k_2 in zip(l_i, k_2_l)]
+            t_i3 = [t_x + h * k_2 / 2.0 for t_x, k_2 in zip(t_i, k_2_t)]
+            k_3_l, k_3_t = self._timestep(l_i3, t_i3, time[i] + h / 2.0)
+
+            l_i4 = [l_x + h * k_3 for l_x, k_3 in zip(l_i, k_3_l)]
+            t_i4 = [t_x + h * k_3 for t_x, k_3 in zip(t_i, k_3_t)]
+            k_4_l, k_4_t = self._timestep(l_i4, t_i4, time[i] + h)
+
+            l_i = [
+                l_x + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+                for l_x, k_1, k_2, k_3, k_4 in zip(
+                    l_i, k_1_l, k_2_l, k_3_l, k_4_l
+                )
+            ]
+            t_i = [
+                t_x + h / 6.0 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+                for t_x, k_1, k_2, k_3, k_4 in zip(
+                    t_i, k_1_t, k_2_t, k_3_t, k_4_t
+                )
+            ]
+
+            self._set_l(l_i)
+            self._set_t(t_i)
+
             prob[i] = self._compute_time_evolution_probability()
 
         return prob, time
