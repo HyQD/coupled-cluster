@@ -198,7 +198,11 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         while diff > tol and iterations < max_iterations:
             if self.verbose:
-                print("Iteration: {0}\tEnergy: {1}".format(iterations, energy))
+                print(
+                    "Iteration: {0}\tEnergy: {1}".format(
+                        iterations, energy.real
+                    )
+                )
 
             self._compute_amplitudes(theta, iterative=True)
             energy_prev = energy
