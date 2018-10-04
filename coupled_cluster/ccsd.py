@@ -151,7 +151,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self.rho_qp[o, v] += self.l_1
 
-        self.rho_qp[o, o] += 1
+        self.rho_qp[o, o] += np.eye(self.n)
         self.rho_qp[o, o] -= np.dot(self.l_1, self.t_1)
         self.rho_qp[o, o] += 0.5 * np.tensordot(
             self.l_2, self.t_2, axes=((1, 2, 3), (2, 0, 1))
