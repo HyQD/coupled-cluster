@@ -4,8 +4,8 @@ from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
 import matplotlib.pyplot as plt
 import numpy as np
 
-n = 4
-l = 30
+n = 2
+l = 6
 length = 10
 num_grid_points = 400
 omega = 0.25
@@ -38,12 +38,16 @@ plt.show()
 t_start = 0
 t_end = 10
 num_timesteps = 10001
-print((t_end - t_start) / (num_timesteps - 1))
+print("delta t = {0}".format((t_end - t_start) / (num_timesteps - 1)))
 
 prob, time = ccsd.evolve_amplitudes(t_start, t_end, num_timesteps)
-print(prob)
 
 fig, ax = plt.subplots()
 ax.plot(time * laser_frequency / (2.0 * np.pi), prob.real)
 ax.ticklabel_format(useOffset=False)
+plt.show()
+
+rho = ccsd.compute_one_body_density()
+
+plt.plot(odho.grid, rho)
 plt.show()
