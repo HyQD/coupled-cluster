@@ -17,6 +17,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.m = self.system.m
 
         self.h, self.f, self.u = self.system.h, self.system.f, self.system.u
+        self.off_diag_f = self.system.off_diag_f
 
         self.o, self.v = self.system.o, self.system.v
 

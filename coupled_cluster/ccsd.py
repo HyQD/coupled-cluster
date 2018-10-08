@@ -15,9 +15,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         o, v = self.o, self.v
         n, m = self.n, self.m
 
-        self.off_diag_f = self.f.copy()
-        np.fill_diagonal(self.off_diag_f, 0)
-
         self.rhs_1 = np.zeros((m, n), dtype=np.complex128)
         self.rhs_2 = np.zeros((m, m, n, n), dtype=np.complex128)
 
