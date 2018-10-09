@@ -21,6 +21,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.o, self.v = self.system.o, self.system.v
 
+    def __err(self, func_name):
+        raise NotImplementedError(
+            "Class '{0}' does not have an implementation of '{1}'".format(
+                self.__class__.__name__, func_name
+            )
+        )
+
     @abc.abstractmethod
     def _compute_energy(self):
         pass
@@ -29,33 +36,28 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def _compute_amplitudes(self, theta, iterative=True):
         pass
 
-    @abc.abstractmethod
     def _compute_lambda_amplitudes(self, theta, iterative=True):
-        pass
+        self.__err(self._compute_lambda_amplitudes.__name__)
 
-    @abc.abstractmethod
     def _compute_time_evolution_probability(self):
-        pass
+        self.__err(self._compute_time_evolution_probability.__name__)
 
-    @abc.abstractmethod
     def _compute_one_body_density_matrix(self):
-        pass
+        self.__err(self._compute_one_body_density_matrix.__name__)
 
     @abc.abstractmethod
     def _get_t_copy(self):
         pass
 
-    @abc.abstractmethod
     def _get_lambda_copy(self):
-        pass
+        self.__err(self._get_lambda_copy.__name__)
 
     @abc.abstractmethod
     def _set_t(self, t):
         pass
 
-    @abc.abstractmethod
     def _set_l(self, l):
-        pass
+        self.__err(self._set_l.__name__)
 
     def _timestep(self, l_i, t_i, time):
         self._set_l(l_i)
