@@ -68,11 +68,11 @@ class CoupledClusterDoubles(CoupledCluster):
         self.rhs_2.fill(0)
         self.rhs_2 += self.u[v, v, o, o]
 
-        term = np.tensordot(f, self.t_2, axes=((1), (1)))
+        term = np.tensordot(f[v, v], self.t_2, axes=((1), (1)))
         term -= term.swapaxes(0, 1)
         self.rhs_2 -= term
 
-        term = np.tensordot(self.t_2, f, axes=((3), (0)))
+        term = np.tensordot(self.t_2, f[o, o], axes=((3), (0)))
         term -= term.swapaxes(2, 3)
         self.rhs_2 -= term
 
