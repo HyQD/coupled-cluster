@@ -42,8 +42,6 @@ class CoupledClusterDoubles(CoupledCluster):
     def _compute_ccd_energy(self):
         o, v = self.o, self.v
 
-        # TODO: Check if this energy is correct when combined with the
-        # reference energy
         energy = 0.25 * np.einsum("abij, abij ->", self.u[v, v, o, o], self.t_2)
 
         return energy + self.compute_reference_energy()
