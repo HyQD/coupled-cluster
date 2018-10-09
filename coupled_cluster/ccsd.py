@@ -12,7 +12,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def __init__(self, system, **kwargs):
         super().__init__(system, **kwargs)
 
-        o, v = self.o, self.v
         n, m = self.n, self.m
 
         self.rhs_1 = np.zeros((m, n), dtype=np.complex128)
