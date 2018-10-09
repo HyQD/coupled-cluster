@@ -3,6 +3,7 @@ from .cc import CoupledCluster
 from .cc_helper import amplitude_scaling_two_body
 
 
+# TODO: The energy is too low, which means there is an error somewhere...
 class CoupledClusterDoubles(CoupledCluster):
     def __init__(self, system, **kwargs):
         super().__init__(system, **kwargs)
