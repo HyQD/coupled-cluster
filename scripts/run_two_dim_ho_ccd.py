@@ -4,7 +4,7 @@ from coupled_cluster.ccd import CoupledClusterDoubles
 import numpy as np
 
 n = 2
-l = 42
+l = 12
 omega = 1
 
 theta = 0.1
