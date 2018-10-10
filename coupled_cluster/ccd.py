@@ -114,3 +114,8 @@ class CoupledClusterDoubles(CoupledCluster):
         self.W_pp += 0.5 * np.tensordot(
             self.t_2, self.u[o, o, v, v], axes=((1, 2, 3), (2, 0, 1))
         )
+
+        self.W_hh.fill(0)
+        self.W_hh += 0.5 * np.tensordot(
+            self.u[o, o, v, v], self.t_2, axes=((0, 2, 3), (3, 0, 1))
+        )
