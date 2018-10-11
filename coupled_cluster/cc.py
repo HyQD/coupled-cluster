@@ -139,12 +139,14 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             )
 
         rho_qp_reduced = rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
-        rho = np.zeros(self.system.spf.shape[1], dtype=np.complex128)
+        rho = np.zeros(self.system.spf.shape[1:], dtype=np.complex128)
+        spf_slice = slice(0, self.system.spf.shape[0])
 
-        for i in range(len(rho)):
-            rho[i] += np.dot(
-                self.system.spf[:, i].conj(),
-                np.dot(rho_qp_reduced, self.system.spf[:, i]),
+        for _i in np.ndindex(rho.shape):
+            i = (spf_slice, *_i)
+            rho[_i] += np.dot(
+                self.system.spf[i].conj(),
+                np.dot(rho_qp_reduced, self.system.spf[i]),
             )
 
         return rho.real
