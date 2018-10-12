@@ -4,7 +4,6 @@ from coupled_cluster.ccd import CoupledClusterDoubles
 
 
 def test_reference_energy(tdho, ref_energy):
-    n = pytest.n
     tol = 1e-4
 
     cc_scheme = CoupledClusterDoubles(tdho, verbose=True)
