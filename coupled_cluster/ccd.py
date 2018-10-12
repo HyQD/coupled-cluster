@@ -151,8 +151,6 @@ class CoupledClusterDoubles(CoupledCluster):
 
         self.rhs_2 += term
 
-        # term = np.einsum("mnjn -> mj", self.u[o, o, o, o])
-        # self.rhs_2 += 0.5 * np.tensordot(self.t_2, term, axes=((3), (0)))
         term = np.einsum("mnjn -> mj", self.u[o, o, o, o])
         term = 0.5 * np.tensordot(self.t_2, term, axes=((3), (0)))
 
