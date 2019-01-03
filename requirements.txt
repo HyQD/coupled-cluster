@@ -4,6 +4,9 @@ tqdm
 # Install numpy
 numpy
 
+# Install pytest
+pytest
+
 # Install numba
 numba
 
