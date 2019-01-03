@@ -1,3 +1,11 @@
+# Install progress bar
 tqdm
+
+# Install numpy
 numpy
+
+# Install numba
 numba
+
+# Install quantum-systems
+git+https://github.com/Schoyen/quantum-systems.git
