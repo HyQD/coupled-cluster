@@ -36,21 +36,16 @@ def amplitude_scaling_two_body_lambda(
     cdef np.complex128_t divisor, val
 
     for a in prange(m, nogil=True):
-        for b in range(a, m):
+        for b in range(m):#a, m):
             for i in range(n):
-                for j in range(i, n):
+                for j in range(n):#i, n):
                     divisor = f[i, i] + f[j, j] \
                             - f[a + n, a + n] - f[b + n, b + n]
 
                     if abs(divisor) < tol:
                         continue
 
-                    val = l[i, j, a, b] / divisor
-
-                    l[i, j, a, b] = val
-                    l[i, j, b, a] = -val
-                    l[j, i, a, b] = -val
-                    l[j, i, b, a] = val
+                    l[i, j, a, b] = l[i, j, a, b] / divisor
 
 
 @cython.wraparound(False)
@@ -83,21 +78,16 @@ def amplitude_scaling_two_body(
         int m, int n, double tol=1e-10
 ):
     cdef int a, b, i, j
-    cdef np.complex128_t divisor, val
+    cdef np.complex128_t divisor
 
     for a in prange(m, nogil=True):
-        for b in range(a, m):
+        for b in range(m):
             for i in range(n):
-                for j in range(i, n):
+                for j in range(n):
                     divisor = h[i, i] + h[j, j] \
                             - h[a + n, a + n] - h[b + n, b + n]
 
                     if abs(divisor) < tol:
                         continue
 
-                    val = t[a, b, i, j] / divisor
-
-                    t[a, b, i, j] = val
-                    t[a, b, j, i] = -val
-                    t[b, a, i, j] = -val
-                    t[b, a, j, i] = val
+                    t[a, b, i, j] = t[a, b, i, j] / divisor
