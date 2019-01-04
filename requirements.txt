@@ -7,6 +7,9 @@ numpy
 # Install scipy
 scipy
 
+# Install pandas
+pandas
+
 # Install pytest
 pytest
 
