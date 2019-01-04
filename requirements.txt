@@ -4,6 +4,9 @@ tqdm
 # Install numpy
 numpy
 
+# Install scipy
+scipy
+
 # Install pytest
 pytest
 
