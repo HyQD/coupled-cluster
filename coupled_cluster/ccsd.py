@@ -167,9 +167,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         return self.rho_qp
 
     def _compute_energy(self):
-        return self._compute_ccsd_energy()
-
-    def _compute_ccsd_energy(self):
         o, v = self.o, self.v
 
         energy = np.einsum("ia, ai ->", self.f[o, v], self.t_1)

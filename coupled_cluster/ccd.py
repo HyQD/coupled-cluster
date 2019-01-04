@@ -39,9 +39,6 @@ class CoupledClusterDoubles(CoupledCluster):
         np.divide(self.rhs_2, self.d_2, out=self.t_2)
 
     def _compute_energy(self):
-        return self._compute_ccd_energy()
-
-    def _compute_ccd_energy(self):
         o, v = self.o, self.v
 
         energy = 0.25 * np.einsum("abij, abij ->", self.u[v, v, o, o], self.t_2)
