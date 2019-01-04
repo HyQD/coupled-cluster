@@ -1,11 +1,5 @@
 import numpy as np
 from .cc import CoupledCluster
-from .cc_helper import (
-    amplitude_scaling_one_body,
-    amplitude_scaling_two_body,
-    amplitude_scaling_one_body_lambda,
-    amplitude_scaling_two_body_lambda,
-)
 
 
 class CoupledClusterSinglesDoubles(CoupledCluster):
@@ -22,6 +16,20 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self.t_1 = np.zeros((m, n), dtype=np.complex128)
         self.t_2 = np.zeros((m, m, n, n), dtype=np.complex128)
+
+        self.d_1 = np.diag(self.f)[self.o] - np.diag(self.f)[self.v].reshape(
+            -1, 1
+        )
+        self.d_2 = (
+            np.diag(self.f)[self.o]
+            + np.diag(self.f)[self.o].reshape(-1, 1)
+            - np.diag(self.f)[self.v].reshape(-1, 1, 1)
+            - np.diag(self.f)[self.v].reshape(-1, 1, 1, 1)
+        )
+        # Copying the transposed matrices for the lambda amplitudes (especially
+        # d_2) greatly increases the speed of the division later on.
+        self.d_1_l = self.d_1.T.copy()
+        self.d_2_l = self.d_2.transpose(2, 3, 0, 1).copy()
 
         self.l_1 = np.zeros((n, m), dtype=np.complex128)
         self.l_2 = np.zeros((n, n, m, m), dtype=np.complex128)
@@ -82,24 +90,14 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np.copyto(self.rhs_1, self.f[v, o])
         np.copyto(self.rhs_2, self.u[v, v, o, o])
 
-        amplitude_scaling_one_body(self.rhs_1, self.f, self.m, self.n)
-        amplitude_scaling_two_body(self.rhs_2, self.f, self.m, self.n)
-
-        np.copyto(self.t_1, self.rhs_1)
-        np.copyto(self.t_2, self.rhs_2)
+        np.divide(self.rhs_1, self.d_1, out=self.t_1)
+        np.divide(self.rhs_2, self.d_2, out=self.t_2)
 
         np.copyto(self.rhs_1_lambda, self.f[o, v])
         np.copyto(self.rhs_2_lambda, self.u[o, o, v, v])
 
-        amplitude_scaling_one_body_lambda(
-            self.rhs_1_lambda, self.f, self.m, self.n
-        )
-        amplitude_scaling_two_body_lambda(
-            self.rhs_2_lambda, self.f, self.m, self.n
-        )
-
-        np.copyto(self.l_1, self.rhs_1_lambda)
-        np.copyto(self.l_2, self.rhs_2_lambda)
+        np.divide(self.rhs_1_lambda, self.d_1_l, out=self.l_1)
+        np.divide(self.rhs_2_lambda, self.d_2_l, out=self.l_2)
 
     def _compute_time_evolution_probability(self):
         t_1_0, t_2_0 = self._t_0
@@ -193,8 +191,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         if not iterative:
             return [self.rhs_1.copy(), self.rhs_2.copy()]
 
-        amplitude_scaling_one_body(self.rhs_1, self.f, self.m, self.n)
-        amplitude_scaling_two_body(self.rhs_2, self.f, self.m, self.n)
+        np.divide(self.rhs_1, self.d_1, out=self.rhs_1)
+        np.divide(self.rhs_2, self.d_2, out=self.rhs_2)
 
         np.add((1 - theta) * self.rhs_1, theta * self.t_1, out=self.t_1)
         np.add((1 - theta) * self.rhs_2, theta * self.t_2, out=self.t_2)
@@ -208,12 +206,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         if not iterative:
             return [self.rhs_1_lambda.copy(), self.rhs_2_lambda.copy()]
 
-        amplitude_scaling_one_body_lambda(
-            self.rhs_1_lambda, self.f, self.m, self.n
-        )
-        amplitude_scaling_two_body_lambda(
-            self.rhs_2_lambda, self.f, self.m, self.n
-        )
+        np.divide(self.rhs_1_lambda, self.d_1_l, out=self.rhs_1_lambda)
+        np.divide(self.rhs_2_lambda, self.d_2_l, out=self.rhs_2_lambda)
 
         np.add((1 - theta) * self.rhs_1_lambda, theta * self.l_1, out=self.l_1)
         np.add((1 - theta) * self.rhs_2_lambda, theta * self.l_2, out=self.l_2)

@@ -1,6 +1,5 @@
 import numpy as np
 from .cc import CoupledCluster
-from .cc_helper import amplitude_scaling_two_body
 
 
 class CoupledClusterDoubles(CoupledCluster):
@@ -10,7 +9,13 @@ class CoupledClusterDoubles(CoupledCluster):
         n, m = self.n, self.m
 
         self.rhs_2 = np.zeros((m, m, n, n), dtype=np.complex128)
-        self.t_2 = np.zeros((m, m, n, n), dtype=np.complex128)
+        self.t_2 = np.zeros_like(self.rhs_2)
+        self.d_2 = (
+            np.diag(self.f)[self.o]
+            + np.diag(self.f)[self.o].reshape(-1, 1)
+            - np.diag(self.f)[self.v].reshape(-1, 1, 1)
+            - np.diag(self.f)[self.v].reshape(-1, 1, 1, 1)
+        )
 
         self.W_pppp = np.zeros((m, m, m, m), dtype=np.complex128)
         self.W_phhp = np.zeros((m, n, n, m), dtype=np.complex128)
@@ -31,9 +36,7 @@ class CoupledClusterDoubles(CoupledCluster):
         o, v = self.o, self.v
 
         np.copyto(self.rhs_2, self.u[v, v, o, o])
-
-        amplitude_scaling_two_body(self.rhs_2, self.f, self.m, self.n)
-        np.copyto(self.t_2, self.rhs_2)
+        np.divide(self.rhs_2, self.d_2, out=self.t_2)
 
     def _compute_energy(self):
         return self._compute_ccd_energy()
@@ -53,7 +56,7 @@ class CoupledClusterDoubles(CoupledCluster):
         if not iterative:
             return [self.rhs_2.copy()]
 
-        amplitude_scaling_two_body(self.rhs_2, self.f, self.m, self.n)
+        np.divide(self.rhs_2, self.d_2, out=self.rhs_2)
         np.add((1 - theta) * self.rhs_2, theta * self.t_2, out=self.t_2)
 
     def _compute_ccd_amplitude_d(self, iterative):
