@@ -179,7 +179,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         return energy + self.compute_reference_energy()
 
-    def _compute_amplitudes(self, theta, iterative=True):
+    def _compute_t_amplitudes(self, theta, iterative=True):
         self._compute_effective_amplitudes()
         self._compute_intermediates(iterative=iterative)
         self._compute_ccsd_amplitude_s(iterative=iterative)
@@ -194,7 +194,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np.add((1 - theta) * self.rhs_1, theta * self.t_1, out=self.t_1)
         np.add((1 - theta) * self.rhs_2, theta * self.t_2, out=self.t_2)
 
-    def _compute_lambda_amplitudes(self, theta, iterative=True):
+    def _compute_l_amplitudes(self, theta, iterative=True):
         self._compute_effective_three_body_intermediates()
         self._compute_lambda_intermediates()
         self._compute_ccsd_lambda_amplitudes_s()

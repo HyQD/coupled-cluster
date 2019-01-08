@@ -33,11 +33,11 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def _compute_amplitudes(self, theta, iterative=True):
+    def _compute_t_amplitudes(self, theta, iterative=True):
         pass
 
-    def _compute_lambda_amplitudes(self, theta, iterative=True):
-        self.__err(self._compute_lambda_amplitudes.__name__)
+    def _compute_l_amplitudes(self, theta, iterative=True):
+        self.__err(self._compute_l_amplitudes.__name__)
 
     def _compute_time_evolution_probability(self):
         self.__err(self._compute_time_evolution_probability.__name__)
@@ -66,11 +66,10 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.system.evolve_in_time(time)
 
         t_new = [
-            -1j * t_x for t_x in self._compute_amplitudes(0, iterative=False)
+            -1j * t_x for t_x in self._compute_t_amplitudes(0, iterative=False)
         ]
         l_new = [
-            1j * l_x
-            for l_x in self._compute_lambda_amplitudes(0, iterative=False)
+            1j * l_x for l_x in self._compute_l_amplitudes(0, iterative=False)
         ]
 
         return (l_new, t_new)
@@ -182,7 +181,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
                     )
                 )
 
-            self._compute_lambda_amplitudes(theta, iterative=True)
+            self._compute_l_amplitudes(theta, iterative=True)
             diff_l_1 = np.amax(np.abs(self.l_1 - l_1))
             diff_l_2 = np.amax(np.abs(self.l_2 - l_2))
 
@@ -209,7 +208,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
                     )
                 )
 
-            self._compute_amplitudes(theta, iterative=True)
+            self._compute_t_amplitudes(theta, iterative=True)
             energy_prev = energy
             energy = self._compute_energy()
             diff = abs(energy - energy_prev)

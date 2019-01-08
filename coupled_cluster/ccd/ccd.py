@@ -42,7 +42,7 @@ class CoupledClusterDoubles(CoupledCluster):
 
         return energy
 
-    def _compute_amplitudes(self, theta, iterative=True):
+    def _compute_t_amplitudes(self, theta, iterative=True):
         f = self.off_diag_f if iterative else self.f
 
         self.rhs_2.fill(0)
