@@ -67,7 +67,7 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def _compute_l_amplitudes(self, theta, iterative=True):
         self.rhs_2_l.fill(0)
-        compute_l_2_amplitude(
+        compute_l_2_amplitudes(
             self.u, self.t_2, self.l_2, self.o, self.v, out=self.rhs_2_l, np=np
         )
 
