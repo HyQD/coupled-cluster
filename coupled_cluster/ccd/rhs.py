@@ -13,12 +13,6 @@ def compute_t_2_amplitude(f, u, t, o, v, out=None, np=None):
     if out is None:
         out = np.zeros_like(t)
 
-    ## Construct intermediates
-    # W_pppp = construct_pppp_intermediate(u, t, o, v, np=np)
-    # W_hh = construct_hh_intermediate(u, t, o, v, np=np)
-    # W_pp = construct_pp_intermediate(u, t, o, v, np=np)
-    # W_phhp = construct_phhp_intermediate(u, t, o, v, np=np)
-
     add_d1(u, o, v, out, np=np)
     add_d2a(f, t, o, v, out, np=np)
     add_d2b(f, t, o, v, out, np=np)
@@ -29,74 +23,8 @@ def compute_t_2_amplitude(f, u, t, o, v, out=None, np=None):
     add_d3b(u, t, o, v, out, np=np)
     add_d3c(u, t, o, v, out, np=np)
     add_d3d(u, t, o, v, out, np=np)
-    # add_d2c_and_d3a(t, W_pppp, o, v, out, np=np)
-    # add_d3c(u, t, W_hh, o, v, out, np=np)
-    # add_d2e_and_d3b(u, t, W_phhp, o, v, out, np=np)
-    # add_d3d(t, W_pp, o, v, out, np=np)
 
     return out
-
-
-# def construct_pppp_intermediate(u, t, o, v, np=None):
-#    """Function constructing the intermediate
-#
-#        W^{ab}_{cd} = 0.25 * t^{ab}_{kl} u^{kl}_{cd} + 0.5 * u^{ab}_{cd}
-#
-#    Number of FLOPS required: O(m^4 n^2).
-#    """
-#    if np is None:
-#        import numpy as np
-#
-#    W_pppp = 0.25 * np.tensordot(t, u[o, o, v, v], axes=((2, 3), (0, 1)))
-#    W_pppp += 0.5 * u[v, v, v, v]
-#
-#    return W_pppp
-#
-#
-# def construct_hh_intermediate(u, t, o, v, np=None):
-#    """Function constructing the intermediate
-#
-#        W^{l}_{j} = 0.5 * t^{cd}_{jk} u^{kl}_{cd}
-#
-#    Number of FLOPS required: O(m^2 n^3).
-#    """
-#    if np is None:
-#        import numpy as np
-#
-#    W_hh = 0.5 * np.tensordot(u[o, o, v, v], t, axes=((0, 2, 3), (3, 0, 1)))
-#
-#    return W_hh
-#
-#
-# def construct_pp_intermediate(u, t, o, v, np=None):
-#    """Function constructing the intermediate
-#
-#        W^{b}_{c} = 0.5 * t^{bd}_{kl} u^{kl}_{cd}
-#
-#    Number of FLOPS required: O(m^3 n^2).
-#    """
-#    if np is None:
-#        import numpy as np
-#
-#    W_pp = 0.5 * np.tensordot(t, u[o, o, v, v], axes=((1, 2, 3), (3, 0, 1)))
-#
-#    return W_pp
-#
-#
-# def construct_phhp_intermediate(u, t, o, v, np=None):
-#    """Function constructing the intermediate
-#
-#        W^{bk}_{jc} = 0.5 * t^{bd}_{jl} u^{kl}_{cd} + u^{bk}_{jc}
-#
-#    Number of FLOPS required: O(m^3 n^3).
-#    """
-#    if np is None:
-#        import numpy as np
-#
-#    W_phhp = 0.5 * np.einsum("bdjl, klcd -> bkjc", t, u[o, o, v, v])
-#    W_phhp += u[v, o, o, v]
-#
-#    return W_phhp
 
 
 def add_d1(u, o, v, out, np=None):
@@ -285,63 +213,3 @@ def add_d3d(u, t, o, v, out, np=None):
     term = -np.tensordot(W_ad, t, axes=((1), (0)))
     term -= term.swapaxes(0, 1)
     out += term
-
-
-# def add_d2c_and_d3a(t, W_pppp, o, v, out, np=None):
-#    """Function adding the D2c and D3a diagrams (using an intermediate tensor)
-#
-#        g(f, u, t) <- t^{cd}_{ij} W^{ab}_{cd}
-#
-#    Number of FLOPS required: O(m^4 n^2).
-#    """
-#    if np is None:
-#        import numpy as np
-#
-#    out += np.tensordot(W_pppp, t, axes=((2, 3), (0, 1)))
-
-
-# def add_d3c(u, t, W_hh, o, v, out, np=None):
-#    """Function adding the D3c diagram (using an intermediate tensor)
-#
-#        g(f, u, t) <- t^{ab}_{il} W^{l}_{j} P(ij)
-#
-#    Number of FLOPS required: O(m^2 n^3).
-#    """
-#    if np is None:
-#        import numpy as np
-#
-#    term = np.tensordot(t, W_hh, axes=((3), (0)))
-#    term -= term.swapaxes(2, 3)
-#    out += term
-
-
-# def add_d2e_and_d3b(u, t, W_phhp, o, v, out, np=None):
-#    """Function adding the D2e and D3b diagrams (using an intermediate tensor)
-#
-#        g(f, u, t) <- t^{ac}_{ik} W^{bk}_{jc} P(ab) P(ij)
-#
-#    Number of FLOPS required: O(m^3 n^3).
-#    """
-#    if np is None:
-#        import numpy as np
-#
-#    #term = np.einsum("acik, bkjc -> abij", t, W_phhp)
-#    term = np.tensordot(t, W_phhp, axes=((1, 3), (3, 1))).transpose(0, 2, 1, 3)
-#    term -= term.swapaxes(0, 1)
-#    term -= term.swapaxes(2, 3)
-#    out += term
-
-
-# def add_d3d(t, W_pp, o, v, out, np=None):
-#    """Function adding the D3d diagram (using an intermediate tensor)
-#
-#        g(f, u, t) <- -t^{ac}_{ij} W^{b}_{c} P(ab)
-#
-#    Number of FLOPS required: O(m^3 n^2).
-#    """
-#    if np is None:
-#        import numpy as np
-#
-#    term = np.tensordot(W_pp, t, axes=((1), (1)))
-#    term -= term.swapaxes(0, 1)
-#    out += term
