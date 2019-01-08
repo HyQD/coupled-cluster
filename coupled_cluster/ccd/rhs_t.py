@@ -1,33 +1,29 @@
 # Labelling of the different terms comes from the book "Many-Body Methods in
-# Chemistry and Physics" by I. Shavitt and R. J. Bartlett. Note that the sign of
-# the diagrams below may differ from Shavitt and Bartlett, due to the
-# autogeneration by SymPy.
-#
-# Furthermore, due to the use of intermediates, some diagrams are combined.
+# Chemistry and Physics" by I. Shavitt and R. J. Bartlett.
 
 
-def compute_t_2_amplitude(f, u, t, o, v, out=None, np=None):
+def compute_t_2_amplitudes(f, u, t, o, v, out=None, np=None):
     if np is None:
         import numpy as np
 
     if out is None:
         out = np.zeros_like(t)
 
-    add_d1(u, o, v, out, np=np)
-    add_d2a(f, t, o, v, out, np=np)
-    add_d2b(f, t, o, v, out, np=np)
-    add_d2c(u, t, o, v, out, np=np)
-    add_d2d(u, t, o, v, out, np=np)
-    add_d2e(u, t, o, v, out, np=np)
-    add_d3a(u, t, o, v, out, np=np)
-    add_d3b(u, t, o, v, out, np=np)
-    add_d3c(u, t, o, v, out, np=np)
-    add_d3d(u, t, o, v, out, np=np)
+    add_d1_t(u, o, v, out, np=np)
+    add_d2a_t(f, t, o, v, out, np=np)
+    add_d2b_t(f, t, o, v, out, np=np)
+    add_d2c_t(u, t, o, v, out, np=np)
+    add_d2d_t(u, t, o, v, out, np=np)
+    add_d2e_t(u, t, o, v, out, np=np)
+    add_d3a_t(u, t, o, v, out, np=np)
+    add_d3b_t(u, t, o, v, out, np=np)
+    add_d3c_t(u, t, o, v, out, np=np)
+    add_d3d_t(u, t, o, v, out, np=np)
 
     return out
 
 
-def add_d1(u, o, v, out, np=None):
+def add_d1_t(u, o, v, out, np=None):
     """Function adding the D1 diagram
 
         g(f, u, t) <- u^{ab}_{ij}
@@ -40,7 +36,7 @@ def add_d1(u, o, v, out, np=None):
     out += u[v, v, o, o]
 
 
-def add_d2a(f, t, o, v, out, np=None):
+def add_d2a_t(f, t, o, v, out, np=None):
     """Function adding the D2a diagram
 
         g(f, u, t) <- f^{b}_{c} t^{ac}_{ij} P(ab)
@@ -55,7 +51,7 @@ def add_d2a(f, t, o, v, out, np=None):
     out += term
 
 
-def add_d2b(f, t, o, v, out, np=None):
+def add_d2b_t(f, t, o, v, out, np=None):
     """Function adding the D2b diagram
 
         g(f, u, t) <- -f^{k}_{j} t^{ab}_{ik} P(ij)
@@ -70,7 +66,7 @@ def add_d2b(f, t, o, v, out, np=None):
     out -= term
 
 
-def add_d2c(u, t, o, v, out, np=None):
+def add_d2c_t(u, t, o, v, out, np=None):
     """Function adding the D2c diagram
 
         g(f, u, t) <- 0.5 * t^{cd}_{ij} u^{ab}_{cd}
@@ -83,7 +79,7 @@ def add_d2c(u, t, o, v, out, np=None):
     out += 0.5 * np.tensordot(u[v, v, v, v], t, axes=((2, 3), (0, 1)))
 
 
-def add_d2d(u, t, o, v, out, np=None):
+def add_d2d_t(u, t, o, v, out, np=None):
     """Function adding the D2d diagram
 
         g(f, u, t) <- 0.5 * t^{ab}_{kl} u^{kl}_{ij}
@@ -96,7 +92,7 @@ def add_d2d(u, t, o, v, out, np=None):
     out += 0.5 * np.tensordot(t, u[o, o, o, o], axes=((2, 3), (0, 1)))
 
 
-def add_d2e(u, t, o, v, out, np=None):
+def add_d2e_t(u, t, o, v, out, np=None):
     """Function adding the D2e diagram
 
         g(f, u, t) <- t^{ac}_{ik} u^{bk}_{jc} P(ab) P(ij)
@@ -114,7 +110,7 @@ def add_d2e(u, t, o, v, out, np=None):
     out += term
 
 
-def add_d3a(u, t, o, v, out, np=None):
+def add_d3a_t(u, t, o, v, out, np=None):
     """Function adding the D3a diagram
 
         g(f, u, t) <- 0.25 * t^{cd}_{ij} t^{ab}_{kl} u^{kl}_{cd}
@@ -150,7 +146,7 @@ def add_d3a(u, t, o, v, out, np=None):
         out += np.tensordot(t, W_klij, axes=((2, 3), (0, 1)))
 
 
-def add_d3b(u, t, o, v, out, np=None):
+def add_d3b_t(u, t, o, v, out, np=None):
     """Function adding the D3b diagram
 
         g(f, u, t) <- t^{ac}_{ik} t^{bd}_{jl} u^{kl}_{cd} P(ij)
@@ -173,7 +169,7 @@ def add_d3b(u, t, o, v, out, np=None):
     out += term
 
 
-def add_d3c(u, t, o, v, out, np=None):
+def add_d3c_t(u, t, o, v, out, np=None):
     """Function adding the D3c diagram
 
         g(f, u, t) <- -0.5 t^{ab}_{lj} t^{dc}_{ik} u^{kl}_{cd} P(ij)
@@ -194,7 +190,7 @@ def add_d3c(u, t, o, v, out, np=None):
     out += term
 
 
-def add_d3d(u, t, o, v, out, np=None):
+def add_d3d_t(u, t, o, v, out, np=None):
     """Function adding the D3d diagram
 
         g(f, u, t) <- -0.5 t^{ac}_{lk} t^{db}_{ij} u^{kl}_{cd} P(ab)

@@ -1,6 +1,6 @@
 import numpy as np
 from coupled_cluster.cc import CoupledCluster
-from coupled_cluster.ccd.rhs import compute_t_2_amplitude
+from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 
 
 class CoupledClusterDoubles(CoupledCluster):
