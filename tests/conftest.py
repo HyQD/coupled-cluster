@@ -6,9 +6,9 @@ from quantum_systems import TwoDimensionalHarmonicOscillator, CustomSystem
 
 l = 12  # Number of orbitals
 n = 2  # Number of particles
-n_large = 20
-n_larger = 40
-l_large = 50
+n_large = 6
+n_larger = 12
+l_large = 20
 
 radius = 4
 num_grid_points = 101
@@ -62,7 +62,10 @@ def large_system(_n_large):
     t = np.random.random((m, m, n, n)).astype(np.complex128)
     t = anti_symmetrize_t(t, m, n)
 
-    return t, cs
+    l = np.random.random((n, n, m, m)).astype(np.complex128)
+    l = anti_symmetrize_t(l, n, m)
+
+    return t, l, cs
 
 
 @pytest.fixture
