@@ -6,8 +6,9 @@ from quantum_systems import TwoDimensionalHarmonicOscillator, CustomSystem
 
 l = 12  # Number of orbitals
 n = 2  # Number of particles
-n_large = 2
-l_large = 5
+n_large = 20
+n_larger = 40
+l_large = 50
 
 radius = 4
 num_grid_points = 101
@@ -31,6 +32,11 @@ def _omega(request):
     return request.param
 
 
+@pytest.fixture(params=[n_large, n_larger], scope="session")
+def _n_large(request):
+    return request.param
+
+
 @pytest.fixture
 def tdho(_omega):
     _tdho = TwoDimensionalHarmonicOscillator(
@@ -41,9 +47,10 @@ def tdho(_omega):
 
 
 @pytest.fixture(scope="session")
-def large_system():
-    n = n_large
+def large_system(_n_large):
+    n = _n_large
     l = l_large
+    m = l - n
 
     cs = CustomSystem(n, l)
     cs.set_h(np.random.random((l, l)), add_spin=True)
@@ -52,18 +59,10 @@ def large_system():
     )
     cs.construct_fock_matrix()
 
-    return cs
-
-
-@pytest.fixture(scope="session")
-def large_t():
-    n = n_large
-    m = l_large - n
-
     t = np.random.random((m, m, n, n)).astype(np.complex128)
     t = anti_symmetrize_t(t, m, n)
 
-    return t
+    return t, cs
 
 
 @pytest.fixture
