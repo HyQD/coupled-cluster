@@ -22,6 +22,8 @@ def compute_l_2_amplitudes(u, t, l, o, v, out=None, np=None):
     add_d3c_l(u, t, l, o, v, out, np=np)
     add_d3d_l(u, t, l, o, v, out, np=np)
     add_d3e_l(u, t, l, o, v, out, np=np)
+    add_d3f_l(u, t, l, o, v, out, np=np)
+    add_d3g_l(u, t, l, o, v, out, np=np)
 
 
 def add_d1_l(u, o, v, out, np=None):
