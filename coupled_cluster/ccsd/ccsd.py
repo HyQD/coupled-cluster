@@ -14,8 +14,11 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.rhs_1_l = np.zeros((n, m), dtype=np.complex128)
         self.rhs_2_l = np.zeros((n, n, m, m), dtype=np.complex128)
 
-        self.t_1 = np.zeros((m, n), dtype=np.complex128)
-        self.t_2 = np.zeros((m, m, n, n), dtype=np.complex128)
+        self.t_1 = np.zeros_like(self.rhs_1_t)
+        self.t_2 = np.zeros_like(self.rhs_2_t)
+
+        self.l_1 = np.zeros_like(self.rhs_1_l)
+        self.l_2 = np.zeros_like(self.rhs_2_l)
 
         self.d_1_t = np.diag(self.f)[self.o] - np.diag(self.f)[self.v].reshape(
             -1, 1
@@ -30,9 +33,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         # d_2) greatly increases the speed of the division later on.
         self.d_1_l = self.d_1_t.T.copy()
         self.d_2_l = self.d_2_t.transpose(2, 3, 0, 1).copy()
-
-        self.l_1 = np.zeros((n, m), dtype=np.complex128)
-        self.l_2 = np.zeros((n, n, m, m), dtype=np.complex128)
 
         self.xi = np.zeros((m, m, n, n), dtype=np.complex128)
         self.tau = np.zeros((m, m, n, n), dtype=np.complex128)
