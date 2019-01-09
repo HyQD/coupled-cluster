@@ -13,6 +13,7 @@ def test_mbpt_enegy(tdho):
     assert True
 
 
+@pytest.mark.skip
 def test_ccsd_energy(tdho, ccsd_energy):
     tol = 1e-4
 
@@ -22,6 +23,7 @@ def test_ccsd_energy(tdho, ccsd_energy):
     assert abs(energy - ccsd_energy) < tol
 
 
+@pytest.mark.skip
 def test_lambda_amplitude_iterations(tdho):
     cc_scheme = CoupledClusterSinglesDoubles(tdho, verbose=True)
 
