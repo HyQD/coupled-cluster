@@ -47,7 +47,7 @@ def tdho(_omega):
 
 
 @pytest.fixture(scope="session")
-def large_system(_n_large):
+def large_system_ccd(_n_large):
     n = _n_large
     l = l_large
     m = l - n
@@ -66,6 +66,30 @@ def large_system(_n_large):
     l = anti_symmetrize_t(l, n, m)
 
     return t, l, cs
+
+
+@pytest.fixture(scope="session")
+def large_system_ccsd(_n_large):
+    n = _n_large
+    l = l_large
+    m = l - n
+
+    cs = CustomSystem(n, l)
+    cs.set_h(np.random.random((l, l)), add_spin=True)
+    cs.set_u(
+        np.random.random((l, l, l, l)), add_spin=True, anti_symmetrize=True
+    )
+    cs.construct_fock_matrix()
+
+    t_1 = np.random.random((m, n)).astype(np.complex128)
+    t_2 = np.random.random((m, m, n, n)).astype(np.complex128)
+    t_2 = anti_symmetrize_t(t_2, m, n)
+
+    l_1 = np.random.random((n, m)).astype(np.complex128)
+    l_2 = np.random.random((n, n, m, m)).astype(np.complex128)
+    l_2 = anti_symmetrize_t(l_2, n, m)
+
+    return t_1, t_2, l_1, l_2, cs
 
 
 @pytest.fixture
