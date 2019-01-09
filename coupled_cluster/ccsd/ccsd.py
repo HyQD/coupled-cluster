@@ -1,5 +1,5 @@
 import numpy as np
-from .cc import CoupledCluster
+from coupled_cluster.cc import CoupledCluster
 
 
 class CoupledClusterSinglesDoubles(CoupledCluster):
