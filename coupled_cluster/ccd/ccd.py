@@ -2,6 +2,7 @@ import numpy as np
 from coupled_cluster.cc import CoupledCluster
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
+from coupled_cluster.ccd.density_matrices import compute_one_body_density_matrix
 
 
 class CoupledClusterDoubles(CoupledCluster):
@@ -29,10 +30,18 @@ class CoupledClusterDoubles(CoupledCluster):
     def _get_t_copy(self):
         return [self.t_2.copy()]
 
+    def _get_l_copy(self):
+        return [self.l_2.copy()]
+
     def _set_t(self, t):
         t_2 = t[0]
 
         np.copyto(self.t_2, t_2)
+
+    def _set_l(self, l):
+        l_2 = l[0]
+
+        np.copyto(self.l_2, l_2)
 
     def _compute_initial_guess(self):
         o, v = self.o, self.v
@@ -76,3 +85,8 @@ class CoupledClusterDoubles(CoupledCluster):
 
         np.divide(self.rhs_2_l, self.d_2_l, out=self.rhs_2_l)
         np.add((1 - theta) * self.rhs_2_l, theta * self.l_2, out=self.l_2)
+
+    def _compute_one_body_density_matrix(self):
+        return compute_one_body_density_matrix(
+            self.t_2, self.l_2, self.o, self.v, np=np
+        )
