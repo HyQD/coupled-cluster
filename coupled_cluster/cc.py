@@ -49,8 +49,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def _get_t_copy(self):
         pass
 
-    def _get_lambda_copy(self):
-        self.__err(self._get_lambda_copy.__name__)
+    def _get_l_copy(self):
+        self.__err(self._get_l_copy.__name__)
 
     @abc.abstractmethod
     def _set_t(self, t):
@@ -81,7 +81,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         time[0] = t_start
         h = (t_end - t_start) / (num_timesteps - 1)
 
-        self._l_0 = self._get_lambda_copy()
+        self._l_0 = self._get_l_copy()
         self._t_0 = self._get_t_copy()
         prob[0] = self._compute_time_evolution_probability()
 
@@ -158,9 +158,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         return e_ref
 
-    def compute_lambda_amplitudes(
-        self, max_iterations=100, tol=1e-4, theta=0.1
-    ):
+    def compute_l_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
 
         iterations = 0
