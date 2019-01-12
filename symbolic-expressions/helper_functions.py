@@ -1,8 +1,4 @@
-from symbols.physics.secondquant import (
-    wicks,
-    evaluate_deltas,
-    substitute_dummies,
-)
+from sympy.physics.secondquant import wicks, evaluate_deltas, substitute_dummies
 
 pretty_dummies_dict = {
     "above": "abcdef",
@@ -19,9 +15,15 @@ wicks_kwargs = {
 sub_kwargs = {"new_indices": True, "pretty_indices": pretty_dummies_dict}
 
 
-def eval_equation(eq, wicks_kwargs=wicks_kwargs, sub_kwargs=sub_kwargs):
-    eq = wicks(eq, **wicks_kwargs)
+def beautify_equation(eq, sub_kwargs=sub_kwargs):
     eq = evaluate_deltas(eq.expand())
     eq = substitute_dummies(eq, **sub_kwargs)
+
+    return eq
+
+
+def eval_equation(eq, wicks_kwargs=wicks_kwargs, sub_kwargs=sub_kwargs):
+    eq = wicks(eq, **wicks_kwargs)
+    eq = beautify_equation(eq, sub_kwargs=sub_kwargs)
 
     return eq
