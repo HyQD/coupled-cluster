@@ -1,6 +1,7 @@
 import abc
 import numpy as np
 import tqdm
+import warnings
 
 
 class CoupledCluster(metaclass=abc.ABCMeta):
@@ -126,16 +127,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         return prob, time
 
-    def compute_one_body_density(self):
+    def compute_spin_reduced_one_body_density_matrix(self):
         rho_qp = self._compute_one_body_density_matrix()
 
-        if self.verbose and np.abs(np.trace(rho_qp) - self.n) > 1e-8:
-            print(
-                (
-                    "Warning: trace of rho_qp = {0} != {1} = "
-                    + "number of particles"
-                ).format(np.trace(rho_qp), self.n)
-            )
+        if np.abs(np.trace(rho_qp) - self.n) > 1e-8:
+            warn = "Trace of rho_qp = {0} != {1} = number of particles"
+            warn = warn.format(np.trace(rho_qp), self.n)
+            warnings.warn(warn)
 
         rho_qp_reduced = rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
         rho = np.zeros(self.system.spf.shape[1:], dtype=np.complex128)
