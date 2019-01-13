@@ -12,17 +12,17 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         n, m = self.n, self.m
 
-        self.rhs_1_t = np.zeros((m, n), dtype=np.complex128)
-        self.rhs_2_t = np.zeros((m, m, n, n), dtype=np.complex128)
+        self.rhs_t_1 = np.zeros((m, n), dtype=np.complex128)
+        self.rhs_t_2 = np.zeros((m, m, n, n), dtype=np.complex128)
 
-        self.rhs_1_l = np.zeros((n, m), dtype=np.complex128)
-        self.rhs_2_l = np.zeros((n, n, m, m), dtype=np.complex128)
+        self.rhs_l_1 = np.zeros((n, m), dtype=np.complex128)
+        self.rhs_l_2 = np.zeros((n, n, m, m), dtype=np.complex128)
 
-        self.t_1 = np.zeros_like(self.rhs_1_t)
-        self.t_2 = np.zeros_like(self.rhs_2_t)
+        self.t_1 = np.zeros_like(self.rhs_t_1)
+        self.t_2 = np.zeros_like(self.rhs_t_2)
 
-        self.l_1 = np.zeros_like(self.rhs_1_l)
-        self.l_2 = np.zeros_like(self.rhs_2_l)
+        self.l_1 = np.zeros_like(self.rhs_l_1)
+        self.l_2 = np.zeros_like(self.rhs_l_2)
 
         self.d_1_t = np.diag(self.f)[self.o] - np.diag(self.f)[self.v].reshape(
             -1, 1
@@ -91,17 +91,17 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def _compute_initial_guess(self):
         o, v = self.o, self.v
 
-        np.copyto(self.rhs_1_t, self.f[v, o])
-        np.copyto(self.rhs_2_t, self.u[v, v, o, o])
+        np.copyto(self.rhs_t_1, self.f[v, o])
+        np.copyto(self.rhs_t_2, self.u[v, v, o, o])
 
-        np.divide(self.rhs_1_t, self.d_1_t, out=self.t_1)
-        np.divide(self.rhs_2_t, self.d_2_t, out=self.t_2)
+        np.divide(self.rhs_t_1, self.d_1_t, out=self.t_1)
+        np.divide(self.rhs_t_2, self.d_2_t, out=self.t_2)
 
-        np.copyto(self.rhs_1_l, self.f[o, v])
-        np.copyto(self.rhs_2_l, self.u[o, o, v, v])
+        np.copyto(self.rhs_l_1, self.f[o, v])
+        np.copyto(self.rhs_l_2, self.u[o, o, v, v])
 
-        np.divide(self.rhs_1_l, self.d_1_l, out=self.l_1)
-        np.divide(self.rhs_2_l, self.d_2_l, out=self.l_2)
+        np.divide(self.rhs_l_1, self.d_1_l, out=self.l_1)
+        np.divide(self.rhs_l_2, self.d_2_l, out=self.l_2)
 
     # def _compute_time_evolution_probability(self):
     #    t_1_0, t_2_0 = self._t_0
@@ -186,14 +186,28 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def _compute_t_amplitudes(self, theta, iterative=True):
         f = self.off_diag_f if iterative else self.f
 
-        self.rhs_1_t.fill(0)
-        self.rhs_2_t.fill(0)
+        self.rhs_t_1.fill(0)
+        self.rhs_t_2.fill(0)
 
         compute_t_1_amplitudes(
-            f, self.u, self.t_1, self.t_2, self.o, self.v, out=self.rhs_1, np=np
+            f,
+            self.u,
+            self.t_1,
+            self.t_2,
+            self.o,
+            self.v,
+            out=self.rhs_t_1,
+            np=np,
         )
         compute_t_2_amplitudes(
-            f, self.u, self.t_1, self.t_2, self.o, self.v, out=self.rhs_2, np=np
+            f,
+            self.u,
+            self.t_1,
+            self.t_2,
+            self.o,
+            self.v,
+            out=self.rhs_t_2,
+            np=np,
         )
 
         # self._compute_effective_amplitudes()
@@ -202,13 +216,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         # self._compute_ccsd_amplitude_d()
 
         if not iterative:
-            return [self.rhs_1_t.copy(), self.rhs_2_t.copy()]
+            return [self.rhs_t_1.copy(), self.rhs_t_2.copy()]
 
-        np.divide(self.rhs_1_t, self.d_1_t, out=self.rhs_1_t)
-        np.divide(self.rhs_2_t, self.d_2_t, out=self.rhs_2_t)
+        np.divide(self.rhs_t_1, self.d_1_t, out=self.rhs_t_1)
+        np.divide(self.rhs_t_2, self.d_2_t, out=self.rhs_t_2)
 
-        np.add((1 - theta) * self.rhs_1_t, theta * self.t_1, out=self.t_1)
-        np.add((1 - theta) * self.rhs_2_t, theta * self.t_2, out=self.t_2)
+        np.add((1 - theta) * self.rhs_t_1, theta * self.t_1, out=self.t_1)
+        np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
 
     # def _compute_l_amplitudes(self, theta, iterative=True):
     #    self._compute_effective_three_body_intermediates()
@@ -217,13 +231,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     #    self._compute_ccsd_lambda_amplitudes_d()
 
     #    if not iterative:
-    #        return [self.rhs_1_l.copy(), self.rhs_2_l.copy()]
+    #        return [self.rhs_l_1.copy(), self.rhs_l_2.copy()]
 
-    #    np.divide(self.rhs_1_l, self.d_1_l, out=self.rhs_1_l)
-    #    np.divide(self.rhs_2_l, self.d_2_l, out=self.rhs_2_l)
+    #    np.divide(self.rhs_l_1, self.d_1_l, out=self.rhs_l_1)
+    #    np.divide(self.rhs_l_2, self.d_2_l, out=self.rhs_l_2)
 
-    #    np.add((1 - theta) * self.rhs_1_l, theta * self.l_1, out=self.l_1)
-    #    np.add((1 - theta) * self.rhs_2_l, theta * self.l_2, out=self.l_2)
+    #    np.add((1 - theta) * self.rhs_l_1, theta * self.l_1, out=self.l_1)
+    #    np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
 
     # def _compute_effective_amplitudes(self):
     #    o, v = self.o, self.v
@@ -261,47 +275,47 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     #    if not iterative:
     #        f = self.f
 
-    #    self.rhs_1_t.fill(0)
+    #    self.rhs_t_1.fill(0)
 
-    #    self.rhs_1_t += f[v, o]
-    #    self.rhs_1_t += np.dot(self.F_pp, self.t_1)
-    #    self.rhs_1_t -= np.dot(self.t_1, self.F_hh)
-    #    self.rhs_1_t += np.einsum(
+    #    self.rhs_t_1 += f[v, o]
+    #    self.rhs_t_1 += np.dot(self.F_pp, self.t_1)
+    #    self.rhs_t_1 -= np.dot(self.t_1, self.F_hh)
+    #    self.rhs_t_1 += np.einsum(
     #        "me, aeim -> ai", self.F_hp, self.t_2, optimize=True
     #    )
-    #    self.rhs_1_t += np.einsum(
+    #    self.rhs_t_1 += np.einsum(
     #        "em, amie -> ai", self.t_1, self.u[v, o, o, v], optimize=True
     #    )
-    #    self.rhs_1_t -= 0.5 * np.einsum(
+    #    self.rhs_t_1 -= 0.5 * np.einsum(
     #        "aemn, mnie -> ai", self.t_2, self.u[o, o, o, v], optimize=True
     #    )
-    #    self.rhs_1_t += 0.5 * np.einsum(
+    #    self.rhs_t_1 += 0.5 * np.einsum(
     #        "amef, efim -> ai", self.u[v, o, v, v], self.t_2, optimize=True
     #    )
 
     # def _compute_ccsd_amplitude_d(self):
     #    o, v = self.o, self.v
 
-    #    self.rhs_2_t.fill(0)
+    #    self.rhs_t_2.fill(0)
 
-    #    self.rhs_2_t += self.u[v, v, o, o]
+    #    self.rhs_t_2 += self.u[v, v, o, o]
     #    term = -0.5 * np.dot(self.t_1, self.F_hp)
     #    term += self.F_pp
     #    term = np.einsum("aeij, be -> abij", self.t_2, term, optimize=True)
     #    term -= term.swapaxes(0, 1)
-    #    self.rhs_2_t += term
+    #    self.rhs_t_2 += term
 
     #    term = 0.5 * np.dot(self.F_hp, self.t_1)
     #    term += self.F_hh
     #    term = np.einsum("abim, mj -> abij", self.t_2, term, optimize=True)
     #    term -= term.swapaxes(2, 3)
-    #    self.rhs_2_t -= term
+    #    self.rhs_t_2 -= term
 
-    #    self.rhs_2_t += 0.5 * np.tensordot(
+    #    self.rhs_t_2 += 0.5 * np.tensordot(
     #        self.tau, self.W_hhhh, axes=((2, 3), (0, 1))
     #    )
 
-    #    self.rhs_2_t += 0.5 * np.tensordot(
+    #    self.rhs_t_2 += 0.5 * np.tensordot(
     #        self.W_pppp, self.tau, axes=((2, 3), (0, 1))
     #    )
 
@@ -315,96 +329,96 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     #    ).transpose(0, 2, 1, 3)
     #    term -= term.swapaxes(0, 1)
     #    term -= term.swapaxes(2, 3)
-    #    self.rhs_2_t += term
+    #    self.rhs_t_2 += term
 
     #    term = np.einsum(
     #        "abej, ei -> abij", self.u[v, v, v, o], self.t_1, optimize=True
     #    )
     #    term -= term.swapaxes(2, 3)
-    #    self.rhs_2_t += term
+    #    self.rhs_t_2 += term
 
     #    term = np.tensordot(self.t_1, self.u[o, v, o, o], axes=((1), (0)))
     #    term -= term.swapaxes(0, 1)
-    #    self.rhs_2_t -= term
+    #    self.rhs_t_2 -= term
 
     # def _compute_ccsd_lambda_amplitudes_s(self):
-    #    self.rhs_1_l.fill(0)
+    #    self.rhs_l_1.fill(0)
 
-    #    self.rhs_1_l += self.F_hp_lambda
-    #    self.rhs_1_l += np.dot(self.l_1, self.F_pp_lambda)
-    #    self.rhs_1_l -= np.dot(self.F_hh_lambda, self.l_1)
-    #    self.rhs_1_l += np.tensordot(
+    #    self.rhs_l_1 += self.F_hp_lambda
+    #    self.rhs_l_1 += np.dot(self.l_1, self.F_pp_lambda)
+    #    self.rhs_l_1 -= np.dot(self.F_hh_lambda, self.l_1)
+    #    self.rhs_l_1 += np.tensordot(
     #        self.l_1, self.W_hpph_lambda, axes=((0, 1), (3, 1))
     #    )
-    #    self.rhs_1_l += 0.5 * np.tensordot(
+    #    self.rhs_l_1 += 0.5 * np.tensordot(
     #        self.l_2, self.W_ppph_lambda, axes=((1, 2, 3), (3, 0, 1))
     #    )
-    #    self.rhs_1_l -= 0.5 * np.tensordot(
+    #    self.rhs_l_1 -= 0.5 * np.tensordot(
     #        self.W_hphh_lambda, self.l_2, axes=((1, 2, 3), (3, 0, 1))
     #    )
-    #    self.rhs_1_l -= np.tensordot(
+    #    self.rhs_l_1 -= np.tensordot(
     #        self.G_pp, self.W_phpp_lambda, axes=((0, 1), (0, 2))
     #    )
-    #    self.rhs_1_l -= np.tensordot(
+    #    self.rhs_l_1 -= np.tensordot(
     #        self.G_hh, self.W_hhhp_lambda, axes=((0, 1), (0, 2))
     #    )
 
     # def _compute_ccsd_lambda_amplitudes_d(self):
     #    o, v = self.o, self.v
 
-    #    self.rhs_2_l.fill(0)
+    #    self.rhs_l_2.fill(0)
 
-    #    self.rhs_2_l += self.u[o, o, v, v]
+    #    self.rhs_l_2 += self.u[o, o, v, v]
 
     #    term = np.tensordot(self.l_2, self.F_pp_lambda, axes=((3), (0)))
     #    term -= term.swapaxes(2, 3)
-    #    self.rhs_2_l += term
+    #    self.rhs_l_2 += term
 
     #    term = np.einsum(
     #        "imab, jm -> ijab", self.l_2, self.F_hh_lambda, optimize=True
     #    )
     #    term -= term.swapaxes(0, 1)
-    #    self.rhs_2_l -= term
+    #    self.rhs_l_2 -= term
 
-    #    self.rhs_2_l += 0.5 * np.tensordot(
+    #    self.rhs_l_2 += 0.5 * np.tensordot(
     #        self.W_hhhh_lambda, self.l_2, axes=((2, 3), (0, 1))
     #    )
 
-    #    self.rhs_2_l += 0.5 * np.tensordot(
+    #    self.rhs_l_2 += 0.5 * np.tensordot(
     #        self.l_2, self.W_pppp_lambda, axes=((2, 3), (0, 1))
     #    )
 
     #    term = np.tensordot(self.l_1, self.W_phpp_lambda, axes=((1), (0)))
     #    term -= term.swapaxes(0, 1)
-    #    self.rhs_2_l += term
+    #    self.rhs_l_2 += term
 
     #    term = np.einsum(
     #        "ma, ijmb -> ijab", self.l_1, self.W_hhhp_lambda, optimize=True
     #    )
     #    term -= term.swapaxes(2, 3)
-    #    self.rhs_2_l -= term
+    #    self.rhs_l_2 -= term
 
     #    term = np.einsum(
     #        "imae, jebm -> ijab", self.l_2, self.W_hpph_lambda, optimize=True
     #    )
     #    term -= term.swapaxes(0, 1)
     #    term -= term.swapaxes(2, 3)
-    #    self.rhs_2_l += term
+    #    self.rhs_l_2 += term
 
     #    term = np.einsum("ia, jb -> ijab", self.l_1, self.F_hp_lambda)
     #    term -= term.swapaxes(0, 1)
     #    term -= term.swapaxes(2, 3)
-    #    self.rhs_2_l += term
+    #    self.rhs_l_2 += term
 
     #    term = np.tensordot(self.u[o, o, v, v], self.G_pp, axes=((3), (1)))
     #    term -= term.swapaxes(2, 3)
-    #    self.rhs_2_l += term
+    #    self.rhs_l_2 += term
 
     #    term = np.einsum(
     #        "imab, mj -> ijab", self.u[o, o, v, v], self.G_hh, optimize=True
     #    )
     #    term -= term.swapaxes(0, 1)
-    #    self.rhs_2_l -= term
+    #    self.rhs_l_2 -= term
 
     # def _compute_intermediates(self, iterative):
     #    o, v = self.o, self.v
