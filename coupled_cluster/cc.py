@@ -136,7 +136,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             warnings.warn(warn)
 
         rho_qp_reduced = rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
-        rho = np.zeros(self.system.spf.shape[1:], dtype=np.complex128)
+        rho = np.zeros(self.system.spf.shape[1:], dtype=self.system.spf.dtype)
         spf_slice = slice(0, self.system.spf.shape[0])
 
         for _i in np.ndindex(rho.shape):
@@ -146,7 +146,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
                 np.dot(rho_qp_reduced, self.system.spf[i]),
             )
 
-        return rho.real
+        return rho
 
     def compute_reference_energy(self):
         h, u, o, v = self.h, self.u, self.o, self.v
