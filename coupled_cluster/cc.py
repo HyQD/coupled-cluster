@@ -161,28 +161,24 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         iterations = 0
 
-        diff_l_1 = 100
-        diff_l_2 = 100
-
-        l_1 = self.l_1.copy()
-        l_2 = self.l_2.copy()
+        l_list = self._get_l_copy()
+        diff_l = [100 for l in l_list]
 
         while (
-            diff_l_1 > tol or diff_l_2 > tol
+            any([d_l > tol for d_l in diff_l])
         ) and iterations < max_iterations:
             if self.verbose:
                 print(
-                    "Iteration: {0}\tDiff (l_1): {1}\tDiff (l_2): {2}".format(
-                        iterations, diff_l_1, diff_l_2
-                    )
+                    "Iteration: {0}\tDiff (l): {1}".format(iterations, diff_l)
                 )
 
             self._compute_l_amplitudes(theta, iterative=True)
-            diff_l_1 = np.amax(np.abs(self.l_1 - l_1))
-            diff_l_2 = np.amax(np.abs(self.l_2 - l_2))
-
-            np.copyto(l_1, self.l_1)
-            np.copyto(l_2, self.l_2)
+            new_l_list = self._get_l_copy()
+            diff_l = [
+                np.amax(np.abs(l - new_l))
+                for l, new_l in zip(l_list, new_l_list)
+            ]
+            l_list = new_l_list
 
             iterations += 1
 
