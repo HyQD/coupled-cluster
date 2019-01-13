@@ -1,6 +1,8 @@
 import numpy as np
 from quantum_systems import TwoDimensionalHarmonicOscillator
-from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
+
+# from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
+from coupled_cluster.ccd import CoupledClusterDoubles
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -15,11 +17,17 @@ tdho.setup_system()
 # plt.contourf(tdho.T, tdho.R, np.abs(tdho.spf[1]) ** 2)
 # plt.show()
 
-ccsd = CoupledClusterSinglesDoubles(tdho, verbose=True)
-ccsd.compute_ground_state_energy(theta=theta)
-ccsd.compute_lambda_amplitudes(theta=theta)
+# ccsd = CoupledClusterSinglesDoubles(tdho, verbose=True)
+# ccsd.compute_ground_state_energy(theta=theta)
+# ccsd.compute_lambda_amplitudes(theta=theta)
+#
+# rho = ccsd.compute_one_body_density()
 
-rho = ccsd.compute_one_body_density()
+ccd = CoupledClusterDoubles(tdho, verbose=True)
+ccd.compute_ground_state_energy(theta=theta)
+ccd.compute_l_amplitudes(theta=theta)
+
+rho = ccd.compute_one_body_density()
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
