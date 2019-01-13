@@ -12,6 +12,25 @@ from cluster_operators import (
     get_l_2_operator,
 )
 
+symbol_list = [
+    ("rho^{b}_{a} = ", symbols("a, b", above_fermi=True, cls=Dummy)),
+    (
+        "rho^{i}_{a} = ",
+        (
+            symbols("a", above_fermi=True, cls=Dummy),
+            symbols("i", below_fermi=True, cls=Dummy),
+        ),
+    ),
+    (
+        "rho^{a}_{i} = ",
+        (
+            symbols("i", below_fermi=True, cls=Dummy),
+            symbols("a", above_fermi=True, cls=Dummy),
+        ),
+    ),
+    ("rho^{j}_{i} = ", symbols("i, j", below_fermi=True, cls=Dummy)),
+]
+
 
 def get_one_body_density_operator(p, q):
     return Fd(p) * F(q)
