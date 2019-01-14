@@ -25,9 +25,9 @@ tdho.setup_system()
 
 ccd = CoupledClusterDoubles(tdho, verbose=True)
 ccd.compute_ground_state_energy(theta=theta)
-ccd.compute_l_amplitudes(theta=theta)
+ccd.compute_l_amplitudes(theta=0.6)
 
-rho = ccd.compute_one_body_density()
+rho = ccd.compute_spin_reduced_one_body_density_matrix().real
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
