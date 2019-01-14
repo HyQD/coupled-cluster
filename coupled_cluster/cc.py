@@ -40,8 +40,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def _compute_l_amplitudes(self, theta, iterative=True):
         self.__err(self._compute_l_amplitudes.__name__)
 
-    def _compute_time_evolution_probability(self):
-        self.__err(self._compute_time_evolution_probability.__name__)
+    def _compute_time_overlap_with_ground_state(self):
+        self.__err(self._compute_time_overlap_with_ground_state.__name__)
 
     def _compute_one_body_density_matrix(self):
         self.__err(self._compute_one_body_density_matrix.__name__)
