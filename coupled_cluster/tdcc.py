@@ -11,10 +11,13 @@ class TimeDependentCoupledCluster:
         self.np = np
 
         if not isinstance(rhs_t, collections.Iterable):
-            self.rhs_t = [rhs_t]
+            rhs_t = [rhs_t]
 
         if not isinstance(rhs_l, collections.Iterable):
-            self.rhs_l = [rhs_l]
+            rhs_l = [rhs_l]
+
+        self.rhs_t = rhs_t
+        self.rhs_l = rhs_l
 
     def rhs(self, l, t, current_time):
         o, v = self.system.o, self.system.v
