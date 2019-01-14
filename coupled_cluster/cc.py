@@ -178,8 +178,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
                 np.amax(np.abs(l - new_l))
                 for l, new_l in zip(l_list, new_l_list)
             ]
-            l_list = new_l_list
 
+            l_list = new_l_list
             iterations += 1
 
     def compute_ground_state_energy(
