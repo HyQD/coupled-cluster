@@ -2,6 +2,10 @@ from sympy.physics.secondquant import AntiSymmetricTensor, NO, Fd, F
 from sympy import symbols, Dummy, Rational
 
 
+def get_clusters(cc_functions, *args, **kwargs):
+    return sum([func(*args, **kwargs) for func in cc_functions])
+
+
 def get_t_1_operator(ast_symb="t"):
     i = symbols("i", below_fermi=True, cls=Dummy)
     a = symbols("a", above_fermi=True, cls=Dummy)

@@ -10,6 +10,7 @@ from cluster_operators import (
     get_t_2_operator,
     get_l_1_operator,
     get_l_2_operator,
+    get_clusters,
 )
 
 symbol_list = [
@@ -34,10 +35,6 @@ symbol_list = [
 
 def get_one_body_density_operator(p, q):
     return Fd(p) * F(q)
-
-
-def get_clusters(cc_functions):
-    return sum([func() for func in cc_functions])
 
 
 def get_one_body_density_matrix(
