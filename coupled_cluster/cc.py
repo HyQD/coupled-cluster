@@ -18,9 +18,16 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.m = self.system.m
 
         self.h, self.f, self.u = self.system.h, self.system.f, self.system.u
-        self.off_diag_f = self.system.off_diag_f
+        self.off_diag_f = self._create_off_diagonal_matrix(self.f)
 
         self.o, self.v = self.system.o, self.system.v
+
+    def _create_off_diagonal_matrix(self, matrix):
+        off_diag = np.zeros_like(matrix)
+        off_diag += matrix
+        np.fill_diagonal(off_diag, 0)
+
+        return off_diag
 
     def __err(self, func_name):
         raise NotImplementedError(
