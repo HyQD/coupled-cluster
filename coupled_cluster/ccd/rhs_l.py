@@ -4,7 +4,7 @@
 # and R. J. Bartlett.
 
 
-def compute_l_2_amplitudes(u, t, l, o, v, out=None, np=None):
+def compute_l_2_amplitudes(f, u, t, l, o, v, out=None, np=None):
     if np is None:
         import numpy as np
 
