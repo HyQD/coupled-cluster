@@ -1,4 +1,5 @@
 import collections
+from coupled_cluster.cc_helper import AmplitudeContainer
 
 
 class TimeDependentCoupledCluster:
@@ -34,4 +35,4 @@ class TimeDependentCoupledCluster:
             for rhs_l_func in self.rhs_l_func
         ]
 
-        return l_new, t_new
+        return AmplitudeContainer(l=l_new, t=t_new)
