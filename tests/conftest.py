@@ -57,7 +57,7 @@ def large_system_ccd(_n_large):
     cs.set_u(
         np.random.random((l, l, l, l)), add_spin=True, anti_symmetrize=True
     )
-    cs.construct_fock_matrix()
+    cs.f = cs.construct_fock_matrix(cs.h, cs.u)
 
     t = np.random.random((m, m, n, n)).astype(np.complex128)
     t = anti_symmetrize_t(t, m, n)
@@ -79,7 +79,7 @@ def large_system_ccsd(_n_large):
     cs.set_u(
         np.random.random((l, l, l, l)), add_spin=True, anti_symmetrize=True
     )
-    cs.construct_fock_matrix()
+    cs.f = cs.construct_fock_matrix(cs.h, cs.u)
 
     t_1 = np.random.random((m, n)).astype(np.complex128)
     t_2 = np.random.random((m, m, n, n)).astype(np.complex128)
