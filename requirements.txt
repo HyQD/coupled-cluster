@@ -20,4 +20,5 @@ numba
 git+https://github.com/Schoyen/quantum-systems.git
 
 # Install tdhf
-git+ssh://github.com:haakoek/tdhf.git
+# This is currently not supported as tdhf is a private repo
+# git+https://github.com/haakoek/tdhf.git
