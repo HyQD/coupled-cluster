@@ -25,6 +25,8 @@ def compute_l_2_amplitudes(f, u, t, l, o, v, out=None, np=None):
     add_d3f_l(u, t, l, o, v, out, np=np)
     add_d3g_l(u, t, l, o, v, out, np=np)
 
+    return out
+
 
 def add_d1_l(u, o, v, out, np=None):
     """Function adding the D1 diagram
