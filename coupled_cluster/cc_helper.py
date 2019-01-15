@@ -45,8 +45,3 @@ class AmplitudeContainer:
     def __iter__(self):
         yield self.l
         yield self.t
-
-
-class TimePropagator:
-    def __init__(self):
-        pass

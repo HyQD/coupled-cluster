@@ -1,5 +1,5 @@
 import numpy as np
-from coupled_cluster.time_propagator import AmplitudeContainer
+from coupled_cluster.cc_helper import AmplitudeContainer
 
 
 def test_addition_single_amp(large_system_ccd):
