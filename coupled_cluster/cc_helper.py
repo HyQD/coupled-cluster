@@ -26,6 +26,9 @@ class AmplitudeContainer:
 
         return AmplitudeContainer(new_l, new_t)
 
+    def __radd__(self, k):
+        return self.__add__(k)
+
     def __mul__(self, k):
         # Check if k is a constant to be multiplied with all l- and t-amplitudes
         if type(k) not in [list, tuple, set, type(self)]:
@@ -41,6 +44,9 @@ class AmplitudeContainer:
         new_t = [t * _k_t for t, _k_t in zip(self.t, k_t)]
 
         return AmplitudeContainer(new_l, new_t)
+
+    def __rmul__(self, k):
+        return self.__mul__(k)
 
     def __iter__(self):
         yield self.l
