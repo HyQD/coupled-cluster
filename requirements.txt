@@ -20,4 +20,4 @@ numba
 git+https://github.com/Schoyen/quantum-systems.git
 
 # Install tdhf
-git+https://github.com/haakoek/tdhf.git
+git+ssh://github.com:haakoek/tdhf.git
