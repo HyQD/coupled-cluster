@@ -9,7 +9,7 @@ def compute_l_2_amplitudes(f, u, t, l, o, v, out=None, np=None):
         import numpy as np
 
     if out is None:
-        out = np.zeros_like(t)
+        out = np.zeros_like(l)
 
     add_d1_l(u, o, v, out, np=np)
     add_d2a_l(u, l, o, v, out, np=np)
