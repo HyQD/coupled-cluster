@@ -5,10 +5,14 @@ from coupled_cluster.ccd import CoupledClusterDoubles
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
 from coupled_cluster.ccd.density_matrices import compute_one_body_density_matrix
+from coupled_cluster.ccd.time_dependent_overlap import (
+    compute_time_dependent_overlap,
+)
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 
 import matplotlib.pyplot as plt
 import numpy as np
+import tqdm
 
 
 class LaserPulse:
@@ -29,7 +33,7 @@ laser_frequency = 8 * omega
 laser_strength = 1
 theta_t = 0.1
 theta_l = 0.9
-tol = 1e-4
+tol = 1e-5
 
 odho = OneDimensionalHarmonicOscillator(
     n, l, length, num_grid_points, omega=omega
@@ -58,6 +62,27 @@ print(f"dt = {dt}")
 tdccd = TimeDependentCoupledCluster(
     compute_t_2_amplitudes, compute_l_2_amplitudes, odho, np=np
 )
+
 u_0 = AmplitudeContainer(l=ccd._get_l_copy(), t=ccd._get_t_copy())
-u_new = tdccd.rk4_step(u_0, t_start, dt)
-u_new = tdccd.rk4_step(u_new, t_start + dt, dt)
+l_0, t_0 = u_0
+l_0 = l_0[0]
+t_0 = t_0[0]
+psi_overlap = np.zeros(num_timesteps)
+time = np.zeros(num_timesteps)
+
+current_time = t_start
+time[0] = current_time
+u_new = u_0
+for i in tqdm.tqdm(range(num_timesteps)):
+    u_new = tdccd.rk4_step(u_new, current_time, dt)
+    l_new, t_new = u_new
+    l_new = l_new[0]
+    t_new = t_new[0]
+    psi_overlap[i] = compute_time_dependent_overlap(
+        t_0, t_new, l_0, l_new, np=np
+    ).real
+    current_time += dt
+    time[i] = current_time
+
+plt.plot(time, psi_overlap)
+plt.show()
