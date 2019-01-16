@@ -17,6 +17,8 @@ from coupled_cluster.ccsd.rhs_t import (
     add_s5b_t,
     add_s5c_t,
     add_s6_t,
+    add_d4a_t,
+    add_d4b_t,
 )
 
 
@@ -198,6 +200,34 @@ def test_add_s6_t(large_system_ccsd):
     add_s6_t(u, t_1, o, v, out, np=np)
     out_e = (-1) * np.einsum(
         "klcd, ci, ak, dl->ai", u[o, o, v, v], t_1, t_1, t_1
+    )
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_d4a_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d4a_t(u, t_1, o, v, out, np=np)
+    out_e = np.einsum("abcj, ci->abij", u[v, v, v, o], t_1).swapaxes(2, 3)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_d4b_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d4b_t(u, t_1, o, v, out, np=np)
+    out_e = (-1) * np.einsum("kbij, ak->abij", u[o, v, o, o], t_1).swapaxes(
+        0, 1
     )
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)

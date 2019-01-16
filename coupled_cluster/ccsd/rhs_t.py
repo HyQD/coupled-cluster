@@ -2,6 +2,9 @@
 # Chemistry and Physics" by I. Shavitt and R. J. Bartlett.
 
 
+# Diagrams for CCSD T_1 amplitude equations
+
+
 def compute_t_1_amplitudes(f, u, t_1, t_2, o, v, out=None, np=None):
     if np is None:
         import numpy as np
@@ -213,7 +216,7 @@ def add_s5c_t(u, t_1, o, v, out, np=None):
 def add_s6_t(u, t_1, o, v, out, np=None):
     """Function for adding the S6 diagram
 
-        g(f, u, t) <- - u ^{kl}_{cd} t^{c}_{i} t^{a}_{k} t^{d}_{l}
+        g(f, u, t) <- (-1) * u ^{kl}_{cd} t^{c}_{i} t^{a}_{k} t^{d}_{l}
 
     Number of FLOPS required: O(m^3 n^3)
     """
@@ -224,3 +227,37 @@ def add_s6_t(u, t_1, o, v, out, np=None):
     W_kldi = -np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))
     W_ldia = np.tensordot(W_kldi, t_1, axes=((0), (1)))
     out += np.tensordot(W_ldia, t_1, axes=((0, 1), (1, 0))).swapaxes(0, 1)
+
+
+# Diagrams for T_1 contributions to CCSD T_2 equations.
+
+
+def add_d4a_t(u, t_1, o, v, out, np=None):
+    """Function for adding the D4a diagram
+
+        g(f, u, t) <- u^{ab}_{cj} t^{c}_{i} P(ij)
+
+    Number of FLOPS required: O(m^3, n^2)
+    """
+
+    if np is None:
+        import numpy as np
+
+    term = np.tensordot(u[v, v, v, o], t_1, axes=((2), (0))).transpose(
+        0, 1, 3, 2
+    )
+    out += term.swapaxes(2, 3)
+
+
+def add_d4b_t(u, t_1, o, v, out, np=None):
+    """ Function for adding the D4b diagram
+
+        g(f, u, t) <-  (-1) * u^{kb}_{ij} t^{a}_{k} P(ab)
+
+    Number of FLOPS required: O(m^2 n^3)
+    """
+
+    term = np.tensordot(u[o, v, o, o], t_1, axes=((0), (1))).transpose(
+        3, 0, 1, 2
+    )
+    out += -term.swapaxes(0, 1)
