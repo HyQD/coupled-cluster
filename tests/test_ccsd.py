@@ -126,7 +126,7 @@ def test_add_s4b_t(large_system_ccsd):
 
     out = np.zeros_like(t_1)
     add_s4b_t(u, t_1, t_2, o, v, out, np=np)
-    out_e = -0.5 * np.einsum("klcd, ak, cdil->qi", u[o, o, v, v], t_1, t_2)
+    out_e = -0.5 * np.einsum("klcd, ak, cdil->ai", u[o, o, v, v], t_1, t_2)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
