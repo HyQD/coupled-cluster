@@ -11,6 +11,7 @@ from coupled_cluster.ccsd.rhs_t import (
     add_s3b_t,
     add_s3c_t,
     add_s4a_t,
+    add_s4b_t
 )
 
 
@@ -113,6 +114,19 @@ def test_add_s4a_t(large_system_ccsd):
     out = np.zeros_like(t_1)
     add_s4a_t(u, t_1, t_2, o, v, out, np=np)
     out_e = -0.5 * np.einsum("klcd, ci, adkl->ai", u[o, o, v, v], t_1, t_2)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_s4b_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o 
+    v = cs.v
+
+    out = np.zeros_like(t_1)
+    add_s4b_t(u, t_1, t_2, o, v, out, np=np)
+    out_e = -0.5 * np.einsum("klcd, ak, cdil->qi", u[o, o, v, v], t_1, t_2)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 

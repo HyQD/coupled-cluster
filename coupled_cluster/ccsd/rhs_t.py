@@ -125,7 +125,7 @@ def add_s4a_t(u, t_1, t_2, o, v, out, np=None):
 
         g(f, u, t) <- -0.5 * u^{kl}_{cd} t^{c}_{i} t^{ad}_{kl}
 
-    Number of FLOPS required: O(m^2 n^3)
+    Number of FLOPS required: O(m^3 n^3)
     """
 
     if np is None:
@@ -133,3 +133,17 @@ def add_s4a_t(u, t_1, t_2, o, v, out, np=None):
 
     W_kldi = -0.5 * np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))
     out += np.tensordot(W_kldi, t_2, axes=((0, 1, 2), (2, 3, 1))).swapaxes(0, 1)
+
+def add_s4b_t(u, t_1, t_2, o, v, out, np=None):
+    """Function for adding the S4b diagram
+
+        g(f, u, t) <- -0.5 * u^{kl}_{cd} t^{a}_{k} t^{cd}_{il}
+
+    Number of FLOPS required: O(m^3 n^3)
+    """
+
+    if np is None:
+        import numpy as np
+
+    W_lcda = -0.5 * np.tensordot(u[o, o, v, v], t_1, axes=((0), (1)))
+    out += np.tensordot(W_lcda, t_2, axes=((1, 2, 0), (0, 1, 3)))
