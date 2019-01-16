@@ -134,6 +134,7 @@ def add_s4a_t(u, t_1, t_2, o, v, out, np=None):
     W_kldi = -0.5 * np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))
     out += np.tensordot(W_kldi, t_2, axes=((0, 1, 2), (2, 3, 1))).swapaxes(0, 1)
 
+
 def add_s4b_t(u, t_1, t_2, o, v, out, np=None):
     """Function for adding the S4b diagram
 
@@ -147,3 +148,79 @@ def add_s4b_t(u, t_1, t_2, o, v, out, np=None):
 
     W_lcda = -0.5 * np.tensordot(u[o, o, v, v], t_1, axes=((0), (1)))
     out += np.tensordot(W_lcda, t_2, axes=((1, 2, 0), (0, 1, 3)))
+
+
+def add_s4c_t(u, t_1, t_2, o, v, out, np=None):
+    """Function for adding the S4c diagram
+
+        g(f, u, t) <- u^{kl}_{cd} t^{c}_{k} t^{da}_{li}
+
+    Number of FLOPS required: O(m^3 n^3)
+    """
+
+    if np is None:
+        import numpy as np
+
+    temp_ld = np.tensordot(u[o, o, v, v], t_1, axes=((0, 2), (1, 0)))
+    out += np.tensordot(temp_ld, t_2, axes=((0, 1), (2, 0)))
+
+
+def add_s5a_t(f, t_1, o, v, out, np=None):
+    """Function for adding the S5a diagram
+
+        g(f, u, t) <- f^{k}_{c} t^{c}_{i} t^{a}_{k}
+
+    Number of FLOPS required: O(m^2, n^2)
+    """
+
+    if np is None:
+        import numpy as np
+
+    temp_ki = -np.tensordot(f[o, v], t_1, axes=((1), (0)))
+    out += np.tensordot(temp_ki, t_1, axes=((0), (1))).swapaxes(0, 1)
+
+
+def add_s5b_t(u, t_1, o, v, out, np=None):
+    """Function for adding the S5b diagram
+
+        g(f, u, t) <- u^{ak}_{cd} t^{c}_{i} t^{d}_{k}
+
+    Number of FLOPS required: O(m^2 n^3)
+    """
+
+    if np is None:
+        import numpy as np
+
+    W_akdi = np.tensordot(u[v, o, v, v], t_1, axes=((2), (0)))
+    out += np.tensordot(W_akdi, t_1, axes=((1, 2), (1, 0)))
+
+
+def add_s5c_t(u, t_1, o, v, out, np=None):
+    """Function for adding the S5c diagram
+
+        g(f, u, t) <- - u^{kl}_{ic} t^{a}_{k} t^{c}_{l}
+
+    Number of FLOPS required: O(m^2, n^3)
+    """
+
+    if np is None:
+        import numpy as np
+
+    W_lica = -np.tensordot(u[o, o, o, v], t_1, axes=((0), (1)))
+    out += np.tensordot(W_lica, t_1, axes=((0, 2), (1, 0))).swapaxes(0, 1)
+
+
+def add_s6_t(u, t_1, o, v, out, np=None):
+    """Function for adding the S6 diagram
+
+        g(f, u, t) <- - u ^{kl}_{cd} t^{c}_{i} t^{a}_{k} t^{d}_{l}
+
+    Number of FLOPS required: O(m^3 n^3)
+    """
+
+    if np is None:
+        import numpy as np
+
+    W_kldi = -np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))
+    W_ldia = np.tensordot(W_kldi, t_1, axes=((0), (1)))
+    out += np.tensordot(W_ldia, t_1, axes=((0, 1), (1, 0))).swapaxes(0, 1)
