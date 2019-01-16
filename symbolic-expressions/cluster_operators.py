@@ -1,8 +1,12 @@
+import collections
 from sympy.physics.secondquant import AntiSymmetricTensor, NO, Fd, F
 from sympy import symbols, Dummy, Rational
 
 
 def get_clusters(cc_functions, *args, **kwargs):
+    if not isinstance(cc_functions, collections.Iterable):
+        cc_functions = [cc_functions]
+
     return sum([func(*args, **kwargs) for func in cc_functions])
 
 
