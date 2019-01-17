@@ -34,6 +34,18 @@ def get_t_2_operator(ast_symb="t"):
     return T_2
 
 
+def get_t_3_operator(ast_symb="t"):
+    i, j, k = symbols("i, j, k", below_fermi=True, cls=Dummy)
+    a, b, c = symbols("a, b, c", above_fermi=True, cls=Dummy)
+
+    t_abcijk = AntiSymmetricTensor(ast_symb, (a, b, c), (i, j, k))
+    c_abcijk = NO(Fd(a) * Fd(b) * Fd(c) * F(k) * F(j) * F(i))
+
+    T_3 = Rational(1, 36) * t_abcijk * c_abcijk
+
+    return T_3
+
+
 def get_l_1_operator(ast_symb="l"):
     i = symbols("i", below_fermi=True, cls=Dummy)
     a = symbols("a", above_fermi=True, cls=Dummy)
@@ -56,3 +68,15 @@ def get_l_2_operator(ast_symb="l"):
     L_2 = Rational(1, 4) * l_ijab * c_ijab
 
     return L_2
+
+
+def get_l_3_operator(ast_symb="l"):
+    i, j, k = symbols("i, j, k", below_fermi=True, cls=Dummy)
+    a, b, c = symbols("a, b, c", above_fermi=True, cls=Dummy)
+
+    l_ijkabc = AntiSymmetricTensor(ast_symb, (i, j, k), (a, b, c))
+    c_ijkabc = NO(Fd(i) * Fd(j) * Fd(k) * F(c) * F(b) * F(a))
+
+    L_3 = Rational(1, 36) * l_ijkabc * c_ijkabc
+
+    return L_3
