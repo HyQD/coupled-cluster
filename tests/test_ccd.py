@@ -104,7 +104,7 @@ def test_add_d2e_t(large_system_ccd):
 
     out = np.zeros_like(t)
     add_d2e_t(u, t, o, v, out, np=np)
-    out_e = np.einsum("acik, bkjc -> abij", t, u[v, o, o, v])
+    out_e = np.einsum("acik, kbcj -> abij", t, u[o, v, v, o])
     out_e -= out_e.swapaxes(0, 1)
     out_e -= out_e.swapaxes(2, 3)
 

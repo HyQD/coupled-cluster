@@ -95,14 +95,14 @@ def add_d2d_t(u, t, o, v, out, np=None):
 def add_d2e_t(u, t, o, v, out, np=None):
     """Function adding the D2e diagram
 
-        g(f, u, t) <- t^{ac}_{ik} u^{bk}_{jc} P(ab) P(ij)
+        g(f, u, t) <- t^{ac}_{ik} u^{kb}_{cj} P(ab) P(ij)
 
     Number of FLOPS required: O(m^3 n^3).
     """
     if np is None:
         import numpy as np
 
-    term = np.tensordot(t, u[v, o, o, v], axes=((1, 3), (3, 1))).transpose(
+    term = np.tensordot(t, u[o, v, v, o], axes=((1, 3), (2, 0))).transpose(
         0, 2, 1, 3
     )
     term -= term.swapaxes(0, 1)
