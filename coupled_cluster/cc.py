@@ -71,7 +71,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self._set_l(l_i)
         self._set_t(t_i)
 
-        self.system.evolve_in_time(time)
+        self.h = self.system.h_t(time)
+        self.u = self.system.u_t(time)
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
 
         t_new = [
             -1j * t_x for t_x in self._compute_t_amplitudes(0, iterative=False)
