@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-import numba
 
 from quantum_systems import TwoDimensionalHarmonicOscillator, CustomSystem
 
@@ -14,15 +13,10 @@ radius = 4
 num_grid_points = 101
 
 
-@numba.njit(cache=True)
-def anti_symmetrize_t(t, m, n):
-    for a in range(m):
-        for b in range(a, m):
-            for i in range(n):
-                for j in range(i, n):
-                    t[a, b, j, i] = -t[a, b, i, j]
-                    t[b, a, i, j] = -t[a, b, i, j]
-                    t[b, a, j, i] = t[a, b, i, j]
+def get_random_doubles_amplitude(m, n):
+    t = np.random.random((m, m, n, n)) + 1j * np.random.random((m, m, n, n))
+    t = t + t.transpose(1, 0, 3, 2)
+    t = t - t.transpose(0, 1, 3, 2)
 
     return t
 
@@ -52,18 +46,17 @@ def large_system_ccd(_n_large):
     l = l_large
     m = l - n
 
+    u = np.random.random((l, l, l, l))
+    # Make u symmetric
+    u = u + u.transpose(1, 0, 3, 2)
+
     cs = CustomSystem(n, l)
     cs.set_h(np.random.random((l, l)), add_spin=True)
-    cs.set_u(
-        np.random.random((l, l, l, l)), add_spin=True, anti_symmetrize=True
-    )
+    cs.set_u(u, add_spin=True, anti_symmetrize=True)
     cs.f = cs.construct_fock_matrix(cs.h, cs.u)
 
-    t = np.random.random((m, m, n, n)).astype(np.complex128)
-    t = anti_symmetrize_t(t, m, n)
-
-    l = np.random.random((n, n, m, m)).astype(np.complex128)
-    l = anti_symmetrize_t(l, n, m)
+    t = get_random_doubles_amplitude(m, n)
+    l = get_random_doubles_amplitude(n, m)
 
     return t, l, cs
 
@@ -74,20 +67,20 @@ def large_system_ccsd(_n_large):
     l = l_large
     m = l - n
 
+    u = np.random.random((l, l, l, l))
+    # Make u symmetric
+    u = u + u.transpose(1, 0, 3, 2)
+
     cs = CustomSystem(n, l)
     cs.set_h(np.random.random((l, l)), add_spin=True)
-    cs.set_u(
-        np.random.random((l, l, l, l)), add_spin=True, anti_symmetrize=True
-    )
+    cs.set_u(u, add_spin=True, anti_symmetrize=True)
     cs.f = cs.construct_fock_matrix(cs.h, cs.u)
 
     t_1 = np.random.random((m, n)).astype(np.complex128)
-    t_2 = np.random.random((m, m, n, n)).astype(np.complex128)
-    t_2 = anti_symmetrize_t(t_2, m, n)
+    t_2 = get_random_doubles_amplitude(m, n)
 
     l_1 = np.random.random((n, m)).astype(np.complex128)
-    l_2 = np.random.random((n, n, m, m)).astype(np.complex128)
-    l_2 = anti_symmetrize_t(l_2, n, m)
+    l_2 = get_random_doubles_amplitude(n, m)
 
     return t_1, t_2, l_1, l_2, cs
 
