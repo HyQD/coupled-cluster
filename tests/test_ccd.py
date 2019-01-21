@@ -12,6 +12,7 @@ from coupled_cluster.ccd.rhs_t import (
     add_d3b_t,
     add_d3c_t,
     add_d3d_t,
+    compute_t_2_amplitudes,
 )
 from coupled_cluster.ccd.rhs_l import (
     add_d1_l,
@@ -172,6 +173,103 @@ def test_add_d3d_t(large_system_ccd):
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_full_t_amplitudes(large_system_ccd):
+    t, l, large_system_ccd = large_system_ccd
+    t = t.real
+    T2 = t.copy().transpose(2, 3, 0, 1)
+    F = large_system_ccd.f
+    W = large_system_ccd.u
+    o = large_system_ccd.o
+    v = large_system_ccd.v
+
+    np.testing.assert_allclose(t, -t.transpose(1, 0, 2, 3), atol=1e-10)
+    np.testing.assert_allclose(t, -t.transpose(0, 1, 3, 2), atol=1e-10)
+    np.testing.assert_allclose(t, t.transpose(1, 0, 3, 2), atol=1e-10)
+
+    # d1
+    result = -1.0 * np.einsum(
+        "BAIJ->IJAB", W[v, v, o, o], optimize=["einsum_path", (0,)]
+    )
+
+    # d2a
+    temp = np.einsum(
+        "IJAc,Bc->IJAB", T2, F[v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+
+    # d2b
+    temp = np.einsum(
+        "IkBA,kJ->IJAB", T2, F[o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+
+    # d2c
+    result += -0.5 * np.einsum(
+        "IJdc,BAdc->IJAB", T2, W[v, v, v, v], optimize=["einsum_path", (0, 1)]
+    )
+
+    # d2d
+    result += -0.5 * np.einsum(
+        "lkBA,lkIJ->IJAB", T2, W[o, o, o, o], optimize=["einsum_path", (0, 1)]
+    )
+
+    # d2e
+    temp = np.einsum(
+        "IkAc,BkJc->IJAB", T2, W[v, o, o, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+
+    # d3a
+    result += -0.25 * np.einsum(
+        "lkBA,IJdc,lkdc->IJAB",
+        T2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+
+    # d3b
+    temp = np.einsum(
+        "IkAc,JlBd,lkdc->IJAB",
+        T2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+
+    # d3c
+    temp = 0.5 * np.einsum(
+        "IlBA,Jkdc,lkdc->IJAB",
+        T2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+
+    # d3d
+    temp = 0.5 * np.einsum(
+        "IJAc,lkBd,lkdc->IJAB",
+        T2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+
+    out = compute_t_2_amplitudes(F, W, t, o, v, np=np)
+    np.testing.assert_allclose(out, result.transpose(2, 3, 0, 1), atol=1e-10)
 
 
 def test_add_d1_l(large_system_ccd):
