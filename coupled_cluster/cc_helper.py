@@ -59,3 +59,7 @@ class AmplitudeContainer:
     def __iter__(self):
         yield self._t
         yield self._l
+
+    def unpack(self):
+        yield from self._t
+        yield from self._l
