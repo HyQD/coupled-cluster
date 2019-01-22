@@ -21,7 +21,7 @@ def compute_ground_state_energy_correction(u, t, o, v, np=None):
     )
 
 
-def compute_time_dependent_energy_correction(f, u, t, l, o, v, np=None):
+def compute_time_dependent_energy(f, u, t, l, o, v, np=None):
     if np is None:
         import numpy as np
 
