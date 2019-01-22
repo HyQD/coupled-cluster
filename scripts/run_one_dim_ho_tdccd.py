@@ -1,6 +1,5 @@
 from quantum_systems import OneDimensionalHarmonicOscillator
 from quantum_systems.time_evolution_operators import LaserField
-from coupled_cluster.cc_helper import AmplitudeContainer
 from coupled_cluster.ccd import CoupledClusterDoubles
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
@@ -63,28 +62,22 @@ tdccd = TimeDependentCoupledCluster(
     compute_t_2_amplitudes, compute_l_2_amplitudes, odho, np=np
 )
 
-u_0 = AmplitudeContainer(l=ccd._get_l_copy(), t=ccd._get_t_copy())
-# l_0, t_0 = u_0
-# l_0 = l_0[0]
-# t_0 = t_0[0]
+u_0 = ccd.get_amplitudes()
 psi_overlap = np.zeros(num_timesteps)
 time = np.zeros(num_timesteps)
 
-# psi_overlap[0] = compute_time_dependent_overlap(t_0, t_0, l_0, l_0, np=np).real
-psi_overlap[0] = compute_time_dependent_overlap(*u_0, *u_0, np=np).real
+psi_overlap[0] = compute_time_dependent_overlap(
+    *u_0.unpack(), *u_0.unpack(), np=np
+).real
 current_time = t_start
 time[0] = current_time
 
 u_new = u_0
 for i in tqdm.tqdm(range(1, num_timesteps)):
     u_new = tdccd.rk4_step(u_new, current_time, dt)
-    l_new, t_new = u_new
-    l_new = l_new[0]
-    t_new = t_new[0]
-    psi_overlap[i] = compute_time_dependent_overlap(*u_0, *u_new, np=np)
-    # psi_overlap[i] = compute_time_dependent_overlap(
-    #    t_0, t_new, l_0, l_new, np=np
-    # ).real
+    psi_overlap[i] = compute_time_dependent_overlap(
+        *u_0.unpack(), *u_new.unpack(), np=np
+    )
     current_time += dt
     time[i] = current_time
 
