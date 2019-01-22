@@ -73,6 +73,8 @@ class CoupledClusterDoubles(CoupledCluster):
         np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
 
     def _compute_l_amplitudes(self, theta, iterative=True):
+        f = self.off_diag_f if iterative else self.f
+
         self.rhs_l_2.fill(0)
         compute_l_2_amplitudes(
             self.f,
