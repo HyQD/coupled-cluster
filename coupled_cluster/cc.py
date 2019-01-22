@@ -3,6 +3,8 @@ import numpy as np
 import tqdm
 import warnings
 
+from coupled_cluster.cc_helper import AmplitudeContainer
+
 
 class CoupledCluster(metaclass=abc.ABCMeta):
     """Abstract base class defining the skeleton of a Coupled Cluster solver
@@ -21,6 +23,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.off_diag_f = self._create_off_diagonal_matrix(self.f)
 
         self.o, self.v = self.system.o, self.system.v
+
+    def get_amplitudes(self):
+        return AmplitudeContainer(t=self._get_t_copy(), l=self._get_l_copy())
 
     def _create_off_diagonal_matrix(self, matrix):
         off_diag = np.zeros_like(matrix)
