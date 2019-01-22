@@ -54,8 +54,8 @@ plt.plot(odho.grid, rho)
 plt.show()
 
 t_start = 0
-t_end = 3
-num_timesteps = 3001
+t_end = 10
+num_timesteps = 10001
 dt = (t_end - t_start) / (num_timesteps - 1)
 print(f"dt = {dt}")
 
