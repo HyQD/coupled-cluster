@@ -613,7 +613,9 @@ def test_compute_time_dependent_overlap():
     tilde_0 += 0.25 * np.einsum("ijab, abij ->", l, t_t)
     tilde_0 -= 0.25 * np.einsum("ijab, abij ->", l, t)
 
-    assert abs(tilde_t * tilde_0 - overlap) < 1e-10
+    overlap_e = tilde_t * tilde_0
+
+    assert abs(overlap_e - overlap) < 1e-8
 
 
 def test_reference_energy(tdho, ref_energy):
