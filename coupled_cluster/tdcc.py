@@ -3,12 +3,15 @@ from coupled_cluster.cc_helper import AmplitudeContainer
 
 
 class TimeDependentCoupledCluster:
-    def __init__(self, rhs_t_func, rhs_l_func, system, np=None):
+    def __init__(self, rhs_t_func, rhs_l_func, energy_func, system, np=None):
         if np is None:
             import numpy as np
 
         self.np = np
         self.system = system
+        self.h = self.system.h
+        self.u = self.system.u
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
 
         if not isinstance(rhs_t_func, collections.Iterable):
             rhs_t_func = [rhs_t_func]
@@ -18,23 +21,34 @@ class TimeDependentCoupledCluster:
 
         self.rhs_t_func = rhs_t_func
         self.rhs_l_func = rhs_l_func
+        self.energy_func = energy_func
+
+    def compute_time_dependent_energy(self, amplitudes):
+        return self.energy_func(
+            self.f,
+            self.u,
+            *amplitudes.unpack(),
+            self.system.o,
+            self.system.v,
+            np=self.np
+        )
 
     def rhs(self, prev_amp, current_time):
         o, v = self.system.o, self.system.v
 
-        h = self.system.h_t(current_time)
-        u = self.system.u_t(current_time)
-        f = self.system.construct_fock_matrix(h, u)
+        self.h = self.system.h_t(current_time)
+        self.u = self.system.u_t(current_time)
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
 
         t_old, l_old = prev_amp
 
         t_new = [
-            -1j * rhs_t_func(f, u, *t_old, o, v, np=self.np)
+            -1j * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_func
         ]
 
         l_new = [
-            1j * rhs_l_func(f, u, *t_old, *l_old, o, v, np=self.np)
+            1j * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
             for rhs_l_func in self.rhs_l_func
         ]
 
