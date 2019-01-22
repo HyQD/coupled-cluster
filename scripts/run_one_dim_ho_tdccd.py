@@ -64,13 +64,14 @@ tdccd = TimeDependentCoupledCluster(
 )
 
 u_0 = AmplitudeContainer(l=ccd._get_l_copy(), t=ccd._get_t_copy())
-l_0, t_0 = u_0
-l_0 = l_0[0]
-t_0 = t_0[0]
+# l_0, t_0 = u_0
+# l_0 = l_0[0]
+# t_0 = t_0[0]
 psi_overlap = np.zeros(num_timesteps)
 time = np.zeros(num_timesteps)
 
-psi_overlap[0] = compute_time_dependent_overlap(t_0, t_0, l_0, l_0, np=np).real
+# psi_overlap[0] = compute_time_dependent_overlap(t_0, t_0, l_0, l_0, np=np).real
+psi_overlap[0] = compute_time_dependent_overlap(*u_0, *u_0, np=np).real
 current_time = t_start
 time[0] = current_time
 
@@ -80,9 +81,10 @@ for i in tqdm.tqdm(range(1, num_timesteps)):
     l_new, t_new = u_new
     l_new = l_new[0]
     t_new = t_new[0]
-    psi_overlap[i] = compute_time_dependent_overlap(
-        t_0, t_new, l_0, l_new, np=np
-    ).real
+    psi_overlap[i] = compute_time_dependent_overlap(*u_0, *u_new, np=np)
+    # psi_overlap[i] = compute_time_dependent_overlap(
+    #    t_0, t_new, l_0, l_new, np=np
+    # ).real
     current_time += dt
     time[i] = current_time
 
