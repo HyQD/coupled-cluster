@@ -26,7 +26,7 @@ class TimeDependentCoupledCluster:
         u = self.system.u_t(current_time)
         f = self.system.construct_fock_matrix(h, u)
 
-        l_old, t_old = prev_amp
+        t_old, l_old = prev_amp
 
         t_new = [
             -1j * rhs_t_func(f, u, *t_old, o, v, np=self.np)
@@ -38,7 +38,7 @@ class TimeDependentCoupledCluster:
             for rhs_l_func in self.rhs_l_func
         ]
 
-        return AmplitudeContainer(l=l_new, t=t_new)
+        return AmplitudeContainer(t=t_new, l=l_new)
 
     def rk4_step(self, u, t, dt):
         f = self.rhs
