@@ -15,6 +15,10 @@ def compute_reference_energy(f, u, o, v, np=None):
     )
 
 
+def compute_spin_reduced_one_body_density_matrix(rho_qp):
+    return rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
+
+
 class CoupledCluster(metaclass=abc.ABCMeta):
     """Abstract base class defining the skeleton of a Coupled Cluster solver
     class.
@@ -158,7 +162,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             warn = warn.format(np.trace(rho_qp), self.n)
             warnings.warn(warn)
 
-        rho_qp_reduced = rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
+        rho_qp_reduced = compute_spin_reduced_one_body_density_matrix(rho_qp)
         rho = np.zeros(self.system.spf.shape[1:], dtype=self.system.spf.dtype)
         spf_slice = slice(0, self.system.spf.shape[0])
 
