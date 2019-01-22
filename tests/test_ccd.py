@@ -313,13 +313,13 @@ def test_add_d2b_l(large_system_ccd):
 
 def test_add_d2c_l(large_system_ccd):
     t, l, large_system_ccd = large_system_ccd
-    u = large_system_ccd.u
+    f = large_system_ccd.f
     o = large_system_ccd.o
     v = large_system_ccd.v
 
     out = np.zeros_like(l)
-    add_d2c_l(u, l, o, v, out, np=np)
-    out_e = -np.einsum("ijbc, ckak -> ijab", l, u[v, o, v, o])
+    add_d2c_l(f, l, o, v, out, np=np)
+    out_e = -np.einsum("ijbc, ca -> ijab", l, f[v, v])
     out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
@@ -327,13 +327,13 @@ def test_add_d2c_l(large_system_ccd):
 
 def test_add_d2d_l(large_system_ccd):
     t, l, large_system_ccd = large_system_ccd
-    u = large_system_ccd.u
+    f = large_system_ccd.f
     o = large_system_ccd.o
     v = large_system_ccd.v
 
     out = np.zeros_like(l)
-    add_d2d_l(u, l, o, v, out, np=np)
-    out_e = np.einsum("jkab, ilkl -> ijab", l, u[o, o, o, o])
+    add_d2d_l(f, l, o, v, out, np=np)
+    out_e = np.einsum("jkab, ik -> ijab", l, f[o, o])
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
