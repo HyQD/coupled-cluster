@@ -7,6 +7,7 @@ from coupled_cluster.ccd.density_matrices import compute_one_body_density_matrix
 from coupled_cluster.ccd.time_dependent_overlap import (
     compute_time_dependent_overlap,
 )
+from coupled_cluster.ccd.energies import compute_time_dependent_energy
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 
 import matplotlib.pyplot as plt
@@ -20,7 +21,9 @@ class LaserPulse:
         self.laser_strength = laser_strength
 
     def __call__(self, t):
-        return self.laser_strength * np.sin(self.laser_frequency * t)
+        if t < 100:
+            return self.laser_strength * np.sin(self.laser_frequency * t)
+        return 0
 
 
 n = 2
@@ -54,18 +57,24 @@ plt.show()
 
 t_start = 0
 t_end = 10
-num_timesteps = 10001
+num_timesteps = 1001
 dt = (t_end - t_start) / (num_timesteps - 1)
 print(f"dt = {dt}")
 
 tdccd = TimeDependentCoupledCluster(
-    compute_t_2_amplitudes, compute_l_2_amplitudes, odho, np=np
+    compute_t_2_amplitudes,
+    compute_l_2_amplitudes,
+    compute_time_dependent_energy,
+    odho,
+    np=np,
 )
 
 u_0 = ccd.get_amplitudes()
 psi_overlap = np.zeros(num_timesteps)
+td_energies = np.zeros(num_timesteps)
 time = np.zeros(num_timesteps)
 
+td_energies[0] = tdccd.compute_time_dependent_energy(u_0)
 psi_overlap[0] = compute_time_dependent_overlap(
     *u_0.unpack(), *u_0.unpack(), np=np
 ).real
@@ -75,11 +84,19 @@ time[0] = current_time
 u_new = u_0
 for i in tqdm.tqdm(range(1, num_timesteps)):
     u_new = tdccd.rk4_step(u_new, current_time, dt)
+
+    td_energies[i] = tdccd.compute_time_dependent_energy(u_new)
     psi_overlap[i] = compute_time_dependent_overlap(
         *u_0.unpack(), *u_new.unpack(), np=np
-    )
+    ).real
+
     current_time += dt
     time[i] = current_time
 
+plt.figure()
 plt.plot(time, psi_overlap)
+plt.title("Time-dependent overlap with ground state")
+plt.figure()
+plt.plot(time, td_energies)
+plt.title("Time-dependent energy")
 plt.show()
