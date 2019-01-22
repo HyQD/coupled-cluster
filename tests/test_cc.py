@@ -13,10 +13,16 @@ def test_reference_energy():
     u = u + u.transpose(1, 0, 3, 2)
     u = u - u.transpose(0, 1, 3, 2)
 
-    e_ref = compute_reference_energy(h, u, o, v, np=np)
+    f = h + np.trace(u[:, o, :, o], axis1=1, axis2=3)
+
+    e_ref = compute_reference_energy(f, u, o, v, np=np)
 
     e_test = np.einsum("ii ->", h[o, o]) + 0.5 * np.einsum(
         "ijij ->", u[o, o, o, o]
     )
+    e_test_f = np.einsum("ii ->", f[o, o]) - 0.5 * np.einsum(
+        "ijij ->", u[o, o, o, o]
+    )
 
     assert abs(e_ref - e_test) < 1e-10
+    assert abs(e_ref - e_test_f) < 1e-10

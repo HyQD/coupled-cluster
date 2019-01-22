@@ -6,6 +6,15 @@ import warnings
 from coupled_cluster.cc_helper import AmplitudeContainer
 
 
+def compute_reference_energy(f, u, o, v, np=None):
+    if np is None:
+        import numpy as np
+
+    return np.trace(f[o, o]) - 0.5 * np.trace(
+        np.trace(u[o, o, o, o], axis1=1, axis2=3)
+    )
+
+
 class CoupledCluster(metaclass=abc.ABCMeta):
     """Abstract base class defining the skeleton of a Coupled Cluster solver
     class.
@@ -163,12 +172,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         return rho
 
     def compute_reference_energy(self):
-        h, u, o, v = self.h, self.u, self.o, self.v
-        e_ref = np.einsum("ii ->", h[o, o]) + 0.5 * np.einsum(
-            "ijij ->", u[o, o, o, o]
-        )
-
-        return e_ref
+        return compute_reference_energy(self.f, self.u, self.o, self.v, np=np)
 
     def compute_l_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
