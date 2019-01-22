@@ -46,12 +46,13 @@ def large_system_ccd(_n_large):
     l = l_large
     m = l - n
 
-    u = np.random.random((l, l, l, l))
+    h = np.random.random((l, l)) + 1j * np.random.random((l, l))
+    u = np.random.random((l, l, l, l)) + 1j * np.random.random((l, l, l, l))
     # Make u symmetric
     u = u + u.transpose(1, 0, 3, 2)
 
     cs = CustomSystem(n, l)
-    cs.set_h(np.random.random((l, l)), add_spin=True)
+    cs.set_h(h, add_spin=True)
     cs.set_u(u, add_spin=True, anti_symmetrize=True)
     cs.f = cs.construct_fock_matrix(cs.h, cs.u)
 
@@ -67,19 +68,20 @@ def large_system_ccsd(_n_large):
     l = l_large
     m = l - n
 
-    u = np.random.random((l, l, l, l))
+    h = np.random.random((l, l)) + 1j * np.random.random((l, l))
+    u = np.random.random((l, l, l, l)) + 1j * np.random.random((l, l, l, l))
     # Make u symmetric
     u = u + u.transpose(1, 0, 3, 2)
 
     cs = CustomSystem(n, l)
-    cs.set_h(np.random.random((l, l)), add_spin=True)
+    cs.set_h(h, add_spin=True)
     cs.set_u(u, add_spin=True, anti_symmetrize=True)
     cs.f = cs.construct_fock_matrix(cs.h, cs.u)
 
-    t_1 = np.random.random((m, n)).astype(np.complex128)
+    t_1 = np.random.random((m, n)) + 1j * np.random.random((m, n))
     t_2 = get_random_doubles_amplitude(m, n)
 
-    l_1 = np.random.random((n, m)).astype(np.complex128)
+    l_1 = np.random.random((n, m)) + 1j * np.random.random((n, m))
     l_2 = get_random_doubles_amplitude(n, m)
 
     return t_1, t_2, l_1, l_2, cs

@@ -28,6 +28,7 @@ from coupled_cluster.ccd.rhs_l import (
     add_d3e_l,
     add_d3f_l,
     add_d3g_l,
+    compute_l_2_amplitudes,
 )
 
 
@@ -177,7 +178,6 @@ def test_add_d3d_t(large_system_ccd):
 
 def test_full_t_amplitudes(large_system_ccd):
     t, l, large_system_ccd = large_system_ccd
-    t = t.real
     T2 = t.copy().transpose(2, 3, 0, 1)
     F = large_system_ccd.f
     W = large_system_ccd.u
@@ -463,6 +463,132 @@ def test_add_d3g_l(large_system_ccd):
     out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_full_l_amplitudes(large_system_ccd):
+    t, l, large_system_ccd = large_system_ccd
+    T2 = t.copy().transpose(2, 3, 0, 1)
+    L2 = l.copy()
+    F = large_system_ccd.f
+    W = large_system_ccd.u
+    o = large_system_ccd.o
+    v = large_system_ccd.v
+
+    # d1
+    result = -1.0 * np.einsum(
+        "IJBA->IJAB", W[o, o, v, v], optimize=["einsum_path", (0,)]
+    )
+
+    # d2a
+    result += -0.5 * np.einsum(
+        "lkBA,IJlk->IJAB", L2, W[o, o, o, o], optimize=["einsum_path", (0, 1)]
+    )
+
+    # d2b
+    result += -0.5 * np.einsum(
+        "IJdc,dcBA->IJAB", L2, W[v, v, v, v], optimize=["einsum_path", (0, 1)]
+    )
+
+    # d2c
+    temp = np.einsum(
+        "IJAc,cB->IJAB", L2, F[v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+
+    # d2d
+    temp = np.einsum(
+        "IkBA,Jk->IJAB", L2, F[o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+
+    # d2e
+    temp = np.einsum(
+        "IkAc,JcBk->IJAB", L2, W[o, v, v, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+
+    # d3a
+    temp = 0.5 * np.einsum(
+        "IJAc,lkdc,lkBd->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+
+    # d3b
+    result += -0.25 * np.einsum(
+        "IJdc,lkdc,lkBA->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+
+    # d3c
+    temp = -0.5 * np.einsum(
+        "IkBA,lkdc,Jldc->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+
+    # d3d
+    temp = np.einsum(
+        "IkAc,lkdc,JlBd->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+
+    # d3e
+    temp = -0.5 * np.einsum(
+        "Ikdc,lkdc,JlBA->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+
+    # d3f
+    result += -0.25 * np.einsum(
+        "lkBA,lkdc,IJdc->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+
+    # d3g
+    temp = 0.5 * np.einsum(
+        "lkAc,lkdc,IJBd->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+
+    out = compute_l_2_amplitudes(F, W, t, l, o, v, np=np)
+    np.testing.assert_allclose(out, result, atol=1e-10)
 
 
 def test_reference_energy(tdho, ref_energy):
