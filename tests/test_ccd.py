@@ -30,6 +30,9 @@ from coupled_cluster.ccd.rhs_l import (
     add_d3g_l,
     compute_l_2_amplitudes,
 )
+from coupled_cluster.ccd.time_dependent_overlap import (
+    compute_time_dependent_overlap,
+)
 
 
 def test_add_d1_t(large_system_ccd):
@@ -589,6 +592,28 @@ def test_full_l_amplitudes(large_system_ccd):
 
     out = compute_l_2_amplitudes(F, W, t, l, o, v, np=np)
     np.testing.assert_allclose(out, result, atol=1e-10)
+
+
+def test_compute_time_dependent_overlap():
+    n = 10
+    m = 20
+
+    t = np.random.random((m, m, n, n)) + 1j * np.random.random((m, m, n, n))
+    t_t = np.random.random((m, m, n, n)) + 1j * np.random.random((m, m, n, n))
+    l = np.random.random((n, n, m, m)) + 1j * np.random.random((n, n, m, m))
+    l_t = np.random.random((n, n, m, m)) + 1j * np.random.random((n, n, m, m))
+
+    overlap = compute_time_dependent_overlap(t, l, t_t, l_t, np=np)
+
+    tilde_t = 1
+    tilde_t += 0.25 * np.einsum("ijab, abij ->", l_t, t)
+    tilde_t -= 0.25 * np.einsum("ijab, abij ->", l_t, t_t)
+
+    tilde_0 = 1
+    tilde_0 += 0.25 * np.einsum("ijab, abij ->", l, t_t)
+    tilde_0 -= 0.25 * np.einsum("ijab, abij ->", l, t)
+
+    assert abs(tilde_t * tilde_0 - overlap) < 1e-10
 
 
 def test_reference_energy(tdho, ref_energy):
