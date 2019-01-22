@@ -1,5 +1,6 @@
 import numpy as np
 from coupled_cluster.cc import CoupledCluster
+from coupled_cluster.ccd.energies import compute_ground_state_energy_correction
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
 from coupled_cluster.ccd.density_matrices import compute_one_body_density_matrix
@@ -53,9 +54,9 @@ class CoupledClusterDoubles(CoupledCluster):
         np.divide(self.rhs_l_2, self.d_l_2, out=self.l_2)
 
     def _compute_energy(self):
-        o, v = self.o, self.v
-
-        energy = 0.25 * np.einsum("abij, abij ->", self.u[v, v, o, o], self.t_2)
+        energy = compute_ground_state_energy_correction(
+            self.u, self.t_2, self.o, self.v, np=np
+        )
         energy += self.compute_reference_energy()
 
         return energy
