@@ -1,4 +1,4 @@
-def compute_time_dependent_overlap(t, t_t, l, l_t, np=None):
+def compute_time_dependent_overlap(l, t, l_t, t_t, np=None):
     """Compute the overlap between the time-evolved state and the ground state
     wavefunction using the bivariational view. That is, we compute
 
