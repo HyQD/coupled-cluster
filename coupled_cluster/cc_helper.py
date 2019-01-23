@@ -63,3 +63,16 @@ class AmplitudeContainer:
     def unpack(self):
         yield from self._t
         yield from self._l
+
+
+def compute_reference_energy(f, u, o, v, np=None):
+    if np is None:
+        import numpy as np
+
+    return np.trace(f[o, o]) - 0.5 * np.trace(
+        np.trace(u[o, o, o, o], axis1=1, axis2=3)
+    )
+
+
+def compute_spin_reduced_one_body_density_matrix(rho_qp):
+    return rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
