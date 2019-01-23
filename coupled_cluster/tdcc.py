@@ -1,13 +1,23 @@
 import collections
 from coupled_cluster.cc_helper import AmplitudeContainer
+from coupled_cluster.integrators import RungeKutta4
 
 
 class TimeDependentCoupledCluster:
-    def __init__(self, rhs_t_func, rhs_l_func, energy_func, system, np=None):
+    def __init__(
+        self,
+        rhs_t_func,
+        rhs_l_func,
+        energy_func,
+        system,
+        np=None,
+        integrator=RungeKutta4,
+    ):
         if np is None:
             import numpy as np
 
         self.np = np
+        self.integrator = integrator(self, np=self.np)
         self.system = system
         self.h = self.system.h
         self.u = self.system.u
@@ -53,3 +63,6 @@ class TimeDependentCoupledCluster:
         ]
 
         return AmplitudeContainer(t=t_new, l=l_new)
+
+    def step(self, u, t, dt):
+        return self.integrator.step(u, t, dt)
