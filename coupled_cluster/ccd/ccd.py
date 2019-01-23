@@ -77,7 +77,7 @@ class CoupledClusterDoubles(CoupledCluster):
 
         self.rhs_l_2.fill(0)
         compute_l_2_amplitudes(
-            self.f,
+            f,
             self.u,
             self.t_2,
             self.l_2,
