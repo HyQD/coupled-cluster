@@ -8,8 +8,12 @@ from coupled_cluster.cc import CoupledCluster
 
 
 class CoupledClusterSinglesDoubles(CoupledCluster):
-    def __init__(self, system, **kwargs):
+    def __init__(self, system, include_singles=True, **kwargs):
         super().__init__(system, **kwargs)
+
+        # Add option to run ccd instead of ccsd. This is mostly used for
+        # testing.
+        self.include_singles = include_singles
 
         n, m = self.n, self.m
 
@@ -93,16 +97,17 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def _compute_initial_guess(self):
         o, v = self.o, self.v
 
-        np.copyto(self.rhs_t_1, self.f[v, o])
-        np.copyto(self.rhs_t_2, self.u[v, v, o, o])
+        if self.include_singles:
+            np.copyto(self.rhs_t_1, self.f[v, o])
+            np.divide(self.rhs_t_1, self.d_1_t, out=self.t_1)
 
-        np.divide(self.rhs_t_1, self.d_1_t, out=self.t_1)
+            np.copyto(self.rhs_l_1, self.f[o, v])
+            np.divide(self.rhs_l_1, self.d_1_l, out=self.l_1)
+
+        np.copyto(self.rhs_t_2, self.u[v, v, o, o])
         np.divide(self.rhs_t_2, self.d_2_t, out=self.t_2)
 
-        np.copyto(self.rhs_l_1, self.f[o, v])
         np.copyto(self.rhs_l_2, self.u[o, o, v, v])
-
-        np.divide(self.rhs_l_1, self.d_1_l, out=self.l_1)
         np.divide(self.rhs_l_2, self.d_2_l, out=self.l_2)
 
     def _compute_time_evolution_probability(self):
@@ -214,16 +219,20 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self._compute_effective_amplitudes()
         self._compute_intermediates(iterative=iterative)
-        self._compute_ccsd_amplitude_s(iterative=iterative)
+
+        if self.include_singles:
+            self._compute_ccsd_amplitude_s(iterative=iterative)
+
         self._compute_ccsd_amplitude_d()
 
         if not iterative:
             return [self.rhs_t_1.copy(), self.rhs_t_2.copy()]
 
-        np.divide(self.rhs_t_1, self.d_1_t, out=self.rhs_t_1)
-        np.divide(self.rhs_t_2, self.d_2_t, out=self.rhs_t_2)
+        if self.include_singles:
+            np.divide(self.rhs_t_1, self.d_1_t, out=self.rhs_t_1)
+            np.add((1 - theta) * self.rhs_t_1, theta * self.t_1, out=self.t_1)
 
-        np.add((1 - theta) * self.rhs_t_1, theta * self.t_1, out=self.t_1)
+        np.divide(self.rhs_t_2, self.d_2_t, out=self.rhs_t_2)
         np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
 
         # Notify a change in t for recalculation of intermediates
@@ -238,16 +247,20 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self._compute_effective_three_body_intermediates()
         self._compute_lambda_intermediates()
-        self._compute_ccsd_lambda_amplitudes_s()
+
+        if self.include_singles:
+            self._compute_ccsd_lambda_amplitudes_s()
+
         self._compute_ccsd_lambda_amplitudes_d()
 
         if not iterative:
             return [self.rhs_l_1.copy(), self.rhs_l_2.copy()]
 
-        np.divide(self.rhs_l_1, self.d_1_l, out=self.rhs_l_1)
-        np.divide(self.rhs_l_2, self.d_2_l, out=self.rhs_l_2)
+        if self.include_singles:
+            np.divide(self.rhs_l_1, self.d_1_l, out=self.rhs_l_1)
+            np.add((1 - theta) * self.rhs_l_1, theta * self.l_1, out=self.l_1)
 
-        np.add((1 - theta) * self.rhs_l_1, theta * self.l_1, out=self.l_1)
+        np.divide(self.rhs_l_2, self.d_2_l, out=self.rhs_l_2)
         np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
 
     def _compute_effective_amplitudes(self):
