@@ -392,25 +392,50 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self.rhs_l_2.fill(0)
 
+        # d1
         self.rhs_l_2 += self.u[o, o, v, v]
 
+        # d2a and d3f
+        self.rhs_l_2 += 0.5 * np.tensordot(
+            self.W_hhhh_lambda, self.l_2, axes=((2, 3), (0, 1))
+        )
+
+        # d2b and d3b
+        self.rhs_l_2 += 0.5 * np.tensordot(
+            self.l_2, self.W_pppp_lambda, axes=((2, 3), (0, 1))
+        )
+
+        # d2c and d3a
         term = np.tensordot(self.l_2, self.F_pp_lambda, axes=((3), (0)))
         term -= term.swapaxes(2, 3)
         self.rhs_l_2 += term
 
+        # d2d and d3c
         term = np.einsum(
             "imab, jm -> ijab", self.l_2, self.F_hh_lambda, optimize=True
         )
         term -= term.swapaxes(0, 1)
         self.rhs_l_2 -= term
 
-        self.rhs_l_2 += 0.5 * np.tensordot(
-            self.W_hhhh_lambda, self.l_2, axes=((2, 3), (0, 1))
+        # d2e and d3d
+        term = np.einsum(
+            "imae, jebm -> ijab", self.l_2, self.W_hpph_lambda, optimize=True
         )
+        term -= term.swapaxes(0, 1)
+        term -= term.swapaxes(2, 3)
+        self.rhs_l_2 += term
 
-        self.rhs_l_2 += 0.5 * np.tensordot(
-            self.l_2, self.W_pppp_lambda, axes=((2, 3), (0, 1))
+        # d3e
+        term = np.einsum(
+            "imab, mj -> ijab", self.u[o, o, v, v], self.G_hh, optimize=True
         )
+        term -= term.swapaxes(0, 1)
+        self.rhs_l_2 -= term
+
+        # d3g
+        term = np.tensordot(self.u[o, o, v, v], self.G_pp, axes=((3), (1)))
+        term -= term.swapaxes(2, 3)
+        self.rhs_l_2 += term
 
         term = np.tensordot(self.l_1, self.W_phpp_lambda, axes=((1), (0)))
         term -= term.swapaxes(0, 1)
@@ -422,27 +447,10 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         term -= term.swapaxes(2, 3)
         self.rhs_l_2 -= term
 
-        term = np.einsum(
-            "imae, jebm -> ijab", self.l_2, self.W_hpph_lambda, optimize=True
-        )
-        term -= term.swapaxes(0, 1)
-        term -= term.swapaxes(2, 3)
-        self.rhs_l_2 += term
-
         term = np.einsum("ia, jb -> ijab", self.l_1, self.F_hp_lambda)
         term -= term.swapaxes(0, 1)
         term -= term.swapaxes(2, 3)
         self.rhs_l_2 += term
-
-        term = np.tensordot(self.u[o, o, v, v], self.G_pp, axes=((3), (1)))
-        term -= term.swapaxes(2, 3)
-        self.rhs_l_2 += term
-
-        term = np.einsum(
-            "imab, mj -> ijab", self.u[o, o, v, v], self.G_hh, optimize=True
-        )
-        term -= term.swapaxes(0, 1)
-        self.rhs_l_2 -= term
 
     def _compute_intermediates(self, iterative):
         o, v = self.o, self.v
