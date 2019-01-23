@@ -9,6 +9,7 @@ from coupled_cluster.ccd.time_dependent_overlap import (
 )
 from coupled_cluster.ccd.energies import compute_time_dependent_energy
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
+from coupled_cluster.integrators import RungeKutta4
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -68,6 +69,7 @@ tdccd = TimeDependentCoupledCluster(
     odho,
     np=np,
 )
+rk4 = RungeKutta4(tdccd, np=np)
 
 u_0 = ccd.get_amplitudes()
 psi_overlap = np.zeros(num_timesteps)
@@ -83,7 +85,7 @@ time[0] = current_time
 
 u_new = u_0
 for i in tqdm.tqdm(range(1, num_timesteps)):
-    u_new = tdccd.rk4_step(u_new, current_time, dt)
+    u_new = rk4.step(u_new, current_time, dt)
 
     td_energies[i] = tdccd.compute_time_dependent_energy(u_new)
     psi_overlap[i] = compute_time_dependent_overlap(
