@@ -70,6 +70,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self._compute_initial_guess()
 
         self.rho_qp = np.zeros((self.l, self.l), dtype=np.complex128)
+        self.changed_t = False
 
     def _get_t_copy(self):
         return [self.t_1.copy(), self.t_2.copy()]
@@ -225,7 +226,16 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np.add((1 - theta) * self.rhs_t_1, theta * self.t_1, out=self.t_1)
         np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
 
+        # Notify a change in t for recalculation of intermediates
+        self.changed_t = True
+
     def _compute_l_amplitudes(self, theta, iterative=True):
+        if self.changed_t:
+            # Make sure that we use updated intermediates for lambda
+            self._compute_effective_amplitudes()
+            self._compute_intermediates(iterative=iterative)
+            self.changed_t = False
+
         self._compute_effective_three_body_intermediates()
         self._compute_lambda_intermediates()
         self._compute_ccsd_lambda_amplitudes_s()
