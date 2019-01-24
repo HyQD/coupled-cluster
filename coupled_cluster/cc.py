@@ -16,7 +16,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     class.
     """
 
-    def __init__(self, system, verbose=False):
+    def __init__(self, system, verbose=False, np=None):
+        if np is None:
+            import numpy as np
+
+        self.np = np
+
         self.system = system
         self.verbose = verbose
 
@@ -191,6 +196,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
             l_list = new_l_list
             iterations += 1
+
+    def compute_t_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
+        assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
 
     def compute_ground_state_energy(
         self, max_iterations=100, tol=1e-4, theta=0.1

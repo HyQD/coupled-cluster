@@ -1,37 +1,39 @@
+import abc
 import collections
 from coupled_cluster.cc_helper import AmplitudeContainer
 from coupled_cluster.integrators import RungeKutta4
 
 
-class TimeDependentCoupledCluster:
+class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     def __init__(
-        self,
-        rhs_t_func,
-        rhs_l_func,
-        energy_func,
-        system,
-        np=None,
-        integrator=RungeKutta4,
+        self, cc, system, np=None, integrator=RungeKutta4, **cc_kwargs
     ):
         if np is None:
             import numpy as np
 
         self.np = np
-        self.integrator = integrator(self, np=self.np)
+
+        if not "np" in cc_kwargs:
+            cc_kwargs["np"] = self.np
+
+        # Initialize ground state solver
+        self.cc = cc(system, **cc_kwargs)
         self.system = system
-        self.h = self.system.h
-        self.u = self.system.u
-        self.f = self.system.construct_fock_matrix(self.h, self.u)
+        self.integrator = integrator(self, np=self.np)
 
-        if not isinstance(rhs_t_func, collections.Iterable):
-            rhs_t_func = [rhs_t_func]
+        # Inherit functions from ground state solver
+        self.compute_ground_state_energy = self.cc.compute_ground_state_energy
+        self.compute_reference_energy = self.cc.compute_reference_energy
 
-        if not isinstance(rhs_l_func, collections.Iterable):
-            rhs_l_func = [rhs_l_func]
+    def compute_initial_state(
+        self, t_args=[], t_kwargs={}, l_args=[], l_kwargs={}
+    ):
+        # Compute ground state amplitudes
+        self.cc.compute_t_amplitudes(*t_args, **t_kwargs)
+        self.cc.compute_l_amplitudes(*l_args, **l_kwargs)
 
-        self.rhs_t_func = rhs_t_func
-        self.rhs_l_func = rhs_l_func
-        self.energy_func = energy_func
+        # Create copy of ground state amplitudes
+        self.u = self.cc.get_amplitudes()
 
     def compute_time_dependent_energy(self, amplitudes):
         return self.energy_func(
