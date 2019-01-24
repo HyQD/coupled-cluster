@@ -22,8 +22,16 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.integrator = integrator(self, np=self.np)
 
         # Inherit functions from ground state solver
-        self.compute_ground_state_energy = self.cc.compute_ground_state_energy
-        self.compute_reference_energy = self.cc.compute_reference_energy
+        self.compute_ground_state_energy = self.cc.compute_energy
+        self.compute_ground_state_reference_energy = (
+            self.cc.compute_reference_energy
+        )
+        self.compute_ground_state_particle_density = (
+            self.cc.compute_particle_density
+        )
+        self.compute_ground_state_one_body_density_matrix = (
+            self.cc.compute_one_body_density_matrix
+        )
 
     def compute_initial_state(
         self, t_args=[], t_kwargs={}, l_args=[], l_kwargs={}
