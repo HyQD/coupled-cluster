@@ -7,6 +7,7 @@ from coupled_cluster.cc_helper import (
     compute_reference_energy,
     compute_spin_reduced_one_body_density_matrix,
     remove_diagonal_in_matrix,
+    compute_particle_density,
 )
 
 
@@ -29,7 +30,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.m = self.system.m
 
         self.h, self.f, self.u = self.system.h, self.system.f, self.system.u
-        self.off_diag_f = self._remove_diagonal_in_matrix(self.f)
+        self.off_diag_f = remove_diagonal_in_matrix(self.f, np=self.np)
 
         self.o, self.v = self.system.o, self.system.v
 
@@ -47,7 +48,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         )
 
     @abc.abstractmethod
-    def _compute_energy(self):
+    def compute_one_body_density_matrix(self):
         pass
 
     @abc.abstractmethod
@@ -60,22 +61,20 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def _compute_time_overlap_with_ground_state(self):
         self.__err(self._compute_time_overlap_with_ground_state.__name__)
 
-    def _compute_one_body_density_matrix(self):
-        self.__err(self._compute_one_body_density_matrix.__name__)
+    def compute_particle_density(self):
+        np = self.np
 
-    @abc.abstractmethod
-    def _get_t_copy(self):
-        pass
+        rho_qp = self.compute_one_body_density_matrix()
 
-    def _get_l_copy(self):
-        self.__err(self._get_l_copy.__name__)
+        if np.abs(np.trace(rho_qp) - self.n) > 1e-8:
+            warn = "Trace of rho_qp = {0} != {1} = number of particles"
+            warn = warn.format(np.trace(rho_qp), self.n)
+            warnings.warn(warn)
 
-    @abc.abstractmethod
-    def _set_t(self, t):
-        pass
+        rho_qp_reduced = compute_spin_reduced_one_body_density_matrix(rho_qp)
+        rho = compute_particle_density(rho_qp_reduced, self.system.spf)
 
-    def _set_l(self, l):
-        self.__err(self._set_l.__name__)
+        return rho
 
     def _timestep(self, l_i, t_i, time):
         self._set_l(l_i)
