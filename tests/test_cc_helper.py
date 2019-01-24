@@ -1,5 +1,5 @@
 import numpy as np
-from coupled_cluster.cc import compute_reference_energy
+from coupled_cluster.cc_helper import compute_reference_energy
 
 
 def test_reference_energy():
