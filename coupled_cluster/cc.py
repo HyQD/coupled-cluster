@@ -7,6 +7,7 @@ from coupled_cluster.cc_helper import (
     AmplitudeContainer,
     compute_reference_energy,
     compute_spin_reduced_one_body_density_matrix,
+    remove_diagonal_in_matrix,
 )
 
 
@@ -24,19 +25,15 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.m = self.system.m
 
         self.h, self.f, self.u = self.system.h, self.system.f, self.system.u
-        self.off_diag_f = self._create_off_diagonal_matrix(self.f)
+        self.off_diag_f = self._remove_diagonal_in_matrix(self.f)
 
         self.o, self.v = self.system.o, self.system.v
 
     def get_amplitudes(self):
         return AmplitudeContainer(t=self._get_t_copy(), l=self._get_l_copy())
 
-    def _create_off_diagonal_matrix(self, matrix):
-        off_diag = np.zeros_like(matrix)
-        off_diag += matrix
-        np.fill_diagonal(off_diag, 0)
-
-        return off_diag
+    def _remove_diagonal_in_matrix(self, matrix):
+        return remove_diagonal_in_matrix(matrix, np=np)
 
     def __err(self, func_name):
         raise NotImplementedError(
