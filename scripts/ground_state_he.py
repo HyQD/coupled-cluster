@@ -12,6 +12,7 @@ options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(He, options)
 
 # Compute the Hartree-Fock state
+print("** Compute groundstate of He **")
 hf = HartreeFock(system,verbose=True)
 C = hf.scf(max_iters=30, tolerance=1e-15)
 
@@ -26,12 +27,13 @@ system._u = np.einsum(
     optimize=True,
 )
 
-ccd = CoupledClusterDoubles(system, verbose=True)
+ccd = CoupledClusterDoubles(system, verbose=False)
 ccd.iterate_t_amplitudes()
 print("Ground state energy: {0}".format((ccd.compute_energy()-hf.e_hf).real))
 
 del system
 del ccd 
+print()
 
 CO = """
 C 0.0 0.0 -1.079696382067556
@@ -46,6 +48,7 @@ options = {"basis": "STO-3G", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(CO, options)
 
 # Compute the Hartree-Fock state
+print("** Compute groundstate of CO **")
 hf = HartreeFock(system,verbose=True)
 C = hf.scf(max_iters=30, tolerance=1e-15)
 
@@ -60,7 +63,7 @@ system._u = np.einsum(
     optimize=True,
 )
 
-ccd = CoupledClusterDoubles(system, verbose=True)
+ccd = CoupledClusterDoubles(system, verbose=False)
 ccd.iterate_t_amplitudes()
 print("Ground state energy: {0}".format((ccd.compute_energy()-hf.e_hf).real))
 
