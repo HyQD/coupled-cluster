@@ -29,7 +29,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.l = self.system.l
         self.m = self.system.m
 
-        self.h, self.f, self.u = self.system.h, self.system.f, self.system.u
+        self.h = self.system.h
+        self.u = self.system.u
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
         self.off_diag_f = remove_diagonal_in_matrix(self.f, np=self.np)
 
         self.o, self.v = self.system.o, self.system.v
