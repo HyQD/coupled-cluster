@@ -105,6 +105,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     def compute_one_body_density_matrix(self):
         pass
 
+    @abc.abstractmethod
+    def compute_time_dependent_overlap(self):
+        pass
+
     def __call__(self, prev_amp, current_time):
         o, v = self.system.o, self.system.v
 
