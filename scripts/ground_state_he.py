@@ -8,8 +8,9 @@ def ccd_groundstate(name,system):
     print("Number of electrons: {0}".format(system.n))
     print("Number of spin orbitals: {0}".format(system.l))
     # Compute the Hartree-Fock state
-    hf = HartreeFock(system,verbose=False)
-    C = hf.scf(max_iters=30, tolerance=1e-8)
+    hf = HartreeFock(system,verbose=True)
+    C = hf.scf(max_iters=100, tolerance=1e-8)
+    
     
     system._h = np.einsum("ap,bq,ab->pq", C.conj(), C, system.h, optimize=True)
     system._u = np.einsum(
@@ -25,12 +26,11 @@ def ccd_groundstate(name,system):
     
 
     ccd = CoupledClusterDoubles(system, verbose=False)
-    ccd.iterate_t_amplitudes()
-    print("Ehf: {0}".format(hf.e_hf.real))
+    ccd.iterate_t_amplitudes(theta=0)
+    
     print("Eccd: {0}".format(ccd.compute_energy().real))
     print("Ecorr: {0}".format((ccd.compute_energy()-hf.e_hf).real))
     print()
-
 
 
 #Noble gases + Be
@@ -101,6 +101,18 @@ options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(h20, options)
 ccd_groundstate("H2O",system)
 
+CO = """
+C 0.0 0.0 -1.079696382067556
+O 0.0 0.0  0.810029743390272
+symmetry c1
+no_reorient
+no_com
+units bohr
+"""
+options = {"basis": "STO-3G", "scf_type": "pk", "e_convergence": 1e-8}
+system = construct_psi4_system(CO, options)
+ccd_groundstate("CO",system)
+
 r = 2.0
 N2 = """
 0 1
@@ -115,16 +127,6 @@ options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(N2, options)
 ccd_groundstate("N2",system)
 
-CO = """
-C 0.0 0.0 -1.079696382067556
-O 0.0 0.0  0.810029743390272
-symmetry c1
-no_reorient
-no_com
-units bohr
-"""
-options = {"basis": "STO-3G", "scf_type": "pk", "e_convergence": 1e-8}
-system = construct_psi4_system(CO, options)
-ccd_groundstate("CO",system)
+
 
 
