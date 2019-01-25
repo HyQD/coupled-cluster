@@ -5,11 +5,6 @@ from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
 from coupled_cluster.ccd.density_matrices import compute_one_body_density_matrix
 
-# TODO: Move this to TDCC
-from coupled_cluster.ccd.time_dependent_overlap import (
-    compute_time_dependent_overlap,
-)
-
 
 class CoupledClusterDoubles(CoupledCluster):
     def __init__(self, system, **kwargs):
@@ -101,10 +96,4 @@ class CoupledClusterDoubles(CoupledCluster):
     def _compute_one_body_density_matrix(self):
         return compute_one_body_density_matrix(
             self.t_2, self.l_2, self.o, self.v, np=np
-        )
-
-    def _compute_time_evolution_probability(self):
-        # TODO: Move this to TDCC
-        return compute_time_dependent_overlap(
-            self._t_0[0], self._l_0[0], self.t_2, self.l_2, np=np
         )
