@@ -69,6 +69,7 @@ def ccd(zanghellini_system):
     return CoupledClusterDoubles(zanghellini_system)
 
 
+@pytest.mark.skip
 def test_ground_state(ccd, ccsd_sans_singles, cc_params):
     ccsd = ccsd_sans_singles
 
@@ -93,6 +94,7 @@ def test_ground_state(ccd, ccsd_sans_singles, cc_params):
     np.testing.assert_allclose(rho_ccsd, rho_ccd, atol=1e-10)
 
 
+@pytest.mark.skip
 def test_time_evolution(ccd, ccsd_sans_singles, cc_params, time_params):
     ccsd = ccsd_sans_singles
 
