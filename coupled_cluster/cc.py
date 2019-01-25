@@ -34,9 +34,15 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.o, self.v = self.system.o, self.system.v
 
-    @abc.abstractmethod
     def get_amplitudes(self):
-        # return AmplitudeContainer(t=self._get_t_copy(), l=self._get_l_copy())
+        return AmplitudeContainer(t=self._get_t_copy(), l=self._get_l_copy())
+
+    @abc.abstractmethod
+    def _get_t_copy(self):
+        pass
+
+    @abc.abstractmethod
+    def _get_l_copy(self):
         pass
 
     @abc.abstractmethod
@@ -48,11 +54,11 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def _compute_t_amplitudes(self, theta, iterative=True):
+    def compute_t_amplitudes(self, theta, iterative=True):
         pass
 
     @abc.abstractmethod
-    def _compute_l_amplitudes(self, theta, iterative=True):
+    def compute_l_amplitudes(self, theta, iterative=True):
         pass
 
     def compute_particle_density(self):
@@ -75,7 +81,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             self.f, self.u, self.o, self.v, np=self.np
         )
 
-    def compute_l_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
+    def iterate_l_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
         np = self.np
 
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
@@ -90,7 +96,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if all([l_d < tol for l_d in l_diff]):
                 break
 
-            self._compute_l_amplitudes(theta)
+            self.compute_l_amplitudes(theta, iterative=True)
             new_l_list = self._get_l_copy()
             l_diff = [
                 np.amax(np.abs(l - l_new))
@@ -99,7 +105,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
             l_list = new_l_list
 
-    def compute_t_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
+    def iterate_t_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
         np = self.np
 
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
@@ -109,12 +115,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         for i in range(max_iterations):
             if self.verbose:
-                print(f"Itereration: {i}\tDiff (t): {t_diff}")
+                print(f"Iteration: {i}\tDiff (t): {t_diff}")
 
             if all([t_d < tol for t_d in t_diff]):
                 break
 
-            self._compute_t_amplitudes(theta)
+            self.compute_t_amplitudes(theta, iterative=True)
             new_t_list = self._get_t_copy()
             t_diff = [
                 np.amax(np.abs(t - t_new))

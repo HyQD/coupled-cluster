@@ -26,25 +26,9 @@ class CoupledClusterDoubles(CoupledCluster):
         )
         self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
 
-        self._compute_initial_guess()
+        self.compute_initial_guess()
 
-    def _get_t_copy(self):
-        return [self.t_2.copy()]
-
-    def _get_l_copy(self):
-        return [self.l_2.copy()]
-
-    def _set_t(self, t):
-        t_2 = t[0]
-
-        np.copyto(self.t_2, t_2)
-
-    def _set_l(self, l):
-        l_2 = l[0]
-
-        np.copyto(self.l_2, l_2)
-
-    def _compute_initial_guess(self):
+    def compute_initial_guess(self):
         o, v = self.o, self.v
 
         np.copyto(self.rhs_t_2, self.u[v, v, o, o])
@@ -53,12 +37,18 @@ class CoupledClusterDoubles(CoupledCluster):
         np.copyto(self.rhs_l_2, self.u[o, o, v, v])
         np.divide(self.rhs_l_2, self.d_l_2, out=self.l_2)
 
-    def _compute_energy(self):
+    def _get_t_copy(self):
+        return [self.t_2.copy()]
+
+    def _get_l_copy(self):
+        return [self.l_2.copy()]
+
+    def compute_energy(self):
         return compute_ccd_ground_state_energy(
             self.f, self.u, self.t_2, self.o, self.v, np=np
         )
 
-    def _compute_t_amplitudes(self, theta, iterative=True):
+    def compute_t_amplitudes(self, theta, iterative=True):
         f = self.off_diag_f if iterative else self.f
 
         self.rhs_t_2.fill(0)
@@ -72,7 +62,7 @@ class CoupledClusterDoubles(CoupledCluster):
         np.divide(self.rhs_t_2, self.d_t_2, out=self.rhs_t_2)
         np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
 
-    def _compute_l_amplitudes(self, theta, iterative=True):
+    def compute_l_amplitudes(self, theta, iterative=True):
         f = self.off_diag_f if iterative else self.f
 
         self.rhs_l_2.fill(0)
@@ -93,7 +83,7 @@ class CoupledClusterDoubles(CoupledCluster):
         np.divide(self.rhs_l_2, self.d_l_2, out=self.rhs_l_2)
         np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
 
-    def _compute_one_body_density_matrix(self):
+    def compute_one_body_density_matrix(self):
         return compute_one_body_density_matrix(
             self.t_2, self.l_2, self.o, self.v, np=np
         )
