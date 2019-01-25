@@ -120,12 +120,12 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         t_new = [
             -1j * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
-            for rhs_t_func in self.rhs_t_amplitudes
+            for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
         l_new = [
             1j * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
-            for rhs_l_func in self.rhs_l_amplitudes
+            for rhs_l_func in self.rhs_l_amplitudes()
         ]
 
         return AmplitudeContainer(t=t_new, l=l_new)
