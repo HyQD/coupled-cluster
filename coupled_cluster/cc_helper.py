@@ -78,6 +78,20 @@ def compute_spin_reduced_one_body_density_matrix(rho_qp):
     return rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
 
 
+def compute_particle_density(rho_qp, spf, np=None):
+    if np is None:
+        import numpy as np
+
+    rho = np.zeros(spf.shape[1:], dtype=spf.dtype)
+    spf_slice = slice(0, spf.shape[0])
+
+    for _i in np.ndindex(rho.shape):
+        i = (spf_slice, *_i)
+        rho[_i] += np.dot(spf[i].conj(), np.dot(rho_qp, spf[i]))
+
+    return rho
+
+
 def remove_diagonal_in_matrix(matrix, np=None):
     if np is None:
         import numpy as np

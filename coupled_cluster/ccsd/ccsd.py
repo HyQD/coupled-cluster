@@ -71,30 +71,12 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.W_hphh_lambda = np.zeros((n, m, n, n), dtype=np.complex128)
         self.W_ppph_lambda = np.zeros((m, m, m, n), dtype=np.complex128)
 
-        self._compute_initial_guess()
+        self.compute_initial_guess()
 
         self.rho_qp = np.zeros((self.l, self.l), dtype=np.complex128)
         self.changed_t = False
 
-    def _get_t_copy(self):
-        return [self.t_1.copy(), self.t_2.copy()]
-
-    def _get_l_copy(self):
-        return [self.l_1.copy(), self.l_2.copy()]
-
-    def _set_t(self, t):
-        t_1, t_2 = t
-
-        np.copyto(self.t_1, t_1)
-        np.copyto(self.t_2, t_2)
-
-    def _set_l(self, l):
-        l_1, l_2 = l
-
-        np.copyto(self.l_1, l_1)
-        np.copyto(self.l_2, l_2)
-
-    def _compute_initial_guess(self):
+    def compute_initial_guess(self):
         o, v = self.o, self.v
 
         if self.include_singles:
@@ -110,74 +92,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np.copyto(self.rhs_l_2, self.u[o, o, v, v])
         np.divide(self.rhs_l_2, self.d_2_l, out=self.l_2)
 
-    def _compute_time_evolution_probability(self):
-        t_1_0, t_2_0 = self._t_0
-        l_1_0, l_2_0 = self._l_0
+    def _get_t_copy(self):
+        return [self.t_1.copy(), self.t_2.copy()]
 
-        psi_t_0 = 1
-        psi_t_0 += np.einsum("ia, ai ->", self.l_1, t_1_0)
-        psi_t_0 -= np.einsum("ia, ai ->", self.l_1, self.t_1)
-        psi_t_0 += 0.25 * np.einsum("ijab, abij ->", self.l_2, t_2_0)
-        psi_t_0 -= 0.5 * np.einsum(
-            "ijab, aj, bi ->", self.l_2, t_1_0, t_1_0, optimize=True
-        )
-        psi_t_0 -= np.einsum(
-            "ijab, ai, bj ->", self.l_2, self.t_1, t_1_0, optimize=True
-        )
-        psi_t_0 -= 0.5 * np.einsum(
-            "ijab, aj, bi ->", self.l_2, self.t_1, self.t_1, optimize=True
-        )
-        psi_t_0 -= 0.25 * np.einsum("ijab, abij ->", self.l_2, self.t_2)
+    def _get_l_copy(self):
+        return [self.l_1.copy(), self.l_2.copy()]
 
-        psi_0_t = 1
-        psi_0_t += np.einsum("ia, ai ->", l_1_0, self.t_1)
-        psi_0_t -= np.einsum("ia, ai ->", l_1_0, t_1_0)
-        psi_0_t += 0.25 * np.einsum("ijab, abij ->", l_2_0, self.t_2)
-        psi_0_t -= 0.5 * np.einsum(
-            "ijab, aj, bi ->", l_2_0, t_1_0, t_1_0, optimize=True
-        )
-        psi_0_t -= np.einsum("ijab, ai, bj ->", l_2_0, self.t_1, t_1_0)
-        psi_0_t -= 0.5 * np.einsum(
-            "ijab, aj, bi ->", l_2_0, self.t_1, self.t_1, optimize=True
-        )
-        psi_0_t -= 0.25 * np.einsum("ijab, abij ->", l_2_0, t_2_0)
-
-        return psi_t_0 * psi_0_t
-
-    def _compute_one_body_density_matrix(self):
-        o, v = self.o, self.v
-
-        self.rho_qp.fill(0)
-
-        self.rho_qp[v, v] += np.dot(self.t_1, self.l_1)
-        self.rho_qp[v, v] += 0.5 * np.tensordot(
-            self.t_2, self.l_2, axes=((1, 2, 3), (3, 0, 1))
-        )
-
-        self.rho_qp[o, v] += self.l_1
-
-        self.rho_qp[o, o] += np.eye(self.n)
-        self.rho_qp[o, o] -= np.dot(self.l_1, self.t_1)
-        self.rho_qp[o, o] += 0.5 * np.tensordot(
-            self.l_2, self.t_2, axes=((1, 2, 3), (2, 0, 1))
-        )
-
-        self.rho_qp[v, o] += self.t_1
-        self.rho_qp[v, o] += np.tensordot(
-            self.l_1,
-            self.t_2 - np.einsum("bi, aj -> abij", self.t_1, self.t_1),
-            axes=((0, 1), (3, 1)),
-        )
-        self.rho_qp[v, o] += 0.5 * np.einsum(
-            "bi, kjcb, ackj -> ai", self.t_1, self.l_2, self.t_2, optimize=True
-        )
-        self.rho_qp[v, o] -= 0.5 * np.einsum(
-            "aj, kjcb, cbki -> ai", self.t_1, self.l_2, self.t_2, optimize=True
-        )
-
-        return self.rho_qp
-
-    def _compute_energy(self):
+    def compute_energy(self):
         o, v = self.o, self.v
 
         energy = np.einsum("ia, ai ->", self.f[o, v], self.t_1)
@@ -190,7 +111,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         return energy + self.compute_reference_energy()
 
-    def _compute_t_amplitudes(self, theta, iterative=True):
+    def compute_t_amplitudes(self, theta, iterative=True):
         f = self.off_diag_f if iterative else self.f
 
         self.rhs_t_1.fill(0)
@@ -238,7 +159,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         # Notify a change in t for recalculation of intermediates
         self.changed_t = True
 
-    def _compute_l_amplitudes(self, theta, iterative=True):
+    def compute_l_amplitudes(self, theta, iterative=True):
         if self.changed_t:
             # Make sure that we use updated intermediates for lambda
             self._compute_effective_amplitudes()
@@ -262,6 +183,73 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         np.divide(self.rhs_l_2, self.d_2_l, out=self.rhs_l_2)
         np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
+
+    def compute_one_body_density_matrix(self):
+        o, v = self.o, self.v
+
+        self.rho_qp.fill(0)
+
+        self.rho_qp[v, v] += np.dot(self.t_1, self.l_1)
+        self.rho_qp[v, v] += 0.5 * np.tensordot(
+            self.t_2, self.l_2, axes=((1, 2, 3), (3, 0, 1))
+        )
+
+        self.rho_qp[o, v] += self.l_1
+
+        self.rho_qp[o, o] += np.eye(self.n)
+        self.rho_qp[o, o] -= np.dot(self.l_1, self.t_1)
+        self.rho_qp[o, o] += 0.5 * np.tensordot(
+            self.l_2, self.t_2, axes=((1, 2, 3), (2, 0, 1))
+        )
+
+        self.rho_qp[v, o] += self.t_1
+        self.rho_qp[v, o] += np.tensordot(
+            self.l_1,
+            self.t_2 - np.einsum("bi, aj -> abij", self.t_1, self.t_1),
+            axes=((0, 1), (3, 1)),
+        )
+        self.rho_qp[v, o] += 0.5 * np.einsum(
+            "bi, kjcb, ackj -> ai", self.t_1, self.l_2, self.t_2, optimize=True
+        )
+        self.rho_qp[v, o] -= 0.5 * np.einsum(
+            "aj, kjcb, cbki -> ai", self.t_1, self.l_2, self.t_2, optimize=True
+        )
+
+        return self.rho_qp
+
+    def _compute_time_evolution_probability(self):
+        t_1_0, t_2_0 = self._t_0
+        l_1_0, l_2_0 = self._l_0
+
+        psi_t_0 = 1
+        psi_t_0 += np.einsum("ia, ai ->", self.l_1, t_1_0)
+        psi_t_0 -= np.einsum("ia, ai ->", self.l_1, self.t_1)
+        psi_t_0 += 0.25 * np.einsum("ijab, abij ->", self.l_2, t_2_0)
+        psi_t_0 -= 0.5 * np.einsum(
+            "ijab, aj, bi ->", self.l_2, t_1_0, t_1_0, optimize=True
+        )
+        psi_t_0 -= np.einsum(
+            "ijab, ai, bj ->", self.l_2, self.t_1, t_1_0, optimize=True
+        )
+        psi_t_0 -= 0.5 * np.einsum(
+            "ijab, aj, bi ->", self.l_2, self.t_1, self.t_1, optimize=True
+        )
+        psi_t_0 -= 0.25 * np.einsum("ijab, abij ->", self.l_2, self.t_2)
+
+        psi_0_t = 1
+        psi_0_t += np.einsum("ia, ai ->", l_1_0, self.t_1)
+        psi_0_t -= np.einsum("ia, ai ->", l_1_0, t_1_0)
+        psi_0_t += 0.25 * np.einsum("ijab, abij ->", l_2_0, self.t_2)
+        psi_0_t -= 0.5 * np.einsum(
+            "ijab, aj, bi ->", l_2_0, t_1_0, t_1_0, optimize=True
+        )
+        psi_0_t -= np.einsum("ijab, ai, bj ->", l_2_0, self.t_1, t_1_0)
+        psi_0_t -= 0.5 * np.einsum(
+            "ijab, aj, bi ->", l_2_0, self.t_1, self.t_1, optimize=True
+        )
+        psi_0_t -= 0.25 * np.einsum("ijab, abij ->", l_2_0, t_2_0)
+
+        return psi_t_0 * psi_0_t
 
     def _compute_effective_amplitudes(self):
         o, v = self.o, self.v

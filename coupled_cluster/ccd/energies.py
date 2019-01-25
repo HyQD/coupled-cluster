@@ -1,4 +1,4 @@
-from coupled_cluster.cc import compute_reference_energy
+from coupled_cluster.cc_helper import compute_reference_energy
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 
 
