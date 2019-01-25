@@ -71,10 +71,26 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.W_hphh_lambda = np.zeros((n, m, n, n), dtype=np.complex128)
         self.W_ppph_lambda = np.zeros((m, m, m, n), dtype=np.complex128)
 
-        self._compute_initial_guess()
+        self.compute_initial_guess()
 
         self.rho_qp = np.zeros((self.l, self.l), dtype=np.complex128)
         self.changed_t = False
+
+    def compute_initial_guess(self):
+        o, v = self.o, self.v
+
+        if self.include_singles:
+            np.copyto(self.rhs_t_1, self.f[v, o])
+            np.divide(self.rhs_t_1, self.d_1_t, out=self.t_1)
+
+            np.copyto(self.rhs_l_1, self.f[o, v])
+            np.divide(self.rhs_l_1, self.d_1_l, out=self.l_1)
+
+        np.copyto(self.rhs_t_2, self.u[v, v, o, o])
+        np.divide(self.rhs_t_2, self.d_2_t, out=self.t_2)
+
+        np.copyto(self.rhs_l_2, self.u[o, o, v, v])
+        np.divide(self.rhs_l_2, self.d_2_l, out=self.l_2)
 
     def _get_t_copy(self):
         return [self.t_1.copy(), self.t_2.copy()]
@@ -93,22 +109,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         np.copyto(self.l_1, l_1)
         np.copyto(self.l_2, l_2)
-
-    def _compute_initial_guess(self):
-        o, v = self.o, self.v
-
-        if self.include_singles:
-            np.copyto(self.rhs_t_1, self.f[v, o])
-            np.divide(self.rhs_t_1, self.d_1_t, out=self.t_1)
-
-            np.copyto(self.rhs_l_1, self.f[o, v])
-            np.divide(self.rhs_l_1, self.d_1_l, out=self.l_1)
-
-        np.copyto(self.rhs_t_2, self.u[v, v, o, o])
-        np.divide(self.rhs_t_2, self.d_2_t, out=self.t_2)
-
-        np.copyto(self.rhs_l_2, self.u[o, o, v, v])
-        np.divide(self.rhs_l_2, self.d_2_l, out=self.l_2)
 
     def _compute_time_evolution_probability(self):
         t_1_0, t_2_0 = self._t_0
