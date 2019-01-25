@@ -110,7 +110,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
 
-        t_list = self._get_t_coy()
+        t_list = self._get_t_copy()
         t_diff = [100 for t in t_list]
 
         for i in range(max_iterations):
