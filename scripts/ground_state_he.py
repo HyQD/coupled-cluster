@@ -31,6 +31,9 @@ def ccd_groundstate(name,system):
     print("Ecorr: {0}".format((ccd.compute_energy()-hf.e_hf).real))
     print()
 
+
+
+#Noble gases + Be
 He = """
 He 0.0 0.0 0.0
 symmetry c1
@@ -70,6 +73,18 @@ symmetry c1
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(Kr, options)
 ccd_groundstate("Kr",system)
+
+#Some molecules
+r = 1.3897  # Requilibrium = 0.7354 Å -> 1.3897 a.u
+H2 = """
+H 0.0 0.0 -0.69485
+H 0.0 0.0  0.69485
+symmetry c1
+units bohr
+"""
+options = {"basis": "6-311++G(d,p)", "scf_type": "pk", "e_convergence": 1e-8}
+system = construct_psi4_system(H2, options)
+ccd_groundstate("H2",system)
 
 r = 1.1
 h20 = (
