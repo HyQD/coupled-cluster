@@ -98,18 +98,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def _get_l_copy(self):
         return [self.l_1.copy(), self.l_2.copy()]
 
-    def _set_t(self, t):
-        t_1, t_2 = t
-
-        np.copyto(self.t_1, t_1)
-        np.copyto(self.t_2, t_2)
-
-    def _set_l(self, l):
-        l_1, l_2 = l
-
-        np.copyto(self.l_1, l_1)
-        np.copyto(self.l_2, l_2)
-
     def _compute_time_evolution_probability(self):
         t_1_0, t_2_0 = self._t_0
         l_1_0, l_2_0 = self._l_0
