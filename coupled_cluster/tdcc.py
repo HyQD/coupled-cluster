@@ -5,6 +5,10 @@ from coupled_cluster.integrators import RungeKutta4
 
 
 class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
+    """Abstract base class defining the skeleton of a time-dependent Coupled
+    Cluster solver class.
+    """
+
     def __init__(
         self, cc, system, np=None, integrator=RungeKutta4, **cc_kwargs
     ):
