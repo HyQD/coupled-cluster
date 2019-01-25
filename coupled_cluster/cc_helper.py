@@ -87,10 +87,7 @@ def compute_particle_density(rho_qp, spf, np=None):
 
     for _i in np.ndindex(rho.shape):
         i = (spf_slice, *_i)
-        rho[_i] += np.dot(
-            self.system.spf[i].conj(),
-            np.dot(rho_qp_reduced, self.system.spf[i]),
-        )
+        rho[_i] += np.dot(spf[i].conj(), np.dot(rho_qp, spf[i]))
 
     return rho
 
