@@ -98,6 +98,19 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def _get_l_copy(self):
         return [self.l_1.copy(), self.l_2.copy()]
 
+    def compute_energy(self):
+        o, v = self.o, self.v
+
+        energy = np.einsum("ia, ai ->", self.f[o, v], self.t_1)
+        energy += 0.25 * np.einsum(
+            "ijab, abij ->", self.u[o, o, v, v], self.t_2
+        )
+        energy += 0.5 * np.einsum(
+            "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
+        )
+
+        return energy + self.compute_reference_energy()
+
     def _compute_time_evolution_probability(self):
         t_1_0, t_2_0 = self._t_0
         l_1_0, l_2_0 = self._l_0
@@ -164,19 +177,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         )
 
         return self.rho_qp
-
-    def _compute_energy(self):
-        o, v = self.o, self.v
-
-        energy = np.einsum("ia, ai ->", self.f[o, v], self.t_1)
-        energy += 0.25 * np.einsum(
-            "ijab, abij ->", self.u[o, o, v, v], self.t_2
-        )
-        energy += 0.5 * np.einsum(
-            "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
-        )
-
-        return energy + self.compute_reference_energy()
 
     def _compute_t_amplitudes(self, theta, iterative=True):
         f = self.off_diag_f if iterative else self.f
