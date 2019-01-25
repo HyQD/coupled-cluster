@@ -184,6 +184,39 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np.divide(self.rhs_l_2, self.d_2_l, out=self.rhs_l_2)
         np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
 
+    def compute_one_body_density_matrix(self):
+        o, v = self.o, self.v
+
+        self.rho_qp.fill(0)
+
+        self.rho_qp[v, v] += np.dot(self.t_1, self.l_1)
+        self.rho_qp[v, v] += 0.5 * np.tensordot(
+            self.t_2, self.l_2, axes=((1, 2, 3), (3, 0, 1))
+        )
+
+        self.rho_qp[o, v] += self.l_1
+
+        self.rho_qp[o, o] += np.eye(self.n)
+        self.rho_qp[o, o] -= np.dot(self.l_1, self.t_1)
+        self.rho_qp[o, o] += 0.5 * np.tensordot(
+            self.l_2, self.t_2, axes=((1, 2, 3), (2, 0, 1))
+        )
+
+        self.rho_qp[v, o] += self.t_1
+        self.rho_qp[v, o] += np.tensordot(
+            self.l_1,
+            self.t_2 - np.einsum("bi, aj -> abij", self.t_1, self.t_1),
+            axes=((0, 1), (3, 1)),
+        )
+        self.rho_qp[v, o] += 0.5 * np.einsum(
+            "bi, kjcb, ackj -> ai", self.t_1, self.l_2, self.t_2, optimize=True
+        )
+        self.rho_qp[v, o] -= 0.5 * np.einsum(
+            "aj, kjcb, cbki -> ai", self.t_1, self.l_2, self.t_2, optimize=True
+        )
+
+        return self.rho_qp
+
     def _compute_time_evolution_probability(self):
         t_1_0, t_2_0 = self._t_0
         l_1_0, l_2_0 = self._l_0
@@ -217,39 +250,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         psi_0_t -= 0.25 * np.einsum("ijab, abij ->", l_2_0, t_2_0)
 
         return psi_t_0 * psi_0_t
-
-    def _compute_one_body_density_matrix(self):
-        o, v = self.o, self.v
-
-        self.rho_qp.fill(0)
-
-        self.rho_qp[v, v] += np.dot(self.t_1, self.l_1)
-        self.rho_qp[v, v] += 0.5 * np.tensordot(
-            self.t_2, self.l_2, axes=((1, 2, 3), (3, 0, 1))
-        )
-
-        self.rho_qp[o, v] += self.l_1
-
-        self.rho_qp[o, o] += np.eye(self.n)
-        self.rho_qp[o, o] -= np.dot(self.l_1, self.t_1)
-        self.rho_qp[o, o] += 0.5 * np.tensordot(
-            self.l_2, self.t_2, axes=((1, 2, 3), (2, 0, 1))
-        )
-
-        self.rho_qp[v, o] += self.t_1
-        self.rho_qp[v, o] += np.tensordot(
-            self.l_1,
-            self.t_2 - np.einsum("bi, aj -> abij", self.t_1, self.t_1),
-            axes=((0, 1), (3, 1)),
-        )
-        self.rho_qp[v, o] += 0.5 * np.einsum(
-            "bi, kjcb, ackj -> ai", self.t_1, self.l_2, self.t_2, optimize=True
-        )
-        self.rho_qp[v, o] -= 0.5 * np.einsum(
-            "aj, kjcb, cbki -> ai", self.t_1, self.l_2, self.t_2, optimize=True
-        )
-
-        return self.rho_qp
 
     def _compute_effective_amplitudes(self):
         o, v = self.o, self.v
