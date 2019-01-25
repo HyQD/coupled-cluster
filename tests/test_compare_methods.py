@@ -3,8 +3,8 @@ import numpy as np
 
 from quantum_systems import OneDimensionalHarmonicOscillator
 from quantum_systems.time_evolution_operators import LaserField
-from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
-from coupled_cluster.ccd import CoupledClusterDoubles
+from coupled_cluster.ccsd import TDCCSD, CoupledClusterSinglesDoubles
+from coupled_cluster.ccd import TDCCD, CoupledClusterDoubles
 
 
 class LaserPulse:

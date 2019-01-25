@@ -1,2 +1,2 @@
 from .ccd import CoupledClusterDoubles
-from .tdccd import TimeDependentCoupledClusterDoubles
+from .tdccd import TDCCD

@@ -8,7 +8,7 @@ from coupled_cluster.ccd.time_dependent_overlap import (
 )
 
 
-class TimeDependentCoupledClusterDoubles(TimeDependentCoupledCluster):
+class TDCCD(TimeDependentCoupledCluster):
     def rhs_t_amplitudes(self):
         yield compute_t_2_amplitudes
 
