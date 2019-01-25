@@ -111,6 +111,79 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         return energy + self.compute_reference_energy()
 
+    def compute_t_amplitudes(self, theta, iterative=True):
+        f = self.off_diag_f if iterative else self.f
+
+        self.rhs_t_1.fill(0)
+        self.rhs_t_2.fill(0)
+
+        # compute_t_1_amplitudes(
+        #    f,
+        #    self.u,
+        #    self.t_1,
+        #    self.t_2,
+        #    self.o,
+        #    self.v,
+        #    out=self.rhs_t_1,
+        #    np=np,
+        # )
+        # compute_t_2_amplitudes(
+        #    f,
+        #    self.u,
+        #    self.t_1,
+        #    self.t_2,
+        #    self.o,
+        #    self.v,
+        #    out=self.rhs_t_2,
+        #    np=np,
+        # )
+
+        self._compute_effective_amplitudes()
+        self._compute_intermediates(iterative=iterative)
+
+        if self.include_singles:
+            self._compute_ccsd_amplitude_s(iterative=iterative)
+
+        self._compute_ccsd_amplitude_d()
+
+        if not iterative:
+            return [self.rhs_t_1.copy(), self.rhs_t_2.copy()]
+
+        if self.include_singles:
+            np.divide(self.rhs_t_1, self.d_1_t, out=self.rhs_t_1)
+            np.add((1 - theta) * self.rhs_t_1, theta * self.t_1, out=self.t_1)
+
+        np.divide(self.rhs_t_2, self.d_2_t, out=self.rhs_t_2)
+        np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
+
+        # Notify a change in t for recalculation of intermediates
+        self.changed_t = True
+
+    def compute_l_amplitudes(self, theta, iterative=True):
+        if self.changed_t:
+            # Make sure that we use updated intermediates for lambda
+            self._compute_effective_amplitudes()
+            self._compute_intermediates(iterative=iterative)
+            self.changed_t = False
+
+        self._compute_effective_three_body_intermediates()
+        self._compute_lambda_intermediates()
+
+        if self.include_singles:
+            self._compute_ccsd_lambda_amplitudes_s()
+
+        self._compute_ccsd_lambda_amplitudes_d()
+
+        if not iterative:
+            return [self.rhs_l_1.copy(), self.rhs_l_2.copy()]
+
+        if self.include_singles:
+            np.divide(self.rhs_l_1, self.d_1_l, out=self.rhs_l_1)
+            np.add((1 - theta) * self.rhs_l_1, theta * self.l_1, out=self.l_1)
+
+        np.divide(self.rhs_l_2, self.d_2_l, out=self.rhs_l_2)
+        np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
+
     def _compute_time_evolution_probability(self):
         t_1_0, t_2_0 = self._t_0
         l_1_0, l_2_0 = self._l_0
@@ -177,79 +250,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         )
 
         return self.rho_qp
-
-    def _compute_t_amplitudes(self, theta, iterative=True):
-        f = self.off_diag_f if iterative else self.f
-
-        self.rhs_t_1.fill(0)
-        self.rhs_t_2.fill(0)
-
-        # compute_t_1_amplitudes(
-        #    f,
-        #    self.u,
-        #    self.t_1,
-        #    self.t_2,
-        #    self.o,
-        #    self.v,
-        #    out=self.rhs_t_1,
-        #    np=np,
-        # )
-        # compute_t_2_amplitudes(
-        #    f,
-        #    self.u,
-        #    self.t_1,
-        #    self.t_2,
-        #    self.o,
-        #    self.v,
-        #    out=self.rhs_t_2,
-        #    np=np,
-        # )
-
-        self._compute_effective_amplitudes()
-        self._compute_intermediates(iterative=iterative)
-
-        if self.include_singles:
-            self._compute_ccsd_amplitude_s(iterative=iterative)
-
-        self._compute_ccsd_amplitude_d()
-
-        if not iterative:
-            return [self.rhs_t_1.copy(), self.rhs_t_2.copy()]
-
-        if self.include_singles:
-            np.divide(self.rhs_t_1, self.d_1_t, out=self.rhs_t_1)
-            np.add((1 - theta) * self.rhs_t_1, theta * self.t_1, out=self.t_1)
-
-        np.divide(self.rhs_t_2, self.d_2_t, out=self.rhs_t_2)
-        np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
-
-        # Notify a change in t for recalculation of intermediates
-        self.changed_t = True
-
-    def _compute_l_amplitudes(self, theta, iterative=True):
-        if self.changed_t:
-            # Make sure that we use updated intermediates for lambda
-            self._compute_effective_amplitudes()
-            self._compute_intermediates(iterative=iterative)
-            self.changed_t = False
-
-        self._compute_effective_three_body_intermediates()
-        self._compute_lambda_intermediates()
-
-        if self.include_singles:
-            self._compute_ccsd_lambda_amplitudes_s()
-
-        self._compute_ccsd_lambda_amplitudes_d()
-
-        if not iterative:
-            return [self.rhs_l_1.copy(), self.rhs_l_2.copy()]
-
-        if self.include_singles:
-            np.divide(self.rhs_l_1, self.d_1_l, out=self.rhs_l_1)
-            np.add((1 - theta) * self.rhs_l_1, theta * self.l_1, out=self.l_1)
-
-        np.divide(self.rhs_l_2, self.d_2_l, out=self.rhs_l_2)
-        np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
 
     def _compute_effective_amplitudes(self):
         o, v = self.o, self.v
