@@ -631,6 +631,7 @@ def test_ccd_energy(tdho, ccd_energy):
     tol = 1e-4
 
     cc_scheme = CoupledClusterDoubles(tdho, verbose=True)
-    energy, _ = cc_scheme.compute_ground_state_energy(tol=tol)
+    cc_scheme.iterate_t_amplitudes(tol=tol)
+    energy = cc_scheme.compute_energy()
 
     assert abs(energy - ccd_energy) < tol
