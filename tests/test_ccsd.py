@@ -234,11 +234,10 @@ def test_add_d4b_t(large_system_ccsd):
 
 
 def test_mbpt_enegy(tdho):
-    tol = 1e-4
 
     cc_scheme = CoupledClusterSinglesDoubles(tdho, verbose=True)
+    energy = cc_scheme.compute_energy()
 
-    energy, _ = cc_scheme.compute_ground_state_energy(max_iterations=0, tol=tol)
     assert True
 
 
@@ -246,7 +245,8 @@ def test_ccsd_energy(tdho, ccsd_energy):
     tol = 1e-4
 
     cc_scheme = CoupledClusterSinglesDoubles(tdho, verbose=True)
-    energy, _ = cc_scheme.compute_ground_state_energy(tol=tol)
+    cc_scheme.iterate_t_amplitudes(tol=tol)
+    energy = cc_scheme.compute_energy()
 
     assert abs(energy - ccsd_energy) < tol
 
@@ -254,6 +254,8 @@ def test_ccsd_energy(tdho, ccsd_energy):
 def test_lambda_amplitude_iterations(tdho):
     cc_scheme = CoupledClusterSinglesDoubles(tdho, verbose=True)
 
-    energy, _ = cc_scheme.compute_ground_state_energy()
-    cc_scheme.compute_l_amplitudes()
+    cc_scheme.iterate_t_amplitudes()
+    energy = cc_scheme.compute_energy()
+    cc_scheme.iterate_t_amplitudes()
+
     assert True
