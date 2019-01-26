@@ -1,7 +1,4 @@
-def compute_one_body_density_matrix(t, l, o, v, rho=None, np=None):
-    if np is None:
-        import numpy as np
-
+def compute_one_body_density_matrix(t, l, o, v, np, rho=None):
     if rho is None:
         rho = np.zeros((v.stop, v.stop), dtype=t.dtype)
 

@@ -65,10 +65,7 @@ class AmplitudeContainer:
         yield from self._l
 
 
-def compute_reference_energy(f, u, o, v, np=None):
-    if np is None:
-        import numpy as np
-
+def compute_reference_energy(f, u, o, v, np):
     return np.trace(f[o, o]) - 0.5 * np.trace(
         np.trace(u[o, o, o, o], axis1=1, axis2=3)
     )
@@ -78,10 +75,7 @@ def compute_spin_reduced_one_body_density_matrix(rho_qp):
     return rho_qp[::2, ::2] + rho_qp[1::2, 1::2]
 
 
-def compute_particle_density(rho_qp, spf, np=None):
-    if np is None:
-        import numpy as np
-
+def compute_particle_density(rho_qp, spf, np):
     rho = np.zeros(spf.shape[1:], dtype=spf.dtype)
     spf_slice = slice(0, spf.shape[0])
 
@@ -92,10 +86,7 @@ def compute_particle_density(rho_qp, spf, np=None):
     return rho
 
 
-def remove_diagonal_in_matrix(matrix, np=None):
-    if np is None:
-        import numpy as np
-
+def remove_diagonal_in_matrix(matrix, np):
     off_diag = matrix.copy()
     np.fill_diagonal(off_diag, 0)
 

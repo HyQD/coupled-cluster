@@ -34,7 +34,7 @@ def test_reference_energy():
 def test_remove_diagonal_in_matrix():
     l = 20
     f = np.random.random((l, l)) + 1j * np.random.random((l, l))
-    f_off_diag = remove_diagonal_in_matrix(f)
+    f_off_diag = remove_diagonal_in_matrix(f, np=np)
 
     np.testing.assert_allclose(np.diag(f_off_diag), np.zeros(l))
     np.testing.assert_allclose(f_off_diag, f - np.diag(np.diag(f)), atol=1e-10)

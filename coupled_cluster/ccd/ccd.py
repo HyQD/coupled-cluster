@@ -1,4 +1,3 @@
-import numpy as np
 from coupled_cluster.cc import CoupledCluster
 from coupled_cluster.ccd.energies import compute_ccd_ground_state_energy
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
@@ -10,6 +9,7 @@ class CoupledClusterDoubles(CoupledCluster):
     def __init__(self, system, **kwargs):
         super().__init__(system, **kwargs)
 
+        np = self.np
         n, m = self.n, self.m
 
         self.rhs_t_2 = np.zeros((m, m, n, n), dtype=np.complex128)
@@ -29,6 +29,7 @@ class CoupledClusterDoubles(CoupledCluster):
         self.compute_initial_guess()
 
     def compute_initial_guess(self):
+        np = self.np
         o, v = self.o, self.v
 
         np.copyto(self.rhs_t_2, self.u[v, v, o, o])
@@ -45,10 +46,11 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def compute_energy(self):
         return compute_ccd_ground_state_energy(
-            self.f, self.u, self.t_2, self.o, self.v, np=np
+            self.f, self.u, self.t_2, self.o, self.v, np=self.np
         )
 
     def compute_t_amplitudes(self, theta, iterative=True):
+        np = self.np
         f = self.off_diag_f if iterative else self.f
 
         self.rhs_t_2.fill(0)
@@ -63,6 +65,7 @@ class CoupledClusterDoubles(CoupledCluster):
         np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
 
     def compute_l_amplitudes(self, theta, iterative=True):
+        np = self.np
         f = self.off_diag_f if iterative else self.f
 
         self.rhs_l_2.fill(0)
@@ -85,5 +88,5 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def compute_one_body_density_matrix(self):
         return compute_one_body_density_matrix(
-            self.t_2, self.l_2, self.o, self.v, np=np
+            self.t_2, self.l_2, self.o, self.v, np=self.np
         )

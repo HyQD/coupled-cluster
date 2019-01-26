@@ -1,4 +1,4 @@
-def compute_time_dependent_overlap(t, l, t_t, l_t, np=None):
+def compute_time_dependent_overlap(t, l, t_t, l_t, np):
     """Compute the overlap between the time-evolved state and the ground state
     wavefunction using the bivariational view. That is, we compute
 
@@ -13,10 +13,6 @@ def compute_time_dependent_overlap(t, l, t_t, l_t, np=None):
         tilde_t = <~Psi(t)|Psi(0)>,
         tilde_0 = <~Psi(0)|Psi(t)>.
     """
-
-    if np is None:
-        import numpy as np
-
     tilde_t = 1
     tilde_t += 0.25 * np.tensordot(t, l_t, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
     tilde_t -= 0.25 * np.tensordot(t_t, l_t, axes=((0, 1, 2, 3), (2, 3, 0, 1)))

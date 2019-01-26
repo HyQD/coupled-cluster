@@ -2,10 +2,7 @@ import abc
 
 
 class Integrator(metaclass=abc.ABCMeta):
-    def __init__(self, rhs, np=None):
-        if np is None:
-            import numpy as np
-
+    def __init__(self, rhs, np):
         self.np = np
 
         if not callable(rhs):
