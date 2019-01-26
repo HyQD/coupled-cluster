@@ -1,9 +1,9 @@
 def compute_one_body_density_matrix(t, l, o, v, rho=None, np=None):
-    if rho is None:
-        rho = np.zeros((v.stop, v.stop), dtype=t.dtype)
-
     if np is None:
         import numpy as np
+
+    if rho is None:
+        rho = np.zeros((v.stop, v.stop), dtype=t.dtype)
 
     rho.fill(0)
     rho[o, o] += np.eye(o.stop)
