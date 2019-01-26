@@ -1,4 +1,3 @@
-import numpy as np
 from coupled_cluster.cc import CoupledCluster
 
 # from coupled_cluster.ccsd.rhs_t import (
@@ -11,6 +10,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def __init__(self, system, include_singles=True, **kwargs):
         super().__init__(system, **kwargs)
 
+        np = self.np
         # Add option to run ccd instead of ccsd. This is mostly used for
         # testing.
         self.include_singles = include_singles
@@ -77,6 +77,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.changed_t = False
 
     def compute_initial_guess(self):
+        np = self.np
         o, v = self.o, self.v
 
         if self.include_singles:
@@ -99,6 +100,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         return [self.l_1.copy(), self.l_2.copy()]
 
     def compute_energy(self):
+        np = self.np
         o, v = self.o, self.v
 
         energy = np.einsum("ia, ai ->", self.f[o, v], self.t_1)
@@ -112,6 +114,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         return energy + self.compute_reference_energy()
 
     def compute_t_amplitudes(self, theta, iterative=True):
+        np = self.np
         f = self.off_diag_f if iterative else self.f
 
         self.rhs_t_1.fill(0)
@@ -160,6 +163,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.changed_t = True
 
     def compute_l_amplitudes(self, theta, iterative=True):
+        np = self.np
+
         if self.changed_t:
             # Make sure that we use updated intermediates for lambda
             self._compute_effective_amplitudes()
@@ -185,6 +190,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
 
     def compute_one_body_density_matrix(self):
+        np = self.np
         o, v = self.o, self.v
 
         self.rho_qp.fill(0)
@@ -218,6 +224,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         return self.rho_qp
 
     def _compute_time_evolution_probability(self):
+        np = self.np
         t_1_0, t_2_0 = self._t_0
         l_1_0, l_2_0 = self._l_0
 
@@ -252,6 +259,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         return psi_t_0 * psi_0_t
 
     def _compute_effective_amplitudes(self):
+        np = self.np
         o, v = self.o, self.v
 
         term = np.einsum("ai, bj -> abij", self.t_1, self.t_1)
@@ -267,6 +275,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.tau += 0.5 * term
 
     def _compute_effective_three_body_intermediates(self):
+        np = self.np
         o, v = self.o, self.v
 
         self.G_pp.fill(0)
@@ -280,6 +289,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         )
 
     def _compute_ccsd_amplitude_s(self, iterative):
+        np = self.np
         o, v = self.o, self.v
 
         f = self.off_diag_f
@@ -306,6 +316,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         )
 
     def _compute_ccsd_amplitude_d(self):
+        np = self.np
         o, v = self.o, self.v
 
         self.rhs_t_2.fill(0)
@@ -354,6 +365,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.rhs_t_2 -= term
 
     def _compute_ccsd_lambda_amplitudes_s(self):
+        np = self.np
         self.rhs_l_1.fill(0)
 
         self.rhs_l_1 += self.F_hp_lambda
@@ -376,6 +388,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         )
 
     def _compute_ccsd_lambda_amplitudes_d(self):
+        np = self.np
         o, v = self.o, self.v
 
         self.rhs_l_2.fill(0)
@@ -441,6 +454,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.rhs_l_2 += term
 
     def _compute_intermediates(self, iterative):
+        np = self.np
         o, v = self.o, self.v
 
         f = self.off_diag_f
@@ -520,6 +534,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.W_hpph -= term
 
     def _compute_lambda_intermediates(self):
+        np = self.np
         o, v = self.o, self.v
 
         self.F_pp_lambda.fill(0)
