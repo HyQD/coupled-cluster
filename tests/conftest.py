@@ -166,29 +166,29 @@ def zanghellini_system():
 
 
 @pytest.fixture
-def zanghellini_ground_state_energy():
+def tdccd_zanghellini_ground_state_energy():
     return 1.1063
 
 
 @pytest.fixture
-def zanghellini_ground_state_particle_density():
+def tdccd_zanghellini_ground_state_particle_density():
     filename = os.path.join(
-        "tests", "dat", "zanghellini_ground_state_particle_density.dat"
+        "tests", "dat", "tdccd_zanghellini_ground_state_particle_density.dat"
     )
 
     return np.loadtxt(filename, dtype=complex)
 
 
 @pytest.fixture
-def zanghellini_psi_overlap():
-    filename = os.path.join("tests", "dat", "zanghellini_psi_overlap.dat")
+def tdccd_zanghellini_psi_overlap():
+    filename = os.path.join("tests", "dat", "tdccd_zanghellini_psi_overlap.dat")
 
     return np.loadtxt(filename)
 
 
 @pytest.fixture
-def zanghellini_td_energies():
-    filename = os.path.join("tests", "dat", "zanghellini_td_energies.dat")
+def tdccd_zanghellini_td_energies():
+    filename = os.path.join("tests", "dat", "tdccd_zanghellini_td_energies.dat")
 
     return np.loadtxt(filename)
 

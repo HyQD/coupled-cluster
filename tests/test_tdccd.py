@@ -6,10 +6,10 @@ from coupled_cluster.ccd import TDCCD, CoupledClusterDoubles
 
 def test_time_dependent_observables(
     zanghellini_system,
-    zanghellini_ground_state_energy,
-    zanghellini_ground_state_particle_density,
-    zanghellini_psi_overlap,
-    zanghellini_td_energies,
+    tdccd_zanghellini_ground_state_energy,
+    tdccd_zanghellini_ground_state_particle_density,
+    tdccd_zanghellini_psi_overlap,
+    tdccd_zanghellini_td_energies,
     t_kwargs,
     l_kwargs,
     time_params,
@@ -20,7 +20,7 @@ def test_time_dependent_observables(
 
     assert (
         abs(
-            zanghellini_ground_state_energy
+            tdccd_zanghellini_ground_state_energy
             - tdccd.compute_ground_state_energy()
         )
         < t_kwargs["tol"]
@@ -29,7 +29,7 @@ def test_time_dependent_observables(
     rho = tdccd.compute_ground_state_particle_density()
 
     np.testing.assert_allclose(
-        rho, zanghellini_ground_state_particle_density, atol=1e-10
+        rho, tdccd_zanghellini_ground_state_particle_density, atol=1e-10
     )
 
     tdccd.set_initial_conditions()
@@ -49,6 +49,10 @@ def test_time_dependent_observables(
         psi_overlap[i + 1] = tdccd.compute_time_dependent_overlap().real
         td_energies[i + 1] = tdccd.compute_energy().real
 
-    np.testing.assert_allclose(psi_overlap, zanghellini_psi_overlap, atol=1e-10)
+    np.testing.assert_allclose(
+        psi_overlap, tdccd_zanghellini_psi_overlap, atol=1e-10
+    )
 
-    np.testing.assert_allclose(td_energies, zanghellini_td_energies, atol=1e-10)
+    np.testing.assert_allclose(
+        td_energies, tdccd_zanghellini_td_energies, atol=1e-10
+    )
