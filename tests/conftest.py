@@ -1,7 +1,13 @@
 import pytest
 import numpy as np
+import os
 
-from quantum_systems import TwoDimensionalHarmonicOscillator, CustomSystem
+from quantum_systems import (
+    TwoDimensionalHarmonicOscillator,
+    CustomSystem,
+    OneDimensionalHarmonicOscillator,
+)
+from quantum_systems.time_evolution_operators import LaserField
 
 l = 12  # Number of orbitals
 n = 2  # Number of particles
@@ -124,3 +130,89 @@ def ccsd_energy(_omega):
             "We do not a have a test value for omega "
             + "= {0} yet".format(_omega)
         )
+
+
+class LaserPulse:
+    def __init__(self, laser_frequency=2, laser_strength=1):
+        self.laser_frequency = laser_frequency
+        self.laser_strength = laser_strength
+
+    def __call__(self, t):
+        return self.laser_strength * np.sin(self.laser_frequency * t)
+
+
+@pytest.fixture
+def zanghellini_system():
+    n = 2
+    l = 6
+    length = 10
+    num_grid_points = 400
+    omega = 0.25
+    laser_frequency = 8 * omega
+    laser_strength = 1
+
+    odho = OneDimensionalHarmonicOscillator(
+        n, l, length, num_grid_points, omega=omega
+    )
+    odho.setup_system()
+    laser = LaserField(
+        LaserPulse(
+            laser_frequency=laser_frequency, laser_strength=laser_strength
+        )
+    )
+    odho.set_time_evolution_operator(laser)
+
+    return odho
+
+
+@pytest.fixture
+def zanghellini_ground_state_energy():
+    return 1.1063
+
+
+@pytest.fixture
+def zanghellini_ground_state_particle_density():
+    filename = os.path.join(
+        "tests", "dat", "zanghellini_ground_state_particle_density.dat"
+    )
+
+    return np.loadtxt(filename, dtype=complex)
+
+
+@pytest.fixture
+def zanghellini_psi_overlap():
+    filename = os.path.join("tests", "dat", "zanghellini_psi_overlap.dat")
+
+    return np.loadtxt(filename)
+
+
+@pytest.fixture
+def zanghellini_td_energies():
+    filename = os.path.join("tests", "dat", "zanghellini_td_energies.dat")
+
+    return np.loadtxt(filename)
+
+
+@pytest.fixture
+def t_kwargs():
+    theta = 0.5
+    tol = 1e-4
+
+    return {"theta": theta, "tol": tol}
+
+
+@pytest.fixture
+def l_kwargs():
+    theta = 0.9
+    tol = 1e-4
+
+    return {"theta": theta, "tol": tol}
+
+
+@pytest.fixture
+def time_params():
+    t_start = 0
+    t_end = 10
+    num_timesteps = 1001
+
+    return {"t_start": t_start, "t_end": t_end, "num_timesteps": num_timesteps}
