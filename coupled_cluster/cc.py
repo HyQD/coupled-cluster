@@ -74,7 +74,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             warnings.warn(warn)
 
         rho_qp_reduced = compute_spin_reduced_one_body_density_matrix(rho_qp)
-        rho = compute_particle_density(rho_qp_reduced, self.system.spf)
+        rho = compute_particle_density(rho_qp_reduced, self.system.spf, np=np)
 
         return rho
 
