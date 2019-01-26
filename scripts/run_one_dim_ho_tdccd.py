@@ -27,7 +27,7 @@ laser_frequency = 8 * omega
 laser_strength = 1
 theta_t = 0.5
 theta_l = 0.9
-tol = 1e-5
+tol = 1e-4
 
 odho = OneDimensionalHarmonicOscillator(
     n, l, length, num_grid_points, omega=omega
@@ -65,7 +65,6 @@ td_energies[0] = tdccd.compute_energy().real
 for i, amp in enumerate(tdccd.solve(time_points)):
     psi_overlap[i + 1] = tdccd.compute_time_dependent_overlap().real
     td_energies[i + 1] = tdccd.compute_energy().real
-
 
 plt.figure()
 plt.plot(time_points, psi_overlap)
