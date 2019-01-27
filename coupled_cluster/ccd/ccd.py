@@ -95,8 +95,7 @@ class CoupledClusterDoubles(CoupledCluster):
         )
 
     def compute_two_body_density_matrix(self):
-        """
-        Note the transpose. Is used for testing the expressions.
+        """Note the transpose. Is used for testing the expressions.
         """
         return compute_two_body_density_matrix(
             self.t_2.transpose(2, 3, 0, 1), self.l_2, self.o, self.v, np=self.np

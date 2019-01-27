@@ -5,43 +5,31 @@ def compute_one_body_density_matrix(t, l, o, v, np, rho=None):
     rho.fill(0)
     rho[o, o] += np.eye(o.stop)
     rho[o, o] -= 0.5 * np.tensordot(l, t, axes=((0, 2, 3), (2, 0, 1)))
-
     rho[v, v] += 0.5 * np.tensordot(t, l, axes=((1, 2, 3), (3, 0, 1)))
 
     return rho
 
 
-"""
-Two body density matrices from Kvaal(2012). 
-t2 is misshaped so it has to passed in as t2.transpose(2,3,0,1).
-The final twobody density matrix should satisfy (which it does in my test implementation):
-    np.einsum('pqpq->',Dpqrs) = N(N-1)
-where N is the number of electrons.
-"""
-
-
-def compute_two_body_density_matrix(t2, l2, occ, virt, np, rho_pqrs=None):
-
+def compute_two_body_density_matrix(t2, l2, o, v, np, rho_pqrs=None):
+    """Two body density matrices from Kvaal (2012).
+    t2 is misshaped so it has to passed in as t2.transpose(2,3,0,1).
+    The final two body density matrix should satisfy
+    (which it does in my test implementation):
+        np.einsum('pqpq->',Dpqrs) = N(N-1)
+    where N is the number of electrons.
+    """
     if rho_pqrs is None:
-        rho_pqrs = np.zeros(
-            (virt.stop, virt.stop, virt.stop, virt.stop), dtype=t2.dtype
-        )
+        rho_pqrs = np.zeros((v.stop, v.stop, v.stop, v.stop), dtype=t2.dtype)
 
     rho_pqrs.fill(0)
-    rho_pqrs[occ, occ, occ, occ] = rho_ijkl(l2, t2, np)
-    rho_pqrs[virt, virt, virt, virt] = rho_abcd(l2, t2, np)
-    rho_pqrs[occ, virt, occ, virt] = rho_iajb(l2, t2, np)
-    rho_pqrs[occ, virt, virt, occ] = -rho_pqrs[occ, virt, occ, virt].transpose(
-        0, 1, 3, 2
-    )
-    rho_pqrs[virt, occ, occ, virt] = -rho_pqrs[occ, virt, occ, virt].transpose(
-        1, 0, 2, 3
-    )
-    rho_pqrs[virt, occ, virt, occ] = rho_pqrs[occ, virt, occ, virt].transpose(
-        1, 0, 3, 2
-    )
-    rho_pqrs[occ, occ, virt, virt] = rho_ijab(l2, t2, np)
-    rho_pqrs[virt, virt, occ, occ] = rho_abij(l2, t2, np)
+    rho_pqrs[o, o, o, o] = rho_ijkl(l2, t2, np)
+    rho_pqrs[v, v, v, v] = rho_abcd(l2, t2, np)
+    rho_pqrs[o, v, o, v] = rho_iajb(l2, t2, np)
+    rho_pqrs[o, v, v, o] = -rho_pqrs[o, v, o, v].transpose(0, 1, 3, 2)
+    rho_pqrs[v, o, o, v] = -rho_pqrs[o, v, o, v].transpose(1, 0, 2, 3)
+    rho_pqrs[v, o, v, o] = rho_pqrs[o, v, o, v].transpose(1, 0, 3, 2)
+    rho_pqrs[o, o, v, v] = rho_ijab(l2, t2, np)
+    rho_pqrs[v, v, o, o] = rho_abij(l2, t2, np)
     return rho_pqrs
 
 
