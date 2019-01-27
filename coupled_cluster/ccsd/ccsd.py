@@ -223,6 +223,9 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         return self.rho_qp
 
+    def compute_two_body_density_matrix(self):
+        pass
+
     def _compute_time_evolution_probability(self):
         np = self.np
         t_1_0, t_2_0 = self._t_0
