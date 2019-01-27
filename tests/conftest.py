@@ -6,6 +6,7 @@ from quantum_systems import (
     TwoDimensionalHarmonicOscillator,
     CustomSystem,
     OneDimensionalHarmonicOscillator,
+    construct_psi4_system,
 )
 from quantum_systems.time_evolution_operators import LaserField
 
@@ -216,3 +217,36 @@ def time_params():
     num_timesteps = 1001
 
     return {"t_start": t_start, "t_end": t_end, "num_timesteps": num_timesteps}
+
+
+@pytest.fixture
+def helium_system():
+    He = """
+    He 0.0 0.0 0.0
+    symmetry c1
+    """
+    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
+
+    return construct_psi4_system(He, options)
+
+
+@pytest.fixture
+def beryllium_system():
+    Be = """
+    Be 0.0 0.0 0.0
+    symmetry c1
+    """
+    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
+
+    return construct_psi4_system(Be, options)
+
+
+@pytest.fixture
+def neon_system():
+    Ne = """
+    Ne 0.0 0.0 0.0
+    symmetry c1
+    """
+    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
+
+    return construct_psi4_system(Ne, options)
