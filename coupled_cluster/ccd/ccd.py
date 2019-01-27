@@ -2,7 +2,10 @@ from coupled_cluster.cc import CoupledCluster
 from coupled_cluster.ccd.energies import compute_ccd_ground_state_energy
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
-from coupled_cluster.ccd.density_matrices import compute_one_body_density_matrix, compute_two_body_density_matrix
+from coupled_cluster.ccd.density_matrices import (
+    compute_one_body_density_matrix,
+    compute_two_body_density_matrix,
+)
 
 
 class CoupledClusterDoubles(CoupledCluster):
@@ -96,5 +99,5 @@ class CoupledClusterDoubles(CoupledCluster):
         Note the transpose. Is used for testing the expressions.
         """
         return compute_two_body_density_matrix(
-            self.t_2.transpose(2,3,0,1), self.l_2, self.o, self.v, np=self.np
-        )        
+            self.t_2.transpose(2, 3, 0, 1), self.l_2, self.o, self.v, np=self.np
+        )

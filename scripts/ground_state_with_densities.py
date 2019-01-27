@@ -3,6 +3,7 @@ from coupled_cluster.ccd import CoupledClusterDoubles
 from tdhf import HartreeFock
 import numpy as np
 
+
 def ccd_groundstate(name, system):
     print("** Compute groundstate of %s **" % name)
     print("Number of electrons: {0}".format(system.n))
@@ -33,7 +34,7 @@ def ccd_groundstate(name, system):
     print("tr(rho_pq): {0}".format(np.trace(rho_pq).real))
 
     rho_pqrs = ccd.compute_two_body_density_matrix()
-    print("tr(rho_pqrs) {0}".format(np.einsum('pqpq->',rho_pqrs).real))
+    print("tr(rho_pqrs) {0}".format(np.einsum("pqpq->", rho_pqrs).real))
 
     print()
 
@@ -61,4 +62,4 @@ symmetry c1
 """
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(Ne, options)
-ccd_groundstate("Ne",system)
+ccd_groundstate("Ne", system)
