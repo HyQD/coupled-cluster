@@ -636,6 +636,30 @@ def test_compute_time_dependent_overlap():
     assert abs(overlap_e - overlap) < 1e-8
 
 
+def test_one_body_density_matrix(iterated_ccd_amplitudes):
+    ccd_list = iterated_ccd_amplitudes
+
+    for ccd in ccd_list:
+        rho_qp = ccd.compute_one_body_density_matrix()
+
+        assert abs(np.trace(rho_qp) - ccd.n) < 1e-8
+
+
+def test_two_body_density_matrix(iterated_ccd_amplitudes):
+    ccd_list = iterated_ccd_amplitudes
+
+    for ccd in ccd_list:
+        rho_qspr = ccd.compute_two_body_density_matrix()
+
+        assert (
+            abs(
+                np.trace(np.trace(rho_qspr, axis1=0, axis2=2))
+                - ccd.n * (ccd.n - 1)
+            )
+            < 1e-8
+        )
+
+
 def test_reference_energy(tdho, ref_energy):
     tol = 1e-4
 
