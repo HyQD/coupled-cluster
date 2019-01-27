@@ -33,6 +33,24 @@ from coupled_cluster.ccd.rhs_l import (
 from coupled_cluster.ccd.time_dependent_overlap import (
     compute_time_dependent_overlap,
 )
+from coupled_cluster.ccd.density_matrices import (
+    compute_one_body_density_matrix,
+    compute_two_body_density_matrix,
+)
+
+
+@pytest.fixture
+def iterated_ccd_amplitudes(helium_system, beryllium_system, neon_system):
+
+    ccd_list = []
+    for system in [helium_system, beryllium_system, neon_system]:
+        ccd = CoupledClusterDoubles(system, verbose=False)
+        ccd.iterate_t_amplitudes(theta=0.9)
+        ccd.iterate_l_amplitudes(theta=0.9)
+
+        ccd_list.append(ccd)
+
+    return ccd_list
 
 
 def test_add_d1_t(large_system_ccd):
