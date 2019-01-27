@@ -19,23 +19,27 @@ The final twobody density matrix should satisfy (which it does in my test implem
 where N is the number of electrons.
 """
 
-def compute_twobody_density(occ,virt,l2,t2):
-    rho_pqrs = np.zeros((virt.stop,virt.stop,virt.stop,virt.stop))
-    rho_pqrs[occ,occ,occ,occ] = rho_ijkl(l2,t2)
-    rho_pqrs[virt,virt,virt,virt] = rho_abcd(l2,t2)
-    rho_pqrs[occ,virt,occ,virt] = rho_iajb(l2,t2)
+def compute_two_body_density_matrix(t2, l2, occ, virt, np, rho_pqrs=None):
+
+    if rho_pqrs is None:
+        rho_pqrs = np.zeros((virt.stop, virt.stop,virt.stop,virt.stop), dtype=t2.dtype)
+
+    rho_pqrs.fill(0)
+    rho_pqrs[occ,occ,occ,occ] = rho_ijkl(l2,t2,np)
+    rho_pqrs[virt,virt,virt,virt] = rho_abcd(l2,t2,np)
+    rho_pqrs[occ,virt,occ,virt] = rho_iajb(l2,t2,np)
     rho_pqrs[occ,virt,virt,occ] = -rho_pqrs[occ,virt,occ,virt].transpose(0,1,3,2)
     rho_pqrs[virt,occ,occ,virt] = -rho_pqrs[occ,virt,occ,virt].transpose(1,0,2,3)
     rho_pqrs[virt,occ,virt,occ] = rho_pqrs[occ,virt,occ,virt].transpose(1,0,3,2)
-    rho_pqrs[occ,occ,virt,virt] = rho_ijab(l2,t2)
-    rho_pqrs[virt,virt,occ,occ] = rho_abij(l2,t2)
+    rho_pqrs[occ,occ,virt,virt] = rho_ijab(l2,t2,np)
+    rho_pqrs[virt,virt,occ,occ] = rho_abij(l2,t2,np)
     return rho_pqrs
 
-def rho_ijkl(l2,t2):
+def rho_ijkl(l2,t2,np):
     """
     Compute rho_{ij}^{kl}
     """
-    delta_ij  = np.eye(l2.shape[0])
+    delta_ij  = np.eye(l2.shape[0],dtype=np.complex128)
     rho_ijkl  = np.einsum('ik,jl->ijkl',delta_ij,delta_ij,optimize=True)
     rho_ijkl -= rho_ijkl.swapaxes(0,1)
     Pijkl     = 0.5*np.einsum('ik,lmcd,jmcd->ijkl',delta_ij,l2,t2,optimize=True)
@@ -46,14 +50,14 @@ def rho_ijkl(l2,t2):
     rho_ijkl += 0.5*np.einsum('klcd,ijcd->ijkl',l2,t2,optimize=True)
     return rho_ijkl
 
-def rho_abcd(l2,t2):
+def rho_abcd(l2,t2,np):
     """
     Compute rho_{ab}^{cd}
     """
     rho_abcd = 0.5*np.einsum('ijab,ijcd->abcd',l2,t2,optimize=True)
     return rho_abcd
 
-def rho_iajb(l2,t2):
+def rho_iajb(l2,t2,np):
     """
     Compute rho_{ia}^{jb}
     """
@@ -61,13 +65,13 @@ def rho_iajb(l2,t2):
     rho_iajb -= np.einsum('jkac,ikbc->iajb',l2,t2)
     return rho_iajb
 
-def rho_abij(l2,t2):
+def rho_abij(l2,t2,np):
     """
     Compute rho_{ab}^{ij}
     """
     return l2.transpose(2,3,0,1).copy()
 
-def rho_ijab(l2,t2):
+def rho_ijab(l2,t2,np):
     """
     Compute rho_{ij}^{ab}
     """
