@@ -3,7 +3,7 @@ channels:
     - psi4
     - anaconda
 dependencies:
-    - python=3.6
+    - python
     - psi4
     - pip
     - pip:
