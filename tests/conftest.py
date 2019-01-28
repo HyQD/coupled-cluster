@@ -219,7 +219,7 @@ def time_params():
     return {"t_start": t_start, "t_end": t_end, "num_timesteps": num_timesteps}
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def helium_system():
     He = """
     He 0.0 0.0 0.0
@@ -230,7 +230,7 @@ def helium_system():
     return construct_psi4_system(He, options)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def beryllium_system():
     Be = """
     Be 0.0 0.0 0.0
@@ -241,7 +241,7 @@ def beryllium_system():
     return construct_psi4_system(Be, options)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def neon_system():
     Ne = """
     Ne 0.0 0.0 0.0
