@@ -36,6 +36,11 @@ from coupled_cluster.ccd.time_dependent_overlap import (
 from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
+    add_rho_klij,
+    add_rho_abij,
+    add_rho_jbia,
+    add_rho_ijab,
+    add_rho_cdab,
 )
 
 
@@ -658,6 +663,216 @@ def test_two_body_density_matrix(iterated_ccd_amplitudes):
             )
             < 1e-8
         )
+
+
+def test_rho_ijkl(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        t2 = t.copy().transpose(2, 3, 0, 1)
+        l2 = l.copy()
+        o = system.o
+        v = system.v
+
+        rho_pqrs = np.zeros((v.stop, v.stop, v.stop, v.stop), dtype=t2.dtype)
+        rho_out = np.zeros_like(rho_pqrs)
+
+        rho_pqrs[o, o, o, o] += rho_ijkl(l2, t2, np)
+        add_rho_klij(t, l, o, v, rho_out, np)
+        rho_out = rho_out.transpose(2, 3, 0, 1)
+
+        np.testing.assert_allclose(rho_pqrs, rho_out, atol=1e-10)
+
+
+def test_rho_abij(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        t2 = t.copy().transpose(2, 3, 0, 1)
+        l2 = l.copy()
+        o = system.o
+        v = system.v
+
+        rho_pqrs = np.zeros((v.stop, v.stop, v.stop, v.stop), dtype=t2.dtype)
+        rho_out = np.zeros_like(rho_pqrs)
+
+        rho_pqrs[o, o, v, v] += rho_ijab(l2, t2, np)
+        add_rho_abij(t, l, o, v, rho_out, np)
+        rho_out = rho_out.transpose(2, 3, 0, 1)
+
+        np.testing.assert_allclose(rho_pqrs, rho_out, atol=1e-10)
+
+
+def test_rho_jbia(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        t2 = t.copy().transpose(2, 3, 0, 1)
+        l2 = l.copy()
+        o = system.o
+        v = system.v
+
+        rho_pqrs = np.zeros((v.stop, v.stop, v.stop, v.stop), dtype=t2.dtype)
+        rho_out = np.zeros_like(rho_pqrs)
+
+        rho_pqrs[o, v, o, v] = rho_iajb(l2, t2, np)
+        rho_pqrs[o, v, v, o] = -rho_pqrs[o, v, o, v].transpose(0, 1, 3, 2)
+        rho_pqrs[v, o, o, v] = -rho_pqrs[o, v, o, v].transpose(1, 0, 2, 3)
+        rho_pqrs[v, o, v, o] = rho_pqrs[o, v, o, v].transpose(1, 0, 3, 2)
+
+        add_rho_jbia(t, l, o, v, rho_out, np)
+        rho_out = rho_out.transpose(2, 3, 0, 1)
+
+        np.testing.assert_allclose(rho_pqrs, rho_out, atol=1e-10)
+
+
+def test_rho_ijab(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        t2 = t.copy().transpose(2, 3, 0, 1)
+        l2 = l.copy()
+        o = system.o
+        v = system.v
+
+        rho_pqrs = np.zeros((v.stop, v.stop, v.stop, v.stop), dtype=t2.dtype)
+        rho_out = np.zeros_like(rho_pqrs)
+
+        rho_pqrs[v, v, o, o] = rho_abij(l2, t2, np)
+
+        add_rho_ijab(t, l, o, v, rho_out, np)
+        rho_out = rho_out.transpose(2, 3, 0, 1)
+
+        np.testing.assert_allclose(rho_pqrs, rho_out, atol=1e-10)
+
+
+def test_rho_cdab(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        t2 = t.copy().transpose(2, 3, 0, 1)
+        l2 = l.copy()
+        o = system.o
+        v = system.v
+
+        rho_pqrs = np.zeros((v.stop, v.stop, v.stop, v.stop), dtype=t2.dtype)
+        rho_out = np.zeros_like(rho_pqrs)
+
+        rho_pqrs[v, v, v, v] = rho_abcd(l2, t2, np)
+
+        add_rho_cdab(t, l, o, v, rho_out, np)
+        rho_out = rho_out.transpose(2, 3, 0, 1)
+
+        np.testing.assert_allclose(rho_pqrs, rho_out, atol=1e-10)
+
+
+def test_full_two_body_density_matrix(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        t2 = t.copy().transpose(2, 3, 0, 1)
+        l2 = l.copy()
+        o = system.o
+        v = system.v
+
+        rho_pqrs = np.zeros((v.stop, v.stop, v.stop, v.stop), dtype=t2.dtype)
+        rho_out = np.zeros_like(rho_pqrs)
+
+        rho_pqrs[o, o, o, o] += rho_ijkl(l2, t2, np)
+        rho_pqrs[v, v, v, v] += rho_abcd(l2, t2, np)
+        rho_pqrs[o, v, o, v] += rho_iajb(l2, t2, np)
+        rho_pqrs[o, v, v, o] += -rho_pqrs[o, v, o, v].transpose(0, 1, 3, 2)
+        rho_pqrs[v, o, o, v] += -rho_pqrs[o, v, o, v].transpose(1, 0, 2, 3)
+        rho_pqrs[v, o, v, o] += rho_pqrs[o, v, o, v].transpose(1, 0, 3, 2)
+        rho_pqrs[o, o, v, v] += rho_ijab(l2, t2, np)
+        rho_pqrs[v, v, o, o] += rho_abij(l2, t2, np)
+
+        rho_out = compute_two_body_density_matrix(t, l, o, v, np, out=rho_out)
+        rho_out = rho_out.transpose(2, 3, 0, 1)
+
+        np.testing.assert_allclose(rho_pqrs, rho_out, atol=1e-10)
+
+
+def test_full_two_body_density_matrix_2(large_system_ccd):
+    t, l, large_system_ccd = large_system_ccd
+    t2 = t.copy().transpose(2, 3, 0, 1)
+    l2 = l.copy()
+    o = large_system_ccd.o
+    v = large_system_ccd.v
+
+    rho_pqrs = np.zeros((v.stop, v.stop, v.stop, v.stop), dtype=t2.dtype)
+
+    rho_pqrs[o, o, o, o] = rho_ijkl(l2, t2, np)
+    rho_pqrs[v, v, v, v] = rho_abcd(l2, t2, np)
+    rho_pqrs[o, v, o, v] = rho_iajb(l2, t2, np)
+    rho_pqrs[o, v, v, o] = -rho_pqrs[o, v, o, v].transpose(0, 1, 3, 2)
+    rho_pqrs[v, o, o, v] = -rho_pqrs[o, v, o, v].transpose(1, 0, 2, 3)
+    rho_pqrs[v, o, v, o] = rho_pqrs[o, v, o, v].transpose(1, 0, 3, 2)
+    rho_pqrs[o, o, v, v] = rho_ijab(l2, t2, np)
+    rho_pqrs[v, v, o, o] = rho_abij(l2, t2, np)
+
+    rho_out = compute_two_body_density_matrix(t, l, o, v, np).transpose(
+        2, 3, 0, 1
+    )
+
+    np.testing.assert_allclose(rho_out, rho_pqrs, atol=1e-10)
+
+
+def rho_ijkl(l2, t2, np):
+    """
+   Compute rho_{ij}^{kl}
+   """
+    delta_ij = np.eye(l2.shape[0], dtype=np.complex128)
+    rho_ijkl = np.einsum("ik,jl->ijkl", delta_ij, delta_ij, optimize=True)
+    rho_ijkl -= rho_ijkl.swapaxes(0, 1)
+    Pijkl = 0.5 * np.einsum(
+        "ik,lmcd,jmcd->ijkl", delta_ij, l2, t2, optimize=True
+    )
+    rho_ijkl -= Pijkl
+    rho_ijkl += Pijkl.swapaxes(0, 1)
+    rho_ijkl += Pijkl.swapaxes(2, 3)
+    rho_ijkl -= Pijkl.swapaxes(0, 1).swapaxes(2, 3)
+    rho_ijkl += 0.5 * np.einsum("klcd,ijcd->ijkl", l2, t2, optimize=True)
+    return rho_ijkl
+
+
+def rho_abcd(l2, t2, np):
+    """
+   Compute rho_{ab}^{cd}
+   """
+    rho_abcd = 0.5 * np.einsum("ijab,ijcd->abcd", l2, t2, optimize=True)
+    return rho_abcd
+
+
+def rho_iajb(l2, t2, np):
+    """
+   Compute rho_{ia}^{jb}
+   """
+    rho_iajb = 0.5 * np.einsum(
+        "ij,klac,klbc->iajb", np.eye(l2.shape[0]), l2, t2, optimize=True
+    )
+    rho_iajb -= np.einsum("jkac,ikbc->iajb", l2, t2)
+    return rho_iajb
+
+
+def rho_abij(l2, t2, np):
+    """
+   Compute rho_{ab}^{ij}
+   """
+    return l2.transpose(2, 3, 0, 1).copy()
+
+
+def rho_ijab(l2, t2, np):
+    """
+   Compute rho_{ij}^{ab}
+   """
+    rho_ijab = -0.5 * np.einsum(
+        "klcd,ijac,klbd->ijab", l2, t2, t2, optimize=True
+    )
+    rho_ijab -= rho_ijab.swapaxes(2, 3)
+    Pij = np.einsum("klcd,ikac,jlbd->ijab", l2, t2, t2, optimize=True)
+    Pij += 0.5 * np.einsum("klcd,ilab,jkcd->ijab", l2, t2, t2, optimize=True)
+    rho_ijab += Pij
+    rho_ijab -= Pij.swapaxes(0, 1)
+    rho_ijab += 0.25 * np.einsum(
+        "klcd,klab,ijcd->ijab", l2, t2, t2, optimize=True
+    )
+    rho_ijab += t2
+    return rho_ijab
 
 
 def test_reference_energy(tdho, ref_energy):
