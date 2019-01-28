@@ -44,7 +44,7 @@ from coupled_cluster.ccd.density_matrices import (
 )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def iterated_ccd_amplitudes(helium_system, beryllium_system, neon_system):
 
     ccd_list = []
