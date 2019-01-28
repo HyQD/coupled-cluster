@@ -12,6 +12,25 @@ This project can be installed by running:
 pip install git+https://github.com/Schoyen/coupled-cluster.git
 ```
 
+During development it is a good idea to create a _conda environment_ such that all dependencies gets installed correctly. This is easiest done by executing:
+
+```bash
+conda env create -f environment.yml
+source activate cc
+```
+
+Once you are done, you can deactivate the environment by:
+
+```bash
+source deactivate
+```
+
+If the environment changes you can update the new changes by:
+
+```bash
+conda env update -f environment.yml
+```
+
 
 # Science!
 
