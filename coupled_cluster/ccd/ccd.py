@@ -15,8 +15,8 @@ class CoupledClusterDoubles(CoupledCluster):
         np = self.np
         n, m = self.n, self.m
 
-        self.rhs_t_2 = np.zeros((m, m, n, n), dtype=np.complex128)
-        self.rhs_l_2 = np.zeros((n, n, m, m), dtype=np.complex128)
+        self.rhs_t_2 = np.zeros((m, m, n, n), dtype=self.u.dtype)
+        self.rhs_l_2 = np.zeros((n, n, m, m), dtype=self.u.dtype)
 
         self.t_2 = np.zeros_like(self.rhs_t_2)
         self.l_2 = np.zeros_like(self.rhs_l_2)

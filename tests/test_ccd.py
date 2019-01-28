@@ -816,7 +816,7 @@ def rho_ijkl(l2, t2, np):
     """
    Compute rho_{ij}^{kl}
    """
-    delta_ij = np.eye(l2.shape[0], dtype=np.complex128)
+    delta_ij = np.eye(l2.shape[0], dtype=l2.dtype)
     rho_ijkl = np.einsum("ik,jl->ijkl", delta_ij, delta_ij, optimize=True)
     rho_ijkl -= rho_ijkl.swapaxes(0, 1)
     Pijkl = 0.5 * np.einsum(
