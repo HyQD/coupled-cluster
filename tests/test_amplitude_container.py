@@ -90,7 +90,7 @@ def test_addition_double_amp(large_system_ccsd):
     np.testing.assert_allclose(l_2 + l_2, new_l[1], atol=1e-10)
 
 
-def test_addition_double_amp(large_system_ccsd):
+def test_multiplication_double_amp(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
     container = AmplitudeContainer(t=[t_1, t_2], l=[l_1, l_2])
