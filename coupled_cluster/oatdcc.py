@@ -88,6 +88,4 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         C_tilde_new = 1j * self.compute_q_space_bra_equations()
 
         # Return amplitudes and C and C_tilde
-        # TODO: Create new container for these
-
-        pass
+        return OACCVector(t=t_new, l=l_new, C=C_new, C_tilde=C_tilde_new)
