@@ -65,28 +65,69 @@ class AmplitudeContainer:
         yield from self._l
 
 
-class OACCVector:
+class OACCVector(AmplitudeContainer):
     """This is a container for the amplitudes, t and l, and the orbital
     transformation coefficients C and C_tilde.
     """
 
     def __init__(self, t, l, C, C_tilde):
-        if type(t) not in [list, tuple, set]:
-            t = [t]
-
-        self._t = t
-
-        if type(l) not in [list, tuple, set]:
-            l = [l]
-
-        self._l = l
+        super().__init__(t=t, l=l)
 
         self._C = C
         self._C_tilde = C_tilde
 
+    def __add__(self, k):
+        # Check if k is a constant to be added to all l- and t-amplitudes and
+        # coefficients.
+        if type(k) not in [list, tuple, set, type(self)]:
+            new_t = [t + k for t in self._t]
+            new_l = [l + k for l in self._l]
+            new_C = self._C + k
+            new_C_tilde = self._C_tilde + k
+
+            return OACCVector(new_t, new_l, new_C, new_C_tilde)
+
+        # Assuming that k = [k_t, k_l, k_C, k_C_tilde], a list where each
+        # element should be added to each amplitude in the l- and t-lists and
+        # each of the coefficients.
+        k_t, k_l, k_C, k_C_tilde = k
+        new_t = [t + _k_t for t, _k_t in zip(self._t, k_t)]
+        new_l = [l + _k_l for l, _k_l in zip(self._l, k_l)]
+        new_C = self._C + k_C
+        new_C_tilde = self._C_tilde + k_C_tilde
+
+        return OACCVector(new_t, new_l, new_C, new_C_tilde)
+
+    def __mul__(self, k):
+        # Check if k is a constant to be multiplied with all l- and t-amplitudes
+        # and coefficients.
+        if type(k) not in [list, tuple, set, type(self)]:
+            new_t = [t * k for t in self._t]
+            new_l = [l * k for l in self._l]
+            new_C = self._C * k
+            new_C_tilde = self._C_tilde * k
+
+            return OACCVector(new_t, new_l, new_C, new_C_tilde)
+
+        # Assuming that k = [k_t, k_l, k_C, k_C_tilde], a list where each
+        # element should be multiplied with each amplitude in the l- and t-lists
+        # and each of the coefficients.
+        k_t, k_l, k_C, k_C_tilde = k
+        new_t = [t * _k_t for t, _k_t in zip(self._t, k_t)]
+        new_l = [l * _k_l for l, _k_l in zip(self._l, k_l)]
+        new_C = self._C * k_C
+        new_C_tilde = self._C_tilde * k_C_tilde
+
+        return OACCVector(new_t, new_l, new_C, new_C_tilde)
+
     def __iter__(self):
         yield self._t
         yield self._l
+        yield self._C
+        yield self._C_tilde
+
+    def unpack(self):
+        yield from super().unpack()
         yield self._C
         yield self._C_tilde
 
