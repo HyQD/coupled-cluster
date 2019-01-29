@@ -37,8 +37,11 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
-    def compute_q_space_equations(self):
-        pass
+    def compute_q_space_ket_equations(self):
+        return 0
+
+    def compute_q_space_bra_equations(self):
+        return 0
 
     def __call__(self, prev_amp, current_time):
         t_old, l_old, C, C_tilde = prev_amp
@@ -81,7 +84,8 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         eta = self.compute_p_space_equations()
 
         # Solve Q-space for C and C_tilde
-        # Transform basis
+        C_new = -1j * self.compute_q_space_ket_equations()
+        C_tilde_new = 1j * self.compute_q_space_bra_equations()
 
         # Return amplitudes and C and C_tilde
         # TODO: Create new container for these
