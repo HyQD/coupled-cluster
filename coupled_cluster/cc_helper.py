@@ -65,6 +65,32 @@ class AmplitudeContainer:
         yield from self._l
 
 
+class OACCVector:
+    """This is a container for the amplitudes, t and l, and the orbital
+    transformation coefficients C and C_tilde.
+    """
+
+    def __init__(self, t, l, C, C_tilde):
+        if type(t) not in [list, tuple, set]:
+            t = [t]
+
+        self._t = t
+
+        if type(l) not in [list, tuple, set]:
+            l = [l]
+
+        self._l = l
+
+        self._C = C
+        self._C_tilde = C_tilde
+
+    def __iter__(self):
+        yield self._t
+        yield self._l
+        yield self._C
+        yield self._C_tilde
+
+
 def compute_reference_energy(f, u, o, v, np):
     return np.trace(f[o, o]) - 0.5 * np.trace(
         np.trace(u[o, o, o, o], axis1=1, axis2=3)
