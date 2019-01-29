@@ -52,7 +52,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # Change basis to C and C_tilde
         # TODO: Consider offloading these transformations to separate functions
-        self.h = self.C_tilde @ self.h @ self.C
+        self.h = C_tilde @ self.h @ C
         self.u = np.einsum(
             "pa, qb, cr, ds, abcd -> pqrs",
             C_tilde,
