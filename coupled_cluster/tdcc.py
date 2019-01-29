@@ -106,6 +106,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def compute_two_body_density_matrix(self):
+        pass
+
+    @abc.abstractmethod
     def compute_time_dependent_overlap(self):
         pass
 

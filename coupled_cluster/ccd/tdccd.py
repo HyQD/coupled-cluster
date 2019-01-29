@@ -2,7 +2,10 @@ from coupled_cluster.tdcc import TimeDependentCoupledCluster
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
 from coupled_cluster.ccd.energies import compute_time_dependent_energy
-from coupled_cluster.ccd.density_matrices import compute_one_body_density_matrix
+from coupled_cluster.ccd.density_matrices import (
+    compute_one_body_density_matrix,
+    compute_two_body_density_matrix,
+)
 from coupled_cluster.ccd.time_dependent_overlap import (
     compute_time_dependent_overlap,
 )
@@ -25,7 +28,16 @@ class TDCCD(TimeDependentCoupledCluster):
     def compute_one_body_density_matrix(self):
         t_2, l_2 = self._amplitudes.unpack()
 
-        return compute_one_body_density_matrix(t_2, l_2, self.o, self.v)
+        return compute_one_body_density_matrix(
+            t_2, l_2, self.o, self.v, np=self.np
+        )
+
+    def compute_two_body_density_matrix(self):
+        t_2, l_2 = self._amplitudes.unpack()
+
+        return compute_two_body_density_matrix(
+            t_2, l_2, self.o, self.v, np=self.np
+        )
 
     def compute_time_dependent_overlap(self):
         t_2, l_2 = self._amplitudes.unpack()
