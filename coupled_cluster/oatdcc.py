@@ -33,6 +33,10 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         """
         pass
 
+    @abc.abstractmethod
+    def compute_p_space_equations(self):
+        pass
+
     def __call__(self, prev_amp, current_time):
         t, l, C, C_tilde = prev_amp
 
