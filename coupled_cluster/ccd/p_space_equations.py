@@ -1,5 +1,3 @@
-import numpy as np
-
 """
 
 The indexing is extremely confusing. Following the definitions in Kvaal (2012), the 
