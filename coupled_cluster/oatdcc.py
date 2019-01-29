@@ -38,7 +38,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         pass
 
     def __call__(self, prev_amp, current_time):
-        t, l, C, C_tilde = prev_amp
+        t_old, l_old, C, C_tilde = prev_amp
 
         # Evolve system in time
         self.h = self.system.h_t(current_time)
@@ -60,8 +60,23 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # OATDCC procedure:
         # Do amplitude step
+        t_new = [
+            -1j * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
+            for rhs_t_func in self.rhs_t_amplitudes()
+        ]
+
+        l_new = [
+            1j * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
+            for rhs_l_func in self.rhs_l_amplitudes()
+        ]
+
         # Compute density matrices
+        self.rho_qp = self.compute_one_body_density_matrix()
+        self.rho_qspr = self.compute_two_body_density_matrix()
+
         # Solve P-space equations for eta
+        eta = self.compute_p_space_equations()
+
         # Solve Q-space for C and C_tilde
         # Transform basis
 
