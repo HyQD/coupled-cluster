@@ -22,3 +22,7 @@ def compute_time_dependent_overlap(t, l, t_t, l_t, np):
     tilde_0 += 0.25 * np.tensordot(t_t, l, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
 
     return tilde_t * tilde_0
+
+
+def compute_orbital_adaptive_time_dependent_overlap(t, l, t_t, l_t, np):
+    pass
