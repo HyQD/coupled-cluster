@@ -15,7 +15,7 @@ def compute_two_body_density_matrix(t, l, o, v, np, out=None):
 
     The final two body density matrix should satisfy
 
-        np.einsum('pqpq->',Dpqrs) = N(N-1)
+        np.einsum('pqpq->', rho_qspr) = N(N-1)
 
     where N is the number of electrons.
     """
@@ -46,15 +46,13 @@ def add_rho_klij(t, l, o, v, out, np):
 
     term = np.einsum("ki, lj -> klij", delta, delta)
     term -= term.swapaxes(2, 3)
-
     out[o, o, o, o] += term
 
-    term = 0.5 * np.tensordot(l, t, axes=((1, 2, 3), (3, 0, 1)))
-    term = np.einsum("ki, lj -> klij", delta, term)
+    term_lj = -0.5 * np.tensordot(l, t, axes=((1, 2, 3), (3, 0, 1)))
+    term = np.einsum("ki, lj -> klij", delta, term_lj)
     term -= term.swapaxes(0, 1)
     term -= term.swapaxes(2, 3)
-
-    out[o, o, o, o] -= term
+    out[o, o, o, o] += term
 
     out[o, o, o, o] += 0.5 * np.tensordot(l, t, axes=((2, 3), (0, 1)))
 
@@ -79,21 +77,18 @@ def add_rho_abij(t, l, o, v, out, np):
     W_bc = -0.5 * np.tensordot(t, l, axes=((1, 2, 3), (3, 0, 1)))
     term = np.tensordot(t, W_bc, axes=((1), (1))).transpose(0, 3, 1, 2)
     term -= term.swapaxes(0, 1)
-
     out[v, v, o, o] += term
 
     # Complexity: O(m^3 n^3)
     W_aild = np.tensordot(t, l, axes=((1, 3), (2, 0)))
     term = np.tensordot(W_aild, t, axes=((2, 3), (3, 1))).transpose(0, 2, 1, 3)
     term -= term.swapaxes(2, 3)
-
     out[v, v, o, o] += term
 
     # Complexity: O(m^2 n^3)
     W_lj = 0.5 * np.tensordot(l, t, axes=((0, 2, 3), (3, 0, 1)))
     term = np.tensordot(t, W_lj, axes=((3), (0)))
     term -= term.swapaxes(2, 3)
-
     out[v, v, o, o] += term
 
     if o.stop >= v.stop // 2:
