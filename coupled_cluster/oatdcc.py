@@ -73,7 +73,10 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         # Compute density matrices
         self.rho_qp = self.compute_one_body_density_matrix()
         self.rho_qspr = self.compute_two_body_density_matrix()
-        
+
+        # Solve P-space equations for eta
+        eta = self.compute_p_space_equations()
+
         # Compute the inverse of rho_qp needed in Q-space eqs.
         """
         If rho_qp is singular we can regularize it as, 
@@ -84,10 +87,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         always work with the regularized rho_qp. Note here that expm refers to the matrix exponential which I can not find in 
         numpy only in scipy. 
         """
-        rho_qp_inverse = self.np.linalg.inv(self.rho_qp)
-
-        # Solve P-space equations for eta
-        eta = self.compute_p_space_equations()
+        rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
         C_new = -1j * self.compute_q_space_ket_equations()
