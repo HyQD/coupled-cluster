@@ -35,7 +35,7 @@ symmetry c1
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 omega = 2.873_564_3
-E = 100  # 0.05-5
+E = 1  # 0.05-5
 
 
 system = construct_psi4_system(He, options)
@@ -56,7 +56,7 @@ system.set_polarization_vector(polarization)
 system.set_time_evolution_operator(LaserField(laser_pulse(omega=omega, E=E)))
 
 oatdccd.set_initial_conditions()
-time_points = np.linspace(0, 2, 2001)
+time_points = np.linspace(0, 7, 701)
 dt = time_points[1] - time_points[0]
 print("dt = {0}".format(dt))
 td_energies = np.zeros(len(time_points))
