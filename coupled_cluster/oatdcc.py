@@ -138,9 +138,7 @@ def compute_q_space_ket_equations(
     rhs += np.dot(h, C)
     rhs -= np.dot(C, h_tilde)
 
-    u_quart = np.einsum(
-        "rb,gq,ds,abgd->arqs", C_tilde, C, C, u, optimize=True
-    )
+    u_quart = np.einsum("rb,gq,ds,abgd->arqs", C_tilde, C, C, u, optimize=True)
     u_quart -= np.tensordot(C, u_tilde, axes=((1), (0)))
 
     temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
