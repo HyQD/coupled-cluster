@@ -17,7 +17,7 @@ def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
     return eta
 
 
-def compute_A_ibaj(rho_qp, o, v, np=np):
+def compute_A_ibaj(rho_qp, o, v, np):
     delta_ij = np.eye(o.stop)
     delta_ba = np.eye(v.stop - o.stop)
 
