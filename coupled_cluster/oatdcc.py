@@ -37,18 +37,12 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
-    def compute_q_space_ket_equations(self):
-        return 0
-
-    def compute_q_space_bra_equations(self):
-        return 0
-
     def __call__(self, prev_amp, current_time):
         t_old, l_old, C, C_tilde = prev_amp
 
         # Evolve system in time
-        self.h = self.system.h_t(current_time)
-        self.u = self.system.u_t(current_time)
+        self.h_orig = self.system.h_t(current_time)
+        self.u_orig = self.system.u_t(current_time)
 
         # Change basis to C and C_tilde
         # TODO: Consider offloading these transformations to separate functions
