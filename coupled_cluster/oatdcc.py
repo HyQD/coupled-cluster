@@ -48,14 +48,14 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # Change basis to C and C_tilde
         # TODO: Consider offloading these transformations to separate functions
-        self.h = C_tilde @ self.h @ C
+        self.h = C_tilde @ self.h_orig @ C
         self.u = np.einsum(
             "pa, qb, cr, ds, abcd -> pqrs",
             C_tilde,
             C_tilde,
             C,
             C,
-            self.u,
+            self.u_orig,
             optimize=True,
         )
         self.f = self.system.construct_fock_matrix(self.h, self.u)
