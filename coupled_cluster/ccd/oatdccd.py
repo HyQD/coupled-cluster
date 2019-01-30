@@ -26,6 +26,22 @@ class OATDCCD(OATDCC):
             self.f, self.u, t_2, l_2, self.o, self.v, np=self.np
         )
 
+    def one_body_density_matrix(self, t, l):
+        t_2 = t[0]
+        l_2 = l[0]
+
+        return compute_one_body_density_matrix(
+            t_2, l_2, self.o, self.v, np=self.np
+        )
+
+    def two_body_density_matrix(self, t, l):
+        t_2 = t[0]
+        l_2 = l[0]
+
+        return compute_two_body_density_matrix(
+            t_2, l_2, self.o, self.v, np=self.np
+        )
+
     def compute_one_body_density_matrix(self):
         t_2, l_2, _, _ = self._amplitudes.unpack()
 

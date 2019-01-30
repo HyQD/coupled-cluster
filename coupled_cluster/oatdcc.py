@@ -27,6 +27,14 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self._amplitudes = OACCVector(*amplitudes, C, C_tilde)
 
     @abc.abstractmethod
+    def one_body_density_matrix(self, t, l):
+        pass
+
+    @abc.abstractmethod
+    def two_body_density_matrix(self, t, l):
+        pass
+
+    @abc.abstractmethod
     def compute_time_dependent_overlap(self):
         """The time-dependent overlap for orbital-adaptive coupled cluster
         changes due to the time-dependent orbitals in the wavefunctions.
@@ -73,8 +81,8 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         ]
 
         # Compute density matrices
-        self.rho_qp = self.compute_one_body_density_matrix()
-        self.rho_qspr = self.compute_two_body_density_matrix()
+        self.rho_qp = self.one_body_density_matrix(t_old, l_old)
+        self.rho_qspr = self.two_body_density_matrix(t_old, l_old)
 
         # Solve P-space equations for eta
         eta = self.compute_p_space_equations()
