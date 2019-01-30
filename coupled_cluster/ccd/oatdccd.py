@@ -9,6 +9,7 @@ from coupled_cluster.ccd.density_matrices import (
 from coupled_cluster.ccd.time_dependent_overlap import (
     compute_orbital_adaptive_time_dependent_overlap,
 )
+from coupled_cluster.ccd.p_space_equations import compute_eta
 
 
 class OATDCCD(OATDCC):
