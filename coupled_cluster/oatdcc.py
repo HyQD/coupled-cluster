@@ -90,8 +90,68 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
-        C_new = -1j * self.compute_q_space_ket_equations()
-        C_tilde_new = 1j * self.compute_q_space_bra_equations()
+        C_new = -1j * compute_q_space_ket_equations(
+            C,
+            C_tilde,
+            eta,
+            self.h_orig,
+            self.h,
+            self.u_orig,
+            self.u,
+            rho_pq_inv,
+            self.rho_qspr,
+            np=np,
+        )
+        C_tilde_new = 1j * compute_q_space_bra_equations(
+            C,
+            C_tilde,
+            eta,
+            self.h_orig,
+            self.h,
+            self.u_orig,
+            self.u,
+            rho_pq_inv,
+            self.rho_qspr,
+            np=np,
+        )
 
         # Return amplitudes and C and C_tilde
         return OACCVector(t=t_new, l=l_new, C=C_new, C_tilde=C_tilde_new)
+
+
+def compute_q_space_ket_equations(
+    C, C_tilde, eta, h, h_tilde, u, u_tilde, rho_inv_pq, rho_qspr, np
+):
+    rhs = 1j * np.dot(C, eta)
+    rhs += np.dot(h, C)
+    rhs -= np.dot(C, h_tilde)
+
+    u_quart = np.einsum(
+        "qb, cr, ds, pbcd -> pqrs", C_tilde, C, C, u, optimize=True
+    )
+    u_quart -= np.tensordot(C, u_tilde, axes=((1), (0)))
+
+    temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
+    rhs += np.dot(temp_ap, rho_inv_pq)
+
+    return rhs
+
+
+def compute_q_space_bra_equations(
+    C, C_tilde, eta, h, h_tilde, u, u_tilde, rho_inv_pq, rho_qspr, np
+):
+    rhs = 1j * np.dot(eta, C_tilde)
+    rhs += np.dot(C_tilde, h)
+    rhs -= np.dot(h_tilde, C_tilde)
+
+    u_quart = np.einsum(
+        "pa, qb, ds, abrd -> pqrs", C_tilde, C_tilde, C, u, optimize=True
+    )
+    u_quart -= np.tensordot(u_tilde, C_tilde, axes=((2), (0))).transpose(
+        0, 1, 3, 2
+    )
+
+    temp_qb = np.tensordot(rho_qspr, u_quart, axes=((1, 2, 3), (3, 0, 1)))
+    rhs += np.dot(rho_inv_pq, temp_qb)
+
+    return rhs
