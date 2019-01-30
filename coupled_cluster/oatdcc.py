@@ -131,7 +131,7 @@ def compute_q_space_ket_equations(
     rhs -= np.dot(C, h_tilde)
 
     u_quart = np.einsum(
-        "qb, cr, ds, pbcd -> pqrs", C_tilde, C, C, u, optimize=True
+        "rb,gq,ds,abgd->arqs", C_tilde, C, C, u, optimize=True
     )
     u_quart -= np.tensordot(C, u_tilde, axes=((1), (0)))
 
@@ -149,7 +149,7 @@ def compute_q_space_bra_equations(
     rhs -= np.dot(h_tilde, C_tilde)
 
     u_quart = np.einsum(
-        "pa, qb, ds, abrd -> pqrs", C_tilde, C_tilde, C, u, optimize=True
+        "pa,rg,ds,agbd->prbs", C_tilde, C_tilde, C, u, optimize=True
     )
     u_quart -= np.tensordot(u_tilde, C_tilde, axes=((2), (0))).transpose(
         0, 1, 3, 2
