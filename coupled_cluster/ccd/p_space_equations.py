@@ -31,10 +31,20 @@ def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
     R_ia = np.dot(rho_qp[o, o], h[o, v])
     R_ia -= np.dot(h[o, v], rho_qp[v, v])
     R_ia += 0.5 * np.tensordot(
-        rho_qspr[o, :, :, :], u[:, :, v, :], axes=((1, 2, 3), (3, 0, 1))
+        # rho^{is}_{pr}
+        rho_qspr[o, :, :, :],
+        # u^{pr}_{as}
+        u[:, :, v, :],
+        # axes=((s, p, r), (s, p, r))
+        axes=((1, 2, 3), (3, 0, 1)),
     )
     R_ia -= 0.5 * np.tensordot(
-        u[o, :, :, :], rho_qspr[:, :, v, :], axes=((1, 2, 3), (3, 0, 1))
+        # u^{ir}_{qs}
+        u[o, :, :, :],
+        # rho^{qs}_{ar}
+        rho_qspr[:, :, v, :],
+        # axes=((r, q, s), (r, q, s))
+        axes=((1, 2, 3), (3, 0, 1)),
     )
 
     return R_ia
@@ -44,10 +54,20 @@ def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
     R_tilde_ai = np.dot(rho_qp[v, v], h[v, o])
     R_tilde_ai -= np.dot(h[v, o], rho_qp[o, o])
     R_tilde_ai += 0.5 * np.tensordot(
-        rho_qspr[v, :, :, :], u[:, :, o, :], axes=((1, 2, 3), (3, 0, 1))
+        # rho^{as}_{pr}
+        rho_qspr[v, :, :, :],
+        # u^{pr}_{is}
+        u[:, :, o, :],
+        # axes=((s, p, r), (s, p, r))
+        axes=((1, 2, 3), (3, 0, 1)),
     )
     R_tilde_ai -= 0.5 * np.tensordot(
-        u[v, :, :, :], rho_qspr[:, :, o, :], axes=((1, 2, 3), (3, 0, 1))
+        # u^{ar}_{qs}
+        u[v, :, :, :],
+        # rho^{qs}_{ir}
+        rho_qspr[:, :, o, :],
+        # axes=((r, q, s), (r, q, s))
+        axes=((1, 2, 3), (3, 0, 1)),
     )
 
     return R_tilde_ai
