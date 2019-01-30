@@ -38,6 +38,8 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         pass
 
     def __call__(self, prev_amp, current_time):
+        np = self.np
+        o, v = self.o, self.v
         t_old, l_old, C, C_tilde = prev_amp
 
         # Evolve system in time
