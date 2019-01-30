@@ -12,7 +12,7 @@ def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
     eta_bj = np.linalg.tensorsolve(1j * A_aibj, R_tilde_ai)
 
     eta[o, v] += eta_jb
-    eta[v, o] += eta_jb
+    eta[v, o] += eta_bj
 
     return eta
 
