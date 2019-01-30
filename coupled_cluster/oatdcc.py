@@ -79,6 +79,18 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         # Compute density matrices
         self.rho_qp = self.compute_one_body_density_matrix()
         self.rho_qspr = self.compute_two_body_density_matrix()
+        
+        # Compute the inverse of rho_qp needed in Q-space eqs.
+        """
+        If rho_qp is singular we can regularize it as, 
+        
+        rho_qp_reg = rho_qp + eps*expm( -(1.0/eps) * rho_qp) Eq [3.14] Multidimensional Quantum Dynamics, Meyer
+        
+        with eps = 1e-8 (or some small number). It seems like it is standard in the MCTDHF literature to 
+        always work with the regularized rho_qp. Note here that expm refers to the matrix exponential which I can not find in 
+        numpy only in scipy. 
+        """
+        rho_qp_inverse = self.np.linalg.inv(self.rho_qp)
 
         # Solve P-space equations for eta
         eta = self.compute_p_space_equations()
