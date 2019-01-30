@@ -1,7 +1,7 @@
 import abc
 from coupled_cluster.cc_helper import OACCVector
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
-from coupled_cluster.integrator import RungeKutta4
+from coupled_cluster.integrators import RungeKutta4
 
 
 class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
