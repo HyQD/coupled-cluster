@@ -35,7 +35,7 @@ symmetry c1
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 omega = 2.8735643
-E = 100  # 0.05-5
+E = 1  # 0.05-5
 
 
 system = construct_psi4_system(He, options)
@@ -115,5 +115,19 @@ plt.grid()
 plt.figure()
 plt.plot(time_points, norm_l2)
 plt.grid()
+
+from scipy.fftpack import fft, ifft, fftshift, fftfreq
+"""
+Fourier transform of dip_z after pulse.
+"""
+freq = fftshift(fftfreq(len(time_points[501:]))) * (2 * np.pi / dt)
+a = np.abs(fftshift(fft(dip_z[501:])))
+amax = a.max()
+a = a / amax
+plt.figure()
+plt.plot(freq, a, label=r"$\vert \tilde{d_z} \vert$")
+plt.legend()
+plt.xlim(0, 6)
+plt.xlabel("frequency/au")
 
 plt.show()
