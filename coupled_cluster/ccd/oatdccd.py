@@ -1,7 +1,10 @@
 from coupled_cluster.oatdcc import OATDCC
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
-from coupled_cluster.ccd.energies import compute_time_dependent_energy, Lagrangian_fun
+from coupled_cluster.ccd.energies import (
+    compute_time_dependent_energy,
+    Lagrangian_fun,
+)
 from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
@@ -21,11 +24,23 @@ class OATDCCD(OATDCC):
 
     def compute_energy(self):
         t_2, l_2, _, _ = self._amplitudes.unpack()
-        e_ref = self.np.einsum('ii->',self.h[self.o,self.o]) + 0.5*self.np.einsum('ijij->',self.u[self.o,self.o,self.o,self.o])
-        #return compute_time_dependent_energy(
+        e_ref = self.np.einsum(
+            "ii->", self.h[self.o, self.o]
+        ) + 0.5 * self.np.einsum(
+            "ijij->", self.u[self.o, self.o, self.o, self.o]
+        )
+        # return compute_time_dependent_energy(
         #    self.f, self.u, t_2, l_2, self.o, self.v, np=self.np
-        #)
-        return e_ref+Lagrangian_fun(t_2.transpose(2,3,0,1),l_2,self.f,self.u,self.o,self.v,np=self.np)
+        # )
+        return e_ref + Lagrangian_fun(
+            t_2.transpose(2, 3, 0, 1),
+            l_2,
+            self.f,
+            self.u,
+            self.o,
+            self.v,
+            np=self.np,
+        )
 
     def one_body_density_matrix(self, t, l):
         t_2 = t[0]

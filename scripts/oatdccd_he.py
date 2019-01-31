@@ -34,7 +34,7 @@ symmetry c1
 
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-omega = 2.8735643
+omega = 2.873_564_3
 E = 1  # 0.05-5
 
 
@@ -77,12 +77,15 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     rho_qp = oatdccd.rho_qp
     z = system.dipole_moment[2]
     z = C_tilde @ z @ C
-    dip_z[i + 1] = (np.einsum(
-        "ij,ij->", rho_qp[system.o, system.o], z[system.o, system.o]
-    ) + np.einsum("ab,ab->", rho_qp[system.v, system.v], z[system.v, system.v])).real
+    dip_z[i + 1] = (
+        np.einsum("ij,ij->", rho_qp[system.o, system.o], z[system.o, system.o])
+        + np.einsum(
+            "ab,ab->", rho_qp[system.v, system.v], z[system.v, system.v]
+        )
+    ).real
 
-    norm_t2[i+1] = np.linalg.norm(t)
-    norm_l2[i+1] = np.linalg.norm(l)
+    norm_t2[i + 1] = np.linalg.norm(t)
+    norm_l2[i + 1] = np.linalg.norm(l)
 
     if i % 100 == 0:
         print(f"i = {i}")
@@ -117,6 +120,7 @@ plt.plot(time_points, norm_l2)
 plt.grid()
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
+
 """
 Fourier transform of dip_z after pulse.
 """
