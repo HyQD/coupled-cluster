@@ -16,7 +16,7 @@ def compute_ground_state_energy_correction(u, t, o, v, np):
 
 
 def compute_time_dependent_energy(f, u, t, l, o, v, np):
-    energy = compute_ground_state_energy_correction(u, t, o, v, np)
+    energy = compute_ccd_ground_state_energy(f, u, t, o, v, np=np)
     rhs_t = compute_t_2_amplitudes(f, u, t, o, v, np=np)
     energy += 0.25 * np.tensordot(l, rhs_t, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
 
