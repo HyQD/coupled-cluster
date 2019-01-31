@@ -23,7 +23,16 @@ def compute_time_dependent_energy(f, u, t, l, o, v, np):
     return energy
 
 
-def Lagrangian_fun(T2, L2, F, W, o, v, np):
+def compute_oatdccd_energy(f, u, t, l, o, v, np):
+    energy = compute_reference_energy(f, u, o, v, np=np)
+    energy += lagrangian_funtional(
+        t.transpose(2, 3, 0, 1), l, f, u, o, v, np=np
+    )
+
+    return energy
+
+
+def lagrangian_funtional(T2, L2, F, W, o, v, np):
     """
     Eq [A8] in Kvaal - h_i^i + 0.5 u_{ij}^{ij} term
     """
@@ -108,4 +117,5 @@ def Lagrangian_fun(T2, L2, F, W, o, v, np):
         W[o, o, v, v],
         optimize=["einsum_path", (0, 1), (0, 1), (0, 1)],
     )
+
     return result
