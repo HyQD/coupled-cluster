@@ -34,7 +34,7 @@ symmetry c1
 
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-omega = 2.873_564_3
+omega = 2.8735643
 E = 100  # 0.05-5
 
 
@@ -63,14 +63,22 @@ print("dt = {0}".format(dt))
 
 td_energies = np.zeros(len(time_points))
 td_energies_imag = np.zeros(len(time_points))
-
+dip_z = np.zeros(len(time_points))
 td_energies[0] = oatdccd.compute_energy()
 
 for i, amp in enumerate(oatdccd.solve(time_points)):
     t, l, C, C_tilde = amp
     energy = oatdccd.compute_energy()
-    td_energies[i+1] = energy.real
-    td_energies_imag[i+1] = energy.imag
+    td_energies[i + 1] = energy.real
+    td_energies_imag[i + 1] = energy.imag
+
+    rho_qp = oatdccd.rho_qp
+    z = system.dipole_moment[2]
+    z = C_tilde @ z @ C
+    dip_z[i + 1] = (np.einsum(
+        "ij,ij->", rho_qp[system.o, system.o], z[system.o, system.o]
+    ) + np.einsum("ab,ab->", rho_qp[system.v, system.v], z[system.v, system.v])).real
+
     if i % 100 == 0:
         print(f"i = {i}")
         eye = C_tilde @ C
@@ -89,6 +97,10 @@ plt.grid()
 
 plt.figure()
 plt.plot(time_points, td_energies_imag)
+plt.grid()
+
+plt.figure()
+plt.plot(time_points, dip_z)
 plt.grid()
 
 plt.show()
