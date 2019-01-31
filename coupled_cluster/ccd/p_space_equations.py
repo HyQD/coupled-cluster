@@ -14,20 +14,30 @@ def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
         o.stop * (v.stop - o.stop), o.stop * (v.stop - o.stop)
     )
 
+    #print("det(A_iajb: %g" % np.linalg.det(A_iajb))
     eta_jb = np.linalg.solve(A_iajb, R_ia.reshape(o.stop * (v.stop - o.stop)))
     eta_jb = -1j * eta_jb.reshape(o.stop, (v.stop - o.stop))
     # eta_jb = np.linalg.tensorsolve(-1j*A_iajb, R_ia)
     # eta_jb = -1j*np.linalg.tensorsolve(A_iajb, R_ia)
 
-    A_aibj = A_ibaj.transpose(2, 0, 1, 3)
-    A_aibj = A_aibj.reshape(
+    """
+    Using A^{ja}_{bi} = -A^{aj}_{ib}
+    Then Eq. [34 d] becomes, 
+    i A^{aj}_{ib} \eta^b_j = R_tilde^a_i
+    -> A_{ai,bj} \eta_{bj} = R_tilde_{ai} 
+    """
+
+    A_ajib = compute_A_bija(rho_qp,o,v,np=np)
+    A_ajib = A_ajib.transpose(0,2,3,1)
+    A_ajib = A_ajib.reshape(
         o.stop * (v.stop - o.stop), o.stop * (v.stop - o.stop)
     )
+    #print("det(A_aibj: %g" % np.linalg.det(A_aibj))
     # eta_bj = np.linalg.tensorsolve(1j*A_aibj, R_tilde_ai)
     eta_bj = np.linalg.solve(
-        A_aibj, R_tilde_ai.reshape(o.stop * (v.stop - o.stop))
+        A_ajib, R_tilde_ai.reshape(o.stop * (v.stop - o.stop))
     )
-    eta_bj = 1j * eta_bj.reshape(v.stop - o.stop, o.stop)
+    eta_bj = -1j * eta_bj.reshape(v.stop - o.stop, o.stop)
 
     eta[o, v] += eta_jb
     eta[v, o] += eta_bj
@@ -44,6 +54,14 @@ def compute_A_ibaj(rho_qp, o, v, np):
 
     return A_ibaj
 
+def compute_A_bija(rho_qp, o,v,np):
+    delta_ij = np.eye(o.stop)
+    delta_ba = np.eye(v.stop - o.stop)
+
+    A_ibaj = -np.einsum("ba, ij -> bija", delta_ba, rho_qp[o, o])
+    A_ibaj += np.einsum("ij, ba -> bija", delta_ij, rho_qp[v, v])
+
+    return A_ibaj
 
 def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
     """
