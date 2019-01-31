@@ -105,8 +105,20 @@ plt.title("Time-dependent energy")
 plt.grid()
 
 plt.figure()
+plt.plot(time_points[time_points > 5], td_energies[time_points > 5])
+plt.title("Time-dependent energy, after laser is turned off")
+plt.grid()
+
+plt.figure()
 plt.plot(time_points, td_energies_imag)
 plt.title("Time-dependent energy (imaginary component)")
+plt.grid()
+
+plt.figure()
+plt.plot(time_points[time_points > 5], td_energies_imag[time_points > 5])
+plt.title(
+    "Time-dependent energy, after laser is turned off (imaginary component)"
+)
 plt.grid()
 
 plt.figure()
