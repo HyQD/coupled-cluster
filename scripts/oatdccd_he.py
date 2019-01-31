@@ -35,7 +35,7 @@ symmetry c1
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 omega = 2.8735643
-E = 1  # 0.05-5
+E = 100  # 0.05-5
 
 
 system = construct_psi4_system(He, options)
@@ -57,12 +57,14 @@ system.set_polarization_vector(polarization)
 system.set_time_evolution_operator(LaserField(laser_pulse(omega=omega, E=E)))
 
 oatdccd.set_initial_conditions()
-time_points = np.linspace(0, 7, 7001)
+time_points = np.linspace(0, 50, 5001)
 dt = time_points[1] - time_points[0]
 print("dt = {0}".format(dt))
 
 td_energies = np.zeros(len(time_points))
 td_energies_imag = np.zeros(len(time_points))
+norm_t2 = np.zeros(len(time_points))
+norm_l2 = np.zeros(len(time_points))
 dip_z = np.zeros(len(time_points))
 td_energies[0] = oatdccd.compute_energy()
 
@@ -78,6 +80,9 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     dip_z[i + 1] = (np.einsum(
         "ij,ij->", rho_qp[system.o, system.o], z[system.o, system.o]
     ) + np.einsum("ab,ab->", rho_qp[system.v, system.v], z[system.v, system.v])).real
+
+    norm_t2[i+1] = np.linalg.norm(t)
+    norm_l2[i+1] = np.linalg.norm(l)
 
     if i % 100 == 0:
         print(f"i = {i}")
@@ -101,6 +106,14 @@ plt.grid()
 
 plt.figure()
 plt.plot(time_points, dip_z)
+plt.grid()
+
+plt.figure()
+plt.plot(time_points, norm_t2)
+plt.grid()
+
+plt.figure()
+plt.plot(time_points, norm_l2)
 plt.grid()
 
 plt.show()
