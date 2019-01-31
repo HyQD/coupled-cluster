@@ -101,22 +101,27 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
 
 plt.figure()
 plt.plot(time_points, td_energies)
+plt.title("Time-dependent energy")
 plt.grid()
 
 plt.figure()
 plt.plot(time_points, td_energies_imag)
+plt.title("Time-dependent energy (imaginary component)")
 plt.grid()
 
 plt.figure()
 plt.plot(time_points, dip_z)
+plt.title(r"$\langle z(t) \rangle$")
 plt.grid()
 
 plt.figure()
 plt.plot(time_points, norm_t2)
+plt.title(r"Norm of $\tau_2$-amplitudes")
 plt.grid()
 
 plt.figure()
 plt.plot(time_points, norm_l2)
+plt.title(r"Norm of $\lambda_2$-amplitudes")
 plt.grid()
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
@@ -130,6 +135,7 @@ amax = a.max()
 a = a / amax
 plt.figure()
 plt.plot(freq, a, label=r"$\vert \tilde{d_z} \vert$")
+plt.title(r"Fourier transform of $\langle z(t)\rangle$")
 plt.legend()
 plt.xlim(0, 6)
 plt.xlabel("frequency/au")
