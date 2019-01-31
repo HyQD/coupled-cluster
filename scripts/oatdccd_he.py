@@ -45,7 +45,8 @@ system.change_basis(C)
 
 cc_kwargs = dict(verbose=True)
 oatdccd = OATDCCD(CoupledClusterDoubles, system, np=np, **cc_kwargs)
-oatdccd.compute_ground_state()
+t_kwargs = dict(theta=0.1, tol=1e-10)
+oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
 print(
     "Ground state CCD energy: {0}".format(oatdccd.compute_ground_state_energy())
 )
@@ -59,23 +60,33 @@ oatdccd.set_initial_conditions()
 time_points = np.linspace(0, 7, 701)
 dt = time_points[1] - time_points[0]
 print("dt = {0}".format(dt))
-td_energies = np.zeros(len(time_points))
 
-td_energies[0] = oatdccd.compute_energy().real
+td_energies = np.zeros(len(time_points))
+td_energies_imag = np.zeros(len(time_points))
+
+td_energies[0] = oatdccd.compute_energy()
 
 for i, amp in enumerate(oatdccd.solve(time_points)):
     t, l, C, C_tilde = amp
-    td_energies[i + 1] = oatdccd.compute_energy().real
+    energy = oatdccd.compute_energy()
+    td_energies[i+1] = energy.real
+    td_energies_imag[i+1] = energy.imag
     if i % 100 == 0:
         print(f"i = {i}")
-
-    eye = C_tilde @ C
+        eye = C_tilde @ C
+        print(np.allclose(eye, np.eye(eye.shape[0])))
     # print(eye)
     # print(np.diag(eye))
     # np.testing.assert_allclose(C_tilde @ C, np.eye(C_tilde.shape[0]), atol=1e-10)
     # if i == 1:
     #    break
 
+plt.figure()
 plt.plot(time_points, td_energies)
 plt.grid()
+
+plt.figure()
+plt.plot(time_points, td_energies_imag)
+plt.grid()
+
 plt.show()
