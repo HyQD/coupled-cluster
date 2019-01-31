@@ -45,7 +45,7 @@ system.change_basis(C)
 
 cc_kwargs = dict(verbose=True)
 oatdccd = OATDCCD(CoupledClusterDoubles, system, np=np, **cc_kwargs)
-t_kwargs = dict(theta=0.1, tol=1e-10)
+t_kwargs = dict(theta=0, tol=1e-10)
 oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
 print(
     "Ground state CCD energy: {0}".format(oatdccd.compute_ground_state_energy())
@@ -57,7 +57,7 @@ system.set_polarization_vector(polarization)
 system.set_time_evolution_operator(LaserField(laser_pulse(omega=omega, E=E)))
 
 oatdccd.set_initial_conditions()
-time_points = np.linspace(0, 3, 3001)
+time_points = np.linspace(0, 5, 5001)
 dt = time_points[1] - time_points[0]
 print("dt = {0}".format(dt))
 
