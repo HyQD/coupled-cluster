@@ -35,7 +35,7 @@ symmetry c1
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 omega = 2.873_564_3
-E = 1  # 0.05-5
+E = 100  # 0.05-5
 
 
 system = construct_psi4_system(He, options)
@@ -57,7 +57,7 @@ system.set_polarization_vector(polarization)
 system.set_time_evolution_operator(LaserField(laser_pulse(omega=omega, E=E)))
 
 oatdccd.set_initial_conditions()
-time_points = np.linspace(0, 7, 701)
+time_points = np.linspace(0, 3, 3001)
 dt = time_points[1] - time_points[0]
 print("dt = {0}".format(dt))
 
@@ -75,6 +75,8 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
         print(f"i = {i}")
         eye = C_tilde @ C
         print(np.allclose(eye, np.eye(eye.shape[0])))
+        print("norm(t2): %g" % np.linalg.norm(t))
+        print("norm(l2): %g" % np.linalg.norm(l))
     # print(eye)
     # print(np.diag(eye))
     # np.testing.assert_allclose(C_tilde @ C, np.eye(C_tilde.shape[0]), atol=1e-10)
