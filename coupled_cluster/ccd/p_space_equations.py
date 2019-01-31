@@ -1,15 +1,33 @@
 def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
     eta = np.zeros(h.shape, dtype=np.complex128)
-
     A_ibaj = compute_A_ibaj(rho_qp, o, v, np=np)
     R_ia = compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np=np)
     R_tilde_ai = compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np=np)
 
+    """
+    It seems like tensorsolve is sensitive to where we place the 
+    1j's !!!!!!!!!!!
+    """
+
     A_iajb = A_ibaj.transpose(0, 2, 3, 1)
-    eta_jb = np.linalg.tensorsolve(-1j * A_iajb, R_ia)
+    A_iajb = A_iajb.reshape(
+        o.stop * (v.stop - o.stop), o.stop * (v.stop - o.stop)
+    )
+
+    eta_jb = np.linalg.solve(A_iajb, R_ia.reshape(o.stop * (v.stop - o.stop)))
+    eta_jb = -1j * eta_jb.reshape(o.stop, (v.stop - o.stop))
+    # eta_jb = np.linalg.tensorsolve(-1j*A_iajb, R_ia)
+    # eta_jb = -1j*np.linalg.tensorsolve(A_iajb, R_ia)
 
     A_aibj = A_ibaj.transpose(2, 0, 1, 3)
-    eta_bj = np.linalg.tensorsolve(1j * A_aibj, R_tilde_ai)
+    A_aibj = A_aibj.reshape(
+        o.stop * (v.stop - o.stop), o.stop * (v.stop - o.stop)
+    )
+    # eta_bj = np.linalg.tensorsolve(1j*A_aibj, R_tilde_ai)
+    eta_bj = np.linalg.solve(
+        A_aibj, R_tilde_ai.reshape(o.stop * (v.stop - o.stop))
+    )
+    eta_bj = 1j * eta_bj.reshape(v.stop - o.stop, o.stop)
 
     eta[o, v] += eta_jb
     eta[v, o] += eta_bj
@@ -28,6 +46,12 @@ def compute_A_ibaj(rho_qp, o, v, np):
 
 
 def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
+    """
+    R_ia  = np.einsum('ij,ja->ia',rho_qp[o,o],h[o,v])
+    R_ia -= np.einsum('ba,ib->ia',rho_qp[v,v],h[o,v])
+    R_ia += 0.5*np.einsum('ispr,pras->ia',rho_qspr[o,:,:,:],u[:,:,v,:],optimize=True)
+    R_ia -= 0.5*np.einsum('qsar,irqs->ia',rho_qspr[:,:,v,:],u[o,:,:,:],optimize=True) 
+    """
     R_ia = np.dot(rho_qp[o, o], h[o, v])
     R_ia -= np.dot(h[o, v], rho_qp[v, v])
     R_ia += 0.5 * np.tensordot(
@@ -51,6 +75,13 @@ def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
 
 
 def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
+    """
+    R_tilde_ai  = np.einsum('ab,bi->ai',rho_qp[v,v],h[v,o])
+    R_tilde_ai -= np.einsum('ji,aj->ai',rho_qp[o,o],h[v,o])
+    R_tilde_ai += 0.5*np.einsum('aspr,pris->ai',rho_qspr[v,:,:,:],u[:,:,o,:])
+    R_tilde_ai -= 0.5*np.einsum('qsir,arqs->ai',rho_qspr[:,:,o,:],u[v,:,:,:])
+
+    """
     R_tilde_ai = np.dot(rho_qp[v, v], h[v, o])
     R_tilde_ai -= np.dot(h[v, o], rho_qp[o, o])
     R_tilde_ai += 0.5 * np.tensordot(
