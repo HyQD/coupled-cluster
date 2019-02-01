@@ -65,7 +65,7 @@ system.set_time_evolution_operator(LaserField(laser_pulse(td=laser_duration, ome
 oatdccd.set_initial_conditions()
 
 dt = 1e-2
-Tfinal = 5
+Tfinal = 1000
 Nsteps = int(Tfinal/dt) + 1
 timestep_stop_laser = int(laser_duration/dt)
 
@@ -92,14 +92,14 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     td_energies[i + 1] = energy.real
     td_energies_imag[i + 1] = energy.imag
 
-    rho_qp = oatdccd.rho_qp
-    z = system.dipole_moment[2]
+    rho_qp = oatdccd.one_body_density_matrix(t,l)
+    rho_qp_hermitian = 0.5*(rho_qp.conj().T + rho_qp)
+
+    z = system.dipole_moment[2].copy()
     z = C_tilde @ z @ C
+
     dip_z[i + 1] = (
-        np.einsum("ij,ij->", rho_qp[system.o, system.o], z[system.o, system.o])
-        + np.einsum(
-            "ab,ab->", rho_qp[system.v, system.v], z[system.v, system.v]
-        )
+        np.einsum('qp,pq->',rho_qp_hermitian,z)
     ).real
 
     norm_t2[i + 1] = np.linalg.norm(t)
