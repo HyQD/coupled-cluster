@@ -35,7 +35,8 @@ symmetry c1
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 omega = 2.873_564_3
-E = 1  # 0.05-5
+E = 100  # 0.05-5
+laser_duration = 5
 
 
 system = construct_psi4_system(He, options)
@@ -54,11 +55,17 @@ print(
 polarization = np.zeros(3)
 polarization[2] = 1
 system.set_polarization_vector(polarization)
-system.set_time_evolution_operator(LaserField(laser_pulse(omega=omega, E=E)))
+system.set_time_evolution_operator(LaserField(laser_pulse(td=laser_duration,omega=omega, E=E)))
 
 oatdccd.set_initial_conditions()
-time_points = np.linspace(0, 50, 5001)
-dt = time_points[1] - time_points[0]
+dt = 1e-2
+Tfinal = 5
+Nsteps = int(Tfinal/dt) + 1
+timestep_stop_laser = int(laser_duration/dt)
+
+time_points = np.linspace(0, Tfinal, Nsteps)
+print("Nsteps: %d" % Nsteps)
+print("step stop laser: %d" % timestep_stop_laser)
 print("dt = {0}".format(dt))
 
 td_energies = np.zeros(len(time_points))
@@ -74,14 +81,14 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     td_energies[i + 1] = energy.real
     td_energies_imag[i + 1] = energy.imag
 
-    rho_qp = oatdccd.rho_qp
-    z = system.dipole_moment[2]
+    rho_qp = oatdccd.one_body_density_matrix(t,l)
+    rho_qp_hermitian = 0.5*(rho_qp.conj().T + rho_qp)
+
+    z = system.dipole_moment[2].copy()
     z = C_tilde @ z @ C
+
     dip_z[i + 1] = (
-        np.einsum("ij,ij->", rho_qp[system.o, system.o], z[system.o, system.o])
-        + np.einsum(
-            "ab,ab->", rho_qp[system.v, system.v], z[system.v, system.v]
-        )
+        np.einsum('qp,pq->',rho_qp_hermitian,z)
     ).real
 
     norm_t2[i + 1] = np.linalg.norm(t)
@@ -90,14 +97,12 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     if i % 100 == 0:
         print(f"i = {i}")
         eye = C_tilde @ C
-        print(np.allclose(eye, np.eye(eye.shape[0])))
+        print("C_tilde C is identity: %s" % np.allclose(eye, np.eye(eye.shape[0])))
+        print("rho_qp_hermitian is hermitian: %s" % np.allclose(rho_qp_hermitian, rho_qp_hermitian.conj().T))
         print("norm(t2): %g" % np.linalg.norm(t))
         print("norm(l2): %g" % np.linalg.norm(l))
-    # print(eye)
-    # print(np.diag(eye))
-    # np.testing.assert_allclose(C_tilde @ C, np.eye(C_tilde.shape[0]), atol=1e-10)
-    # if i == 1:
-    #    break
+    
+
 
 plt.figure()
 plt.plot(time_points, td_energies)
@@ -135,14 +140,14 @@ plt.figure()
 plt.plot(time_points, norm_l2)
 plt.title(r"Norm of $\lambda_2$-amplitudes")
 plt.grid()
+plt.show()
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
-
 """
 Fourier transform of dip_z after pulse.
 """
-freq = fftshift(fftfreq(len(time_points[501:]))) * (2 * np.pi / dt)
-a = np.abs(fftshift(fft(dip_z[501:])))
+freq = fftshift(fftfreq(len(time_points[timestep_stop_laser:]))) * (2 * np.pi / dt)
+a = np.abs(fftshift(fft(dip_z[timestep_stop_laser:])))
 amax = a.max()
 a = a / amax
 plt.figure()
@@ -151,5 +156,4 @@ plt.title(r"Fourier transform of $\langle z(t)\rangle$")
 plt.legend()
 plt.xlim(0, 6)
 plt.xlabel("frequency/au")
-
 plt.show()
