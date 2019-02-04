@@ -36,7 +36,7 @@ class GaussIntegrator(Integrator):
     Simple implemenation of a Gauss integrator,
     order 4 and 6 (s=2 and 3)."""
 
-    def __init__(self, rhs, y0, t0, h, np, s=2, maxit=20, eps=1e-14, mu=1.75):
+    def __init__(self, rhs, np, s=2, maxit=20, eps=1e-14):
         assert maxit > 0
 
         super().__init__(rhs, np)
@@ -44,23 +44,15 @@ class GaussIntegrator(Integrator):
         np = self.np
 
         self.s = s
-        self.h = h
         self.maxit = maxit
         self.eps = eps
 
-        self.y0 = np.array(y0, dtype=complex)
-        self.n = len(y0)
-        self.t = t0
-        self.y = np.array(self.y0, dtype=complex)
-        self.y_prev = np.zeros(len(self.y0))
-
         self.F = np.zeros((self.n, self.s))
-        self.Z = np.zeros((1, self.n, self.s), dtype=complex)
+        # self.Z = np.zeros((1, self.n, self.s), dtype=complex)
+        self.Z = [0] * s
+        self.u_prev = None
 
         self.a, self.b, self.c = gauss_tableau(self.s)
-
-        # Compute starting guess method data
-        self.mu = mu  # parameter to method B.
 
     def eval_rhs(self, y, t):
         self.rhs_evals += 1
@@ -68,10 +60,8 @@ class GaussIntegrator(Integrator):
         return self.rhs(y, t)
 
     def Z_solve(self, y, Z0):
-        """
-        Solve the problem Z = h*f(y + Z)*a^T by fix point iterations
-        Use Z0 as initial guess, and maxit iterations, and residual norm
-        tolerance eps.
+        """Solve the problem Z = h*f(y + Z)*a^T by fix point iterations Use Z0
+        as initial guess, and maxit iterations, and residual norm tolerance eps.
         """
         Z = Z0
 
