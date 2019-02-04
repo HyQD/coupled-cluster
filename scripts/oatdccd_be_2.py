@@ -99,15 +99,13 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     td_energies[i + 1] = energy.real
     td_energies_imag[i + 1] = energy.imag
 
-    rho_qp = oatdccd.one_body_density_matrix(t,l)
-    rho_qp_hermitian = 0.5*(rho_qp.conj().T + rho_qp)
+    rho_qp = oatdccd.one_body_density_matrix(t, l)
+    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
     z = system.dipole_moment[2].copy()
     z = C_tilde @ z @ C
 
-    dip_z[i + 1] = (
-        np.einsum('qp,pq->',rho_qp_hermitian,z)
-    ).real
+    dip_z[i + 1] = (np.einsum("qp,pq->", rho_qp_hermitian, z)).real
 
     norm_t2[i + 1] = np.linalg.norm(t)
     norm_l2[i + 1] = np.linalg.norm(l)

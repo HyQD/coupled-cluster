@@ -39,7 +39,7 @@ Use same laser parameters as in Thomas and Simen's article: https://arxiv.org/ab
 With static orbitals they only manage E=0.3 and the method breaks completely down with E=1.
 """
 
-omega = 0.2068175
+omega = 0.206_817_5
 E = 1  # E = 0.3, 1
 laser_duration = 5
 
@@ -60,14 +60,16 @@ print(
 polarization = np.zeros(3)
 polarization[2] = 1
 system.set_polarization_vector(polarization)
-system.set_time_evolution_operator(LaserField(laser_pulse(td=laser_duration, omega=omega, E=E)))
+system.set_time_evolution_operator(
+    LaserField(laser_pulse(td=laser_duration, omega=omega, E=E))
+)
 
 oatdccd.set_initial_conditions()
 
 dt = 1e-2
 Tfinal = 1000
-Nsteps = int(Tfinal/dt) + 1
-timestep_stop_laser = int(laser_duration/dt)
+Nsteps = int(Tfinal / dt) + 1
+timestep_stop_laser = int(laser_duration / dt)
 
 time_points = np.linspace(0, Tfinal, Nsteps)
 print("Nsteps: %d" % Nsteps)
@@ -82,8 +84,8 @@ norm_l2 = np.zeros(len(time_points))
 dip_z = np.zeros(len(time_points))
 td_energies[0] = oatdccd.compute_energy()
 
-#norm_t2[0] = np.linalg.norm(oatdccd.t)
-#norm_l2[0] = np.linalg.norm(oatdccd.l)
+# norm_t2[0] = np.linalg.norm(oatdccd.t)
+# norm_l2[0] = np.linalg.norm(oatdccd.l)
 
 
 for i, amp in enumerate(oatdccd.solve(time_points)):
@@ -92,15 +94,13 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     td_energies[i + 1] = energy.real
     td_energies_imag[i + 1] = energy.imag
 
-    rho_qp = oatdccd.one_body_density_matrix(t,l)
-    rho_qp_hermitian = 0.5*(rho_qp.conj().T + rho_qp)
+    rho_qp = oatdccd.one_body_density_matrix(t, l)
+    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
     z = system.dipole_moment[2].copy()
     z = C_tilde @ z @ C
 
-    dip_z[i + 1] = (
-        np.einsum('qp,pq->',rho_qp_hermitian,z)
-    ).real
+    dip_z[i + 1] = (np.einsum("qp,pq->", rho_qp_hermitian, z)).real
 
     norm_t2[i + 1] = np.linalg.norm(t)
     norm_l2[i + 1] = np.linalg.norm(l)
@@ -108,7 +108,7 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     if i % 5 == 0:
         print(f"i = {i}")
         eye = C_tilde @ C
-        print(np.allclose(eye, np.eye(eye.shape[0]),atol=1e-4))
+        print(np.allclose(eye, np.eye(eye.shape[0]), atol=1e-4))
         print("norm(t2): %g" % np.linalg.norm(t))
         print("norm(l2): %g" % np.linalg.norm(l))
     # print(eye)
@@ -156,10 +156,13 @@ plt.grid()
 plt.show()
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
+
 """
 Fourier transform of dip_z after pulse.
 """
-freq = fftshift(fftfreq(len(time_points[timestep_stop_laser:]))) * (2 * np.pi / dt)
+freq = fftshift(fftfreq(len(time_points[timestep_stop_laser:]))) * (
+    2 * np.pi / dt
+)
 a = np.abs(fftshift(fft(dip_z[timestep_stop_laser:])))
 amax = a.max()
 a = a / amax

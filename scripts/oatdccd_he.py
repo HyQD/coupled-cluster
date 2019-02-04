@@ -55,13 +55,15 @@ print(
 polarization = np.zeros(3)
 polarization[2] = 1
 system.set_polarization_vector(polarization)
-system.set_time_evolution_operator(LaserField(laser_pulse(td=laser_duration,omega=omega, E=E)))
+system.set_time_evolution_operator(
+    LaserField(laser_pulse(td=laser_duration, omega=omega, E=E))
+)
 
 oatdccd.set_initial_conditions()
 dt = 1e-2
 Tfinal = 5
-Nsteps = int(Tfinal/dt) + 1
-timestep_stop_laser = int(laser_duration/dt)
+Nsteps = int(Tfinal / dt) + 1
+timestep_stop_laser = int(laser_duration / dt)
 
 time_points = np.linspace(0, Tfinal, Nsteps)
 print("Nsteps: %d" % Nsteps)
@@ -81,15 +83,13 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     td_energies[i + 1] = energy.real
     td_energies_imag[i + 1] = energy.imag
 
-    rho_qp = oatdccd.one_body_density_matrix(t,l)
-    rho_qp_hermitian = 0.5*(rho_qp.conj().T + rho_qp)
+    rho_qp = oatdccd.one_body_density_matrix(t, l)
+    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
     z = system.dipole_moment[2].copy()
     z = C_tilde @ z @ C
 
-    dip_z[i + 1] = (
-        np.einsum('qp,pq->',rho_qp_hermitian,z)
-    ).real
+    dip_z[i + 1] = (np.einsum("qp,pq->", rho_qp_hermitian, z)).real
 
     norm_t2[i + 1] = np.linalg.norm(t)
     norm_l2[i + 1] = np.linalg.norm(l)
@@ -97,11 +97,15 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     if i % 100 == 0:
         print(f"i = {i}")
         eye = C_tilde @ C
-        print("C_tilde C is identity: %s" % np.allclose(eye, np.eye(eye.shape[0])))
-        print("rho_qp_hermitian is hermitian: %s" % np.allclose(rho_qp_hermitian, rho_qp_hermitian.conj().T))
+        print(
+            "C_tilde C is identity: %s" % np.allclose(eye, np.eye(eye.shape[0]))
+        )
+        print(
+            "rho_qp_hermitian is hermitian: %s"
+            % np.allclose(rho_qp_hermitian, rho_qp_hermitian.conj().T)
+        )
         print("norm(t2): %g" % np.linalg.norm(t))
         print("norm(l2): %g" % np.linalg.norm(l))
-    
 
 
 plt.figure()
@@ -143,10 +147,13 @@ plt.grid()
 plt.show()
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
+
 """
 Fourier transform of dip_z after pulse.
 """
-freq = fftshift(fftfreq(len(time_points[timestep_stop_laser:]))) * (2 * np.pi / dt)
+freq = fftshift(fftfreq(len(time_points[timestep_stop_laser:]))) * (
+    2 * np.pi / dt
+)
 a = np.abs(fftshift(fft(dip_z[timestep_stop_laser:])))
 amax = a.max()
 a = a / amax
