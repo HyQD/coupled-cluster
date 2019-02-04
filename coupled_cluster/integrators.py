@@ -140,3 +140,82 @@ class GaussIntegrator(Integrator):
         self.t += self.h
 
         return (self.y, self.t)
+
+
+def gauleg(n):
+    """Compute weights and abscissa for Gauss-Legendre quadrature.
+
+    Adapted from an old MATLAB code from 2011 by S. Kvaal.
+
+    Usage: x,w = gauleg(n)
+
+    Uses Golub-Welsh algorithm (Golub & Welsh, Mathematics of Computation, Vol.
+    23, No. 106, (Apr., 1969), pp. 221-230)
+
+    In the algorithm, one computes a tridiagonal matrix T, whose elements are
+    given by the recurrence coefficients of the orthogonal polynomials one
+    wishes to compute Gauss-quadrature rules from.  Thus, gauleg is easily
+    adaptable to other orthogonal polynomials.
+    """
+    nn = np.arange(1, n + 1)
+
+    a = np.sqrt((2 * nn - 1) * (2 * nn + 1)) / nn
+    b = 0 * nn
+    temp = (2 * nn + 1) / (2 * nn - 3)
+    temp = (
+        np.abs(temp) + temp
+    ) / 2  # hack to remove negative indices, which are not
+    # used but still give a runtime warning in np.sqrt
+    c = (nn - 1) / nn * np.sqrt(temp)
+
+    alpha = -b / a
+    beta = np.sqrt(c[1:] / (a[:-1] * a[1:]))
+
+    mu0 = 2
+
+    J = np.diag(beta, -1) + np.diag(alpha) + np.diag(beta, 1)
+    v, u = np.linalg.eig(J)
+    j = np.argsort(v)
+    w = mu0 * u[0, :] ** 2
+    w = w[j]
+    x = v[j]
+    return x, w
+
+
+def lagpol(c, j):
+    """Compute Lagrange interpolation polynomial.
+
+    Usage:  p = lagpol(c,j)
+
+    Given a vector of collocation points c[i], compute the j'th
+    Lagrange interpolation polynomial.
+
+    Returns a np.poly1d object.
+    """
+
+    r = np.delete(c, j)
+    a = np.prod(c[j] - r)
+    p = np.poly1d(r, r=True) / a
+
+    return p
+
+
+def gauss_tableau(s):
+    """Compute Butcher Tableau of s-stage Gauss integrator.
+
+    Usage a,b,c = gauss_tableau(s)
+    """
+
+    # compute collocation points and weights
+    c, b = gauleg(s)
+    c = (c + 1) / 2
+    b = b / 2
+
+    # compute a matrix
+    a = np.zeros((s, s))
+    for j in range(s):
+        p = np.polyint(lagpol(c, j))
+        for i in range(s):
+            a[i, j] = np.polyval(p, c[i]) - np.polyval(p, 0)
+
+    return a, b, c
