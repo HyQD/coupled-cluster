@@ -88,8 +88,8 @@ class GaussIntegrator(Integrator):
 
         return Z, F
 
-    def step(self):
-        """ Do a time step. Return (y,t) at next time step. """
+    def step(self, u, t, dt):
+        """ Do a time step. Return u at next time step. """
 
         # Predict solution Z of nonlinear equations
         # Note that a fixed 8th order predictor is implemented
