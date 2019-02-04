@@ -147,11 +147,9 @@ class GaussIntegrator(Integrator):
 
         # Make a step using Gauss method
         for i in range(self.s):
-            self.y += self.h * self.b[i] * self.F[:, i]
+            self.y += dt * self.b[i] * self.F[:, i]
 
-        self.t += self.h
-
-        return (self.y, self.t)
+        return y
 
 
 def gauleg(n):
@@ -191,6 +189,7 @@ def gauleg(n):
     w = mu0 * u[0, :] ** 2
     w = w[j]
     x = v[j]
+
     return x, w
 
 
