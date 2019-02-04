@@ -97,8 +97,30 @@ class GaussIntegrator(Integrator):
         # Compute interpolating polynomial w(t), that interpolates (t_{n-1},
         # y_{n-1}) and the points (t_{n-1}+c_i*h,Y_{n-1,i}).
 
-        t_vec = (self.t - self.h) + np.append([0], self.h * self.c)
-        t_vec2 = self.t + self.h * self.c
+        t_vec = (t - dt) + np.append([0], dt * self.c)
+        t_vec2 = t + dt * self.c
+
+        # Iterate over pairwise amplitudes and coefficients in containers
+        for y_prev, Z in zip(u, self.Z):
+            y_prev = y_prev.ravel()
+            n = len(y_prev)
+
+            W = np.zeros((n, self.s + 1), dtype=y_prev.dtype)
+            W[:, 0] = y_prev
+
+            for i in range(self.s):
+                W[: i + 1] = y_prev + Z[0, :, i]
+
+            y_0 = barycentric_interpolate(
+                t_vec, W.transpose(), t_vec2
+            ).transpose()
+
+            Z_0 = np.zeros((n, self.s), dtype=y_prev.dtype)
+
+            for i in range(self.s):
+                Z_0[:, i] = y_0[:, i] - y
+
+            # FIXME: You're here
 
         W = np.zeros((self.n, self.s + 1), dtype=complex)
         W[:, 0] = self.y_prev
