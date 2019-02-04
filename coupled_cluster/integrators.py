@@ -12,7 +12,7 @@ class Integrator(metaclass=abc.ABCMeta):
         self.rhs_evals = 0
 
     @abc.abstractmethod
-    def step(self):
+    def step(self, u, t, dt):
         pass
 
 
