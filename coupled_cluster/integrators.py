@@ -9,6 +9,7 @@ class Integrator(metaclass=abc.ABCMeta):
             rhs = lambda u, t: rhs
 
         self.rhs = rhs
+        self.rhs_evals = 0
 
     @abc.abstractmethod
     def step(self):
@@ -24,5 +25,7 @@ class RungeKutta4(Integrator):
         K3 = dt * f(u + 0.5 * K2, t + 0.5 * dt)
         K4 = dt * f(u + K3, t + dt)
         u_new = u + (1 / 6.0) * (K1 + 2 * K2 + 2 * K3 + K4)
+
+        self.rhs_evals += 4
 
         return u_new
