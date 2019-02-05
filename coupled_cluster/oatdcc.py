@@ -101,7 +101,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         here that expm refers to the matrix exponential which I can not find in
         numpy only in scipy. 
         """
-        rho_pq_inv = self.np.linalg.inv(self.rho_qp)
+        # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
         C_new = np.dot(C, eta)
