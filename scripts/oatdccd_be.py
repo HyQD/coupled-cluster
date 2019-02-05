@@ -5,6 +5,7 @@ from quantum_systems import construct_psi4_system
 from quantum_systems.time_evolution_operators import LaserField
 from tdhf import HartreeFock
 from coupled_cluster.ccd import OATDCCD, CoupledClusterDoubles
+from coupled_cluster.integrators import GaussIntegrator
 
 
 class laser_pulse:
@@ -46,11 +47,14 @@ laser_duration = 5
 
 system = construct_psi4_system(Be, options)
 hf = HartreeFock(system, verbose=True)
-C = hf.scf(tolerance=1e-15)
+C = hf.scf(tolerance=1e-12)
 system.change_basis(C)
 
+integrator = GaussIntegrator(np=np, eps=1e-10)
 cc_kwargs = dict(verbose=True)
-oatdccd = OATDCCD(CoupledClusterDoubles, system, np=np, **cc_kwargs)
+oatdccd = OATDCCD(
+    CoupledClusterDoubles, system, integrator=integrator, np=np, **cc_kwargs
+)
 t_kwargs = dict(theta=0, tol=1e-10)
 oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
 print(
@@ -67,7 +71,7 @@ system.set_time_evolution_operator(
 oatdccd.set_initial_conditions()
 
 dt = 1e-2
-Tfinal = 1000
+Tfinal = 10
 Nsteps = int(Tfinal / dt) + 1
 timestep_stop_laser = int(laser_duration / dt)
 
@@ -153,7 +157,6 @@ plt.figure()
 plt.plot(time_points, norm_l2)
 plt.title(r"Norm of $\lambda_2$-amplitudes")
 plt.grid()
-plt.show()
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
 
