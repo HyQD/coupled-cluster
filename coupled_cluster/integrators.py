@@ -2,14 +2,17 @@ import abc
 
 
 class Integrator(metaclass=abc.ABCMeta):
-    def __init__(self, rhs, np):
+    def __init__(self, np):
         self.np = np
 
+    def set_rhs(self, rhs):
         if not callable(rhs):
             rhs = lambda u, t: rhs
 
         self.rhs = rhs
         self.rhs_evals = 0
+
+        return self
 
     @abc.abstractmethod
     def step(self, u, t, dt):

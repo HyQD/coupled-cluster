@@ -9,9 +9,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     Cluster solver class.
     """
 
-    def __init__(
-        self, cc, system, np=None, integrator=RungeKutta4, **cc_kwargs
-    ):
+    def __init__(self, cc, system, np=None, integrator=None, **cc_kwargs):
         if np is None:
             import numpy as np
 
@@ -30,7 +28,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.o = self.system.o
         self.v = self.system.v
 
-        self.integrator = integrator(self, np=self.np)
+        if integrator is None:
+            integrator = RungeKutta4(np=self.np)
+
+        self.integrator = integrator.set_rhs(self)
         self._amplitudes = None
 
         # Inherit functions from ground state solver
