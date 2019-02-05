@@ -5,6 +5,7 @@ from quantum_systems import construct_psi4_system
 from quantum_systems.time_evolution_operators import LaserField
 from tdhf import HartreeFock
 from coupled_cluster.ccd import OATDCCD, CoupledClusterDoubles
+from coupled_cluster.integrators import GaussIntegrator
 
 
 class laser_pulse:
@@ -44,8 +45,12 @@ hf = HartreeFock(system, verbose=True)
 C = hf.scf(tolerance=1e-15)
 system.change_basis(C)
 
+integrator = GaussIntegrator(np=np, eps=1e-10)
+# integrator = None
 cc_kwargs = dict(verbose=True)
-oatdccd = OATDCCD(CoupledClusterDoubles, system, np=np, **cc_kwargs)
+oatdccd = OATDCCD(
+    CoupledClusterDoubles, system, integrator=integrator, np=np, **cc_kwargs
+)
 t_kwargs = dict(theta=0, tol=1e-10)
 oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
 print(

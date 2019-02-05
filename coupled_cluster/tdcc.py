@@ -9,9 +9,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     Cluster solver class.
     """
 
-    def __init__(
-        self, cc, system, np=None, integrator=RungeKutta4, **cc_kwargs
-    ):
+    def __init__(self, cc, system, np=None, integrator=None, **cc_kwargs):
         if np is None:
             import numpy as np
 
@@ -30,7 +28,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.o = self.system.o
         self.v = self.system.v
 
-        self.integrator = integrator(self, np=self.np)
+        if integrator is None:
+            integrator = RungeKutta4(np=self.np)
+
+        self.integrator = integrator.set_rhs(self)
         self._amplitudes = None
 
         # Inherit functions from ground state solver
@@ -68,12 +69,15 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         for i in range(n - 1):
             dt = time_points[i + 1] - time_points[i]
-            self._amplitudes = self.step(self._amplitudes, time_points[i], dt)
+            amp_vec = self.integrator.step(
+                self._amplitudes.asarray(), time_points[i], dt
+            )
+
+            self._amplitudes = type(self._amplitudes).from_array(
+                self._amplitudes, amp_vec
+            )
 
             yield self._amplitudes
-
-    def step(self, amplitudes, t, dt):
-        return self.integrator.step(self._amplitudes, t, dt)
 
     @abc.abstractmethod
     def rhs_t_amplitudes(self):
@@ -120,6 +124,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.u = self.system.u_t(current_time)
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
+        prev_amp = AmplitudeContainer.from_array(self._amplitudes, prev_amp)
         t_old, l_old = prev_amp
 
         t_new = [
@@ -132,4 +137,4 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             for rhs_l_func in self.rhs_l_amplitudes()
         ]
 
-        return AmplitudeContainer(t=t_new, l=l_new)
+        return AmplitudeContainer(t=t_new, l=l_new, np=self.np).asarray()

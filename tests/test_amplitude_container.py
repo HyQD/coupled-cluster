@@ -5,7 +5,7 @@ from coupled_cluster.cc_helper import AmplitudeContainer, OACCVector
 def test_addition_single_amp(large_system_ccd):
     t, l, cs = large_system_ccd
 
-    container = AmplitudeContainer(t=t, l=l)
+    container = AmplitudeContainer(t=t, l=l, np=np)
     k = 10
     new_container = container + k
     new_t, new_l = new_container
@@ -32,7 +32,7 @@ def test_addition_single_amp(large_system_ccd):
 def test_multiplication_single_amp(large_system_ccd):
     t, l, cs = large_system_ccd
 
-    container = AmplitudeContainer(t=t, l=l)
+    container = AmplitudeContainer(t=t, l=l, np=np)
     k = 10
     new_container = container * k
     new_t, new_l = new_container
@@ -59,7 +59,7 @@ def test_multiplication_single_amp(large_system_ccd):
 def test_addition_double_amp(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
-    container = AmplitudeContainer(t=[t_1, t_2], l=[l_1, l_2])
+    container = AmplitudeContainer(t=[t_1, t_2], l=[l_1, l_2], np=np)
     k = 10
     new_container = container + k
     new_t, new_l = new_container
@@ -92,7 +92,7 @@ def test_addition_double_amp(large_system_ccsd):
 def test_multiplication_double_amp(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
-    container = AmplitudeContainer(t=[t_1, t_2], l=[l_1, l_2])
+    container = AmplitudeContainer(t=[t_1, t_2], l=[l_1, l_2], np=np)
     k = 10
     new_container = container * k
     new_t, new_l = new_container
@@ -127,7 +127,9 @@ def test_addition_double_amp_oaccvector(large_system_ccsd):
     C = np.random.random((cs.l, cs.l)).astype(t_2.dtype)
     C_tilde = np.random.random((cs.l, cs.l)).astype(t_2.dtype)
 
-    container = OACCVector(t=[t_1, t_2], l=[l_1, l_2], C=C, C_tilde=C_tilde)
+    container = OACCVector(
+        t=[t_1, t_2], l=[l_1, l_2], C=C, C_tilde=C_tilde, np=np
+    )
     k = 10
     new_container = container + k
     new_t, new_l, new_C, new_C_tilde = new_container
@@ -168,7 +170,9 @@ def test_multiplication_double_amp_oaccvector(large_system_ccsd):
     C = np.random.random((cs.l, cs.l)).astype(t_2.dtype)
     C_tilde = np.random.random((cs.l, cs.l)).astype(t_2.dtype)
 
-    container = OACCVector(t=[t_1, t_2], l=[l_1, l_2], C=C, C_tilde=C_tilde)
+    container = OACCVector(
+        t=[t_1, t_2], l=[l_1, l_2], C=C, C_tilde=C_tilde, np=np
+    )
     k = 10
     new_container = container * k
     new_t, new_l, new_C, new_C_tilde = new_container

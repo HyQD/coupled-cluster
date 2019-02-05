@@ -1,14 +1,23 @@
 class AmplitudeContainer:
-    def __init__(self, t, l):
+    def __init__(self, t, l, np):
+        self.np = np
+        self.n = 0
+
         if type(t) not in [list, tuple, set]:
             t = [t]
 
         self._t = t
 
+        for _t in self._t:
+            self.n += _t.size
+
         if type(l) not in [list, tuple, set]:
             l = [l]
 
         self._l = l
+
+        for _l in self._l:
+            self.n += _l.size
 
     @property
     def t(self):
@@ -24,7 +33,7 @@ class AmplitudeContainer:
             new_t = [t + k for t in self._t]
             new_l = [l + k for l in self._l]
 
-            return AmplitudeContainer(new_t, new_l)
+            return AmplitudeContainer(new_t, new_l, np=self.np)
 
         # Assuming that k = [k_t, k_l], a list where each element should be
         # added to each amplitude in the l- and t-lists.
@@ -32,7 +41,7 @@ class AmplitudeContainer:
         new_t = [t + _k_t for t, _k_t in zip(self._t, k_t)]
         new_l = [l + _k_l for l, _k_l in zip(self._l, k_l)]
 
-        return AmplitudeContainer(new_t, new_l)
+        return AmplitudeContainer(new_t, new_l, np=self.np)
 
     def __radd__(self, k):
         return self.__add__(k)
@@ -43,7 +52,7 @@ class AmplitudeContainer:
             new_t = [t * k for t in self._t]
             new_l = [l * k for l in self._l]
 
-            return AmplitudeContainer(new_t, new_l)
+            return AmplitudeContainer(new_t, new_l, np=self.np)
 
         # Assuming that k = [k_t, k_l], a list where each element should be
         # mulitplied with each amplitude in the l- and t-lists.
@@ -51,7 +60,7 @@ class AmplitudeContainer:
         new_t = [t * _k_t for t, _k_t in zip(self._t, k_t)]
         new_l = [l * _k_l for l, _k_l in zip(self._l, k_l)]
 
-        return AmplitudeContainer(new_t, new_l)
+        return AmplitudeContainer(new_t, new_l, np=self.np)
 
     def __rmul__(self, k):
         return self.__mul__(k)
@@ -64,17 +73,82 @@ class AmplitudeContainer:
         yield from self._t
         yield from self._l
 
+    def asarray(self):
+        np = self.np
+
+        amp_vec = np.zeros(self.n)
+        start_index = 0
+        stop_index = 0
+
+        for amp in self.unpack():
+            start_index = stop_index
+            stop_index += amp.size
+
+            try:
+                amp_vec[start_index:stop_index] += amp.ravel()
+            except TypeError:
+                amp_vec = amp_vec.astype(amp.dtype)
+                amp_vec[start_index:stop_index] += amp.ravel()
+
+        return amp_vec
+
+    @staticmethod
+    def zeros_like(u):
+        np = u.np
+
+        args = []
+        for amps in u:
+            inner = []
+
+            if type(amps) == list:
+                inner = [np.zeros_like(amp) for amp in amps]
+            else:
+                inner = np.zeros_like(amps)
+
+            args.append(inner)
+
+        return type(u)(*args, np=np)
+
+    @staticmethod
+    def from_array(u, arr):
+        np = u.np
+
+        args = []
+        start_index = 0
+        stop_index = 0
+
+        for amps in u:
+            inner = []
+
+            if type(amps) == list:
+                for amp in amps:
+                    start_index = stop_index
+                    stop_index += amp.size
+
+                    inner.append(arr[start_index:stop_index].reshape(amp.shape))
+            else:
+                start_index = stop_index
+                stop_index += amps.size
+                inner = arr[start_index:stop_index].reshape(amps.shape)
+
+            args.append(inner)
+
+        return type(u)(*args, np=np)
+
 
 class OACCVector(AmplitudeContainer):
     """This is a container for the amplitudes, t and l, and the orbital
     transformation coefficients C and C_tilde.
     """
 
-    def __init__(self, t, l, C, C_tilde):
-        super().__init__(t=t, l=l)
+    def __init__(self, t, l, C, C_tilde, np):
+        super().__init__(t=t, l=l, np=np)
 
         self._C = C
         self._C_tilde = C_tilde
+
+        self.n += self._C.size
+        self.n += self._C_tilde.size
 
     def __add__(self, k):
         # Check if k is a constant to be added to all l- and t-amplitudes and
@@ -85,7 +159,7 @@ class OACCVector(AmplitudeContainer):
             new_C = self._C + k
             new_C_tilde = self._C_tilde + k
 
-            return OACCVector(new_t, new_l, new_C, new_C_tilde)
+            return OACCVector(new_t, new_l, new_C, new_C_tilde, np=self.np)
 
         # Assuming that k = [k_t, k_l, k_C, k_C_tilde], a list where each
         # element should be added to each amplitude in the l- and t-lists and
@@ -96,7 +170,7 @@ class OACCVector(AmplitudeContainer):
         new_C = self._C + k_C
         new_C_tilde = self._C_tilde + k_C_tilde
 
-        return OACCVector(new_t, new_l, new_C, new_C_tilde)
+        return OACCVector(new_t, new_l, new_C, new_C_tilde, np=self.np)
 
     def __mul__(self, k):
         # Check if k is a constant to be multiplied with all l- and t-amplitudes
@@ -107,7 +181,7 @@ class OACCVector(AmplitudeContainer):
             new_C = self._C * k
             new_C_tilde = self._C_tilde * k
 
-            return OACCVector(new_t, new_l, new_C, new_C_tilde)
+            return OACCVector(new_t, new_l, new_C, new_C_tilde, np=self.np)
 
         # Assuming that k = [k_t, k_l, k_C, k_C_tilde], a list where each
         # element should be multiplied with each amplitude in the l- and t-lists
@@ -118,7 +192,7 @@ class OACCVector(AmplitudeContainer):
         new_C = self._C * k_C
         new_C_tilde = self._C_tilde * k_C_tilde
 
-        return OACCVector(new_t, new_l, new_C, new_C_tilde)
+        return OACCVector(new_t, new_l, new_C, new_C_tilde, np=self.np)
 
     def __iter__(self):
         yield self._t

@@ -24,7 +24,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         if C_tilde is None:
             C_tilde = self.np.eye(self.system.l)
 
-        self._amplitudes = OACCVector(*amplitudes, C, C_tilde)
+        self._amplitudes = OACCVector(*amplitudes, C, C_tilde, np=self.np)
 
     @abc.abstractmethod
     def one_body_density_matrix(self, t, l):
@@ -48,6 +48,8 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def __call__(self, prev_amp, current_time):
         np = self.np
         o, v = self.o, self.v
+
+        prev_amp = OACCVector.from_array(self._amplitudes, prev_amp)
         t_old, l_old, C, C_tilde = prev_amp
 
         # Evolve system in time
@@ -131,8 +133,11 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             np=np,
         )
         """
+
         # Return amplitudes and C and C_tilde
-        return OACCVector(t=t_new, l=l_new, C=C_new, C_tilde=C_tilde_new)
+        return OACCVector(
+            t=t_new, l=l_new, C=C_new, C_tilde=C_tilde_new, np=self.np
+        ).asarray()
 
 
 def compute_q_space_ket_equations(
