@@ -45,8 +45,8 @@ hf = HartreeFock(system, verbose=True)
 C = hf.scf(tolerance=1e-15)
 system.change_basis(C)
 
-# integrator = GaussIntegrator(np=np)
-integrator = None
+integrator = GaussIntegrator(np=np, eps=1e-10)
+# integrator = None
 cc_kwargs = dict(verbose=True)
 oatdccd = OATDCCD(
     CoupledClusterDoubles, system, integrator=integrator, np=np, **cc_kwargs
