@@ -34,7 +34,10 @@ def compute_oatdccd_energy(f, u, t, l, o, v, np):
 
 def lagrangian_funtional(T2, L2, F, W, o, v, np):
     """
-    Eq [A8] in Kvaal - h_i^i + 0.5 u_{ij}^{ij} term
+    Eq [A8] in Kvaal sans the reference energy
+
+        E_ref = h^i_i + 0.5 u^{ij}_{ij}
+            = f^{i}_{i} - 0.5 u^{ij}_{ij}
     """
     result = 0.25 * np.einsum(
         "lkdc,dclk->", L2, W[v, v, o, o], optimize=["einsum_path", (0, 1)]
