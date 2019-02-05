@@ -73,6 +73,68 @@ class AmplitudeContainer:
         yield from self._t
         yield from self._l
 
+    def asarray(self):
+        np = self.np
+
+        amp_vec = np.zeros(self.n)
+        start_index = 0
+        stop_index = 0
+
+        for amp in self.unpack():
+            start_index = stop_index
+            stop_index += amp.size
+
+            try:
+                amp_vec[start_index:stop_index] += amp.ravel()
+            except TypeError:
+                amp_vec = amp_vec.astype(amp.dtype)
+                amp_vec[start_index:stop_index] += amp.ravel()
+
+        return amp_vec
+
+    @staticmethod
+    def zeros_like(u):
+        np = u.np
+
+        args = []
+        for amps in u:
+            inner = []
+
+            if type(amps) == list:
+                inner = [np.zeros_like(amp) for amp in amps]
+            else:
+                inner = np.zeros_like(amps)
+
+            args.append(inner)
+
+        return type(u)(*args, np=np)
+
+    @staticmethod
+    def from_array(u, arr):
+        np = u.np
+
+        args = []
+        start_index = 0
+        stop_index = 0
+
+        for amps in u:
+            inner = []
+
+            if type(amps) == list:
+                for amp in amps:
+                    start_index = stop_index
+                    stop_index += amp.size
+
+                    inner.append(arr[start_index:stop_index].reshape(amp.shape))
+            else:
+                start_index = stop_index
+                stop_index += amps.size
+                inner = arr[start_index:stop_index].reshape(amps.shape)
+
+            args.append(inner)
+
+        return type(u)(*args, np=np)
+
 
 class OACCVector(AmplitudeContainer):
     """This is a container for the amplitudes, t and l, and the orbital
