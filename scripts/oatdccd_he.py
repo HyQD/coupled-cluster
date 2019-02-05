@@ -61,7 +61,7 @@ system.set_time_evolution_operator(
 
 oatdccd.set_initial_conditions()
 dt = 1e-2
-Tfinal = 5
+Tfinal = 10
 Nsteps = int(Tfinal / dt) + 1
 timestep_stop_laser = int(laser_duration / dt)
 
@@ -144,7 +144,6 @@ plt.figure()
 plt.plot(time_points, norm_l2)
 plt.title(r"Norm of $\lambda_2$-amplitudes")
 plt.grid()
-plt.show()
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
 
