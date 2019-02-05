@@ -69,7 +69,7 @@ class GaussIntegrator(Integrator):
         converged = False
 
         for j in range(self.maxit):
-            F = np.zeros((self.n, self.s), dtype=y.dtype)
+            F = np.zeros((self.n, self.s), dtype=np.complex128)
             for i in range(self.s):
                 F[:, i] = self.eval_rhs(y + Z[:, i], t + dt * self.c[i])
 
@@ -98,18 +98,18 @@ class GaussIntegrator(Integrator):
 
         np = self.np
 
-        self.y = u
+        self.y = u.astype(np.complex128)
         self.n = len(self.y)
 
         if self.y_prev is None:
             self.y_prev = np.zeros_like(self.y)
             self.y_prev += self.y
-            self.Z = np.zeros((1, self.n, self.s), dtype=self.y.dtype)
+            self.Z = np.zeros((1, self.n, self.s), dtype=np.complex128)
 
         t_vec = (t - dt) + np.append([0], dt * self.c)
         t_vec2 = t + dt * self.c
 
-        W = np.zeros((self.n, self.s + 1), dtype=self.y.dtype)
+        W = np.zeros((self.n, self.s + 1), dtype=np.complex128)
         W[:, 0] += self.y_prev
 
         for i in range(self.s):
@@ -118,7 +118,7 @@ class GaussIntegrator(Integrator):
         Y0 = barycentric_interpolate(t_vec, W.transpose(), t_vec2).transpose()
 
         # Save as initial guess Z0
-        Z0 = np.zeros((self.n, self.s), dtype=self.y.dtype)
+        Z0 = np.zeros((self.n, self.s), dtype=np.complex128)
         for i in range(self.s):
             Z0[:, i] = Y0[:, i] - self.y
 
