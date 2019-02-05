@@ -24,7 +24,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         if C_tilde is None:
             C_tilde = self.np.eye(self.system.l)
 
-        self._amplitudes = OACCVector(*amplitudes, C, C_tilde)
+        self._amplitudes = OACCVector(*amplitudes, C, C_tilde, np=self.np)
 
     @abc.abstractmethod
     def one_body_density_matrix(self, t, l):
