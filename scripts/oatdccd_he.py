@@ -149,7 +149,6 @@ plt.figure()
 plt.plot(time_points, norm_l2)
 plt.title(r"Norm of $\lambda_2$-amplitudes")
 plt.grid()
-plt.show()
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
 
