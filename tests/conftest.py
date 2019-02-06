@@ -195,6 +195,43 @@ def tdccd_zanghellini_td_energies():
 
 
 @pytest.fixture
+def oatdccd_helium_td_energies():
+    filename = os.path.join("tests", "dat", "oatdccd_helium_td_energies.dat")
+
+    return np.loadtxt(filename)
+
+
+@pytest.fixture
+def oatdccd_helium_td_energies_imag():
+    filename = os.path.join(
+        "tests", "dat", "oatdccd_helium_td_energies_imag.dat"
+    )
+
+    return np.loadtxt(filename)
+
+
+@pytest.fixture
+def oatdccd_helium_dip_z():
+    filename = os.path.join("tests", "dat", "oatdccd_helium_dip_z.dat")
+
+    return np.loadtxt(filename)
+
+
+@pytest.fixture
+def oatdccd_helium_norm_t2():
+    filename = os.path.join("tests", "dat", "oatdccd_helium_norm_t2.dat")
+
+    return np.loadtxt(filename)
+
+
+@pytest.fixture
+def oatdccd_helium_norm_l2():
+    filename = os.path.join("tests", "dat", "oatdccd_helium_norm_l2.dat")
+
+    return np.loadtxt(filename)
+
+
+@pytest.fixture
 def t_kwargs():
     theta = 0.5
     tol = 1e-4
@@ -228,6 +265,11 @@ def helium_system():
     options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 
     return construct_psi4_system(He, options)
+
+
+@pytest.fixture
+def ccd_groundstate_He_energy():
+    return -2.8875924
 
 
 @pytest.fixture(scope="session")
