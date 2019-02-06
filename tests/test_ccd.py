@@ -42,6 +42,11 @@ from coupled_cluster.ccd.density_matrices import (
     add_rho_ijab,
     add_rho_cdab,
 )
+from coupled_cluster.ccd.p_space_equations import (
+    compute_R_ia,
+    compute_R_tilde_ai,
+    compute_A_ibaj,
+)
 
 
 @pytest.fixture(scope="session")
@@ -873,6 +878,56 @@ def rho_ijab(l2, t2, np):
     )
     rho_ijab += t2
     return rho_ijab
+
+
+def test_R_ia(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        o = system.o
+        v = system.v
+
+        rho_qp = ccd.compute_one_body_density_matrix()
+        rho_qspr = ccd.compute_two_body_density_matrix()
+
+        h, u = system.h, system.u
+
+        R_ia = compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np=np)
+
+        R_ia_test = np.einsum("ij,ja->ia", rho_qp[o, o], h[o, v])
+        R_ia_test -= np.einsum("ba,ib->ia", rho_qp[v, v], h[o, v])
+        R_ia_test += 0.5 * np.einsum(
+            "ispr,pras->ia", rho_qspr[o, :, :, :], u[:, :, v, :], optimize=True
+        )
+        R_ia_test -= 0.5 * np.einsum(
+            "qsar,irqs->ia", rho_qspr[:, :, v, :], u[o, :, :, :], optimize=True
+        )
+
+        np.testing.assert_allclose(R_ia, R_ia_test, atol=1e-8)
+
+
+def test_R_tilde_ia(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        o = system.o
+        v = system.v
+
+        rho_qp = ccd.compute_one_body_density_matrix()
+        rho_qspr = ccd.compute_two_body_density_matrix()
+
+        h, u = system.h, system.u
+
+        R_tilde_ai = compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np=np)
+
+        R_tilde_ai_test = np.einsum("ab,bi->ai", rho_qp[v, v], h[v, o])
+        R_tilde_ai_test -= np.einsum("ji,aj->ai", rho_qp[o, o], h[v, o])
+        R_tilde_ai_test += 0.5 * np.einsum(
+            "aspr,pris->ai", rho_qspr[v, :, :, :], u[:, :, o, :]
+        )
+        R_tilde_ai_test -= 0.5 * np.einsum(
+            "qsir,arqs->ai", rho_qspr[:, :, o, :], u[v, :, :, :]
+        )
+
+        np.testing.assert_allclose(R_tilde_ai, R_tilde_ai_test, atol=1e-8)
 
 
 def test_reference_energy(tdho, ref_energy):
