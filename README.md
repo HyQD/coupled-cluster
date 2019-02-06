@@ -30,8 +30,3 @@ If the environment changes you can update the new changes by:
 ```bash
 conda env update -f environment.yml
 ```
-
-
-# Science!
-
-![](https://i.giphy.com/media/w5FTwwiweGqDm/giphy.webp)
