@@ -8,7 +8,7 @@ from coupled_cluster.ccd import OATDCCD, CoupledClusterDoubles
 from coupled_cluster.integrators import GaussIntegrator
 
 
-class laser_pulse:
+class LaserPulse:
     def __init__(self, t0=0, td=5, omega=0.1, E=0.03):
         self.t0 = t0
         self.td = td
@@ -61,7 +61,7 @@ polarization = np.zeros(3)
 polarization[2] = 1
 system.set_polarization_vector(polarization)
 system.set_time_evolution_operator(
-    LaserField(laser_pulse(td=laser_duration, omega=omega, E=E))
+    LaserField(LaserPulse(td=laser_duration, omega=omega, E=E))
 )
 
 oatdccd.set_initial_conditions()
