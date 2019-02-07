@@ -930,6 +930,27 @@ def test_R_tilde_ia(iterated_ccd_amplitudes):
         np.testing.assert_allclose(R_tilde_ai, R_tilde_ai_test, atol=1e-8)
 
 
+def test_A_ibaj(iterated_ccd_amplitudes):
+    for ccd in iterated_ccd_amplitudes:
+        t, l, system = ccd.t_2, ccd.l_2, ccd.system
+        o = system.o
+        v = system.v
+
+        rho_qp = ccd.compute_one_body_density_matrix()
+
+        A_ibaj = compute_A_ibaj(rho_qp, o, v, np=np)
+
+        # This might seem like an odd test, but it is based on previous working
+        # code that constructed two versions of A_ibaj with a sign difference.
+        delta_ij = np.eye(o.stop)
+        delta_ba = np.eye(v.stop - o.stop)
+
+        A_bija = -np.einsum("ba, ij -> bija", delta_ba, rho_qp[o, o])
+        A_bija += np.einsum("ij, ba -> bija", delta_ij, rho_qp[v, v])
+
+        np.testing.assert_allclose(A_bija, -A_ibaj.transpose(1, 0, 3, 2))
+
+
 def test_reference_energy(tdho, ref_energy):
     tol = 1e-4
 
