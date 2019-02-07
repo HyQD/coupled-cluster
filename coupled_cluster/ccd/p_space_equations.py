@@ -2,45 +2,28 @@ def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
     eta = np.zeros(h.shape, dtype=np.complex128)
     A_ibaj = compute_A_ibaj(rho_qp, o, v, np=np)
     R_ia = compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np=np)
-    R_tilde_ai = compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np=np)
-
-    """
-    It seems like tensorsolve is sensitive to where we place the 
-    1j's !!!!!!!!!!!
-    """
 
     A_iajb = A_ibaj.transpose(0, 2, 3, 1)
-    A_iajb = A_iajb.reshape(
-        o.stop * (v.stop - o.stop), o.stop * (v.stop - o.stop)
-    )
+    eta_jb = -1j * np.linalg.tensorsolve(A_iajb, R_ia)
 
-    # print("det(A_iajb: %g" % np.linalg.det(A_iajb))
-    eta_jb = np.linalg.solve(A_iajb, R_ia.reshape(o.stop * (v.stop - o.stop)))
-    eta_jb = -1j * eta_jb.reshape(o.stop, (v.stop - o.stop))
-    # eta_jb = np.linalg.tensorsolve(-1j*A_iajb, R_ia)
-    # eta_jb = -1j*np.linalg.tensorsolve(A_iajb, R_ia)
-
-    """
-    Using A^{ja}_{bi} = -A^{aj}_{ib}
-    Then Eq. [34 d] becomes, 
-    i A^{aj}_{ib} \eta^b_j = R_tilde^a_i
-    -> A_{ai,bj} \eta_{bj} = R_tilde_{ai} 
-    """
-
-    A_ajib = compute_A_bija(rho_qp, o, v, np=np)
-    A_ajib = A_ajib.transpose(0, 2, 3, 1)
-    A_ajib = A_ajib.reshape(
-        o.stop * (v.stop - o.stop), o.stop * (v.stop - o.stop)
-    )
-    # print("det(A_aibj: %g" % np.linalg.det(A_aibj))
-    # eta_bj = np.linalg.tensorsolve(1j*A_aibj, R_tilde_ai)
-    eta_bj = np.linalg.solve(
-        A_ajib, R_tilde_ai.reshape(o.stop * (v.stop - o.stop))
-    )
-    eta_bj = -1j * eta_bj.reshape(v.stop - o.stop, o.stop)
+    # To make the indices match in the tensorsolve, we treat R_tilde_ai as
+    # R_tilde_bj. Thus we get the tensor equation
+    #
+    #   -i A^{ja}_{bi} eta^{b}_{j} = R_tilde^{a}_{i}
+    #
+    #    => -i A^{ib}_{aj} eta^{a}_{i} = R_tilde^{b}_{j}.
+    #
+    # Rephrased as a matrix equation with compound indices in paranthesis we get
+    #
+    #    => -i A_tilde_{(bj), (ai)} eta_{(ai)} = R_tilde_{(bj)}.
+    #
+    # We solve this equation for eta_{(ai)} <==> eta^{b}_{j}.
+    R_tilde_bj = compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np=np)
+    A_bjai = A_ibaj.transpose(1, 3, 2, 0)
+    eta_ai = 1j * np.linalg.tensorsolve(A_bjai, R_tilde_bj)
 
     eta[o, v] += eta_jb
-    eta[v, o] += eta_bj
+    eta[v, o] += eta_ai
 
     return eta
 
@@ -51,16 +34,6 @@ def compute_A_ibaj(rho_qp, o, v, np):
 
     A_ibaj = np.einsum("ba, ij -> ibaj", delta_ba, rho_qp[o, o])
     A_ibaj -= np.einsum("ij, ba -> ibaj", delta_ij, rho_qp[v, v])
-
-    return A_ibaj
-
-
-def compute_A_bija(rho_qp, o, v, np):
-    delta_ij = np.eye(o.stop)
-    delta_ba = np.eye(v.stop - o.stop)
-
-    A_ibaj = -np.einsum("ba, ij -> bija", delta_ba, rho_qp[o, o])
-    A_ibaj += np.einsum("ij, ba -> bija", delta_ij, rho_qp[v, v])
 
     return A_ibaj
 
