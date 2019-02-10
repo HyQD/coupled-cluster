@@ -178,14 +178,17 @@ def add_d4a_t(u, t_1, o, v, out, np):
 
     Number of FLOPS required: O(m^3, n^2)
     """
+    
+    # Get abji want abij
     term = np.tensordot(u[v, v, v, o], t_1, axes=((2), (0))).transpose(
         0, 1, 3, 2
     )
-    out += term.swapaxes(2, 3)
+    term -= term.swapaxes(2, 3)
+    out += term
 
 
 def add_d4b_t(u, t_1, o, v, out, np):
-    """ Function for adding the D4b diagram
+    """Function for adding the D4b diagram
 
         g(f, u, t) <-  (-1) * u^{kb}_{ij} t^{a}_{k} P(ab)
 
@@ -194,4 +197,19 @@ def add_d4b_t(u, t_1, o, v, out, np):
     term = np.tensordot(u[o, v, o, o], t_1, axes=((0), (1))).transpose(
         3, 0, 1, 2
     )
-    out += -term.swapaxes(0, 1)
+    term -= term.swapaxes(0, 1)
+    out -= term
+
+def add_d5a_t(f, t_1, t_2, o, v, out, np):
+    """Function for adding the D5a diagram
+
+        g(f, u, t) <- (-1) * f^{k}_{c} t^{c}_{i} t^{ab}_{kj} P(ij)
+
+    Number of FLOPS required: O(m^3 n^3)
+    """
+
+    term_ki = np.tensordot(f[o, v], t_1, axes=((1), (0)))
+    # Get iabj want abij
+    term = np.tensordot(term_ki, t_2, axes=((0), (2))).transpose(1, 2, 0, 3)
+    term -= term.swapaxes(2, 3)
+    out -= term

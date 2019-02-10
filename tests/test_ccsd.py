@@ -19,6 +19,7 @@ from coupled_cluster.ccsd.rhs_t import (
     add_s6_t,
     add_d4a_t,
     add_d4b_t,
+    add_d5a_t,
 )
 
 
@@ -213,8 +214,9 @@ def test_add_d4a_t(large_system_ccsd):
 
     out = np.zeros_like(t_2)
     add_d4a_t(u, t_1, o, v, out, np=np)
-    out_e = np.einsum("abcj, ci->abij", u[v, v, v, o], t_1).swapaxes(2, 3)
-
+    out_e = np.einsum("abcj, ci->abij", u[v, v, v, o], t_1)
+    out_e -= out_e.swapaxes(2, 3)
+    
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
@@ -226,9 +228,21 @@ def test_add_d4b_t(large_system_ccsd):
 
     out = np.zeros_like(t_2)
     add_d4b_t(u, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum("kbij, ak->abij", u[o, v, o, o], t_1).swapaxes(
-        0, 1
-    )
+    out_e = (-1) * np.einsum("kbij, ak->abij", u[o, v, o, o], t_1)
+    out_e -= out_e.swapaxes(0, 1)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+def test_add_d5a_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    f = cs.f
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d5a_t(f, t_1, t_2, o, v, out, np=np)
+    out_e = -np.einsum("kc, ci, abkj->abij", f[o, v], t_1, t_2)
+    out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
