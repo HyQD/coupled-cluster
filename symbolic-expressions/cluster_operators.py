@@ -10,6 +10,23 @@ def get_clusters(cc_functions, *args, **kwargs):
     return sum([func(*args, **kwargs) for func in cc_functions])
 
 
+def get_hamiltonian():
+    """Generates normal ordered Hamiltonian. Remember to include the reference
+    energy in the energy expressions. That is,
+
+        E_ref = f^{i}_{i} - 0.5 * u^{ij}_{ij}
+            = h^{i}_{i} + 0.5 * u^{ij}_{ij}.
+    """
+    p, q, r, s = symbols("p, q, r, s", cls=Dummy)
+    f = AntiSymmetricTensor("f", (p,), (q,))
+    u = AntiSymmetricTensor("u", (p, q), (r, s))
+
+    f = f * NO(Fd(p) * F(q))
+    u = u * NO(Fd(p) * Fd(q) * F(s) * F(r))
+
+    return f, Rational(1, 4) * u
+
+
 def get_t_1_operator(ast_symb="t"):
     i = symbols("i", below_fermi=True, cls=Dummy)
     a = symbols("a", above_fermi=True, cls=Dummy)
