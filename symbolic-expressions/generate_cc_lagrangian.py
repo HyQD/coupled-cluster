@@ -1,7 +1,6 @@
 from sympy.physics.secondquant import Commutator, wicks
 from sympy import factorial
 from cluster_operators import get_hamiltonian, get_clusters
-from helper_functions import eval_equation
 
 
 def generate_lagrangian(t_operators, l_operators):
@@ -20,14 +19,17 @@ def generate_lagrangian(t_operators, l_operators):
 
     equation = (1 + get_clusters(l_operators)) * equation
 
-    return eval_equation(equation)
+    return equation
 
 
 if __name__ == "__main__":
     from cluster_operators import get_t_2_operator, get_l_2_operator
+    from helper_functions import eval_equation
     from sympy import latex
 
-    lagrangian = generate_lagrangian(get_t_2_operator, get_l_2_operator)
+    lagrangian = eval_equation(
+        generate_lagrangian(get_t_2_operator, get_l_2_operator)
+    )
 
     print(latex(lagrangian))
     print("\n\n")
