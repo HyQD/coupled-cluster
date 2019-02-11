@@ -154,15 +154,15 @@ def get_ccsd_equations():
 
     cluster_function = [get_t_1_operator, get_t_2_operator]
 
-    equation = compute_hausdorff(
+    t_equation = compute_hausdorff(
         hamiltonian, cluster_function, sub_kwargs=sub_kwargs_ccsd
     )
 
-    energy = get_energy_equation(equation)
-    amplitudes_s = get_singles_amplitudes(equation, sub_kwargs=sub_kwargs_ccsd)
-    amplitudes_d = get_doubles_amplitudes(equation, sub_kwargs=sub_kwargs_ccsd)
+    energy = get_energy_equation(t_equation)
+    t_amplitudes_s = get_singles_amplitudes(t_equation, sub_kwargs=sub_kwargs_ccsd)
+    t_amplitudes_d = get_doubles_amplitudes(t_equation, sub_kwargs=sub_kwargs_ccsd)
 
-    return energy, [amplitudes_s, amplitudes_d]
+    return energy, [t_amplitudes_s, t_amplitudes_d]
 
 
 def get_ccdt_equations():
