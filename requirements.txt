@@ -22,3 +22,9 @@ git+https://github.com/Schoyen/quantum-systems.git
 # Install tdhf
 # This is currently not supported as tdhf is a private repo
 # git+https://github.com/haakoek/tdhf.git
+
+# Install sympy for symbolic expressions
+sympy
+
+# Install matplotlib for plotting of scripts
+matplotlib
