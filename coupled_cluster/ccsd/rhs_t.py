@@ -205,7 +205,7 @@ def add_d5a_t(f, t_1, t_2, o, v, out, np):
 
         g(f, u, t) <- (-1) * f^{k}_{c} t^{c}_{i} t^{ab}_{kj} P(ij)
 
-    Number of FLOPS required: O(m^3 n^3)
+    Number of FLOPS required: O(m^3, n^3)
     """
 
     term_ki = np.tensordot(f[o, v], t_1, axes=((1), (0)))
@@ -213,3 +213,110 @@ def add_d5a_t(f, t_1, t_2, o, v, out, np):
     term = np.tensordot(term_ki, t_2, axes=((0), (2))).transpose(1, 2, 0, 3)
     term -= term.swapaxes(2, 3)
     out -= term
+
+def add_d5b_t(f, t_1, t_2, o, v, out, np):
+    """Function for adding the D5b diagram
+
+        g(f, u, t) <- (-1) * f^{k}_{c} t^{a}_{k} t^{cb}_{ij} P(ab)
+    
+    Number of FLOPS required: O(m^3, n^3)
+    """
+
+    term = np.tensordot(f[o, v], t_1, axes=((0), (1))) # This becomes ca
+    # Get abij
+    term = np.tensordot(term, t_2, axes=((0), (0)))
+    term -= term.swapaxes(0, 1)
+
+    out -= term
+
+def add_d5c_t(u, t_1, t_2, o, v, out, np):
+    """Function for adding the D5c diagram
+
+        g(f, u, t) <- u^{ak}_{cd} t^{c}_{i} t^{db}_{kj} P(ab) P(ij)
+
+    Number of FLOPS required: O(m^4, n^3)
+    """
+
+    term = np.tensordot(u[v, o, v, v], t_1, axes=((2), (0))) # akdi
+    # Get aibj want abij
+    term = np.tensordot(term, t_2, axes=((1, 2), (2, 0))).transpose(0, 2, 1, 3)
+    term -= term.swapaxes(0, 1)
+    term -= term.swapaxes(2, 3)
+
+    out += term
+
+def add_d5e_t(u, t_1, t_2, o, v, out, np):
+    """Function for adding the D5e diagram
+
+        g(f, u, t) <- (-0.5) * u^{kb}_{cd} t^{a}_{k} t^{cd}_{ij} P(ab)
+
+    Number of FLOPS required: O(m^4, n^3)
+    """
+
+    term = (-0.5) * np.tensordot(u[o, v, v, v], t_1, axes=((0), (1))) # bcda
+    # Get baij want abij 
+    term = np.tensordot(term, t_2, axes=((1, 2), (0, 1))).transpose(1, 0, 2, 3)
+    term -= term.swapaxes(0, 1)
+
+    out += term
+
+def add_d5g_t(u, t_1, t_2, o, v, out, np):
+    """Function for adding the D5g diagram
+
+        g(f, u, t) <- u^{ka}_{cd} t^{c}_{k} t^{db}_{ij} P(ab)
+    
+    Number of FLOPS required: O(m^4, n^3)
+    """
+
+    term = np.tensordot(u[o, v, v, v], t_1, axes=((0, 2), (1, 0))) # ad 
+    term = np.tensordot(term, t_2, axes=((1), (0)))
+    term -= term.swapaxes(0, 1)
+
+    out += term
+
+def add_d5d_t(u, t_1, t_2, o, v, out, np):
+    """Function for adding the D5d diagram
+
+        g(f, u, t) <- (-1) * u^{kl}_{ic} t^{a}_{k} t^{cb}_{lj} P(ab) P(ij)
+
+    Number of FLOPS required: O(m^3 n^4)
+    """
+
+    term = (-1) * np.tensordot(u[o, o, o, v], t_1, axes=((0), (1))) # lica
+    # Get iabj want abij
+    term = np.tensordot(term, t_2, axes=((0, 2), (2, 0))).transpose(1, 2, 0, 3)
+    term -= term.swapaxes(0, 1)
+    term -= term.swapaxes(2, 3)
+
+    out += term
+
+def add_d5f_t(u, t_1, t_2, o, v, out, np):
+    """Function for adding the D5f diagram
+
+        g(f, u, t) <- (0.5) * u^{kl}_{cj} t^{c}_{i} t^{ab}_{kl} P(ij)
+
+    Number of FLOPS required O(m^3, n^4)
+    """
+
+    term = (0.5) * np.tensordot(u[o, o, v, o], t_1, axes=((2), (0))) # klji
+    # Get jiab want abij
+    term = np.tensordot(term, t_2, axes=((0, 1), (2, 3))).transpose(2, 3, 1, 0)
+    term -= term.swapaxes(2, 3)
+
+    out += term
+
+def add_d5h_t(u, t_1, t_2, o, v, out, np):
+    """Function for adding the D5h diagram
+
+        g(f, u, t) <- (-1) * u^{kl}_{ci} t^{c}_{k} t^{ab}_{lj}
+
+    Number of FLOPS required O(m^3, n^4)
+    """
+
+    term = (-1) * np.tensordot(u[o, o, v, o], t_1, axes=((0, 2), (1, 0))) # li
+    # Get iabj want abij
+    term = np.tensordot(term, t_2, axes=((0), (2))).transpose(1, 2, 0, 3)
+    term -= term.swapaxes(2, 3)
+
+    out += term
+    

@@ -20,6 +20,13 @@ from coupled_cluster.ccsd.rhs_t import (
     add_d4a_t,
     add_d4b_t,
     add_d5a_t,
+    add_d5b_t,
+    add_d5c_t,
+    add_d5e_t,
+    add_d5g_t,
+    add_d5d_t,
+    add_d5f_t,
+    add_d5h_t,
 )
 
 
@@ -246,6 +253,98 @@ def test_add_d5a_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+def test_add_d5b_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    f = cs.f
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d5b_t(f, t_1, t_2, o, v, out, np=np)
+    out_e = (-1) * np.einsum("kc, ak, cbij->abij", f[o, v], t_1, t_2)
+    out_e -= out_e.swapaxes(0, 1)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+def test_add_d5c_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d5c_t(u, t_1, t_2, o, v, out, np=np)
+    out_e = np.einsum("akcd, ci, dbkj->abij", u[v, o, v, v], t_1, t_2)
+    out_e -= out_e.swapaxes(0, 1)
+    out_e -= out_e.swapaxes(2, 3)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+def test_add_d5e_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d5e_t(u, t_1, t_2, o, v, out, np=np)
+    out_e = (-0.5) * np.einsum("kbcd, ak, cdij->abij", u[o, v, v, v], t_1, t_2)
+    out_e -= out_e.swapaxes(0, 1)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+def test_add_d5g_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d5g_t(u, t_1, t_2, o, v, out, np=np)
+    out_e = np.einsum("kacd, ck, dbij->abij", u[o, v, v, v], t_1, t_2)
+    out_e -= out_e.swapaxes(0, 1)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+def test_add_d5d_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d5d_t(u, t_1, t_2, o, v, out, np=np)
+    out_e = (-1) * np.einsum("klic, ak, cblj->abij", u[o, o, o, v], t_1, t_2)
+    out_e -= out_e.swapaxes(0, 1)
+    out_e -= out_e.swapaxes(2, 3)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+def test_add_d5f_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d5f_t(u, t_1, t_2, o, v, out, np=np)
+    out_e = (0.5) * np.einsum("klcj, ci, abkl->abij", u[o, o, v, o], t_1, t_2)
+    out_e -= out_e.swapaxes(2, 3)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+def test_add_d5h_t(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(t_2)
+    add_d5h_t(u, t_1, t_2, o, v, out, np=np)
+    out_e = (-1) * np.einsum("klci, ck, ablj->abij", u[o, o, v, o], t_1, t_2)
+    out_e -= out_e.swapaxes(2, 3)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 def test_mbpt_enegy(tdho):
 
