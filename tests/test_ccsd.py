@@ -223,7 +223,7 @@ def test_add_d4a_t(large_system_ccsd):
     add_d4a_t(u, t_1, o, v, out, np=np)
     out_e = np.einsum("abcj, ci->abij", u[v, v, v, o], t_1)
     out_e -= out_e.swapaxes(2, 3)
-    
+
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
@@ -240,6 +240,7 @@ def test_add_d4b_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d5a_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     f = cs.f
@@ -253,6 +254,7 @@ def test_add_d5a_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d5b_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     f = cs.f
@@ -265,6 +267,7 @@ def test_add_d5b_t(large_system_ccsd):
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d5c_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -280,6 +283,7 @@ def test_add_d5c_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d5e_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -293,6 +297,7 @@ def test_add_d5e_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d5g_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -305,6 +310,7 @@ def test_add_d5g_t(large_system_ccsd):
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d5d_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -320,6 +326,7 @@ def test_add_d5d_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d5f_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -333,6 +340,7 @@ def test_add_d5f_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d5h_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -345,6 +353,7 @@ def test_add_d5h_t(large_system_ccsd):
     out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_mbpt_enegy(tdho):
 
