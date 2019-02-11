@@ -4,10 +4,27 @@
 
 # Diagrams for CCSD T_1 amplitude equations
 
+import coupled_cluster.ccd.rhs_t as ccd_t
+
 
 def compute_t_1_amplitudes(f, u, t_1, t_2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(t_1)
+
+    add_s1_t(f, o, v, out, np=np)
+    add_s2a_t(f, t_2, o, v, out, np=np)
+    add_s2b_t(u, t_2, o, v, out, np=np)
+    add_s2c_t(u, t_2, o, v, out, np=np)
+    add_s3a_t(f, t_1, o, v, out, np=np)
+    add_s3b_t(f, t_1, o, v, out, np=np)
+    add_s3c_t(u, t_1, o, v, out, np=np)
+    add_s4a_t(u, t_1, t_2, o, v, out, np=np)
+    add_s4b_t(u, t_1, t_2, o, v, out, np=np)
+    add_s4c_t(u, t_1, t_2, o, v, out, np=np)
+    add_s5a_t(f, t_1, o, v, out, np=np)
+    add_s5b_t(u, t_1, o, v, out, np=np)
+    add_s5c_t(u, t_1, o, v, out, np=np)
+    add_s6_t(u, t_1, o, v, out, np=np)
 
     return out
 
@@ -15,6 +32,19 @@ def compute_t_1_amplitudes(f, u, t_1, t_2, o, v, np, out=None):
 def compute_t_2_amplitudes(f, u, t_1, t_2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(t_2)
+
+    ccd_t.compute_t_2_amplitudes(f, u, t_2, o, v, np=np, out=out)
+
+    add_d4a_t(u, t_1, o, v, out, np=np)
+    add_d4b_t(u, t_1, o, v, out, np=np)
+    add_d5a_t(f, t_1, t_2, o, v, out, np=np)
+    add_d5b_t(f, t_1, t_2, o, v, out, np=np)
+    add_d5c_t(u, t_1, t_2, o, v, out, np=np)
+    add_d5d_t(u, t_1, t_2, o, v, out, np=np)
+    add_d5e_t(u, t_1, t_2, o, v, out, np=np)
+    add_d5f_t(u, t_1, t_2, o, v, out, np=np)
+    add_d5g_t(u, t_1, t_2, o, v, out, np=np)
+    add_d5h_t(u, t_1, t_2, o, v, out, np=np)
 
     return out
 
@@ -249,37 +279,6 @@ def add_d5c_t(u, t_1, t_2, o, v, out, np):
     out += term
 
 
-def add_d5e_t(u, t_1, t_2, o, v, out, np):
-    """Function for adding the D5e diagram
-
-        g(f, u, t) <- (-0.5) * u^{kb}_{cd} t^{a}_{k} t^{cd}_{ij} P(ab)
-
-    Number of FLOPS required: O(m^4, n^3)
-    """
-
-    term = (-0.5) * np.tensordot(u[o, v, v, v], t_1, axes=((0), (1)))  # bcda
-    # Get baij want abij
-    term = np.tensordot(term, t_2, axes=((1, 2), (0, 1))).transpose(1, 0, 2, 3)
-    term -= term.swapaxes(0, 1)
-
-    out += term
-
-
-def add_d5g_t(u, t_1, t_2, o, v, out, np):
-    """Function for adding the D5g diagram
-
-        g(f, u, t) <- u^{ka}_{cd} t^{c}_{k} t^{db}_{ij} P(ab)
-    
-    Number of FLOPS required: O(m^4, n^3)
-    """
-
-    term = np.tensordot(u[o, v, v, v], t_1, axes=((0, 2), (1, 0)))  # ad
-    term = np.tensordot(term, t_2, axes=((1), (0)))
-    term -= term.swapaxes(0, 1)
-
-    out += term
-
-
 def add_d5d_t(u, t_1, t_2, o, v, out, np):
     """Function for adding the D5d diagram
 
@@ -297,6 +296,22 @@ def add_d5d_t(u, t_1, t_2, o, v, out, np):
     out += term
 
 
+def add_d5e_t(u, t_1, t_2, o, v, out, np):
+    """Function for adding the D5e diagram
+
+        g(f, u, t) <- (-0.5) * u^{kb}_{cd} t^{a}_{k} t^{cd}_{ij} P(ab)
+
+    Number of FLOPS required: O(m^4, n^3)
+    """
+
+    term = (-0.5) * np.tensordot(u[o, v, v, v], t_1, axes=((0), (1)))  # bcda
+    # Get baij want abij
+    term = np.tensordot(term, t_2, axes=((1, 2), (0, 1))).transpose(1, 0, 2, 3)
+    term -= term.swapaxes(0, 1)
+
+    out += term
+
+
 def add_d5f_t(u, t_1, t_2, o, v, out, np):
     """Function for adding the D5f diagram
 
@@ -309,6 +324,21 @@ def add_d5f_t(u, t_1, t_2, o, v, out, np):
     # Get jiab want abij
     term = np.tensordot(term, t_2, axes=((0, 1), (2, 3))).transpose(2, 3, 1, 0)
     term -= term.swapaxes(2, 3)
+
+    out += term
+
+
+def add_d5g_t(u, t_1, t_2, o, v, out, np):
+    """Function for adding the D5g diagram
+
+        g(f, u, t) <- u^{ka}_{cd} t^{c}_{k} t^{db}_{ij} P(ab)
+    
+    Number of FLOPS required: O(m^4, n^3)
+    """
+
+    term = np.tensordot(u[o, v, v, v], t_1, axes=((0, 2), (1, 0)))  # ad
+    term = np.tensordot(term, t_2, axes=((1), (0)))
+    term -= term.swapaxes(0, 1)
 
     out += term
 
