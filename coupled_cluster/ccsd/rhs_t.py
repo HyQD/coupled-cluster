@@ -265,7 +265,7 @@ def add_d5b_t(f, t_1, t_2, o, v, out, np):
     Number of FLOPS required: O(m^3, n^3)
     """
 
-    term = np.tensordot(f[o, v], t_1, axes=((0), (1))) # ca
+    term = np.tensordot(f[o, v], t_1, axes=((0), (1)))  # ca
     # Get abij
     term = np.tensordot(term, t_2, axes=((0), (0)))
     term -= term.swapaxes(0, 1)
@@ -369,6 +369,7 @@ def add_d5h_t(u, t_1, t_2, o, v, out, np):
 
     out += term
 
+
 def add_d6a_t(u, t_1, o, v, out, np):
     """Function for adding the D6a diagram
 
@@ -377,10 +378,11 @@ def add_d6a_t(u, t_1, o, v, out, np):
     Number of FLOPS required O()
     """
 
-    term = np.tensordot(u[v, v, v, v], t_1, axes=((2), (0))) # abdi
-    term = np.tensordot(term, t_1, axes=((2), (0))) # abij
+    term = np.tensordot(u[v, v, v, v], t_1, axes=((2), (0)))  # abdi
+    term = np.tensordot(term, t_1, axes=((2), (0)))  # abij
 
     out += term
+
 
 def add_d6b_t(u, t_1, o, v, out, np):
     """Function for adding the D6b diagram
@@ -390,10 +392,13 @@ def add_d6b_t(u, t_1, o, v, out, np):
     Number of FLOPS required O(m, n)
     """
 
-    term = np.tensordot(u[o, o, o, o], t_1, axes=((0), (1))) # lija
-    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(2, 3, 0, 1) # ijab -> abij
-    
+    term = np.tensordot(u[o, o, o, o], t_1, axes=((0), (1)))  # lija
+    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(
+        2, 3, 0, 1
+    )  # ijab -> abij
+
     out += term
+
 
 def add_d6c_t(u, t_1, o, v, out, np):
     """Function for adding the D6c diagram
@@ -403,12 +408,15 @@ def add_d6c_t(u, t_1, o, v, out, np):
     Number of FLOPS required O(m, n)
     """
 
-    term = (-1) * np.tensordot(u[o, v, v, o], t_1, axes=((2), (0))) # kbji
-    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(3, 0, 2, 1) # bjia -> abij
+    term = (-1) * np.tensordot(u[o, v, v, o], t_1, axes=((2), (0)))  # kbji
+    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(
+        3, 0, 2, 1
+    )  # bjia -> abij
     term -= term.swapaxes(0, 1)
     term -= term.swapaxes(2, 3)
 
     out += term
+
 
 def add_d7a_t(u, t_1, t_2, o, v, out, np):
     """Function for adding the D7a diagram
@@ -418,11 +426,14 @@ def add_d7a_t(u, t_1, t_2, o, v, out, np):
     Number of FLOPS required O()
     """
 
-    term = (0.5) * np.tensordot(u[o, o, v, v], t_1, axes=((2), (0))) # kldi
-    term = np.tensordot(term, t_2, axes=((0, 1), (2, 3))) # diab
-    term = np.tensordot(term, t_1, axes=((0), (0))).transpose(1, 2, 0, 3) # iabj -> abij
+    term = (0.5) * np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))  # kldi
+    term = np.tensordot(term, t_2, axes=((0, 1), (2, 3)))  # diab
+    term = np.tensordot(term, t_1, axes=((0), (0))).transpose(
+        1, 2, 0, 3
+    )  # iabj -> abij
 
     out += term
+
 
 def add_d7b_t(u, t_1, t_2, o, v, out, np):
     """Function for adding the D7b diagram
@@ -431,12 +442,15 @@ def add_d7b_t(u, t_1, t_2, o, v, out, np):
 
     Number of FLOPS required O()
     """
-    
-    term = (0.5) * np.tensordot(u[o, o, v, v], t_1, axes=((0), (1))) # lcda
-    term = np.tensordot(term, t_2, axes=((1, 2), (0, 1))) # laij
-    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(0, 3, 1, 2) # aijb -> abij
+
+    term = (0.5) * np.tensordot(u[o, o, v, v], t_1, axes=((0), (1)))  # lcda
+    term = np.tensordot(term, t_2, axes=((1, 2), (0, 1)))  # laij
+    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(
+        0, 3, 1, 2
+    )  # aijb -> abij
 
     out += term
+
 
 def add_d7c_t(u, t_1, t_2, o, v, out, np):
     """Function for adding the D7c diagram
@@ -446,13 +460,16 @@ def add_d7c_t(u, t_1, t_2, o, v, out, np):
     Number of FLOPS required O()
     """
 
-    term = (-1) * np.tensordot(u[o, o, v, v], t_1, axes=((2), (0))) # kldi
-    term = np.tensordot(term, t_1, axes=((0), (1))) # ldia
-    term = np.tensordot(term, t_2, axes=((0, 1), (2, 0))).transpose(1, 2, 0, 3) # iabj -> abij
+    term = (-1) * np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))  # kldi
+    term = np.tensordot(term, t_1, axes=((0), (1)))  # ldia
+    term = np.tensordot(term, t_2, axes=((0, 1), (2, 0))).transpose(
+        1, 2, 0, 3
+    )  # iabj -> abij
     term -= term.swapaxes(0, 1)
     term -= term.swapaxes(2, 3)
 
     out += term
+
 
 def add_d7d_t(u, t_1, t_2, o, v, out, np):
     """Function for adding the D7d diagram
@@ -462,12 +479,15 @@ def add_d7d_t(u, t_1, t_2, o, v, out, np):
     Number of FLOPS required O()
     """
 
-    term = (-1) * np.tensordot(u[o, o, v, v], t_1, axes=((0, 2), (1, 0))) # ld 
-    term = np.tensordot(term, t_1, axes=((1), (0))) # li
-    term = np.tensordot(term, t_2, axes=((0), (2))).transpose(1, 2, 0, 3) # iabj -> abij
+    term = (-1) * np.tensordot(u[o, o, v, v], t_1, axes=((0, 2), (1, 0)))  # ld
+    term = np.tensordot(term, t_1, axes=((1), (0)))  # li
+    term = np.tensordot(term, t_2, axes=((0), (2))).transpose(
+        1, 2, 0, 3
+    )  # iabj -> abij
     term -= term.swapaxes(2, 3)
 
     out += term
+
 
 def add_d7e_t(u, t_1, t_2, o, v, out, np):
     """Function for adding the D7e diagram
@@ -477,12 +497,13 @@ def add_d7e_t(u, t_1, t_2, o, v, out, np):
     Number of FLOPS required O()
     """
 
-    term = (-1) * np.tensordot(u[o, o, v, v], t_1, axes=((0, 2), (1, 0))) # ld
-    term = np.tensordot(term, t_1, axes=((0), (1))) # da
-    term = np.tensordot(term, t_2, axes=((0), (0))) # abij
+    term = (-1) * np.tensordot(u[o, o, v, v], t_1, axes=((0, 2), (1, 0)))  # ld
+    term = np.tensordot(term, t_1, axes=((0), (1)))  # da
+    term = np.tensordot(term, t_2, axes=((0), (0)))  # abij
     term -= term.swapaxes(0, 1)
 
     out += term
+
 
 def add_d8a_t(u, t_1, o, v, out, np):
     """Function for adding the D8a diagram
@@ -492,12 +513,15 @@ def add_d8a_t(u, t_1, o, v, out, np):
     Number of FLOPS required O()
     """
 
-    term = np.tensordot(u[o, v, v, v], t_1, axes=((2), (0))) # kbdi
-    term = np.tensordot(term, t_1, axes=((0), (1))) # bdia
-    term = np.tensordot(term, t_1, axes=((1), (0))).transpose(2, 0, 1, 3) # biaj -> abij
+    term = np.tensordot(u[o, v, v, v], t_1, axes=((2), (0)))  # kbdi
+    term = np.tensordot(term, t_1, axes=((0), (1)))  # bdia
+    term = np.tensordot(term, t_1, axes=((1), (0))).transpose(
+        2, 0, 1, 3
+    )  # biaj -> abij
     term -= term.swapaxes(0, 1)
 
     out += term
+
 
 def add_d8b_t(u, t_1, o, v, out, np):
     """Function for adding the D8b diagram
@@ -507,12 +531,15 @@ def add_d8b_t(u, t_1, o, v, out, np):
     Number of FLOPS required O()
     """
 
-    term = np.tensordot(u[o, o, v, o], t_1, axes=((2), (0))) # klji
-    term = np.tensordot(term, t_1, axes=((0), (1))) # ljia
-    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(2, 3, 1, 0) # jiab -> abij
+    term = np.tensordot(u[o, o, v, o], t_1, axes=((2), (0)))  # klji
+    term = np.tensordot(term, t_1, axes=((0), (1)))  # ljia
+    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(
+        2, 3, 1, 0
+    )  # jiab -> abij
     term -= term.swapaxes(2, 3)
 
     out += term
+
 
 def add_d9_t(u, t_1, o, v, out, np):
     """Function for adding the D9 diagram
@@ -522,9 +549,11 @@ def add_d9_t(u, t_1, o, v, out, np):
     Number of FLOPS required O()
     """
 
-    term = np.tensordot(u[o, o, v, v], t_1, axes=((2), (0))) # kldi
-    term = np.tensordot(term, t_1, axes=((2), (0))) # klij
-    term = np.tensordot(term, t_1, axes=((0), (1))) # lija
-    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(2, 3, 0, 1) # ijab -> abij
-    
+    term = np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))  # kldi
+    term = np.tensordot(term, t_1, axes=((2), (0)))  # klij
+    term = np.tensordot(term, t_1, axes=((0), (1)))  # lija
+    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(
+        2, 3, 0, 1
+    )  # ijab -> abij
+
     out += term

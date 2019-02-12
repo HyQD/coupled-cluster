@@ -38,7 +38,11 @@ class RungeKutta4(Integrator):
 class GaussIntegrator(Integrator):
     """
     Simple implemenation of a Gauss integrator,
-    order 4 and 6 (s=2 and 3)."""
+    order 4 and 6 (s=2 and 3).
+
+    Note, this is a modified code recieved from Simen Kvaal and
+    Thomas Bondo Pedersen.
+    """
 
     def __init__(self, np, s=2, maxit=20, eps=1e-14):
         assert maxit > 0
