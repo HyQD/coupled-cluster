@@ -10,20 +10,15 @@ from sympy.physics.secondquant import (
 )
 
 
-def generate_ccd_l_equations():
+def generate_ccd_amplitude_equations():
     ccd_lagrangian = eval_equation(
         generate_lagrangian(get_t_2_operator, get_l_2_operator)
     )
 
-    i, j = symbols("i, j", below_fermi=True)
-    a, b = symbols("a, b", above_fermi=True)
-    # t_equations = eval_equation(diff(ccd_lagrangian, "l"))
-    # l_equations = eval_equation(diff(ccd_lagrangian, "t"))
+    i, j = symbols("I, J", below_fermi=True)
+    a, b = symbols("A, B", above_fermi=True)
 
     t_equations = beautify_equation(diff(ccd_lagrangian, "l"))
-    # t_equations = evaluate_deltas(diff(ccd_lagrangian, "l").doit())
-    # t_equations = substitute_dummies(t_equations, new_indices=True,
-    #        pretty_indices=pretty_dummies_dict)
     t_equations = simplify_index_permutations(
         t_equations, [PermutationOperator(a, b), PermutationOperator(i, j)]
     )
@@ -33,9 +28,16 @@ def generate_ccd_l_equations():
         l_equations, [PermutationOperator(a, b), PermutationOperator(i, j)]
     )
 
-    print("t-equations: ", latex(t_equations))
-    print("l-equations: ", latex(l_equations))
+    return t_equations, l_equations
 
 
 if __name__ == "__main__":
-    generate_ccd_l_equations()
+    t, l = generate_ccd_amplitude_equations()
+
+    print("t-equations:")
+    for term in t.args:
+        print(latex(term))
+
+    print("\n\nl-equations:")
+    for term in l.args:
+        print(latex(term))
