@@ -2,10 +2,12 @@ name: cc
 channels:
     - psi4
     - anaconda
+    - conda-forge
 dependencies:
     - python
     - psi4
     - pip
+    - pre_commit
     - pip:
         - -r requirements.txt
         - .
