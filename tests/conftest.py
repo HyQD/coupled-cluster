@@ -13,8 +13,8 @@ from quantum_systems.time_evolution_operators import LaserField
 l = 12  # Number of orbitals
 n = 2  # Number of particles
 n_large = 6
-n_larger = 12
-l_large = 20
+n_larger = 22
+l_large = 40
 
 radius = 4
 num_grid_points = 101
