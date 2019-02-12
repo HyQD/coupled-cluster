@@ -159,8 +159,12 @@ def get_ccsd_equations():
     )
 
     energy = get_energy_equation(t_equation)
-    t_amplitudes_s = get_singles_amplitudes(t_equation, sub_kwargs=sub_kwargs_ccsd)
-    t_amplitudes_d = get_doubles_amplitudes(t_equation, sub_kwargs=sub_kwargs_ccsd)
+    t_amplitudes_s = get_singles_amplitudes(
+        t_equation, sub_kwargs=sub_kwargs_ccsd
+    )
+    t_amplitudes_d = get_doubles_amplitudes(
+        t_equation, sub_kwargs=sub_kwargs_ccsd
+    )
 
     return energy, [t_amplitudes_s, t_amplitudes_d]
 

@@ -365,6 +365,7 @@ def test_add_d5h_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d6a_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -377,6 +378,7 @@ def test_add_d6a_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d6b_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -388,6 +390,7 @@ def test_add_d6b_t(large_system_ccsd):
     out_e = np.einsum("klij, ak, bl->abij", u[o, o, o, o], t_1, t_1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d6c_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -403,6 +406,7 @@ def test_add_d6c_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d7a_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -411,9 +415,12 @@ def test_add_d7a_t(large_system_ccsd):
 
     out = np.zeros_like(t_2)
     add_d7a_t(u, t_1, t_2, o, v, out, np=np)
-    out_e = (0.5) * np.einsum("klcd, ci, abkl, dj->abij", u[o, o, v, v], t_1, t_2, t_1)
+    out_e = (0.5) * np.einsum(
+        "klcd, ci, abkl, dj->abij", u[o, o, v, v], t_1, t_2, t_1
+    )
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d7b_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -423,9 +430,12 @@ def test_add_d7b_t(large_system_ccsd):
 
     out = np.zeros_like(t_2)
     add_d7b_t(u, t_1, t_2, o, v, out, np=np)
-    out_e = (0.5) * np.einsum("klcd, ak, cdij, bl->abij", u[o, o, v, v], t_1, t_2, t_1)
+    out_e = (0.5) * np.einsum(
+        "klcd, ak, cdij, bl->abij", u[o, o, v, v], t_1, t_2, t_1
+    )
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d7c_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -435,11 +445,14 @@ def test_add_d7c_t(large_system_ccsd):
 
     out = np.zeros_like(t_2)
     add_d7c_t(u, t_1, t_2, o, v, out, np=np)
-    out_e = (-1) * np.einsum("klcd, ci, ak, dblj->abij", u[o, o, v, v], t_1, t_1, t_2)
+    out_e = (-1) * np.einsum(
+        "klcd, ci, ak, dblj->abij", u[o, o, v, v], t_1, t_1, t_2
+    )
     out_e -= out_e.swapaxes(0, 1)
     out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d7d_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -449,10 +462,13 @@ def test_add_d7d_t(large_system_ccsd):
 
     out = np.zeros_like(t_2)
     add_d7d_t(u, t_1, t_2, o, v, out, np=np)
-    out_e = (-1) * np.einsum("klcd, ck, di, ablj->abij", u[o, o, v, v], t_1, t_1, t_2)
+    out_e = (-1) * np.einsum(
+        "klcd, ck, di, ablj->abij", u[o, o, v, v], t_1, t_1, t_2
+    )
     out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d7e_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -462,10 +478,13 @@ def test_add_d7e_t(large_system_ccsd):
 
     out = np.zeros_like(t_2)
     add_d7e_t(u, t_1, t_2, o, v, out, np=np)
-    out_e = (-1) * np.einsum("klcd, ck, al, dbij->abij", u[o, o, v, v], t_1, t_1, t_2)
+    out_e = (-1) * np.einsum(
+        "klcd, ck, al, dbij->abij", u[o, o, v, v], t_1, t_1, t_2
+    )
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d8a_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -480,6 +499,7 @@ def test_add_d8a_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d9b_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -493,6 +513,7 @@ def test_add_d9b_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_d9_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
     u = cs.u
@@ -502,8 +523,9 @@ def test_add_d9_t(large_system_ccsd):
     out = np.zeros_like(t_2)
     add_d9_t(u, t_1, o, v, out, np=np)
     out_e = np.einsum("klcd, ci, dj, ak, bl", u[o, o, v, v], t_1, t_1, t_1, t_1)
-    
+
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_mbpt_enegy(tdho):
 
