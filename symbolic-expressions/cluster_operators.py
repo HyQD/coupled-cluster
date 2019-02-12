@@ -1,6 +1,95 @@
 import collections
-from sympy.physics.secondquant import AntiSymmetricTensor, NO, Fd, F
+from sympy.physics.secondquant import (
+    AntiSymmetricTensor,
+    NO,
+    Fd,
+    F,
+    KroneckerDelta,
+)
 from sympy import symbols, Dummy, Rational
+
+from itertools import permutations
+from functools import reduce
+import operator
+
+
+def eval_derivative(self, s):
+    """Code created by Simen Kvaal.
+    """
+    # For use with Sympy diff()
+    if s != self.symbol:
+        return S.zero
+
+    new_below = "IJKLM"
+    new_above = "ABCDE"
+
+    if len(self.upper + self.lower) > len(new_below + new_above):
+        raise NotImplementedError
+
+    # ASSUMPTION: tensor being differentiated has same occ/vir
+    # structure as the original tensor.
+    new_upper_symbols = []
+    new_lower_symbols = []
+    below_count = 0
+    above_count = 0
+    for s in self.upper + self.lower:
+        properties = {
+            "above_fermi": s.assumptions0.get("above_fermi"),
+            "below_fermi": s.assumptions0.get("below_fermi"),
+        }
+
+        if properties["above_fermi"]:
+            n = new_above[above_count]
+            above_count += 1
+        else:
+            n = new_below[below_count]
+            below_count += 1
+
+        if s in self.upper:
+            new_upper_symbols.append(symbols(n, **properties))
+        else:
+            new_lower_symbols.append(symbols(n, **properties))
+
+    result = 0
+    c_sigma = 1
+    sign_sigma = 1
+
+    for sigma in permutations(self.upper):
+        # THIS IS A HACK ! FIND A BETTER WAY TO COMPUTE SIGN QUICKLY !
+        if c_sigma % 2 == 0:
+            sign_sigma *= -1
+
+        c_sigma += 1
+
+        c_tau = 1
+        sign_tau = 1
+
+        for tau in permutations(self.lower):
+
+            if c_tau % 2 == 0:
+                sign_tau *= -1
+
+            c_tau += 1
+
+            result += (
+                sign_sigma
+                * sign_tau
+                * reduce(
+                    operator.mul,
+                    [
+                        KroneckerDelta(s, j)
+                        for s, j in zip(
+                            sigma + tau, new_upper_symbols + new_lower_symbols
+                        )
+                    ],
+                )
+            )
+
+    return result
+
+
+# Add function computing the derivative of an anti-symmetric tensor
+AntiSymmetricTensor._eval_derivative = eval_derivative
 
 
 def get_clusters(cc_functions, *args, **kwargs):
