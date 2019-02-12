@@ -1,9 +1,9 @@
 from coupled_cluster.cc import CoupledCluster
 
-# from coupled_cluster.ccsd.rhs_t import (
-#    compute_t_1_amplitudes,
-#    compute_t_2_amplitudes,
-# )
+from coupled_cluster.ccsd.rhs_t import (
+    compute_t_1_amplitudes,
+    compute_t_2_amplitudes,
+)
 
 
 class CoupledClusterSinglesDoubles(CoupledCluster):
