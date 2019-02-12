@@ -120,16 +120,18 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.rhs_t_1.fill(0)
         self.rhs_t_2.fill(0)
 
-        # compute_t_1_amplitudes(
-        #    f,
-        #    self.u,
-        #    self.t_1,
-        #    self.t_2,
-        #    self.o,
-        #    self.v,
-        #    out=self.rhs_t_1,
-        #    np=np,
-        # )
+        # if self.include_singles:
+        #    compute_t_1_amplitudes(
+        #        f,
+        #        self.u,
+        #        self.t_1,
+        #        self.t_2,
+        #        self.o,
+        #        self.v,
+        #        out=self.rhs_t_1,
+        #        np=np,
+        #    )
+
         # compute_t_2_amplitudes(
         #    f,
         #    self.u,
