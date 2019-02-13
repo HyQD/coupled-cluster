@@ -28,3 +28,6 @@ sympy
 
 # Install matplotlib for plotting of scripts
 matplotlib
+
+# Install pre-commit
+pre-commit
