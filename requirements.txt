@@ -31,3 +31,6 @@ matplotlib
 
 # Install pre-commit
 pre-commit
+
+# Install black
+black
