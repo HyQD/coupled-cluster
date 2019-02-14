@@ -116,7 +116,7 @@ def get_hamiltonian():
     return f, Rational(1, 4) * u
 
 
-def get_t_1_operator(ast_symb="t"):
+def get_t_1_operator(ast_symb="t_1"):
     i = symbols("i", below_fermi=True, cls=Dummy)
     a = symbols("a", above_fermi=True, cls=Dummy)
 
@@ -128,7 +128,7 @@ def get_t_1_operator(ast_symb="t"):
     return T_1
 
 
-def get_t_2_operator(ast_symb="t"):
+def get_t_2_operator(ast_symb="t_2"):
     i, j = symbols("i, j", below_fermi=True, cls=Dummy)
     a, b = symbols("a, b", above_fermi=True, cls=Dummy)
 
@@ -140,7 +140,7 @@ def get_t_2_operator(ast_symb="t"):
     return T_2
 
 
-def get_t_3_operator(ast_symb="t"):
+def get_t_3_operator(ast_symb="t_3"):
     i, j, k = symbols("i, j, k", below_fermi=True, cls=Dummy)
     a, b, c = symbols("a, b, c", above_fermi=True, cls=Dummy)
 
@@ -152,7 +152,7 @@ def get_t_3_operator(ast_symb="t"):
     return T_3
 
 
-def get_l_1_operator(ast_symb="l"):
+def get_l_1_operator(ast_symb="l_1"):
     i = symbols("i", below_fermi=True, cls=Dummy)
     a = symbols("a", above_fermi=True, cls=Dummy)
 
@@ -164,7 +164,7 @@ def get_l_1_operator(ast_symb="l"):
     return L_1
 
 
-def get_l_2_operator(ast_symb="l"):
+def get_l_2_operator(ast_symb="l_2"):
     i, j = symbols("i, j", below_fermi=True, cls=Dummy)
     a, b = symbols("a, b", above_fermi=True, cls=Dummy)
 
@@ -176,7 +176,7 @@ def get_l_2_operator(ast_symb="l"):
     return L_2
 
 
-def get_l_3_operator(ast_symb="l"):
+def get_l_3_operator(ast_symb="l_3"):
     i, j, k = symbols("i, j, k", below_fermi=True, cls=Dummy)
     a, b, c = symbols("a, b, c", above_fermi=True, cls=Dummy)
 
