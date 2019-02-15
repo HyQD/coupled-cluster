@@ -1,7 +1,7 @@
 #!/bin/bash
 
-user_name = 'Travis CI'
-user_email = 'travis@travis-ci.org'
+user_name='Travis CI'
+user_email='travis@travis-ci.org'
 
 if [ -n "$(git status --porcelain)" ]; then
     git add .
