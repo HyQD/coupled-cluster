@@ -11,11 +11,13 @@ def compute_l_2_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
 
     return out
 
+
 # Here begins the L_1 stuff
 # Note to self: everything output is upside-down and mirrored.
 
 # TODO: figure out naming conventions and,
 # if things need to be Hermitian conjugated? Probably not.
+
 
 def add_s2a_l(f, l_1, o, v, out, np):
     """Function for adding the S2a diagram
@@ -25,7 +27,7 @@ def add_s2a_l(f, l_1, o, v, out, np):
     Number of FLOPS: O(m^2 n)
     """
 
-    out += np.tensordot(f[v, v], l_1, axes=((0), (1))).transpose(1, 0) # ia
+    out += np.tensordot(f[v, v], l_1, axes=((0), (1))).transpose(1, 0)  # ia
 
 
 def add_s2b_l(f, l_1, o, v, out, np):
@@ -36,4 +38,4 @@ def add_s2b_l(f, l_1, o, v, out, np):
     Number of FLOPS: O(m n^2)
     """
 
-    out += (-1) * np.tensordot(f[o, o], l_1, axes=((1), (0))) # ia
+    out += (-1) * np.tensordot(f[o, o], l_1, axes=((1), (0)))  # ia
