@@ -112,3 +112,6 @@ venv.bak/
 
 # Profiler
 *.prof
+
+# Travis files
+miniconda.sh
