@@ -40,10 +40,8 @@ from coupled_cluster.ccsd.rhs_t import (
     add_d9_t,
 )
 
-from coupled_cluster.ccsd.rhs_l import (
-    add_s2a_l,
-    add_s2b_l,
-)
+from coupled_cluster.ccsd.rhs_l import add_s2a_l, add_s2b_l
+
 
 def test_add_s1_t(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -572,12 +570,14 @@ def test_add_d9_t(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 # L diagrams
+
 
 def test_add_s2a_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    
-    f = cs.f 
+
+    f = cs.f
     o = cs.o
     v = cs.v
 
@@ -587,9 +587,10 @@ def test_add_s2a_l(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_s2b_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    
+
     f = cs.f
     o = cs.o
     v = cs.v
@@ -599,6 +600,7 @@ def test_add_s2b_l(large_system_ccsd):
     out_e = (-1) * np.einsum("ij, ja->ia", f[o, o], l_1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_mbpt_enegy(tdho):
 
