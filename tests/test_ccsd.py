@@ -775,7 +775,7 @@ def test_add_s6b_l(large_system_ccsd):
     add_s6b_l(u, l_2, t_1, o, v, out, np=np)
     out_e = (0.5) * np.einsum("ijbc, dj, bcad->ia", l_2, t_1, u[v, v, v, v])
 
-    np.testing.assert_allclose(out, out_e, atol=1e-10)    
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
 def test_add_s6c_l(large_system_ccsd):
@@ -845,7 +845,7 @@ def test_add_s8b_l(large_system_ccsd):
     add_s8b_l(f, l_1, t_1, o, v, out, np=np)
     out_e = (-1) * np.einsum("ja, ib, bj->ia", f[o, v], l_1, t_1)
 
-    np.testing.assert_allclose(out, out_e, atol=1e-10) 
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
 def test_add_s9a_l(large_system_ccsd):
@@ -872,6 +872,7 @@ def test_add_s9b_l(large_system_ccsd):
     out = np.zeros_like(l_1)
     add_s9b_l(u, l_2, t_1, o, v, out, np=np)
     out_e = (-1) * np.einsum("jkab, cj, ibck->ia", l_2, t_1, u[o, v, v, o])
+
 
 def test_add_s9c_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
