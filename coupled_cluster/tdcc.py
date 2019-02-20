@@ -1,6 +1,11 @@
 import abc
 import collections
-from coupled_cluster.cc_helper import AmplitudeContainer
+import warnings
+from coupled_cluster.cc_helper import (
+    AmplitudeContainer,
+    compute_spin_reduced_one_body_density_matrix,
+    compute_particle_density,
+)
 from coupled_cluster.integrators import RungeKutta4
 
 
@@ -116,6 +121,21 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def compute_time_dependent_overlap(self):
         pass
+
+    def compute_particle_density(self):
+        np = self.np
+
+        rho_qp = self.compute_one_body_density_matrix()
+
+        if np.abs(np.trace(rho_qp) - self.system.n) > 1e-8:
+            warn = "Trace of rho_qp = {0} != {1} = number of particles"
+            warn = warn.format(np.trace(rho_qp), self.system.n)
+            warnings.warn(warn)
+
+        rho_qp_reduced = compute_spin_reduced_one_body_density_matrix(rho_qp)
+        rho = compute_particle_density(rho_qp_reduced, self.system.spf, np=np)
+
+        return rho
 
     def __call__(self, prev_amp, current_time):
         o, v = self.system.o, self.system.v
