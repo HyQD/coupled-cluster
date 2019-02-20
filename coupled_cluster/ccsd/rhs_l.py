@@ -282,3 +282,97 @@ def add_s9c_l(u, l_2, t_2, o, v, out, np):
     ).transpose(
         1, 0
     )  # ai -> ia
+
+
+def add_s10a_l(f, l_2, t_2, o, v, out, np):
+    """Function for adding the S10a diagram
+
+        g*(f, u, l, t) <- (-0.5) f^{i}_{b} l^{jk}_{ac} t^{bc}_{jk}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 1, 3), (2, 3, 1)))  # ab
+    out += np.tensordot(f[o, v], term, axes=((1), (1)))  # ia
+
+
+def add_s10b_l(f, l_2, t_2, o, v, out, np):
+    """Function for adding the S10b diagram
+
+        g*(f, u, l, t) <- (-0.5) f*{j}_{a} l^{ik}_{bc} t^{bc}_{jk}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_2, axes=((1, 2, 3), (3, 0, 1)))  # ij
+    out += np.tensordot(f[o, v], term, axes=((0), (1))).transpose(
+        1, 0
+    )  # ai - > ia
+
+
+def add_s10c_l(u, l_1, t_2, o, v, out, np):
+    """Function for adding the S10c diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{i}_{b} t^{bc}_{jk} u^{jk}_{ac}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.5) * np.tensordot(l_1, t_2, axes=((1), (0)))  # icjk
+    out += np.tensordot(term, u[o, o, v, v], axes=((1, 2, 3), (3, 0, 1)))  # ia
+
+
+def add_s10d_l(u, l_1, t_2, o, v, out, np):
+    """Function for adding the S10d diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{j}_{a} t^{bc}_{jk} u^{ik}_{bc}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.5) * np.tensordot(l_1, t_2, axes=((0), (2)))  # abck
+    out += np.tensordot(
+        term, u[o, o, v, v], axes=((1, 2, 3), (2, 3, 1))
+    ).transpose(
+        1, 0
+    )  # ai -> ia
+
+
+def add_s10e_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the S10e diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{jk}_{bc} t^{bc}_{jl} u^{il}_{ak}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 2, 3), (2, 0, 1)))  # kl
+    out += np.tensordot(term, u[o, o, v, o], axes=((0, 1), (3, 1)))  # ia
+
+
+def add_s10f_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the S10f diagram
+
+        g*(f, u, l, t) <- (-0.25) l^{jk}_{ab} t^{cd}_{jk} u^{ib}_{cd}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.25) * np.tensordot(l_2, t_2, axes=((0, 1), (2, 3)))  # abcd
+    out += np.tensordot(
+        term, u[o, v, v, v], axes=((1, 2, 3), (1, 2, 3))
+    ).transpose(
+        1, 0
+    )  # ai -> ia
+
+
+def add_s10g_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the S10g diagram
+
+        g*(f, u, l, t) <- (0.25) l^{ij}_{bc} t^{bc}_{kl} u^{kl}_{aj}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (0.25) * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))  # ijkl
+    out += np.tensordot(term, u[o, o, v, o], axes=((1, 2, 3), (3, 0, 1)))  # ia
