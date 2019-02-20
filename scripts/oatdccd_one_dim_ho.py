@@ -1,6 +1,6 @@
 from quantum_systems import OneDimensionalHarmonicOscillator
 from quantum_systems.time_evolution_operators import LaserField
-from coupled_cluster.ccd import CoupledClusterDoubles, OATDCCD
+from coupled_cluster.ccd import OATDCCD
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,7 +40,7 @@ odho.set_time_evolution_operator(laser)
 
 cc_kwargs = dict(verbose=True)
 
-oatdccd = OATDCCD(CoupledClusterDoubles, odho, np=np, **cc_kwargs)
+oatdccd = OATDCCD(odho, np=np, **cc_kwargs)
 t_kwargs = dict(theta=theta_t, tol=tol)
 l_kwargs = dict(theta=theta_l, tol=tol)
 oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
