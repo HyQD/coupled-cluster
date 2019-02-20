@@ -146,8 +146,8 @@ def add_s5d_l(u, l_1, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0))) # jk
-    out += np.tensordot(term, u[o, o, v, o], axes=((0, 1), (3, 1))) # ia
+    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0)))  # jk
+    out += np.tensordot(term, u[o, o, v, o], axes=((0, 1), (3, 1)))  # ia
 
 
 def add_s6a_l(u, l_2, t_1, o, v, out, np):
@@ -158,8 +158,9 @@ def add_s6a_l(u, l_2, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = np.tensordot(l_2, t_1, axes=((2), (0))) # ijck
-    out += np.tensordot(term, u[v, o, v, o], axes=((1, 2, 3), (3, 0, 1))) # ia
+    term = np.tensordot(l_2, t_1, axes=((2), (0)))  # ijck
+    out += np.tensordot(term, u[v, o, v, o], axes=((1, 2, 3), (3, 0, 1)))  # ia
+
 
 def add_s6b_l(u, l_2, t_1, o, v, out, np):
     """Function for adding the S6b diagram
@@ -169,8 +170,8 @@ def add_s6b_l(u, l_2, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (0.5) * np.tensordot(l_2, t_1, axes=((1), (1))) # ibcd
-    out += np.tensordot(term, u[v, v, v, v], axes=((1, 2, 3), (0, 1, 3))) # ia
+    term = (0.5) * np.tensordot(l_2, t_1, axes=((1), (1)))  # ibcd
+    out += np.tensordot(term, u[v, v, v, v], axes=((1, 2, 3), (0, 1, 3)))  # ia
 
 
 def add_s6c_l(u, l_2, t_1, o, v, out, np):
@@ -181,8 +182,13 @@ def add_s6c_l(u, l_2, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (0.5) * np.tensordot(l_2, t_1, axes=((3), (0))) # jkal
-    out += np.tensordot(term, u[o, o, o, o], axes=((0, 1, 3), (2, 3, 1))).transpose(1, 0) # ai -> ia
+    term = (0.5) * np.tensordot(l_2, t_1, axes=((3), (0)))  # jkal
+    out += np.tensordot(
+        term, u[o, o, o, o], axes=((0, 1, 3), (2, 3, 1))
+    ).transpose(
+        1, 0
+    )  # ai -> ia
+
 
 def add_s6d_l(u, l_2, t_2, o, v, out, np):
     """Function for adding the S6d diagram
@@ -192,8 +198,8 @@ def add_s6d_l(u, l_2, t_2, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (0.5) * np.tensordot(l_2, t_2, axes=((0, 1, 2), (2, 3, 0))) # cd
-    out += np.tensordot(term, u[o, v, v, v], axes=((0, 1), (1, 3))) # ia
+    term = (0.5) * np.tensordot(l_2, t_2, axes=((0, 1, 2), (2, 3, 0)))  # cd
+    out += np.tensordot(term, u[o, v, v, v], axes=((0, 1), (1, 3)))  # ia
 
 
 def add_s7_l(u, l_1, t_2, o, v, out, np):
@@ -204,8 +210,8 @@ def add_s7_l(u, l_1, t_2, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = np.tensordot(l_1, t_2, axes=((0, 1), (2, 0))) # ck
-    out += np.tensordot(term, u[o, o, v, v], axes=((0, 1), (3, 1))) # ia
+    term = np.tensordot(l_1, t_2, axes=((0, 1), (2, 0)))  # ck
+    out += np.tensordot(term, u[o, o, v, v], axes=((0, 1), (3, 1)))  # ia
 
 
 def add_s8a_l(f, l_1, t_1, o, v, out, np):
@@ -216,8 +222,8 @@ def add_s8a_l(f, l_1, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (-1) * np.tensordot(l_1, t_1, axes=((0), (1))) # ab
-    out += np.tensordot(f[o, v], term, axes=((1), (1))) # ia
+    term = (-1) * np.tensordot(l_1, t_1, axes=((0), (1)))  # ab
+    out += np.tensordot(f[o, v], term, axes=((1), (1)))  # ia
 
 
 def add_s8b_l(f, l_1, t_1, o, v, out, np):
@@ -228,8 +234,10 @@ def add_s8b_l(f, l_1, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0))) # ij
-    out += np.tensordot(f[o, v], term, axes=((0), (1))).transpose(1, 0) # ai -> ia
+    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0)))  # ij
+    out += np.tensordot(f[o, v], term, axes=((0), (1))).transpose(
+        1, 0
+    )  # ai -> ia
 
 
 def add_s9a_l(u, l_2, t_2, o, v, out, np):
@@ -240,8 +248,8 @@ def add_s9a_l(u, l_2, t_2, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (-1) * np.tensordot(l_2, t_2, axes=((1, 2), (2, 0))) # icdk
-    out += np.tensordot(term, u[v, o, v, v], axes=((1, 2, 3), (0, 3, 1))) # ia
+    term = (-1) * np.tensordot(l_2, t_2, axes=((1, 2), (2, 0)))  # icdk
+    out += np.tensordot(term, u[v, o, v, v], axes=((1, 2, 3), (0, 3, 1)))  # ia
 
 
 def add_s9b_l(u, l_2, t_1, o, v, out, np):
@@ -252,8 +260,13 @@ def add_s9b_l(u, l_2, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (-1) * np.tensordot(l_2, t_1, axes=((0), (1))) # kabc
-    out += np.tensordot(term, u[o, v, v, o], axes=((0, 2, 3), (3, 1, 2))).transpose(1, 0) # ai -> ia
+    term = (-1) * np.tensordot(l_2, t_1, axes=((0), (1)))  # kabc
+    out += np.tensordot(
+        term, u[o, v, v, o], axes=((0, 2, 3), (3, 1, 2))
+    ).transpose(
+        1, 0
+    )  # ai -> ia
+
 
 def add_s9c_l(u, l_2, t_2, o, v, out, np):
     """Function for adding the S9c diagram
@@ -263,5 +276,9 @@ def add_s9c_l(u, l_2, t_2, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = (-1) * np.tensordot(l_2, t_2, axes=((0, 3), (2, 0))) # kacl
-    out += np.tensordot(term, u[o, o, v, o], axes=((0, 2, 3), (3, 2, 1))).transpose(1, 0) # ai -> ia
+    term = (-1) * np.tensordot(l_2, t_2, axes=((0, 3), (2, 0)))  # kacl
+    out += np.tensordot(
+        term, u[o, o, v, o], axes=((0, 2, 3), (3, 2, 1))
+    ).transpose(
+        1, 0
+    )  # ai -> ia
