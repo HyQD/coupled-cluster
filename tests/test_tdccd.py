@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from coupled_cluster.ccd import TDCCD, CoupledClusterDoubles
+from coupled_cluster.ccd import TDCCD
 
 
 def test_time_dependent_observables(
@@ -15,7 +15,7 @@ def test_time_dependent_observables(
     time_params,
 ):
 
-    tdccd = TDCCD(CoupledClusterDoubles, zanghellini_system, np=np)
+    tdccd = TDCCD(zanghellini_system, np=np)
     tdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
 
     assert (
