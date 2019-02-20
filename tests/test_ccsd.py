@@ -693,6 +693,7 @@ def test_add_s4b_l(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_s5a_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
@@ -704,7 +705,8 @@ def test_add_s5a_l(large_system_ccsd):
     add_s5a_l(u, l_1, t_1, o, v, out, np=np)
     out_e = np.einsum("ib, cj, bjac->ia", l_1, t_1, u[v, o, v, v])
 
-    np.testing.assert_allclose(out, out_e, atol=1e-10) 
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_s5b_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -719,6 +721,7 @@ def test_add_s5b_l(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 def test_add_s5c_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
@@ -731,6 +734,7 @@ def test_add_s5c_l(large_system_ccsd):
     out_e = np.einsum("jb, cj, ibac->ia", l_1, t_1, u[o, v, v, v])
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_s5d_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd

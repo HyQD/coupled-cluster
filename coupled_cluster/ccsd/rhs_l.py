@@ -110,8 +110,9 @@ def add_s5a_l(u, l_1, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = np.tensordot(t_1, u[v, o, v, v], axes=((0, 1), (3, 1))) # ba
-    out += np.tensordot(l_1, term, axes=((1), (0))) # ia
+    term = np.tensordot(t_1, u[v, o, v, v], axes=((0, 1), (3, 1)))  # ba
+    out += np.tensordot(l_1, term, axes=((1), (0)))  # ia
+
 
 def add_s5b_l(u, l_1, t_1, o, v, out, np):
     """Function for adding the S5b diagram
@@ -121,8 +122,9 @@ def add_s5b_l(u, l_1, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = np.tensordot(t_1, u[o, o, v, o], axes=((0, 1), (2, 1))) # ij
-    out += np.tensordot(l_1, term, axes=((0), (1))).transpose(1, 0) # ai -> ia
+    term = np.tensordot(t_1, u[o, o, v, o], axes=((0, 1), (2, 1)))  # ij
+    out += np.tensordot(l_1, term, axes=((0), (1))).transpose(1, 0)  # ai -> ia
+
 
 def add_s5c_l(u, l_1, t_1, o, v, out, np):
     """Function for adding the S5c diagram
@@ -132,8 +134,9 @@ def add_s5c_l(u, l_1, t_1, o, v, out, np):
     Number of FLOPS required: O()
     """
 
-    term = np.tensordot(l_1, t_1, axes=((0), (1))) # bc
-    out += np.tensordot(term, u[o, v, v, v], axes=((0, 1), (1, 3))) # ia
+    term = np.tensordot(l_1, t_1, axes=((0), (1)))  # bc
+    out += np.tensordot(term, u[o, v, v, v], axes=((0, 1), (1, 3)))  # ia
+
 
 def add_s5d_l(u, l_1, t_1, o, v, out, np):
     """Function for adding the S5d diagram
