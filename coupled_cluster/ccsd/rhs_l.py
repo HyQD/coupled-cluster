@@ -419,3 +419,57 @@ def add_s11c_l(u, l_2, t_1, o, v, out, np):
     out += np.tensordot(t_1, term, axes=((0, 1), (3, 0))).transpose(
         1, 0
     )  # ai -> ia
+
+
+def add_s11d_l(u, l_2, t_1, t_2, o, v, out, np):
+    """Function for adding the S11d diagram
+
+        g*(f, u, l, t) <- (0.5) l^{jk}_{bc} t^{b}_{l} t^{cd}_{jk} u^{il}_{ad}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # jkcl
+    term = np.tensordot(term, t_2, axes=((0, 1, 2), (2, 3, 0)))  # ld
+    out += np.tensordot(term, u[o, o, v, v], axes=((0, 1), (1, 3)))  # ia
+
+
+def add_s11e_l(u, l_2, t_1, t_2, o, v, out, np):
+    """Function for adding the S11e diagram
+
+        g*(f, u, l, t) <- (0.5) * l^{jk}_{bc} t^{d}_{j} t^{bc}_{kl} u^{il}_{ad}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (0.5) * np.tensordot(l_2, t_1, axes=((0), (1)))  # kbcd
+    term = np.tensordot(term, t_2, axes=((0, 1, 2), (2, 0, 1)))  # dl
+    out += np.tensordot(term, u[o, o, v, v], axes=((0, 1), (3, 1)))  # ia
+
+
+def add_s11f_l(u, l_1, t_1, o, v, out, np):
+    """Function for adding the S11f diagram
+
+        g*(f, u, l, t) <- l^{i}_{b} t^{b}_{j} t^{c}_{k} u^{jk}_{ac}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0)))  # ij
+    term = np.tensordot(term, u[o, o, v, v], axes=((1), (0)))  # ikac
+    out += np.tensordot(t_1, term, axes=((0, 1), (3, 1)))  # ia
+
+
+def add_s11g_l(u, l_1, t_1, o, v, out, np):
+    """Function for adding the S11g diagram
+
+        g*(f, u, l, t) <- (-1) l^{j}_{a} t^{b}_{j} t^{c}_{k} u^{ik}_{bc}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-1) * np.tensordot(l_1, t_1, axes=((0), (1)))  # ab
+    term = np.tensordot(term, u[o, o, v, v], axes=((1), (2)))  # aikc
+    out += np.tensordot(t_1, term, axes=((0, 1), (3, 2))).transpose(
+        1, 0
+    )  # ai -> ia
