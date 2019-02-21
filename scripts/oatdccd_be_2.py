@@ -60,9 +60,11 @@ print(
 
 polarization = np.zeros(3)
 polarization[2] = 1
-system.set_polarization_vector(polarization)
 system.set_time_evolution_operator(
-    LaserField(laser_pulse(td=laser_duration, omega=omega, E=E))
+    LaserField(
+        laser_pulse(td=laser_duration, omega=omega, E=E),
+        polarization_vector=polarization,
+    )
 )
 
 oatdccd.set_initial_conditions()
