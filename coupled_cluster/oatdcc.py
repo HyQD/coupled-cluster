@@ -1,5 +1,9 @@
 import abc
-from coupled_cluster.cc_helper import OACCVector
+from coupled_cluster.cc_helper import (
+    OACCVector,
+    compute_spin_reduced_one_body_density_matrix,
+    compute_oa_particle_density,
+)
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 from coupled_cluster.integrators import RungeKutta4
 
@@ -40,6 +44,35 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         changes due to the time-dependent orbitals in the wavefunctions.
         """
         pass
+
+    def compute_particle_density(self):
+        np = self.np
+
+        rho_qp = self.compute_one_body_density_matrix()
+
+        if np.abs(np.trace(rho_qp) - self.system.n) > 1e-8:
+            warn = "Trace of rho_qp = {0} != {1} = number of particles"
+            warn = warn.format(np.trace(rho_qp), self.system.n)
+            warnings.warn(warn)
+
+        rho_qp_reduced = compute_spin_reduced_one_body_density_matrix(rho_qp)
+
+        t, l, C, C_tilde = self._amplitudes
+
+        C = C[::2, ::2]
+        C_tilde = C_tilde[::2, ::2]
+        # pa, a -> p
+        # C_tilde, spf^{*} -> spf_tilde
+        bra_spf = np.tensordot(C_tilde, self.system.spf.conj(), axes=((1), (0)))
+        # ap, a -> p
+        # C, spf -> spf
+        ket_spf = np.tensordot(C, self.system.spf, axes=((0), (0)))
+
+        rho = compute_oa_particle_density(
+            rho_qp_reduced, bra_spf, ket_spf, np=np
+        )
+
+        return rho
 
     @abc.abstractmethod
     def compute_p_space_equations(self):
