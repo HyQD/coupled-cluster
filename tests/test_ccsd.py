@@ -72,6 +72,10 @@ from coupled_cluster.ccsd.rhs_l import (
     add_s11a_l,
     add_s11b_l,
     add_s11c_l,
+    add_s11d_l,
+    add_s11e_l,
+    add_s11f_l,
+    add_s11g_l,
 )
 
 
@@ -1079,6 +1083,70 @@ def test_add_s11c_l(large_system_ccsd):
     add_s11c_l(u, l_2, t_1, o, v, out, np=np)
     out_e = (0.5) * np.einsum(
         "jkab, ck, dj, ibcd->ia", l_2, t_1, t_1, u[o, v, v, v], optimize=True
+    )
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_s11d_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_1)
+    add_s11d_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    out_e = (0.5) * np.einsum(
+        "jkbc, bl, cdjk, ilad->ia", l_2, t_1, t_2, u[o, o, v, v], optimize=True
+    )
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_s11e_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_1)
+    add_s11e_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    out_e = (0.5) * np.einsum(
+        "jkbc, dj, bckl, ilad->ia", l_2, t_1, t_2, u[o, o, v, v], optimize=True
+    )
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_s11f_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_1)
+    add_s11f_l(u, l_1, t_1, o, v, out, np=np)
+    out_e = (-1) * np.einsum(
+        "ib, bj, ck, jkac->ia", l_1, t_1, t_1, u[o, o, v, v], optimize=True
+    )
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_s11g_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_1)
+    add_s11g_l(u, l_1, t_1, o, v, out, np=np)
+    out_e = (-1) * np.einsum(
+        "ja, bj, ck, ikbc->ia", l_1, t_1, t_1, u[o, o, v, v], optimize=True
     )
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
