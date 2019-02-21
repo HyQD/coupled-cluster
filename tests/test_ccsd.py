@@ -1031,7 +1031,9 @@ def test_add_s11c_l(large_system_ccsd):
 
     out = np.zeros_like(l_1)
     add_s11c_l(u, l_2, t_1, o, v, out, np=np)
-    out_e = (0.5) * np.einsum("jkab, ck, dj, ibcd->ia", l_2, t_1, t_1, u[o, v, v, v])
+    out_e = (0.5) * np.einsum(
+        "jkab, ck, dj, ibcd->ia", l_2, t_1, t_1, u[o, v, v, v]
+    )
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
