@@ -69,6 +69,9 @@ from coupled_cluster.ccsd.rhs_l import (
     add_s10e_l,
     add_s10f_l,
     add_s10g_l,
+    add_s11a_l,
+    add_s11b_l,
+    add_s11c_l,
 )
 
 
@@ -895,7 +898,7 @@ def test_add_s9c_l(large_system_ccsd):
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
-def test_s10a_l(large_system_ccsd):
+def test_add_s10a_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
     f = cs.f
@@ -909,7 +912,7 @@ def test_s10a_l(large_system_ccsd):
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
-def test_s10b_l(large_system_ccsd):
+def test_add_s10b_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
     f = cs.f
@@ -923,7 +926,7 @@ def test_s10b_l(large_system_ccsd):
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
-def test_s10c_l(large_system_ccsd):
+def test_add_s10c_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
     u = cs.u
@@ -937,7 +940,7 @@ def test_s10c_l(large_system_ccsd):
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
-def test_s10d_l(large_system_ccsd):
+def test_add_s10d_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
     u = cs.u
@@ -951,7 +954,7 @@ def test_s10d_l(large_system_ccsd):
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
-def test_s10e_l(large_system_ccsd):
+def test_add_s10e_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
     u = cs.u
@@ -965,7 +968,7 @@ def test_s10e_l(large_system_ccsd):
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
-def test_s10f_l(large_system_ccsd):
+def test_add_s10f_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
     u = cs.u
@@ -979,7 +982,7 @@ def test_s10f_l(large_system_ccsd):
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
-def test_s10g_l(large_system_ccsd):
+def test_add_s10g_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
     u = cs.u
@@ -989,6 +992,48 @@ def test_s10g_l(large_system_ccsd):
     out = np.zeros_like(l_1)
     add_s10g_l(u, l_2, t_2, o, v, out, np=np)
     out_e = (0.25) * np.einsum("ijbc, bckl, klaj->ia", l_2, t_2, u[o, o, v, o])
+
+
+def test_add_s11a_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_1)
+    add_s11a_l(u, l_2, t_1, o, v, out, np=np)
+    out_e = np.einsum("ijbc, bk, dj, ckad->ia", l_2, t_1, t_1, u[v, o, v, v])
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_s11b_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_1)
+    add_s11b_l(u, l_2, t_1, o, v, out, np=np)
+    out_e = np.einsum("jkab, bl, cj, ilck->ia", l_2, t_1, t_1, u[o, o, v, o])
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_s11c_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_1)
+    add_s11c_l(u, l_2, t_1, o, v, out, np=np)
+    out_e = (0.5) * np.einsum("jkab, ck, dj, ibcd->ia", l_2, t_1, t_1, u[o, v, v, v])
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
 def test_mbpt_enegy(tdho):

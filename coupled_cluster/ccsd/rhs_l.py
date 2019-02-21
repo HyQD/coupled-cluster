@@ -376,3 +376,41 @@ def add_s10g_l(u, l_2, t_2, o, v, out, np):
 
     term = (0.25) * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))  # ijkl
     out += np.tensordot(term, u[o, o, v, o], axes=((1, 2, 3), (3, 0, 1)))  # ia
+
+
+def add_s11a_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the S11a diagram
+
+        g*(f, u, l, t) <- l^{ij}_{bc} t^{b}_{k} t^{d}_{j} u^{ck}_{ad}
+
+    Number of FLOPS required: O()
+    """
+
+    term = np.tensordot(l_2, t_1, axes=((2), (0))) # ijck
+    term = np.tensordot(term, t_1, axes=((1), (1))) # ickd
+    out += np.tensordot(term, u[v, o, v, v], axes=((1, 2, 3), (0, 1, 3))) # ia
+
+def add_s11b_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the S11b diagram
+
+        g*(f, u, l, t) <- l^{jk}_{ab} t^{b}_{l} t^{c}_{j} u^{il}_{ck}
+
+    Number of FLOPS required: O()
+    """
+
+    term = np.tensordot(l_2, t_1, axes=((3), (0))) # jkal
+    term = np.tensordot(term, u[o, o, v, o], axes=((1, 3), (3, 1))) # jaic
+    out += np.tensordot(t_1, term, axes=((0, 1), (3, 0))).transpose(1, 0) # ai -> ia
+
+
+def add_s11c_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the S11c diagram
+
+        g*(f, u, l, t) <- (0.5) l^{jk}_{ab} t^{c}_{k} t^{d}_{j} u^{ib}_{cd}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (0.5) * np.tensordot(l_2, t_1, axes=((1), (1))) # jabc
+    term = np.tensordot(term, u[o, v, v, v], axes=((2, 3), (1, 2))) # jaid
+    out += np.tensordot(t_1, term, axes=((0, 1), (3, 0))).transpose(1, 0) # ai -> ia 
