@@ -2,6 +2,52 @@ def compute_l_1_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(l_1)
 
+    add_s1_l(f, o, v, out, np=np)
+    add_s2a_l(f, l_1, o, v, out, np=np)
+    add_s2b_l(f, l_1, o, v, out, np=np)
+    add_s3a_l(u, l_1, o, v, out, np=np)
+    add_s3b_l(u, t_1, o, v, out, np=np)
+    add_s4a_l(u, l_2, o, v, out, np=np)
+    add_s4b_l(u, l_2, o, v, out, np=np)
+    add_s5a_l(u, l_1, t_1, o, v, out, np=np)
+    add_s5b_l(u, l_1, t_1, o, v, out, np=np)
+    add_s5c_l(u, l_1, t_1, o, v, out, np=np)
+    add_s5d_l(u, l_1, t_1, o, v, out, np=np)
+    add_s6a_l(u, l_2, t_1, o, v, out, np=np)
+    add_s6b_l(u, l_2, t_1, o, v, out, np=np)
+    add_s6c_l(u, l_2, t_1, o, v, out, np=np)
+    add_s6d_l(u, l_2, t_2, o, v, out, np=np)
+    add_s7_l(u, l_1, t_2, o, v, out, np=np)
+    add_s8a_l(f, l_1, t_1, o, v, out, np=np)
+    add_s8b_l(f, l_1, t_1, o, v, out, np=np)
+    add_s9a_l(u, l_2, t_2, o, v, out, np=np)
+    add_s9b_l(u, l_2, t_1, o, v, out, np=np)
+    add_s9c_l(u, l_2, t_2, o, v, out, np=np)
+    add_s10a_l(f, l_2, t_2, o, v, out, np=np)
+    add_s10b_l(f, l_2, t_2, o, v, out, np=np)
+    add_s10c_l(u, l_1, t_2, o, v, out, np=np)
+    add_s10d_l(u, l_1, t_2, o, v, out, np=np)
+    add_s10e_l(u, l_2, t_2, o, v, out, np=np)
+    add_s10f_l(u, l_2, t_2, o, v, out, np=np)
+    add_s10g_l(u, l_2, t_2, o, v, out, np=np)
+    add_s11a_l(u, l_2, t_1, o, v, out, np=np)
+    add_s11b_l(u, l_2, t_1, o, v, out, np=np)
+    add_s11c_l(u, l_2, t_1, o, v, out, np=np)
+    add_s11d_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    add_s11e_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    add_s11f_l(u, l_1, t_1, o, v, out, np=np)
+    add_s11g_l(u, l_1, t_1, o, v, out, np=np)
+    add_s11h_l(u, l_1, t_1, o, v, out, np=np)
+    add_s11i_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    add_s11j_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    add_s11k_l(u, l_2, t_1, o, v, out, np=np)
+    add_s11l_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    add_s11m_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    add_s11n_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    add_s11o_l(u, l_2, t_1, t_2, o, v, out, np=np)
+    add_s12a_l(u, l_2, t_1, o, v, out, np=np)
+    add_s12b_l(u, l_2, t_1, o, v, out, np=np)
+
     return out
 
 
@@ -14,9 +60,6 @@ def compute_l_2_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
 
 # Here begins the L_1 stuff
 # Note to self: everything output is upside-down and mirrored.
-
-# TODO: figure out naming conventions and,
-# if things need to be Hermitian conjugated? Probably not.
 
 
 def add_s1_l(f, o, v, out, np):
@@ -471,5 +514,158 @@ def add_s11g_l(u, l_1, t_1, o, v, out, np):
     term = (-1) * np.tensordot(l_1, t_1, axes=((0), (1)))  # ab
     term = np.tensordot(term, u[o, o, v, v], axes=((1), (2)))  # aikc
     out += np.tensordot(t_1, term, axes=((0, 1), (3, 2))).transpose(
+        1, 0
+    )  # ai -> ia
+
+
+def add_s11h_l(u, l_1, t_1, o, v, out, np):
+    """Function for adding the S11h diagram
+
+        g*(f, u, l, t) <- (-1) l^{j}_{b} t^{b}_{k} t^{c}_{j} u^{ik}_{ac}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0)))  # jk
+    term = np.tensordot(term, t_1, axes=((0), (1)))  # kc
+    out += np.tensordot(term, u[o, o, v, v], axes=((0, 1), (1, 3)))  # ia
+
+
+def add_s11i_l(u, l_2, t_1, t_2, o, v, out, np):
+    """Function for adding the S11i diagram
+
+        g*(f, u, l, t) <- (-1) l^{ij}_{bc} t^{b}_{k} t^{cd}_{jl} u^{kl}_{ad}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-1) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijck
+    term = np.tensordot(term, t_2, axes=((1, 2), (2, 0)))  # ikdl
+    out += np.tensordot(term, u[o, o, v, v], axes=((1, 2, 3), (0, 3, 1)))  # ia
+
+
+def add_s11j_l(u, l_2, t_1, t_2, o, v, out, np):
+    """Function for adding the S11j diagram
+
+        g*(f, u, l, t) <- (-1) l^{jk}_{ab} t^{c}_{j} t^{bd}_{kl} u^{il}_{cd}
+
+    Number of FLOPS required: O
+    """
+
+    term = (-1) * np.tensordot(l_2, t_1, axes=((0), (1)))  # kabc
+    term = np.tensordot(term, t_2, axes=((0, 2), (2, 0)))  # acdl
+    out += np.tensordot(
+        term, u[o, o, v, v], axes=((1, 2, 3), (2, 3, 1))
+    ).transpose(
+        1, 0
+    )  # ai -> ia
+
+
+def add_s11k_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the S11k diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{ij}_{bc} t^{b}_{l} t^{c}_{k} u^{kl}_{aj}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijcl
+    term = np.tensordot(term, t_1, axes=((2), (0)))  # ijlk
+    out += np.tensordot(term, u[o, o, v, o], axes=((1, 2, 3), (3, 1, 0)))  # ia
+
+
+def add_s11l_l(u, l_2, t_1, t_2, o, v, out, np):
+    """Function for adding the S11k diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{ij}_{bc} t^{d}_{k} t^{bc}_{jl} u^{kl}_{ad}
+
+    Number of FLOPS required: O()
+    """
+
+    # Starting with term 1 (l_2) and term 3 (t_2)
+    term = (-0.5) * np.tensordot(l_2, t_2, axes=((1, 2, 3), (2, 0, 1)))  # il
+    # Then term 4 (u)
+    term = np.tensordot(term, u[o, o, v, v], axes=((1), (1)))  # ikad
+    # Lastly, term 2 (t_1)
+    out += np.tensordot(t_1, term, axes=((0, 1), (3, 1)))  # ia
+
+
+def add_s11m_l(u, l_2, t_1, t_2, o, v, out, np):
+    """Function for adding the S11m diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{jk}_{ab} t^{c}_{l} t^{bd}_{jk} u^{il}_{cd}
+
+    Number of FLOPS required: O()
+    """
+
+    # Same as over,
+    # Starting with term 1 (l_2) and term 3 (t_2)
+    term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 1, 3), (2, 3, 0)))  # ad
+    # Then term 4 (u)
+    term = np.tensordot(term, u[o, o, v, v], axes=((1), (3)))  # ailc
+    # Lastly, term 2 (t_1)
+    out += np.tensordot(t_1, term, axes=((0, 1), (3, 2))).transpose(
+        1, 0
+    )  # ai -> ia
+
+
+def add_s11n_l(u, l_2, t_1, t_2, o, v, out, np):
+    """Function for adding the S11n diagram
+
+        g*(f, u, l t) <- (0.25) l^{ij}_{bc} t^{d}_{j} t^{bc}_{kl} u^{kl}_{ad}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (0.25) * np.tensordot(l_2, t_1, axes=((1), (1)))  # ibcd
+    term = np.tensordot(term, t_2, axes=((1, 2), (0, 1)))  # idkl
+    out += np.tensordot(term, u[o, o, v, v], axes=((1, 2, 3), (3, 0, 1)))  # ia
+
+
+def add_s11o_l(u, l_2, t_1, t_2, o, v, out, np):
+    """Function for adding the S11o diagram
+
+        g*(f, u, l, t) <- (0.25) l^{jk}_{ab} t^{b}_{l} t^{cd}_{jk} u^{il}_{cd}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (0.25) * np.tensordot(l_2, t_1, axes=((3), (0)))  # jkal
+    term = np.tensordot(term, t_2, axes=((0, 1), (2, 3)))  # alcd
+    out += np.tensordot(
+        term, u[o, o, v, v], axes=((1, 2, 3), (1, 2, 3))
+    ).transpose(
+        1, 0
+    )  # ai -> ia
+
+
+def add_s12a_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the S12a diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{ij}_{bc} t^{b}_{l} t^{c}_{k} t^{d}_{j} u^{kl}_{ad}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijcl
+    term = np.tensordot(term, t_1, axes=((2), (0)))  # ijlk
+    term = np.tensordot(term, t_1, axes=((1), (1)))  # ilkd
+    out += np.tensordot(term, u[o, o, v, v], axes=((1, 2, 3), (1, 0, 3)))  # ia
+
+
+def add_s12b_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the S12b diagram
+
+        g*(f, u, l, t) <- (-0.5) * l^{jk}_{ab} t^{b}_{l} t^{c}_{k} t^{d}_{j} u^{il}_{cd}
+
+    Number of FLOPS required: O()
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_1, axes=((3), (0)))  # jkal
+    term = np.tensordot(term, t_1, axes=((1), (1)))  # jalc
+    term = np.tensordot(term, t_1, axes=((0), (1)))  # alcd
+    out += np.tensordot(
+        term, u[o, o, v, v], axes=((1, 2, 3), (1, 2, 3))
+    ).transpose(
         1, 0
     )  # ai -> ia
