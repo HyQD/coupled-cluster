@@ -330,6 +330,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self.rhs_t_2.fill(0)
 
+        self.rhs_t_2 += self.u[v, v, o, o]
+
         ### TODO: Remove this test
         import coupled_cluster.ccd.rhs_t as ccd_t
         import coupled_cluster.ccsd.rhs_t as ccsd_t
@@ -337,8 +339,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         f = self.off_diag_f
         out = np.zeros_like(self.rhs_t_2)
         ###
-
-        self.rhs_t_2 += self.u[v, v, o, o]
 
         ### TODO: Remove this test
         ccd_t.add_d1_t(self.u, o, v, out, np)
