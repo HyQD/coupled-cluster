@@ -38,7 +38,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             - np.diag(self.f)[self.v].reshape(-1, 1, 1)
             - np.diag(self.f)[self.v].reshape(-1, 1, 1, 1)
         )
-        #Copying the transposed matrices for the lambda amplitudes (especially
+        # Copying the transposed matrices for the lambda amplitudes (especially
         # d_2) greatly increases the speed of the division later on.
         self.d_1_l = self.d_1_t.T.copy()
         self.d_2_l = self.d_2_t.transpose(2, 3, 0, 1).copy()
@@ -330,8 +330,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self.rhs_t_2.fill(0)
 
-        self.rhs_t_2 += self.u[v, v, o, o]
-
         ### TODO: Remove this test
         import coupled_cluster.ccd.rhs_t as ccd_t
         import coupled_cluster.ccsd.rhs_t as ccsd_t
@@ -339,6 +337,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         f = self.off_diag_f
         out = np.zeros_like(self.rhs_t_2)
         ###
+
+        self.rhs_t_2 += self.u[v, v, o, o]
 
         ### TODO: Remove this test
         ccd_t.add_d1_t(self.u, o, v, out, np)
