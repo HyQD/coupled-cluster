@@ -423,6 +423,17 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         term -= term.swapaxes(2, 3)
         self.rhs_t_2 += term
 
+        ### TODO: Remove this test
+        ccd_t.add_d2e_t(self.u, self.t_2, o, v, out, np)
+        ccd_t.add_d3b_t(self.u, self.t_2, o, v, out, np)
+        ccsd_t.add_d5c_t(self.u, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d5d_t(self.u, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d7c_t(self.u, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d6c_t(self.u, self.t_1, o, v, out, np)
+
+        np.testing.assert_allclose(self.rhs_t_2, out)
+        ###
+
         term = np.einsum(
             "abej, ei -> abij", self.u[v, v, v, o], self.t_1, optimize=True
         )
