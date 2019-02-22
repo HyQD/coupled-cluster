@@ -320,24 +320,62 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             "amef, efim -> ai", self.u[v, o, v, v], self.t_2, optimize=True
         )
 
+        # TODO: Remove this test
+        out = compute_t_1_amplitudes(f, self.u, self.t_1, self.t_2, o, v, np=np)
+        np.testing.assert_allclose(self.rhs_t_1, out)
+
     def _compute_ccsd_amplitude_d(self):
         np = self.np
         o, v = self.o, self.v
 
         self.rhs_t_2.fill(0)
 
+        ### TODO: Remove this test
+        import coupled_cluster.ccd.rhs_t as ccd_t
+        import coupled_cluster.ccsd.rhs_t as ccsd_t
+
+        f = self.off_diag_f
+        out = np.zeros_like(self.rhs_t_2)
+        ###
+
         self.rhs_t_2 += self.u[v, v, o, o]
+
+        ### TODO: Remove this test
+        ccd_t.add_d1_t(self.u, o, v, out, np)
+        np.testing.assert_allclose(self.rhs_t_2, out)
+        ###
+
         term = -0.5 * np.dot(self.t_1, self.F_hp)
         term += self.F_pp
         term = np.einsum("aeij, be -> abij", self.t_2, term, optimize=True)
         term -= term.swapaxes(0, 1)
         self.rhs_t_2 += term
 
+        ### TODO: Remove this test
+        ccd_t.add_d2a_t(f, self.t_2, o, v, out, np)
+        ccd_t.add_d3d_t(self.u, self.t_2, o, v, out, np)
+        ccsd_t.add_d5b_t(f, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d5g_t(self.u, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d7e_t(self.u, self.t_1, self.t_2, o, v, out, np)
+
+        np.testing.assert_allclose(out, self.rhs_t_2)
+        ###
+
         term = 0.5 * np.dot(self.F_hp, self.t_1)
         term += self.F_hh
         term = np.einsum("abim, mj -> abij", self.t_2, term, optimize=True)
         term -= term.swapaxes(2, 3)
         self.rhs_t_2 -= term
+
+        ### TODO: Remove this test
+        ccd_t.add_d2b_t(f, self.t_2, o, v, out, np)
+        ccd_t.add_d3c_t(self.u, self.t_2, o, v, out, np)
+        ccsd_t.add_d5a_t(f, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d5h_t(self.u, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d7d_t(self.u, self.t_1, self.t_2, o, v, out, np)
+
+        np.testing.assert_allclose(self.rhs_t_2, out)
+        ###
 
         self.rhs_t_2 += 0.5 * np.tensordot(
             self.tau, self.W_hhhh, axes=((2, 3), (0, 1))
@@ -368,6 +406,10 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         term = np.tensordot(self.t_1, self.u[o, v, o, o], axes=((1), (0)))
         term -= term.swapaxes(0, 1)
         self.rhs_t_2 -= term
+
+        # TODO: Remove this test
+        out = compute_t_2_amplitudes(f, self.u, self.t_1, self.t_2, o, v, np=np)
+        np.testing.assert_allclose(self.rhs_t_2, out)
 
     def _compute_ccsd_lambda_amplitudes_s(self):
         np = self.np
