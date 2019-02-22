@@ -38,7 +38,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             - np.diag(self.f)[self.v].reshape(-1, 1, 1)
             - np.diag(self.f)[self.v].reshape(-1, 1, 1, 1)
         )
-        # Copying the transposed matrices for the lambda amplitudes (especially
+        #Copying the transposed matrices for the lambda amplitudes (especially
         # d_2) greatly increases the speed of the division later on.
         self.d_1_l = self.d_1_t.T.copy()
         self.d_2_l = self.d_2_t.transpose(2, 3, 0, 1).copy()
