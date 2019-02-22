@@ -398,6 +398,19 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             self.W_pppp, self.tau, axes=((2, 3), (0, 1))
         )
 
+        ### TODO: Remove this test
+        ccd_t.add_d2c_t(self.u, self.t_2, o, v, out, np)
+        ccd_t.add_d3a_t(0.5 * self.u, self.t_2, o, v, out, np)
+        ccsd_t.add_d5e_t(self.u, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d7b_t(0.5 * self.u, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d6a_t(self.u, self.t_1, o, v, out, np)
+        ccsd_t.add_d8a_t(-self.u, self.t_1, o, v, out, np)
+        ccsd_t.add_d7a_t(0.5 * self.u, self.t_1, self.t_2, o, v, out, np)
+        ccsd_t.add_d9_t(0.5 * self.u, self.t_1, o, v, out, np)
+
+        np.testing.assert_allclose(self.rhs_t_2, out)
+        ###
+
         term = np.einsum(
             "ei, mbej -> mbij", self.t_1, self.u[o, v, v, o], optimize=True
         )
