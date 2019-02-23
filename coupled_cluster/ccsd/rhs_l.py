@@ -669,3 +669,200 @@ def add_s12b_l(u, l_2, t_1, o, v, out, np):
     ).transpose(
         1, 0
     )  # ai -> ia
+
+
+# You are now entering the land of L_2. Be cautious.
+# I also don't understand the naming convention at all..
+
+
+def add_d1_l(u, o, v, out, np):
+    """Function for adding the D1 diagram
+
+        g*(f, u, l, t) <- u^{ij}_{ab}
+
+    Number of FLOPS required: 0
+    """
+
+    out += u[o, o, v, v]
+
+
+def add_d2a_l(u, l_2, o, v, out, np):
+    """Function for adding the D2a diagram
+
+        g*(f, u, l, t) <- (0.5) l^{ij}_{cd} u^{cd}_{ab}
+
+    Number of FLOPS required: 
+    """
+
+    out += (0.5) * np.tensordot(
+        l_2, u[v, v, v, v], axes=((2, 3), (0, 1))
+    )  # ijab
+
+
+def add_d2b_l(u, l_2, o, v, out, np):
+    """Function for adding the D2b diagram
+
+        g*(f, u, l, t) <- (0.5) l^{kl}_{ab} u^{ij}_{kl}
+
+    Number of FLOPS required: 
+    """
+
+    out += (0.5) * np.tensordot(
+        l_2, u[o, o, o, o], axes=((0, 1), (2, 3))
+    ).transpose(
+        2, 3, 0, 1
+    )  # abij -> ijab
+
+
+def add_d3a_l(f, l_2, o, v, out, np):
+    """Function for adding the D3a diagram
+
+        g*(f, u, l, t) <- f^{i}_{k} l^{jk}_{ab} P(ij)
+
+    Number of FLOPS required:
+    """
+
+    term = np.tensordot(f[o, o], l_2, axes=((1), (1)))  # ijab
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d3b_l(u, l_1, o, v, out, np):
+    """Function for adding the D3b diagram
+
+        g*(f, u, l, t) <- l^{k}_{a} u^{ij}_{bk} P(ab)
+
+    Number of FLOPS required:
+    """
+
+    term = np.tensordot(l_1, u[o, o, v, o], axes=((0), (3))).transpose(
+        1, 2, 0, 3
+    )  # aijb -> ijab
+    term -= term.swapaxes(2, 3)
+    out += term
+
+
+def add_d4a_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the D4a diagram
+
+        g*(f, u, l, t) <- l^{ij}_{cd} t^{c}_{k} u^{dk}_(ab}
+        
+    Number of FLOPS required:
+    """
+
+    term = np.tensordot(l_2, t_1, axes=((2), (0)))  # ijdk
+    out += np.tensordot(term, u[v, o, v, v], axes=((2, 3), (0, 1)))  # ijab
+
+
+def add_d4b_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the D4b diagram
+
+        g*(f, u, l, t) <- l^{kl}_{ab} t^{c}_{k} u^{ij}_{cl}
+
+    Number of FLOPS required:
+    """
+
+    term = np.tensordot(l_2, t_1, axes=((0), (1)))  # labc
+    out += np.tensordot(term, u[o, o, v, o], axes=((0, 3), (3, 2))).transpose(
+        2, 3, 0, 1
+    )  # abij -> ijab
+
+
+def add_d5a_l(f, l_2, o, v, out, np):
+    """Function for adding the D5a diagram
+
+        g*(f, u, l, t) <- (-1) f^{c}_{a} l^{ij}_{bc} P(ab)
+
+    Number of FLOPS required:
+    """
+
+    term = (-1) * np.tensordot(f[v, v], l_2, axes=((0), (3))).transpose(
+        1, 2, 0, 3
+    )  # aijb -> ijab
+    term -= term.swapaxes(2, 3)
+    out += term
+
+
+def add_d5b_l(u, l_1, o, v, out, np):
+    """Function for adding the D5b diagram
+
+        g*(f, u, l, t) <- l^{i}_{c} u^{jc}_{ab} P(ij)
+
+    Number of FLOPS required:
+    """
+
+    term = (-1) * np.tensordot(l_1, u[o, v, v, v], axes=((1), (1)))  # ijab
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d6a_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the D6a diagram
+
+        g*(f, u, l, t) <- (0.25) l^{ij}_{cd} t^{cd}_{kl} u^{kl}_{ab}
+
+    Number of FLOPS required:
+    """
+
+    term = (0.25) * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))  # ijkl
+    out += np.tensordot(term, u[o, o, v, v], axes=((2, 3), (0, 1)))  # ijab
+
+
+def add_d6b_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the D6b diagram
+
+        g*(f, u, l, t) <- (0.25) l^{kl}_{ab} t^{cd}_{kl} u^{ij}_{cd}
+
+    Number of FLOPS required:
+    """
+
+    term = (0.25) * np.tensordot(l_2, t_2, axes=((0, 1), (2, 3)))  # abcd
+    out += np.tensordot(term, u[o, o, v, v], axes=((2, 3), (2, 3))).transpose(
+        2, 3, 0, 1
+    )  # abij -> ijab
+
+
+def add_d7a_l(f, l_1, o, v, out, np):
+    """Function for adding the D7a diagram
+
+        g*(f, u, l, t) <- f^{i}_{a} l^{j}_{b} P(ab) P(ij)
+
+    Number of FLOPS required:
+    """
+
+    term = np.tensordot(f[o, v], l_1, axes=0).transpose(0, 2, 1, 3)  # iajb
+    term -= term.swapaxes(2, 3)  # P(ab)
+    term -= term.swapaxes(0, 1)  # P(ij)
+    out += term
+
+
+def add_d7b_l(f, l_2, t_1, o, v, out, np):
+    """Function for adding the D7b diagram
+
+        g*(f, u, l, t) <- f^{i}_{c} l^{jk}_{ab} t^{c}_{k} P(ij)
+
+    Number of FLOPS required:
+    """
+
+    # Must first do terms 1 and 3
+    term = np.tensordot(f[o, v], t_1, axes=((1), (0)))  # ik
+    term = np.tensordot(term, l_2, axes=((1), (1)))  # ijab
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d7c_l(f, l_2, t_1, o, v, out, np):
+    """Function for adding the D7c diagram
+
+        g*(f, u, l, t) <- f^{k}_{a} l^{ij}_{bc} t^{c}_{k} P(ab)
+
+    Number of FLOPS required:
+    """
+
+    # First terms 1 and 3
+    term = np.tensordot(f[o, v], t_1, axes=((0), (1)))  # ac
+    term = np.tensordot(term, l_2, axes=((1), (3))).transpose(
+        1, 2, 0, 3
+    )  # aijb -> ijab
+    term -= term.swapaxes(2, 3)
+    out += term
