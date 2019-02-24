@@ -944,3 +944,69 @@ def add_d8e_l(u, l_2, o, v, out, np):
     term -= term.swapaxes(0, 1)
     term -= term.swapaxes(2, 3)
     out += term
+
+
+def add_d9a_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the D9a diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{ij}_{ac} t^{cd}_{kl} u^{kl}_{bd} P(ab)
+
+    Number of FLOPS required:
+    """
+
+    # Start with term 2 and 3
+    term = (-0.5) * np.tensordot(
+        t_2, u[o, o, v, v], axes=((1, 2, 3), (3, 0, 1))
+    )  # cb
+    term = np.tensordot(l_2, term, axes=((3), (0)))  # ijab
+    term -= term.swapaxes(2, 3)
+    out += term
+
+
+def add_d9b_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the D9b diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{ik}_{ab} t^{cd}_{kl} u^{jl}_{cd} P(ij)
+
+    Number of FLOPS required:
+    """
+
+    # Start with term 2 and 3
+    term = (-0.5) * np.tensordot(
+        t_2, u[o, o, v, v], axes=((0, 1, 3), (2, 3, 1))
+    )  # kj
+    term = np.tensordot(l_2, term, axes=((1), (0))).transpose(
+        0, 3, 1, 2
+    )  # iabj -> ijab
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d9c_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the D9c diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{ik}_{cd} t^{cd}_{kl} u^{jl}_{ab} P(ij)
+
+    Number of FLOPS required:
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_2, axes=((1, 2, 3), (2, 0, 1)))  # il
+    term = np.tensordot(term, u[o, o, v, v], axes=((1), (1)))  # ijab
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d9d_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the D9d diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{kl}_{ac} t^{cd}_{kl} u^{ij}_{bd} P(ab)
+
+    Number of FLOPS required:
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 1, 3), (2, 3, 0)))  # ad
+    term = np.tensordot(term, u[o, o, v, v], axes=((1), (3))).transpose(
+        1, 2, 0, 3
+    )  # aijb -> ijab
+    term -= term.swapaxes(2, 3)
+    out += term
