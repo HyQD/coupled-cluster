@@ -1582,10 +1582,13 @@ def test_add_d8a_l(large_system_ccsd):
 
     out = np.zeros_like(l_2)
     add_d8a_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = np.einsum("ic, ck, jkab->ijab", l_1, t_1, u[o, o, v, v], optimize=True)
+    out_e = np.einsum(
+        "ic, ck, jkab->ijab", l_1, t_1, u[o, o, v, v], optimize=True
+    )
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d8b_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -1596,7 +1599,9 @@ def test_add_d8b_l(large_system_ccsd):
 
     out = np.zeros_like(l_2)
     add_d8b_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = np.einsum("ka, ck, ijbc->ijab", l_1, t_1, u[o, o, v, v], optimize=True)
+    out_e = np.einsum(
+        "ka, ck, ijbc->ijab", l_1, t_1, u[o, o, v, v], optimize=True
+    )
     out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
@@ -1611,10 +1616,13 @@ def test_add_d8c_l(large_system_ccsd):
 
     out = np.zeros_like(l_2)
     add_d8c_l(u, l_2, t_1, o, v, out, np=np)
-    out_e = np.einsum("ijac, dk, ckbd->ijab", l_2, t_1, u[v, o, v, v], optimize=True)
+    out_e = np.einsum(
+        "ijac, dk, ckbd->ijab", l_2, t_1, u[v, o, v, v], optimize=True
+    )
     out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d8d_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -1625,10 +1633,13 @@ def test_add_d8d_l(large_system_ccsd):
 
     out = np.zeros_like(l_2)
     add_d8d_l(u, l_2, t_1, o, v, out, np=np)
-    out_e = np.einsum("ikab, cl, jlck->ijab", l_2, t_1, u[o, o, v, o], optimize=True)
+    out_e = np.einsum(
+        "ikab, cl, jlck->ijab", l_2, t_1, u[o, o, v, o], optimize=True
+    )
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
 
 def test_add_d8e_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
@@ -1640,11 +1651,10 @@ def test_add_d8e_l(large_system_ccsd):
     out = np.zeros_like(l_2)
     add_d8e_l(u, l_2, o, v, out, np=np)
     out_e = np.einsum("ikac, jcbk->ijab", l_2, u[o, v, v, o], optimize=True)
-    out_e -= out_e.swapaxes(2, 3) 
+    out_e -= out_e.swapaxes(2, 3)
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
-
 
 
 def test_mbpt_enegy(tdho):

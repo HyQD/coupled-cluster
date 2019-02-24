@@ -876,10 +876,11 @@ def add_d8a_l(u, l_1, t_1, o, v, out, np):
     Number of FLOPS required:
     """
 
-    term = np.tensordot(l_1, t_1, axes=((1), (0))) # ik
-    term = np.tensordot(term, u[o, o, v, v], axes=((1), (1))) # ijab
+    term = np.tensordot(l_1, t_1, axes=((1), (0)))  # ik
+    term = np.tensordot(term, u[o, o, v, v], axes=((1), (1)))  # ijab
     term -= term.swapaxes(0, 1)
     out += term
+
 
 def add_d8b_l(u, l_1, t_1, o, v, out, np):
     """Function for adding the D8b diagram
@@ -889,10 +890,13 @@ def add_d8b_l(u, l_1, t_1, o, v, out, np):
     Number of FLOPS required:
     """
 
-    term = np.tensordot(l_1, t_1, axes=((0), (1))) # ac
-    term = np.tensordot(term, u[o, o, v, v], axes=((1), (3))).transpose(1, 2, 0, 3) # aijb -> ijab
+    term = np.tensordot(l_1, t_1, axes=((0), (1)))  # ac
+    term = np.tensordot(term, u[o, o, v, v], axes=((1), (3))).transpose(
+        1, 2, 0, 3
+    )  # aijb -> ijab
     term -= term.swapaxes(2, 3)
-    out +=  term 
+    out += term
+
 
 def add_d8c_l(u, l_2, t_1, o, v, out, np):
     """Function for adding the D8c diagram
@@ -903,10 +907,11 @@ def add_d8c_l(u, l_2, t_1, o, v, out, np):
     """
 
     # Starting with terms 2 and 3
-    term = np.tensordot(t_1, u[v, o, v, v], axes=((0, 1), (3, 1))) # cb
-    term = np.tensordot(l_2, term, axes=((3), (0))) # ijab
+    term = np.tensordot(t_1, u[v, o, v, v], axes=((0, 1), (3, 1)))  # cb
+    term = np.tensordot(l_2, term, axes=((3), (0)))  # ijab
     term -= term.swapaxes(2, 3)
     out += term
+
 
 def add_d8d_l(u, l_2, t_1, o, v, out, np):
     """Function for adding the D8d diagram
@@ -917,10 +922,13 @@ def add_d8d_l(u, l_2, t_1, o, v, out, np):
     """
 
     # Starting with terms 2 and 3
-    term = np.tensordot(t_1, u[o, o, v, o], axes=((0, 1), (2, 1))) # jk
-    term = np.tensordot(l_2, term, axes=((1), (1))).transpose(0, 3, 1, 2) # iabj -> ijab
+    term = np.tensordot(t_1, u[o, o, v, o], axes=((0, 1), (2, 1)))  # jk
+    term = np.tensordot(l_2, term, axes=((1), (1))).transpose(
+        0, 3, 1, 2
+    )  # iabj -> ijab
     term -= term.swapaxes(0, 1)
     out += term
+
 
 def add_d8e_l(u, l_2, o, v, out, np):
     """Function for adding the D8e diagram
@@ -930,7 +938,9 @@ def add_d8e_l(u, l_2, o, v, out, np):
     Number of FLOPS required: 
     """
 
-    term = np.tensordot(l_2, u[o, v, v, o], axes=((1, 3), (3, 1))).transpose(0, 2, 1, 3) # iajb
+    term = np.tensordot(l_2, u[o, v, v, o], axes=((1, 3), (3, 1))).transpose(
+        0, 2, 1, 3
+    )  # iajb
     term -= term.swapaxes(0, 1)
     term -= term.swapaxes(2, 3)
-    out += term 
+    out += term
