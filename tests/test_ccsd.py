@@ -105,6 +105,10 @@ from coupled_cluster.ccsd.rhs_l import (
     add_d8c_l,
     add_d8d_l,
     add_d8e_l,
+    add_d9a_l,
+    add_d9b_l,
+    add_d9c_l,
+    add_d9d_l,
 )
 
 
@@ -1653,6 +1657,74 @@ def test_add_d8e_l(large_system_ccsd):
     out_e = np.einsum("ikac, jcbk->ijab", l_2, u[o, v, v, o], optimize=True)
     out_e -= out_e.swapaxes(2, 3)
     out_e -= out_e.swapaxes(0, 1)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_d9a_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_2)
+    add_d9a_l(u, l_2, t_2, o, v, out, np=np)
+    out_e = (-0.5) * np.einsum(
+        "ijac, cdkl, klbd->ijab", l_2, t_2, u[o, o, v, v], optimize=True
+    )
+    out_e -= out_e.swapaxes(2, 3)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_d9b_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_2)
+    add_d9b_l(u, l_2, t_2, o, v, out, np=np)
+    out_e = (-0.5) * np.einsum(
+        "ikab, cdkl, jlcd->ijab", l_2, t_2, u[o, o, v, v], optimize=True
+    )
+    out_e -= out_e.swapaxes(0, 1)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_d9c_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_2)
+    add_d9c_l(u, l_2, t_2, o, v, out, np=np)
+    out_e = (-0.5) * np.einsum(
+        "ikcd, cdkl, jlab->ijab", l_2, t_2, u[o, o, v, v], optimize=True
+    )
+    out_e -= out_e.swapaxes(0, 1)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+
+def test_add_d9d_l(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_2)
+    add_d9d_l(u, l_2, t_2, o, v, out, np=np)
+    out_e = (-0.5) * np.einsum(
+        "klac, cdkl, ijbd->ijab", l_2, t_2, u[o, o, v, v], optimize=True
+    )
+    out_e -= out_e.swapaxes(2, 3)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
