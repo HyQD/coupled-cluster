@@ -13,13 +13,13 @@ def ddx_psi(y,dx):
     ddx_y[1:N-1] = (y[0:N-2]-2*y[1:N-1]+y[2:])/dx**2
     return ddx_y
 
-def f(t,y,X,Omega,w):
+def f(t,y,X,Omega,w,E0=1):
     dx = X[1]-X[0]
-    rhs = -0.5*ddx_psi(y,dx)+0.5*Omega**2*X**2*y+4*X*np.sin(w*t)*y
+    rhs = -0.5*ddx_psi(y,dx)+0.5*Omega**2*X**2*y+4*E0*X*np.sin(w*t)*y
     return 0.5*rhs
 
 N    = 400
-rmax = 14
+rmax = 10
 Omega    = 0.25 #Oscillator frequency, naming convention consistent with Schwengelbeck/Zanghellini.
 a    = 0.25
 
@@ -45,7 +45,7 @@ epsR = wR*0.5
 
 # Time parameters
 Psi = psiR.copy()
-T = 13 
+T = 14
 dt = 1e-3 
 counter = 0
 time_steps = int( T / dt ) # Number of time steps
