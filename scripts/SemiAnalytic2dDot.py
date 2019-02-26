@@ -8,7 +8,7 @@ def ddx_psi(y,dx):
     ddx_y[1:N-1] = (y[0:N-2]-2*y[1:N-1]+y[2:])/dx**2
     return ddx_y
 
-def f(t,y,X,Omega,w,E0=3):
+def f(t,y,X,Omega,w,E0=0.5):
     dx = X[1]-X[0]
     rhs = -0.5*ddx_psi(y,dx)+0.5*Omega**2*X**2*y+4*E0*X*np.sin(w*t)*y
     return 0.5*rhs
@@ -21,6 +21,9 @@ n = 2
 m = 0
 
 eps_r = (abs(m)+2)*wr
+
+print("eps_r",eps_r)
+wat
 
 eta_X = 0.5*wR
 eta_Y = 0.5*wR
