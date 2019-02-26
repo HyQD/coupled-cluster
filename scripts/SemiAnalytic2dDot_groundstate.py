@@ -25,7 +25,7 @@ eps_r = 3/12 = 1/4
 
 Nr     = 1000 #Number of internal grid points
 rmax   = 15
-Omega  = 1.0 #Oscillator frequency, naming convention consistent with Schwengelbeck/Zanghellini.
+Omega  = 1.0/6.0 #Oscillator frequency, naming convention consistent with Schwengelbeck/Zanghellini.
 
 #Solve ground state equation for the relative coordnate r = r2-r1
 r       = np.linspace(0, rmax, Nr+2)
@@ -46,7 +46,7 @@ phi = phi/np.sqrt(dr)
 
 #Note that with the current setup the ground state is found at in the second column
 u_r = phi[:,2]
-plt.plot(r,u_r)
+plt.plot(r,np.abs(u_r)**2)
 plt.show()
 
 wR = 2*Omega
@@ -56,6 +56,8 @@ eps_R = eps_X+eps_Y
 
 eps_r = epsilon[2]
 
+
 print("eps_r: %g" % eps_r)
+print("eps_R: %g" % eps_R)
 print("E0: %g" % (2*eps_r+0.5*eps_R))
 
