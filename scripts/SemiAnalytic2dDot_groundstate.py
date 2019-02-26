@@ -7,13 +7,13 @@ import time
 from scipy.integrate import simps, trapz
 from scipy.linalg import expm
 
-Nr     = 2000 #Number of internal grid points
+Nr     = 4000 #Number of internal grid points
 rmax   = 10
 Omega  = 1 #Oscillator frequency, naming convention consistent with Schwengelbeck/Zanghellini.
 
 #Solve ground state equation for the relative coordnate r = r2-r1
 r       = np.linspace(0, rmax, Nr+2)
-dr      = rmax/float(Nr)
+dr      = rmax/float(Nr+1)
 wr      = 0.5*Omega
 H       = np.zeros((Nr+2, Nr+2)) #Include boundary points for convenience
 
@@ -28,14 +28,16 @@ epsilon, phi = np.linalg.eigh(H)
 phi = phi/np.sqrt(dr)
 
 #Note that with the current setup the ground state is found at in the second column
-plt.plot(r,phi[:,2])
+u_r = phi[:,2]
+plt.plot(r,u_r)
 plt.show()
-
-print(epsilon[2])
 
 wR = 2*Omega
 eps_X = 0.5*wR
 eps_Y = 0.5*wR
 eps_R = eps_X+eps_Y
 
-print(2*epsilon[2]+0.5*eps_R)
+eps_r = epsilon[2]
+
+print(eps_r)
+print(2*eps_r+0.5*eps_R)
