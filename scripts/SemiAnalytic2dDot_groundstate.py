@@ -56,6 +56,6 @@ eps_R = eps_X+eps_Y
 
 eps_r = epsilon[2]
 
-print("eps_r: %g" % ((eps_r-1)/1))
+print("eps_r: %g" % eps_r)
 print("E0: %g" % (2*eps_r+0.5*eps_R))
 
