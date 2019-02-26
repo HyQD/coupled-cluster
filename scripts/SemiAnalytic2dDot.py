@@ -13,17 +13,17 @@ def f(t,y,X,Omega,w,E0=0.5):
     rhs = -0.5*ddx_psi(y,dx)+0.5*Omega**2*X**2*y+4*E0*X*np.sin(w*t)*y
     return 0.5*rhs
 
-Omega = 1
+Omega = 1.0/6.0
 wR = 2*Omega
 wr = 0.5*Omega
 
 n = 2
 m = 0
 
-eps_r = (abs(m)+2)*wr
+#eps_r = (abs(m)+2)*wr
+eps_r = 0.25
 
 print("eps_r",eps_r)
-wat
 
 eta_X = 0.5*wR
 eta_Y = 0.5*wR
@@ -32,8 +32,7 @@ eta_XY = eta_X+eta_Y
 print(eta_XY,eps_r)
 print(2*eps_r+0.5*eta_X+0.5*eta_Y)
 
-
-r = np.linspace(0,5,201)
+r = np.linspace(0,15,801)
 u_r = 1.0/np.sqrt(2*np.pi)*np.exp(-0.25*r**2)*(1+r)
 u_r /= np.sqrt(trapz(np.abs(u_r)**2,r))
 
@@ -45,7 +44,7 @@ psiX = (wR/np.pi)**0.25 * np.exp(-0.5*wR*R**2)
 
 # Time parameters
 Psi = psiX.copy()
-T = 10
+T = 8
 dt = 1e-3 
 counter = 0
 time_steps = int( T / dt ) # Number of time steps
