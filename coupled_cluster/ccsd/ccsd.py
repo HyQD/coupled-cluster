@@ -327,6 +327,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.rhs_t_2.fill(0)
 
         self.rhs_t_2 += self.u[v, v, o, o]
+
         term = -0.5 * np.dot(self.t_1, self.F_hp)
         term += self.F_pp
         term = np.einsum("aeij, be -> abij", self.t_2, term, optimize=True)
