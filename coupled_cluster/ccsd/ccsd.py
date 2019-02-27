@@ -320,10 +320,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             "amef, efim -> ai", self.u[v, o, v, v], self.t_2, optimize=True
         )
 
-        # TODO: Remove this test
-        out = compute_t_1_amplitudes(f, self.u, self.t_1, self.t_2, o, v, np=np)
-        np.testing.assert_allclose(self.rhs_t_1, out)
-
     def _compute_ccsd_amplitude_d(self):
         np = self.np
         o, v = self.o, self.v
@@ -332,34 +328,11 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self.rhs_t_2 += self.u[v, v, o, o]
 
-        ### TODO: Remove this test
-        import coupled_cluster.ccd.rhs_t as ccd_t
-        import coupled_cluster.ccsd.rhs_t as ccsd_t
-
-        f = self.off_diag_f
-        out = np.zeros_like(self.rhs_t_2)
-        ###
-
-        ### TODO: Remove this test
-        ccd_t.add_d1_t(self.u, o, v, out, np)
-        np.testing.assert_allclose(self.rhs_t_2, out)
-        ###
-
         term = -0.5 * np.dot(self.t_1, self.F_hp)
         term += self.F_pp
         term = np.einsum("aeij, be -> abij", self.t_2, term, optimize=True)
         term -= term.swapaxes(0, 1)
         self.rhs_t_2 += term
-
-        ### TODO: Remove this test
-        ccd_t.add_d2a_t(f, self.t_2, o, v, out, np)
-        ccd_t.add_d3d_t(self.u, self.t_2, o, v, out, np)
-        ccsd_t.add_d5b_t(f, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d5g_t(self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d7e_t(self.u, self.t_1, self.t_2, o, v, out, np)
-
-        np.testing.assert_allclose(out, self.rhs_t_2)
-        ###
 
         term = 0.5 * np.dot(self.F_hp, self.t_1)
         term += self.F_hh
@@ -367,49 +340,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         term -= term.swapaxes(2, 3)
         self.rhs_t_2 -= term
 
-        ### TODO: Remove this test
-        ccd_t.add_d2b_t(f, self.t_2, o, v, out, np)
-        ccd_t.add_d3c_t(self.u, self.t_2, o, v, out, np)
-        ccsd_t.add_d5a_t(f, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d5h_t(self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d7d_t(self.u, self.t_1, self.t_2, o, v, out, np)
-
-        np.testing.assert_allclose(self.rhs_t_2, out)
-        ###
-
         self.rhs_t_2 += 0.5 * np.tensordot(
             self.tau, self.W_hhhh, axes=((2, 3), (0, 1))
         )
 
-        ### TODO: Remove this test
-        ccd_t.add_d2d_t(self.u, self.t_2, o, v, out, np)
-        ccd_t.add_d3a_t(0.5 * self.u, self.t_2, o, v, out, np)
-        ccsd_t.add_d5f_t(self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d7a_t(0.5 * self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d6b_t(self.u, self.t_1, o, v, out, np)
-        ccsd_t.add_d8b_t(self.u, self.t_1, o, v, out, np)
-        ccsd_t.add_d7b_t(0.5 * self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d9_t(0.5 * self.u, self.t_1, o, v, out, np)
-
-        np.testing.assert_allclose(self.rhs_t_2, out)
-        ###
-
         self.rhs_t_2 += 0.5 * np.tensordot(
             self.W_pppp, self.tau, axes=((2, 3), (0, 1))
         )
-
-        ### TODO: Remove this test
-        ccd_t.add_d2c_t(self.u, self.t_2, o, v, out, np)
-        ccd_t.add_d3a_t(0.5 * self.u, self.t_2, o, v, out, np)
-        ccsd_t.add_d5e_t(self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d7b_t(0.5 * self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d6a_t(self.u, self.t_1, o, v, out, np)
-        ccsd_t.add_d8a_t(self.u, self.t_1, o, v, out, np)
-        ccsd_t.add_d7a_t(0.5 * self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d9_t(0.5 * self.u, self.t_1, o, v, out, np)
-
-        np.testing.assert_allclose(self.rhs_t_2, out)
-        ###
 
         term = np.einsum(
             "ei, mbej -> mbij", self.t_1, self.u[o, v, v, o], optimize=True
@@ -423,44 +360,15 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         term -= term.swapaxes(2, 3)
         self.rhs_t_2 += term
 
-        ### TODO: Remove this test
-        ccd_t.add_d2e_t(self.u, self.t_2, o, v, out, np)
-        ccd_t.add_d3b_t(self.u, self.t_2, o, v, out, np)
-        ccsd_t.add_d5c_t(self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d5d_t(self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d7c_t(self.u, self.t_1, self.t_2, o, v, out, np)
-        ccsd_t.add_d6c_t(self.u, self.t_1, o, v, out, np)
-
-        np.testing.assert_allclose(self.rhs_t_2, out)
-        ###
-
         term = np.einsum(
             "abej, ei -> abij", self.u[v, v, v, o], self.t_1, optimize=True
         )
         term -= term.swapaxes(2, 3)
         self.rhs_t_2 += term
 
-        ### TODO: Remove this test
-        ccsd_t.add_d4a_t(self.u, self.t_1, o, v, out, np)
-
-        np.testing.assert_allclose(self.rhs_t_2, out)
-        ###
-
         term = np.tensordot(self.t_1, self.u[o, v, o, o], axes=((1), (0)))
         term -= term.swapaxes(0, 1)
         self.rhs_t_2 -= term
-
-        ### TODO: Remove this test
-        ccsd_t.add_d4b_t(self.u, self.t_1, o, v, out, np)
-
-        np.testing.assert_allclose(self.rhs_t_2, out)
-        ###
-
-        # TODO: Remove this test
-        out_2 = ccsd_t.compute_t_2_amplitudes(
-            f, self.u, self.t_1, self.t_2, o, v, np=np
-        )
-        np.testing.assert_allclose(self.rhs_t_2, out_2, atol=1e-7)
 
     def _compute_ccsd_lambda_amplitudes_s(self):
         np = self.np
