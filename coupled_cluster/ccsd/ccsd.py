@@ -120,36 +120,36 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.rhs_t_1.fill(0)
         self.rhs_t_2.fill(0)
 
-        # if self.include_singles:
-        #    compute_t_1_amplitudes(
-        #        f,
-        #        self.u,
-        #        self.t_1,
-        #        self.t_2,
-        #        self.o,
-        #        self.v,
-        #        out=self.rhs_t_1,
-        #        np=np,
-        #    )
-
-        # compute_t_2_amplitudes(
-        #    f,
-        #    self.u,
-        #    self.t_1,
-        #    self.t_2,
-        #    self.o,
-        #    self.v,
-        #    out=self.rhs_t_2,
-        #    np=np,
-        # )
-
-        self._compute_effective_amplitudes()
-        self._compute_intermediates(iterative=iterative)
-
         if self.include_singles:
-            self._compute_ccsd_amplitude_s(iterative=iterative)
+            compute_t_1_amplitudes(
+                f,
+                self.u,
+                self.t_1,
+                self.t_2,
+                self.o,
+                self.v,
+                out=self.rhs_t_1,
+                np=np,
+            )
 
-        self._compute_ccsd_amplitude_d()
+        compute_t_2_amplitudes(
+            f,
+            self.u,
+            self.t_1,
+            self.t_2,
+            self.o,
+            self.v,
+            out=self.rhs_t_2,
+            np=np,
+        )
+
+        # self._compute_effective_amplitudes()
+        # self._compute_intermediates(iterative=iterative)
+
+        # if self.include_singles:
+        #    self._compute_ccsd_amplitude_s(iterative=iterative)
+
+        # self._compute_ccsd_amplitude_d()
 
         if not iterative:
             return [self.rhs_t_1.copy(), self.rhs_t_2.copy()]
