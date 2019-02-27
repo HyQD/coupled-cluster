@@ -404,7 +404,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         ccsd_t.add_d5e_t(self.u, self.t_1, self.t_2, o, v, out, np)
         ccsd_t.add_d7b_t(0.5 * self.u, self.t_1, self.t_2, o, v, out, np)
         ccsd_t.add_d6a_t(self.u, self.t_1, o, v, out, np)
-        ccsd_t.add_d8a_t(-self.u, self.t_1, o, v, out, np)
+        ccsd_t.add_d8a_t(self.u, self.t_1, o, v, out, np)
         ccsd_t.add_d7a_t(0.5 * self.u, self.t_1, self.t_2, o, v, out, np)
         ccsd_t.add_d9_t(0.5 * self.u, self.t_1, o, v, out, np)
 
@@ -457,10 +457,10 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         ###
 
         # TODO: Remove this test
-        out = ccsd_t.compute_t_2_amplitudes(
+        out_2 = ccsd_t.compute_t_2_amplitudes(
             f, self.u, self.t_1, self.t_2, o, v, np=np
         )
-        np.testing.assert_allclose(self.rhs_t_2, out)
+        np.testing.assert_allclose(self.rhs_t_2, out_2, atol=1e-7)
 
     def _compute_ccsd_lambda_amplitudes_s(self):
         np = self.np

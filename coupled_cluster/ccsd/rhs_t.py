@@ -508,9 +508,13 @@ def add_d7e_t(u, t_1, t_2, o, v, out, np):
 def add_d8a_t(u, t_1, o, v, out, np):
     """Function for adding the D8a diagram
 
-        g(f, u, t) <- u^{kb}_{cd} t^{c}_{i} t^{a}_{k} t^{d}_{j} P(ab)
+        g(f, u, t) <- (-1) * u^{kb}_{cd} t^{c}_{i} t^{a}_{k} t^{d}_{j} P(ab)
     
     Number of FLOPS required O()
+
+    Note: The minus sign in this expression is in disagreement with the
+    definition in Shavitt & Bartlett page 306. We believe this is an error in
+    Shavitt & Bartlett as SymPy and Gauss & Stanton's article are in agreement.
     """
 
     term = np.tensordot(u[o, v, v, v], t_1, axes=((2), (0)))  # kbdi
@@ -520,7 +524,7 @@ def add_d8a_t(u, t_1, o, v, out, np):
     )  # biaj -> abij
     term -= term.swapaxes(0, 1)
 
-    out += term
+    out -= term
 
 
 def add_d8b_t(u, t_1, o, v, out, np):
