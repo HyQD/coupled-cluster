@@ -579,7 +579,7 @@ def test_add_d8a_t(large_system_ccsd):
     out = np.zeros_like(t_2)
     add_d8a_t(u, t_1, o, v, out, np=np)
     out_e = np.einsum(
-        "kbcd, ci, ak, dj->abij", u[o, v, v, v], t_1, t_1, t_1, optimize=True
+        "bkcd, ci, ak, dj->abij", u[v, o, v, v], t_1, t_1, t_1, optimize=True
     )
     out_e -= out_e.swapaxes(0, 1)
 
