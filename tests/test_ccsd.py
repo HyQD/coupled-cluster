@@ -1891,9 +1891,8 @@ def test_add_d12c_l(large_system_ccsd):
 
     out_e -= out_e.swapaxes(2, 3)
     out_e -= out_e.swapaxes(0, 1)
-    
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
 def test_mbpt_enegy(tdho):

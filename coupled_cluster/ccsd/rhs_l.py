@@ -1116,11 +1116,12 @@ def add_d12a_l(u, l_2, t_1, o, v, out, np):
     """
 
     # Start from the back
-    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (3, 1))) # kb
-    term = np.tensordot(t_1, term, axes=((1), (0))) # cb
-    term = np.tensordot(l_2, term, axes=((3), (0))) # ijab
+    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (3, 1)))  # kb
+    term = np.tensordot(t_1, term, axes=((1), (0)))  # cb
+    term = np.tensordot(l_2, term, axes=((3), (0)))  # ijab
     term -= term.swapaxes(2, 3)
     out += term
+
 
 def add_d12b_l(u, l_2, t_1, o, v, out, np):
     """Function for adding the D12b diagram
@@ -1131,9 +1132,11 @@ def add_d12b_l(u, l_2, t_1, o, v, out, np):
     """
 
     # Starting from the back again
-    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (3, 1))) # jc
-    term = np.tensordot(t_1, term, axes=((0), (1))) # kj
-    term = np.tensordot(l_2, term, axes=((1), (0))).transpose(0, 3, 1, 2) # iabj -> ijab
+    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (3, 1)))  # jc
+    term = np.tensordot(t_1, term, axes=((0), (1)))  # kj
+    term = np.tensordot(l_2, term, axes=((1), (0))).transpose(
+        0, 3, 1, 2
+    )  # iabj -> ijab
     term -= term.swapaxes(0, 1)
     out += term
 
@@ -1147,9 +1150,11 @@ def add_d12c_l(u, l_2, t_1, o, v, out, np):
     """
 
     # From the back
-    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0), (3))) # kjlb
-    term = np.tensordot(t_1, term, axes=((1), (2))) # ckjb
-    term = np.tensordot(l_2, term, axes=((1, 3), (1, 0))).transpose(0, 2, 1, 3) # iajb -> ijab
+    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0), (3)))  # kjlb
+    term = np.tensordot(t_1, term, axes=((1), (2)))  # ckjb
+    term = np.tensordot(l_2, term, axes=((1, 3), (1, 0))).transpose(
+        0, 2, 1, 3
+    )  # iajb -> ijab
     term -= term.swapaxes(2, 3)
     term -= term.swapaxes(0, 1)
     out += term
