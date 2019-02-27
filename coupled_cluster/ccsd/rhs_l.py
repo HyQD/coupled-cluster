@@ -1010,3 +1010,146 @@ def add_d9d_l(u, l_2, t_2, o, v, out, np):
     )  # aijb -> ijab
     term -= term.swapaxes(2, 3)
     out += term
+
+
+def add_d10a_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the D10a diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{kl}_{ab} t^{c}_{l} t^{d}_{k} u^{ij}_{cd}
+
+    Number of FLOPS required:
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_1, axes=((1), (1)))  # kabc
+    term = np.tensordot(term, t_1, axes=((0), (1)))  # abcd
+    out += np.tensordot(term, u[o, o, v, v], axes=((2, 3), (2, 3))).transpose(
+        2, 3, 0, 1
+    )  # abij -> ijab
+
+
+def add_d10b_l(u, l_2, t_1, o, v, out, np):
+    """function for adding the D10b diagram
+
+        g*(f, u, l, t) <- (-0.5) l^{ij}_{cd} t^{c}_{l} t^{d}_{k} u^{kl}_{ab}
+
+    Number of FLOPS required:
+    """
+
+    term = (-0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijdl
+    term = np.tensordot(term, t_1, axes=((2), (0)))  # ijlk
+    out += np.tensordot(term, u[o, o, v, v], axes=((2, 3), (1, 0)))  # ijab
+
+
+def add_d11a_l(u, l_1, t_1, o, v, out, np):
+    """Function for adding the D11a diagram
+
+        g*(f, u, l, t) <- l^{i}_{a} t^{c}_{k} u^{jk}_{bc} P(ab) P(ij)
+
+    Number of FLOPS required:
+    """
+
+    # Starting with terms 2 and 3
+    term = np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (3, 1)))  # jb
+    term = np.tensordot(l_1, term, axes=0).transpose(0, 2, 1, 3)  # iajb -> ijab
+    term -= term.swapaxes(2, 3)
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d11b_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the D11b diagram
+
+        g*(f, u, l, t) <- l^{ik}_{ac} t^{d}_{k} u^{jc}_{bd} P(ab) P(ij)
+
+    Number of FLOPS required:
+    """
+
+    term = np.tensordot(l_2, t_1, axes=((1), (1)))  # iacd
+    term = np.tensordot(term, u[o, v, v, v], axes=((2, 3), (1, 3))).transpose(
+        0, 2, 1, 3
+    )  # iajb -> ijab
+    term -= term.swapaxes(2, 3)
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d11c_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the D11c diagram
+
+        g*(f, u, l, t) <- (-1) l^{ik}_{ac} t^{c}_{l} u^{jl}_{bk} P(ab) P(ij)
+
+    Number of FLOPS required:
+    """
+
+    term = (-1) * np.tensordot(l_2, t_1, axes=((3), (0)))  # ikal
+    term = np.tensordot(term, u[o, o, v, o], axes=((1, 3), (3, 1))).transpose(
+        0, 2, 1, 3
+    )  # iajb -> ijab
+    term -= term.swapaxes(2, 3)
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d11d_l(u, l_2, t_2, o, v, out, np):
+    """Function for adding the D11d diagram
+
+        g*(f, u, l, t) <- l^{ik}_{ac} t^{cd}_{kl} u^{jl}_{bd} P(ab) P(ij)
+
+    Number of FLOPS required:
+    """
+
+    term = np.tensordot(l_2, t_2, axes=((1, 3), (2, 0)))  # iadl
+    term = np.tensordot(term, u[o, o, v, v], axes=((2, 3), (3, 1))).transpose(
+        0, 2, 1, 3
+    )  # iajb -> ijab
+    term -= term.swapaxes(2, 3)
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d12a_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the D12a diagram
+
+        g*(f, u, l, t) <- (-1) l^{ij}_{ac} t^{c}_{k} t^{d}_{l} u^{kl}_{bd} P(ab)
+
+    Number of FLOPS required:
+    """
+
+    # Start from the back
+    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (3, 1))) # kb
+    term = np.tensordot(t_1, term, axes=((1), (0))) # cb
+    term = np.tensordot(l_2, term, axes=((3), (0))) # ijab
+    term -= term.swapaxes(2, 3)
+    out += term
+
+def add_d12b_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the D12b diagram
+
+        g*(f, u, l, t) <- (-1) l^{ik}_{ab} t^{c}_{k} t^{d}_{l} u^{jl}_{cd} P(ij)
+
+    Number of FLOPS required: 
+    """
+
+    # Starting from the back again
+    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (3, 1))) # jc
+    term = np.tensordot(t_1, term, axes=((0), (1))) # kj
+    term = np.tensordot(l_2, term, axes=((1), (0))).transpose(0, 3, 1, 2) # iabj -> ijab
+    term -= term.swapaxes(0, 1)
+    out += term
+
+
+def add_d12c_l(u, l_2, t_1, o, v, out, np):
+    """Function for adding the D12c diagram
+
+        g*(f, u, l, t) <- (-1) l^{ik}_{ac} t^{c}_{l} t^{d}_{k} u^{jl}_{bd} P(ab) P(ij)
+
+    Number of FLOPS required:
+    """
+
+    # From the back
+    term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0), (3))) # kjlb
+    term = np.tensordot(t_1, term, axes=((1), (2))) # ckjb
+    term = np.tensordot(l_2, term, axes=((1, 3), (1, 0))).transpose(0, 2, 1, 3) # iajb -> ijab
+    term -= term.swapaxes(2, 3)
+    term -= term.swapaxes(0, 1)
+    out += term
