@@ -73,34 +73,3 @@ plt.plot(odho_ccsd.grid, rho_ccsd, label=r"$\rho_{CCSD}$")
 plt.plot(odho_ccd.grid, rho_ccd, label=r"$\rho_{CCD}$")
 plt.legend(loc="best")
 plt.show()
-
-t_start = 0
-t_end = 10
-num_timesteps = 10001
-print("delta t = {0}".format((t_end - t_start) / (num_timesteps - 1)))
-
-prob_ccsd, time_ccsd = ccsd.evolve_amplitudes(t_start, t_end, num_timesteps)
-prob_ccd, time_ccd = ccd.evolve_amplitudes(t_start, t_end, num_timesteps)
-
-plt.figure()
-plt.plot(
-    time_ccsd * laser_frequency / (2.0 * np.pi),
-    prob_ccsd.real,
-    label=r"$P_{CCSD}$",
-)
-plt.plot(
-    time_ccd * laser_frequency / (2.0 * np.pi),
-    prob_ccd.real,
-    label=r"$P_{CCD}$",
-)
-plt.legend(loc="best")
-plt.show()
-
-rho_ccsd = ccsd.compute_spin_reduced_one_body_density_matrix()
-rho_ccd = ccd.compute_spin_reduced_one_body_density_matrix()
-
-plt.figure()
-plt.plot(odho_ccsd.grid, rho_ccsd, label=r"$\rho_{CCSD}$")
-plt.plot(odho_ccd.grid, rho_ccd, label=r"$\rho_{CCD}$")
-plt.legend(loc="best")
-plt.show()
