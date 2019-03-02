@@ -43,6 +43,10 @@ wR = 2*Omega
 psiR = (wR/np.pi)**0.25 * np.exp(-0.5*wR*R**2)
 epsR = wR*0.5
 
+plt.figure(0)
+plt.plot(R,np.abs(psiR)**2)
+
+
 # Time parameters
 Psi = psiR.copy()
 T = 14
@@ -74,7 +78,12 @@ while counter < time_steps:
     
     overlap.append(np.abs(simps(np.conj(Psi)*psiR,r))**2)
     t_list.append(tn)
-    #print(trapz(Psi.conj()*Psi,R),tn)
+    
+    if(counter%3000 == 0):
+        plt.plot(R,np.abs(Psi)**2)
+        print(trapz(Psi.conj()*Psi,R),tn)
+    
+plt.show()
 
 plt.figure(1)
 plt.plot(t_list,Energy+2*epsilon[0])
