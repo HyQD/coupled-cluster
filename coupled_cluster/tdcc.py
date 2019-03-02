@@ -3,7 +3,6 @@ import collections
 import warnings
 from coupled_cluster.cc_helper import (
     AmplitudeContainer,
-    compute_spin_reduced_one_body_density_matrix,
     compute_particle_density,
 )
 from coupled_cluster.integrators import RungeKutta4
@@ -132,8 +131,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             warn = warn.format(np.trace(rho_qp), self.system.n)
             warnings.warn(warn)
 
-        rho_qp_reduced = compute_spin_reduced_one_body_density_matrix(rho_qp)
-        rho = compute_particle_density(rho_qp_reduced, self.system.spf, np=np)
+        rho = compute_particle_density(rho_qp, self.system.spf, np=np)
 
         return rho
 
