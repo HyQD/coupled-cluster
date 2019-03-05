@@ -113,16 +113,15 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         return energy + self.compute_reference_energy()
 
-    def compute_t_amplitudes(self, theta, iterative=True):
+    def compute_t_amplitudes(self, theta):
         np = self.np
-        f = self.off_diag_f if iterative else self.f
 
         self.rhs_t_1.fill(0)
         self.rhs_t_2.fill(0)
 
         if self.include_singles:
             compute_t_1_amplitudes(
-                f,
+                self.off_diag_f,
                 self.u,
                 self.t_1,
                 self.t_2,
@@ -133,7 +132,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             )
 
         compute_t_2_amplitudes(
-            f,
+            self.off_diag_f,
             self.u,
             self.t_1,
             self.t_2,
@@ -144,15 +143,12 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         )
 
         # self._compute_effective_amplitudes()
-        # self._compute_intermediates(iterative=iterative)
+        # self._compute_intermediates()
 
         # if self.include_singles:
-        #    self._compute_ccsd_amplitude_s(iterative=iterative)
+        #    self._compute_ccsd_amplitude_s()
 
         # self._compute_ccsd_amplitude_d()
-
-        if not iterative:
-            return [self.rhs_t_1.copy(), self.rhs_t_2.copy()]
 
         if self.include_singles:
             np.divide(self.rhs_t_1, self.d_1_t, out=self.rhs_t_1)
@@ -164,13 +160,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         # Notify a change in t for recalculation of intermediates
         self.changed_t = True
 
-    def compute_l_amplitudes(self, theta, iterative=True):
+    def compute_l_amplitudes(self, theta):
         np = self.np
 
         if self.changed_t:
             # Make sure that we use updated intermediates for lambda
             self._compute_effective_amplitudes()
-            self._compute_intermediates(iterative=iterative)
+            self._compute_intermediates()
             self.changed_t = False
 
         self._compute_effective_three_body_intermediates()
@@ -180,9 +176,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             self._compute_ccsd_lambda_amplitudes_s()
 
         self._compute_ccsd_lambda_amplitudes_d()
-
-        if not iterative:
-            return [self.rhs_l_1.copy(), self.rhs_l_2.copy()]
 
         if self.include_singles:
             np.divide(self.rhs_l_1, self.d_1_l, out=self.rhs_l_1)
@@ -293,14 +286,11 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             self.t_2, self.l_2, axes=((0, 1, 3), (2, 3, 1))
         )
 
-    def _compute_ccsd_amplitude_s(self, iterative):
+    def _compute_ccsd_amplitude_s(self):
         np = self.np
         o, v = self.o, self.v
 
         f = self.off_diag_f
-
-        if not iterative:
-            f = self.f
 
         self.rhs_t_1.fill(0)
 
@@ -459,14 +449,11 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         term -= term.swapaxes(2, 3)
         self.rhs_l_2 += term
 
-    def _compute_intermediates(self, iterative):
+    def _compute_intermediates(self):
         np = self.np
         o, v = self.o, self.v
 
         f = self.off_diag_f
-
-        if not iterative:
-            f = self.f
 
         # One-body intermediate F_{ae}
         self.F_pp.fill(0)
