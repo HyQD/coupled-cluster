@@ -65,9 +65,9 @@ def iterated_ccd_amplitudes(helium_system, beryllium_system, neon_system):
         except ImportError:
             warnings.warn("Running without Hartree-Fock basis")
 
-        ccd = CoupledClusterDoubles(system, mixer=DIIS, verbose=False)
-        ccd.iterate_t_amplitudes()
-        ccd.iterate_l_amplitudes()
+        ccd = CoupledClusterDoubles(system, verbose=False)
+        ccd.iterate_t_amplitudes(theta=0.9)
+        ccd.iterate_l_amplitudes(theta=0.9)
 
         ccd_list.append(ccd)
 
