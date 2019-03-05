@@ -1,5 +1,9 @@
 import abc
-from coupled_cluster.cc_helper import OACCVector, compute_oa_particle_density
+from coupled_cluster.cc_helper import (
+    OACCVector,
+    compute_oa_particle_density,
+    transform_two_body_tensor,
+)
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 from coupled_cluster.integrators import RungeKutta4
 
@@ -68,20 +72,6 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
-    def transform_two_body_full(self, u, C, C_tilde):
-        np = self.np
-
-        # abcd, ds -> abcs
-        _u = np.tensordot(u, C, axes=(3, 0))
-        # abcs, cr -> absr -> abrs
-        _u = np.tensordot(_u, C, axes=(2, 0)).transpose(0, 1, 3, 2)
-        # abrs, qb -> arsq -> aqrs
-        _u = np.tensordot(_u, C_tilde, axes=(1, 1)).transpose(0, 3, 1, 2)
-        # pa, aqrs -> pqrs
-        _u = np.tensordot(C_tilde, _u, axes=(1, 0))
-
-        return _u
-
     def __call__(self, prev_amp, current_time):
         np = self.np
         o, v = self.o, self.v
@@ -95,7 +85,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # Change basis to C and C_tilde
         self.h = C_tilde @ self.h_orig @ C
-        self.u = self.transform_two_body_full(self.u_orig, C, C_tilde)
+        self.u = transform_two_body_tensor(self.u_orig, C, C_tilde, np)
 
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
