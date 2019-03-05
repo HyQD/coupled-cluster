@@ -6,6 +6,7 @@ from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
+from coupled_cluster.mix import AlphaMixer
 
 
 class CoupledClusterDoubles(CoupledCluster):
@@ -47,29 +48,37 @@ class CoupledClusterDoubles(CoupledCluster):
     def _get_l_copy(self):
         return [self.l_2.copy()]
 
+    def setup_l_mixer(self, **kwargs):
+        self.l_2_mixer = self.mixer(**kwargs)
+
+    def setup_t_mixer(self, **kwargs):
+        self.t_2_mixer = self.mixer(**kwargs)
+
     def compute_energy(self):
         return compute_ccd_ground_state_energy(
             self.f, self.u, self.t_2, self.o, self.v, np=self.np
         )
 
-    def compute_t_amplitudes(self, theta, iterative=True):
+    def compute_t_amplitudes(self):
         np = self.np
-        f = self.off_diag_f if iterative else self.f
+        f = self.off_diag_f if self.mixer == AlphaMixer else self.f
 
         self.rhs_t_2.fill(0)
         compute_t_2_amplitudes(
             f, self.u, self.t_2, self.o, self.v, out=self.rhs_t_2, np=np
         )
 
-        if not iterative:
-            return [self.rhs_t_2.copy()]
+        trial_vector = self.t_2
+        direction_vector = np.divide(self.rhs_t_2, self.d_t_2)
+        error_vector = self.rhs_t_2
 
-        np.divide(self.rhs_t_2, self.d_t_2, out=self.rhs_t_2)
-        np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
+        self.t_2 = self.t_2_mixer.compute_new_vector(
+            trial_vector, direction_vector, error_vector
+        )
 
-    def compute_l_amplitudes(self, theta, iterative=True):
+    def compute_l_amplitudes(self):
         np = self.np
-        f = self.off_diag_f if iterative else self.f
+        f = self.off_diag_f if self.mixer == AlphaMixer else self.f
 
         self.rhs_l_2.fill(0)
         compute_l_2_amplitudes(
@@ -83,11 +92,13 @@ class CoupledClusterDoubles(CoupledCluster):
             np=np,
         )
 
-        if not iterative:
-            return [self.rhs_l_2.copy()]
+        trial_vector = self.l_2
+        direction_vector = np.divide(self.rhs_l_2, self.d_l_2)
+        error_vector = self.rhs_l_2
 
-        np.divide(self.rhs_l_2, self.d_l_2, out=self.rhs_l_2)
-        np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
+        self.l_2 = self.l_2_mixer.compute_new_vector(
+            trial_vector, direction_vector, error_vector
+        )
 
     def compute_one_body_density_matrix(self):
         return compute_one_body_density_matrix(

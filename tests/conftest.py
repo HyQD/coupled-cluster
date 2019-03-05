@@ -121,6 +121,19 @@ def ccd_energy(_omega):
 
 
 @pytest.fixture
+def tdho_ccd_hf_energy(_omega):
+    if _omega == 0.5:
+        return 1.681979
+    elif _omega == 1.0:
+        return 3.039048
+    else:
+        raise NotImplementedError(
+            "We do not a have a test value for omega "
+            + "= {0} yet".format(_omega)
+        )
+
+
+@pytest.fixture
 def ccsd_energy(_omega):
     if _omega == 0.5:
         return 1.681608
