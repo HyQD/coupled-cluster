@@ -47,12 +47,18 @@ class CoupledClusterDoubles(CoupledCluster):
     def _get_l_copy(self):
         return [self.l_2.copy()]
 
+    def setup_l_mixer(self, **kwargs):
+        self.l_2_mixer = self.mixer(**kwargs)
+
+    def setup_t_mixer(self, **kwargs):
+        self.t_2_mixer = self.mixer(**kwargs)
+
     def compute_energy(self):
         return compute_ccd_ground_state_energy(
             self.f, self.u, self.t_2, self.o, self.v, np=self.np
         )
 
-    def compute_t_amplitudes(self, theta):
+    def compute_t_amplitudes(self):
         np = self.np
 
         self.rhs_t_2.fill(0)
@@ -66,10 +72,15 @@ class CoupledClusterDoubles(CoupledCluster):
             np=np,
         )
 
-        np.divide(self.rhs_t_2, self.d_t_2, out=self.rhs_t_2)
-        np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
+        trial_vector = self.t_2
+        direction_vector = np.divide(self.rhs_t_2, self.d_t_2)
+        error_vector = self.rhs_t_2
 
-    def compute_l_amplitudes(self, theta):
+        self.t_2 = self.t_2_mixer.compute_new_vector(
+            trial_vector, direction_vector, error_vector
+        )
+
+    def compute_l_amplitudes(self):
         np = self.np
 
         self.rhs_l_2.fill(0)
@@ -84,8 +95,13 @@ class CoupledClusterDoubles(CoupledCluster):
             np=np,
         )
 
-        np.divide(self.rhs_l_2, self.d_l_2, out=self.rhs_l_2)
-        np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
+        trial_vector = self.l_2
+        direction_vector = np.divide(self.rhs_l_2, self.d_l_2)
+        error_vector = self.rhs_l_2
+
+        self.l_2 = self.l_2_mixer.compute_new_vector(
+            trial_vector, direction_vector, error_vector
+        )
 
     def compute_one_body_density_matrix(self):
         return compute_one_body_density_matrix(
