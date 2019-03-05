@@ -1,5 +1,7 @@
 class AlphaMixer:
-    def __init__(self, theta, np=None):
+    def __init__(self, theta=0.1, np=None):
+        assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
+
         self.theta = theta
 
     def compute_new_vector(self, trial_vector, direction_vector, error_vector):
