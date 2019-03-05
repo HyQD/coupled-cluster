@@ -8,6 +8,7 @@ from coupled_cluster.cc_helper import (
     remove_diagonal_in_matrix,
     compute_particle_density,
 )
+from coupled_cluster.mix import AlphaMixer
 
 
 class CoupledCluster(metaclass=abc.ABCMeta):
@@ -15,7 +16,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     state solver class.
     """
 
-    def __init__(self, system, verbose=False, np=None):
+    def __init__(self, system, mixer=AlphaMixer, verbose=False, np=None):
         if np is None:
             import numpy as np
 
@@ -23,6 +24,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.system = system
         self.verbose = verbose
+        self.mixer = mixer
 
         self.n = self.system.n
         self.l = self.system.l
@@ -61,11 +63,19 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def compute_t_amplitudes(self, theta):
+    def compute_t_amplitudes(self):
         pass
 
     @abc.abstractmethod
-    def compute_l_amplitudes(self, theta):
+    def compute_l_amplitudes(self):
+        pass
+
+    @abc.abstractmethod
+    def setup_l_mixer(self, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def setup_t_mixer(self, **kwargs):
         pass
 
     def compute_particle_density(self):
@@ -87,10 +97,15 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             self.f, self.u, self.o, self.v, np=self.np
         )
 
-    def iterate_l_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
+    def iterate_l_amplitudes(
+        self, max_iterations=100, tol=1e-4, **mixer_kwargs
+    ):
         np = self.np
 
-        assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
+        if np not in mixer_kwargs:
+            mixer_kwargs["np"] = np
+
+        self.setup_l_mixer(**mixer_kwargs)
 
         l_list = self._get_l_copy()
         l_diff = [100 for l in l_list]
@@ -102,7 +117,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if all([l_d < tol for l_d in l_diff]):
                 break
 
-            self.compute_l_amplitudes(theta)
+            self.compute_l_amplitudes()
             new_l_list = self._get_l_copy()
             l_diff = [
                 np.amax(np.abs(l - l_new))
@@ -111,10 +126,15 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
             l_list = new_l_list
 
-    def iterate_t_amplitudes(self, max_iterations=100, tol=1e-4, theta=0.1):
+    def iterate_t_amplitudes(
+        self, max_iterations=100, tol=1e-4, **mixer_kwargs
+    ):
         np = self.np
 
-        assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
+        if np not in mixer_kwargs:
+            mixer_kwargs["np"] = np
+
+        self.setup_t_mixer(**mixer_kwargs)
 
         t_list = self._get_t_copy()
         t_diff = [100 for t in t_list]
@@ -126,7 +146,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if all([t_d < tol for t_d in t_diff]):
                 break
 
-            self.compute_t_amplitudes(theta)
+            self.compute_t_amplitudes()
             new_t_list = self._get_t_copy()
             t_diff = [
                 np.amax(np.abs(t - t_new))
