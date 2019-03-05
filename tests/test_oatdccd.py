@@ -48,7 +48,7 @@ def test_oatdccd(
 
     system = helium_system
     hf = HartreeFock(system, verbose=True)
-    C = hf.scf(tolerance=1e-15)
+    C = hf.scf(tolerance=1e-12)
     system.change_basis(C)
 
     integrator = GaussIntegrator(np=np, eps=1e-10)
