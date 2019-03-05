@@ -102,7 +102,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     ):
         np = self.np
 
-        if np not in mixer_kwargs:
+        if not np in mixer_kwargs:
             mixer_kwargs["np"] = np
 
         self.setup_l_mixer(**mixer_kwargs)
@@ -131,7 +131,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     ):
         np = self.np
 
-        if np not in mixer_kwargs:
+        if not np in mixer_kwargs:
             mixer_kwargs["np"] = np
 
         self.setup_t_mixer(**mixer_kwargs)
