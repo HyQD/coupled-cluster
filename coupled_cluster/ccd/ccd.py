@@ -7,6 +7,7 @@ from coupled_cluster.ccd.density_matrices import (
     compute_two_body_density_matrix,
 )
 from coupled_cluster.mix import AlphaMixer
+from coupled_cluster.cc_helper import construct_d_t_2_matrix
 
 
 class CoupledClusterDoubles(CoupledCluster):
@@ -22,12 +23,7 @@ class CoupledClusterDoubles(CoupledCluster):
         self.t_2 = np.zeros_like(self.rhs_t_2)
         self.l_2 = np.zeros_like(self.rhs_l_2)
 
-        self.d_t_2 = (
-            np.diag(self.f)[self.o]
-            + np.diag(self.f)[self.o].reshape(-1, 1)
-            - np.diag(self.f)[self.v].reshape(-1, 1, 1)
-            - np.diag(self.f)[self.v].reshape(-1, 1, 1, 1)
-        )
+        self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
         self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
 
         self.compute_initial_guess()

@@ -4,6 +4,10 @@ from coupled_cluster.ccsd.rhs_t import (
     compute_t_1_amplitudes,
     compute_t_2_amplitudes,
 )
+from coupled_cluster.cc_helper import (
+    construct_d_t_1_matrix,
+    construct_d_t_2_matrix,
+)
 
 
 class CoupledClusterSinglesDoubles(CoupledCluster):
@@ -29,15 +33,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.l_1 = np.zeros_like(self.rhs_l_1)
         self.l_2 = np.zeros_like(self.rhs_l_2)
 
-        self.d_1_t = np.diag(self.f)[self.o] - np.diag(self.f)[self.v].reshape(
-            -1, 1
-        )
-        self.d_2_t = (
-            np.diag(self.f)[self.o]
-            + np.diag(self.f)[self.o].reshape(-1, 1)
-            - np.diag(self.f)[self.v].reshape(-1, 1, 1)
-            - np.diag(self.f)[self.v].reshape(-1, 1, 1, 1)
-        )
+        self.d_1_t = construct_d_t_1_matrix(self.f, self.o, self.v, np)
+        self.d_2_t = construct_d_t_2_matrix(self.f, self.o, self.v, np)
         # Copying the transposed matrices for the lambda amplitudes (especially
         # d_2) greatly increases the speed of the division later on.
         self.d_1_l = self.d_1_t.T.copy()
