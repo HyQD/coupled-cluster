@@ -1,4 +1,5 @@
 import pytest
+import warnings
 import numpy as np
 from coupled_cluster.ccd import CoupledClusterDoubles
 from coupled_cluster.ccd.rhs_t import (
@@ -47,6 +48,7 @@ from coupled_cluster.ccd.p_space_equations import (
     compute_R_tilde_ai,
     compute_A_ibaj,
 )
+from coupled_cluster.mix import DIIS
 
 
 @pytest.fixture(scope="session")
@@ -54,9 +56,18 @@ def iterated_ccd_amplitudes(helium_system, beryllium_system, neon_system):
 
     ccd_list = []
     for system in [helium_system, beryllium_system, neon_system]:
-        ccd = CoupledClusterDoubles(system, verbose=False)
-        ccd.iterate_t_amplitudes(theta=0.9)
-        ccd.iterate_l_amplitudes(theta=0.9)
+        try:
+            from tdhf import HartreeFock
+
+            hf = HartreeFock(system)
+            C = hf.scf(tolerance=1e-10)
+            system.change_basis(C)
+        except ImportError:
+            warnings.warn("Running without Hartree-Fock basis")
+
+        ccd = CoupledClusterDoubles(system, mixer=DIIS, verbose=False)
+        ccd.iterate_t_amplitudes()
+        ccd.iterate_l_amplitudes()
 
         ccd_list.append(ccd)
 
