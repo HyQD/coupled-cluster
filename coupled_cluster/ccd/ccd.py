@@ -6,6 +6,7 @@ from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
+from coupled_cluster.mix import AlphaMixer
 
 
 class CoupledClusterDoubles(CoupledCluster):
@@ -60,16 +61,11 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def compute_t_amplitudes(self):
         np = self.np
+        f = self.off_diag_f if self.mixer == AlphaMixer else self.f
 
         self.rhs_t_2.fill(0)
         compute_t_2_amplitudes(
-            self.off_diag_f,
-            self.u,
-            self.t_2,
-            self.o,
-            self.v,
-            out=self.rhs_t_2,
-            np=np,
+            f, self.u, self.t_2, self.o, self.v, out=self.rhs_t_2, np=np
         )
 
         trial_vector = self.t_2
@@ -82,10 +78,11 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def compute_l_amplitudes(self):
         np = self.np
+        f = self.off_diag_f if self.mixer == AlphaMixer else self.f
 
         self.rhs_l_2.fill(0)
         compute_l_2_amplitudes(
-            self.off_diag_f,
+            f,
             self.u,
             self.t_2,
             self.l_2,
