@@ -1,4 +1,17 @@
-class DIIS:
+class AlphaMixer:
+    def __init__(self, theta, np=None):
+        self.theta = theta
+
+    def compute_new_vector(self, trial_vector, direction_vector, error_vector):
+        return (
+            1 - self.theta
+        ) * direction_vector + self.theta * self.trial_vector
+
+    def clear_vectors(self):
+        pass
+
+
+class DIIS(AlphaMixer):
     """"
     Quite general class to accelerate quasi-Newton 
     using direct inversion of iterative space.
