@@ -61,11 +61,11 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def compute_t_amplitudes(self, theta, iterative=True):
+    def compute_t_amplitudes(self, theta):
         pass
 
     @abc.abstractmethod
-    def compute_l_amplitudes(self, theta, iterative=True):
+    def compute_l_amplitudes(self, theta):
         pass
 
     def compute_particle_density(self):
@@ -102,7 +102,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if all([l_d < tol for l_d in l_diff]):
                 break
 
-            self.compute_l_amplitudes(theta, iterative=True)
+            self.compute_l_amplitudes(theta)
             new_l_list = self._get_l_copy()
             l_diff = [
                 np.amax(np.abs(l - l_new))
@@ -126,7 +126,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if all([t_d < tol for t_d in t_diff]):
                 break
 
-            self.compute_t_amplitudes(theta, iterative=True)
+            self.compute_t_amplitudes(theta)
             new_t_list = self._get_t_copy()
             t_diff = [
                 np.amax(np.abs(t - t_new))

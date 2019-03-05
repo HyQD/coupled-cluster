@@ -52,28 +52,29 @@ class CoupledClusterDoubles(CoupledCluster):
             self.f, self.u, self.t_2, self.o, self.v, np=self.np
         )
 
-    def compute_t_amplitudes(self, theta, iterative=True):
+    def compute_t_amplitudes(self, theta):
         np = self.np
-        f = self.off_diag_f if iterative else self.f
 
         self.rhs_t_2.fill(0)
         compute_t_2_amplitudes(
-            f, self.u, self.t_2, self.o, self.v, out=self.rhs_t_2, np=np
+            self.off_diag_f,
+            self.u,
+            self.t_2,
+            self.o,
+            self.v,
+            out=self.rhs_t_2,
+            np=np,
         )
-
-        if not iterative:
-            return [self.rhs_t_2.copy()]
 
         np.divide(self.rhs_t_2, self.d_t_2, out=self.rhs_t_2)
         np.add((1 - theta) * self.rhs_t_2, theta * self.t_2, out=self.t_2)
 
-    def compute_l_amplitudes(self, theta, iterative=True):
+    def compute_l_amplitudes(self, theta):
         np = self.np
-        f = self.off_diag_f if iterative else self.f
 
         self.rhs_l_2.fill(0)
         compute_l_2_amplitudes(
-            f,
+            self.off_diag_f,
             self.u,
             self.t_2,
             self.l_2,
@@ -82,9 +83,6 @@ class CoupledClusterDoubles(CoupledCluster):
             out=self.rhs_l_2,
             np=np,
         )
-
-        if not iterative:
-            return [self.rhs_l_2.copy()]
 
         np.divide(self.rhs_l_2, self.d_l_2, out=self.rhs_l_2)
         np.add((1 - theta) * self.rhs_l_2, theta * self.l_2, out=self.l_2)
