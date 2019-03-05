@@ -979,3 +979,24 @@ def test_ccd_energy(tdho, ccd_energy):
     energy = cc_scheme.compute_energy()
 
     assert abs(energy - ccd_energy) < tol
+
+
+def test_ccd_diis_energy(tdho, tdho_ccd_hf_energy, ccd_energy):
+    tol = 1e-4
+
+    try:
+        from tdhf import HartreeFock
+
+        hf = HartreeFock(tdho)
+        C = hf.scf(tolerance=1e-15)
+        tdho.change_basis(C)
+
+    except ImportError:
+        warnings.warn("Running without Hartree-Fock basis")
+        tdho_ccd_hf_energy = ccd_energy
+
+    cc_scheme = CoupledClusterDoubles(tdho, mixer=DIIS, verbose=True)
+    cc_scheme.iterate_t_amplitudes(tol=tol, num_vecs=3)
+    energy = cc_scheme.compute_energy()
+
+    assert abs(energy - tdho_ccd_hf_energy) < tol
