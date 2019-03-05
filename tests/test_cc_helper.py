@@ -1,8 +1,59 @@
+import pytest
 import numpy as np
 from coupled_cluster.cc_helper import (
     compute_reference_energy,
     remove_diagonal_in_matrix,
+    construct_d_t_1_matrix,
+    construct_d_t_2_matrix,
 )
+
+
+@pytest.fixture
+def random_f_matrix():
+    n = 10
+    l = 30
+    o = slice(0, n)
+    v = slice(n, l)
+
+    f = np.random.random((l, l)) + 1j * np.random.random((l, l))
+
+    return f, o, v
+
+
+def test_d_t_1_matrix(random_f_matrix):
+    f, o, v = random_f_matrix
+
+    n = o.stop
+    m = v.stop - o.stop
+
+    d_t_1 = construct_d_t_1_matrix(f, o, v, np)
+    d_t_1_ver = np.zeros((m, n), dtype=f.dtype)
+
+    for a in range(m):
+        for i in range(n):
+            d_t_1_ver[a, i] = f[i, i] - f[a + n, a + n]
+
+    np.testing.assert_allclose(d_t_1, d_t_1_ver)
+
+
+def test_d_t_2_matrix(random_f_matrix):
+    f, o, v = random_f_matrix
+
+    n = o.stop
+    m = v.stop - o.stop
+
+    d_t_2 = construct_d_t_2_matrix(f, o, v, np)
+    d_t_2_ver = np.zeros((m, m, n, n), dtype=f.dtype)
+
+    for a in range(m):
+        for b in range(m):
+            for i in range(n):
+                for j in range(n):
+                    d_t_2_ver[a, b, i, j] = (
+                        f[i, i] + f[j, j] - f[a + n, a + n] - f[b + n, b + n]
+                    )
+
+    np.testing.assert_allclose(d_t_2, d_t_2_ver)
 
 
 def test_reference_energy():
