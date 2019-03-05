@@ -68,7 +68,7 @@ class DIIS(AlphaMixer):
         b_vec[b_dim] = -1.0
         pre_condition = np.zeros_like(b_vec)
 
-        if np.any(np.diag(b_mat)[:-1]) <= 0:
+        if np.any(np.diag(b_mat)[:-1] <= 0):
             pre_condition[:-1] = 1
         else:
             pre_condition[:-1] += np.power(np.diag(b_mat)[:-1], -0.5)
