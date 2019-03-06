@@ -19,7 +19,11 @@ system.change_basis(C)
 
 oaccd = OACCD(system, mixer=DIIS, verbose=True)
 oaccd.compute_ground_state(
-    num_vecs=10, tol=1e-10, termination_tol=1e-12, tol_factor=1e-1
+    max_iterations=100,
+    num_vecs=10,
+    tol=1e-10,
+    termination_tol=1e-12,
+    tol_factor=1e-1,
 )
 
 print("Ground state energy: {0}".format(oaccd.compute_energy()))
