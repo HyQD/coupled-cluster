@@ -26,6 +26,9 @@ class CoupledClusterDoubles(CoupledCluster):
         self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
         self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
 
+        self.l_2_mixer = None
+        self.t_2_mixer = None
+
         self.compute_initial_guess()
 
     def compute_initial_guess(self):
@@ -45,10 +48,12 @@ class CoupledClusterDoubles(CoupledCluster):
         return [self.l_2.copy()]
 
     def setup_l_mixer(self, **kwargs):
-        self.l_2_mixer = self.mixer(**kwargs)
+        if self.l_2_mixer is None:
+            self.l_2_mixer = self.mixer(**kwargs)
 
     def setup_t_mixer(self, **kwargs):
-        self.t_2_mixer = self.mixer(**kwargs)
+        if self.t_2_mixer is None:
+            self.t_2_mixer = self.mixer(**kwargs)
 
     def compute_energy(self):
         return compute_ccd_ground_state_energy(
