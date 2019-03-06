@@ -50,10 +50,16 @@ class CoupledClusterDoubles(CoupledCluster):
     def setup_l_mixer(self, **kwargs):
         if self.l_2_mixer is None:
             self.l_2_mixer = self.mixer(**kwargs)
+            return
+
+        self.l_2_mixer.clear_vectors()
 
     def setup_t_mixer(self, **kwargs):
         if self.t_2_mixer is None:
             self.t_2_mixer = self.mixer(**kwargs)
+            return
+
+        self.t_2_mixer.clear_vectors()
 
     def compute_energy(self):
         return compute_ccd_ground_state_energy(
