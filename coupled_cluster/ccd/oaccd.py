@@ -113,12 +113,12 @@ class OACCD(CoupledClusterDoubles):
 
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
                 self.kappa_up,
-                kappa_down_derivative / self.d_t_1,
+                -kappa_down_derivative / self.d_t_1,
                 kappa_down_derivative,
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
                 self.kappa_down,
-                kappa_up_derivative / self.d_t_1,
+                -kappa_up_derivative / self.d_t_1,
                 kappa_up_derivative,
             )
 
