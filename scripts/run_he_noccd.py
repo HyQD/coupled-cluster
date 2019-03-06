@@ -10,7 +10,7 @@ He = """
 He 0.0 0.0 0.0
 symmetry c1
 """
-options = {"basis": "cc-pvqz", "scf_type": "pk", "e_convergence": 1e-8}
+options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(He, options)
 
 hf = HartreeFock(system, verbose=True)
