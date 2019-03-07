@@ -2,7 +2,6 @@ import pytest
 import numpy as np
 from coupled_cluster.cc_helper import (
     compute_reference_energy,
-    remove_diagonal_in_matrix,
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
 )
@@ -80,12 +79,3 @@ def test_reference_energy():
 
     assert abs(e_ref - e_test) < 1e-10
     assert abs(e_ref - e_test_f) < 1e-10
-
-
-def test_remove_diagonal_in_matrix():
-    l = 20
-    f = np.random.random((l, l)) + 1j * np.random.random((l, l))
-    f_off_diag = remove_diagonal_in_matrix(f, np=np)
-
-    np.testing.assert_allclose(np.diag(f_off_diag), np.zeros(l))
-    np.testing.assert_allclose(f_off_diag, f - np.diag(np.diag(f)), atol=1e-10)
