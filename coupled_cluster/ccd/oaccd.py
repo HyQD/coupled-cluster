@@ -98,7 +98,7 @@ class OACCD(CoupledClusterDoubles):
                     break
 
             print(f"\nT converged in {t_it} iterations")
-            print(f"\nT residual is: {residual_t_2}\n")
+            print(f"T residual is {residual_t_2}")
 
             for l_it in range(max_iterations):
                 t_omega_2 = compute_l_2_amplitudes(
@@ -114,8 +114,8 @@ class OACCD(CoupledClusterDoubles):
                 if np.abs(residual_l_2) < amp_tol:
                     break
 
-            print(f"\nL converged in {l_it} iterations")
-            print(f"\nL residual is: {residual_l_2}\n")
+            print(f"\nLambda converged in {l_it} iterations")
+            print(f"Lambda residual is {residual_l_2}")
 
             Ku_der = Ku_der_fun(
                 self.n,
@@ -143,8 +143,8 @@ class OACCD(CoupledClusterDoubles):
             residual_up = np.linalg.norm(Ku_der)
             residual_down = np.linalg.norm(Kd_der)
 
-            print(f"\nResidual up: {residual_up}")
-            print(f"Residual down: {residual_down}")
+            print(f"\nResidual norms: ru = {residual_up}")
+            print(f"Residual norms: rd = {residual_down}")
 
             if np.abs(residual_up) < tol and np.abs(residual_down) < tol:
                 break
@@ -165,7 +165,7 @@ class OACCD(CoupledClusterDoubles):
             self.h = H_NO
             self.f = F_NO
             self.u = W_NO
-            print("Energy: {0}".format(self.compute_energy()))
+            print("Total NOCCD energy: {0}".format(self.compute_energy()))
 
     # def compute_ground_state(
     #    self,
