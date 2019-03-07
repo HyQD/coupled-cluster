@@ -73,10 +73,10 @@ class OACCD(CoupledClusterDoubles):
 
             print(f"\nIteration: {k_it}")
 
-            epsilon1 = -construct_d_t_1_matrix(F_NO, o, v, np).transpose()
-            epsilon2 = -construct_d_t_2_matrix(F_NO, o, v, np).transpose(
-                2, 3, 0, 1
-            )
+            d_t_1 = construct_d_t_1_matrix(F_NO, o, v, np)
+            d_l_1 = d_t_1.T.copy()
+            d_t_2 = construct_d_t_2_matrix(F_NO, o, v, np)
+            d_l_2 = d_t_2.transpose(2, 3, 0, 1).copy()
 
             self.t_2_mixer.clear_vectors()
             self.l_2_mixer.clear_vectors()
@@ -87,9 +87,7 @@ class OACCD(CoupledClusterDoubles):
                 )
 
                 self.t_2 = self.t_2_mixer.compute_new_vector(
-                    self.t_2,
-                    -omega_2 / epsilon2.transpose(2, 3, 0, 1),
-                    -omega_2,
+                    self.t_2, omega_2 / d_t_2, -omega_2
                 )
 
                 residual_t_2 = np.linalg.norm(omega_2)
@@ -106,7 +104,7 @@ class OACCD(CoupledClusterDoubles):
                 )
 
                 self.l_2 = self.l_2_mixer.compute_new_vector(
-                    self.l_2, -t_omega_2 / epsilon2, -t_omega_2
+                    self.l_2, t_omega_2 / d_l_2, -t_omega_2
                 )
 
                 residual_l_2 = np.linalg.norm(t_omega_2)
@@ -150,10 +148,10 @@ class OACCD(CoupledClusterDoubles):
                 break
 
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
-                self.kappa_up, Kd_der / epsilon1.T, Kd_der
+                self.kappa_up, -Kd_der / d_t_1, Kd_der
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
-                self.kappa_down, Ku_der.T / epsilon1, Ku_der.T
+                self.kappa_down, -Ku_der.T / d_l_1, Ku_der.T
             )
 
             self.kappa[v, o] = self.kappa_up
