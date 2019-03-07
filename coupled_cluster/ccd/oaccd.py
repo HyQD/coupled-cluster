@@ -75,31 +75,27 @@ class OACCD(CoupledClusterDoubles):
                 max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
             )
 
-            kappa_up_derivative = compute_kappa_up_rhs(
+            kappa_down_rhs = compute_kappa_down_rhs(
                 self.f, self.u, self.t_2, self.l_2, self.o, self.v, np
             )
-            kappa_down_derivative = compute_kappa_down_rhs(
+            kappa_up_rhs = compute_kappa_up_rhs(
                 self.f, self.u, self.t_2, self.l_2, self.o, self.v, np
             )
 
-            residual_up = np.linalg.norm(kappa_up_derivative)
-            residual_down = np.linalg.norm(kappa_down_derivative)
+            residual_up = np.linalg.norm(kappa_up_rhs)
+            residual_down = np.linalg.norm(kappa_down_rhs)
 
-            print(f"\nResidual norms: ru = {residual_up}")
-            print(f"Residual norms: rd = {residual_down}")
+            print(f"\nResidual norms: rd = {residual_down}")
+            print(f"Residual norms: ru = {residual_up}")
 
             if np.abs(residual_up) < tol and np.abs(residual_down) < tol:
                 break
 
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
-                self.kappa_up,
-                -kappa_down_derivative / d_t_1,
-                kappa_down_derivative,
+                self.kappa_up, -kappa_up_rhs / d_t_1, kappa_up_rhs
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
-                self.kappa_down,
-                -kappa_up_derivative / d_l_1,
-                kappa_up_derivative,
+                self.kappa_down, -kappa_down_rhs / d_l_1, kappa_down_rhs
             )
 
             self.kappa[self.v, self.o] = self.kappa_up
@@ -111,82 +107,136 @@ class OACCD(CoupledClusterDoubles):
             print("Total NOCCD energy: {0}".format(self.compute_energy()))
 
 
-def compute_kappa_up_rhs(f, u, t_2, l_2, o, v, np):
-    L2 = l_2
-    F = f
-    W = u
-    nocc = o.stop
-    nvirt = v.stop - o.stop
-
-    T2 = t_2.transpose(2, 3, 0, 1)
-    result = np.zeros((nvirt, nocc))
-    result += 0.5 * np.einsum(
-        "Ikcd,cdAk->AI", L2, W[v, v, v, o], optimize=["einsum_path", (0, 1)]
-    )
-    result += -0.5 * np.einsum(
-        "lkAc,Iclk->AI", L2, W[o, v, o, o], optimize=["einsum_path", (0, 1)]
-    )
-    result += 0.5 * np.einsum(
-        "lkAc,lkcd,Id->AI",
-        L2,
-        T2,
-        F[o, v],
-        optimize=["einsum_path", (1, 2), (0, 1)],
-    )
-    result += -1.0 * np.einsum(
-        "Ikcd,lkec,dlAe->AI",
-        L2,
-        T2,
-        W[v, o, v, v],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
-    result += -1.0 * np.einsum(
-        "lkAc,mkcd,Imdl->AI",
-        L2,
-        T2,
-        W[o, o, v, o],
-        optimize=["einsum_path", (1, 2), (0, 1)],
-    )
-    result += -0.5 * np.einsum(
-        "Ikcd,lkcd,lA->AI",
-        L2,
-        T2,
-        F[o, v],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
-    result += -0.5 * np.einsum(
-        "lkcd,mkcd,ImAl->AI",
-        L2,
-        T2,
-        W[o, o, v, o],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
-    result += -0.5 * np.einsum(
-        "lkcd,lkec,IdAe->AI",
-        L2,
-        T2,
-        W[o, v, v, v],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
-    result += -0.25 * np.einsum(
-        "lkAc,lked,Iced->AI",
-        L2,
-        T2,
-        W[o, v, v, v],
-        optimize=["einsum_path", (1, 2), (0, 1)],
-    )
-    result += 0.25 * np.einsum(
-        "Ikcd,mlcd,mlAk->AI",
-        L2,
-        T2,
-        W[o, o, v, o],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
-    result += np.einsum("IA->AI", F[o, v], optimize=["einsum_path", (0,)])
-    return result.T.copy()
-
-
 def compute_kappa_down_rhs(f, u, t_2, l_2, o, v, np):
+    # L2 = l_2
+    # F = f
+    # W = u
+    # nocc = o.stop
+    # nvirt = v.stop - o.stop
+
+    # T2 = t_2.transpose(2, 3, 0, 1)
+    # result = np.zeros((nvirt, nocc))
+    # result += 0.5 * np.einsum(
+    #    "Ikcd,cdAk->AI", L2, W[v, v, v, o], optimize=["einsum_path", (0, 1)]
+    # )
+
+    # Result should be kappa_down -> kappa^{i}_{a}
+    res = 0.5 * np.tensordot(l_2, u[v, v, v, o], axes=((1, 2, 3), (3, 0, 1)))
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += -0.5 * np.einsum(
+    #    "lkAc,Iclk->AI", L2, W[o, v, o, o], optimize=["einsum_path", (0, 1)]
+    # )
+
+    res -= 0.5 * np.tensordot(u[o, v, o, o], l_2, axes=((1, 2, 3), (3, 0, 1)))
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += 0.5 * np.einsum(
+    #    "lkAc,lkcd,Id->AI",
+    #    L2,
+    #    T2,
+    #    F[o, v],
+    #    optimize=["einsum_path", (1, 2), (0, 1)],
+    # )
+
+    temp_da = 0.5 * np.tensordot(t_2, l_2, axes=((0, 2, 3), (3, 0, 1)))
+    res += np.dot(f[o, v], temp_da)
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += -1.0 * np.einsum(
+    #    "Ikcd,lkec,dlAe->AI",
+    #    L2,
+    #    T2,
+    #    W[v, o, v, v],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
+
+    temp_elid = -np.tensordot(t_2, l_2, axes=((1, 3), (2, 1)))
+    res += np.tensordot(temp_elid, u[v, o, v, v], axes=((0, 1, 3), (3, 1, 0)))
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += -1.0 * np.einsum(
+    #    "lkAc,mkcd,Imdl->AI",
+    #    L2,
+    #    T2,
+    #    W[o, o, v, o],
+    #    optimize=["einsum_path", (1, 2), (0, 1)],
+    # )
+
+    temp_dmla = -np.tensordot(t_2, l_2, axes=((0, 3), (3, 1)))
+    res += np.tensordot(u[o, o, v, o], temp_dmla, axes=((1, 2, 3), (1, 0, 2)))
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += -0.5 * np.einsum(
+    #    "Ikcd,lkcd,lA->AI",
+    #    L2,
+    #    T2,
+    #    F[o, v],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
+
+    temp_il = -0.5 * np.tensordot(l_2, t_2, axes=((1, 2, 3), (3, 0, 1)))
+    res += np.dot(temp_il, f[o, v])
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += -0.5 * np.einsum(
+    #    "lkcd,mkcd,ImAl->AI",
+    #    L2,
+    #    T2,
+    #    W[o, o, v, o],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
+
+    temp_lm = -0.5 * np.tensordot(l_2, t_2, axes=((1, 2, 3), (3, 0, 1)))
+    res += np.tensordot(u[o, o, v, o], temp_lm, axes=((1, 3), (1, 0)))
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += -0.5 * np.einsum(
+    #    "lkcd,lkec,IdAe->AI",
+    #    L2,
+    #    T2,
+    #    W[o, v, v, v],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
+
+    temp_de = -0.5 * np.tensordot(l_2, t_2, axes=((0, 1, 2), (2, 3, 1)))
+    res += np.tensordot(u[o, v, v, v], temp_de, axes=((1, 3), (0, 1)))
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += -0.25 * np.einsum(
+    #    "lkAc,lked,Iced->AI",
+    #    L2,
+    #    T2,
+    #    W[o, v, v, v],
+    #    optimize=["einsum_path", (1, 2), (0, 1)],
+    # )
+
+    temp_edac = -0.25 * np.tensordot(t_2, l_2, axes=((2, 3), (0, 1)))
+    res += np.tensordot(u[o, v, v, v], temp_edac, axes=((1, 2, 3), (3, 0, 1)))
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += 0.25 * np.einsum(
+    #    "Ikcd,mlcd,mlAk->AI",
+    #    L2,
+    #    T2,
+    #    W[o, o, v, o],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
+
+    temp_ikml = 0.25 * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))
+    res += np.tensordot(temp_ikml, u[o, o, v, o], axes=((1, 2, 3), (3, 0, 1)))
+    # np.testing.assert_allclose(result.T, res)
+
+    # result += np.einsum("IA->AI", F[o, v], optimize=["einsum_path", (0,)])
+
+    res += f[o, v]
+    # np.testing.assert_allclose(result.T, res, atol=1e-10)
+
+    # return result.T.copy()
+    return res
+
+
+def compute_kappa_up_rhs(f, u, t_2, l_2, o, v, np):
     L2 = l_2
     F = f
     W = u
