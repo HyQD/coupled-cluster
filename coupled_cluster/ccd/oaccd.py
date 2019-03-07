@@ -8,8 +8,8 @@ from coupled_cluster.cc_helper import (
     remove_diagonal_in_matrix,
 )
 
-# from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
-# from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
+from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
+from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
 
 
 class OACCD(CoupledClusterDoubles):
@@ -42,146 +42,290 @@ class OACCD(CoupledClusterDoubles):
         tol_factor=0.1,
         **mixer_kwargs,
     ):
-        # Note: The tolerance in the t- and l-amplitudes can be lowered.
         np = self.np
 
         if not np in mixer_kwargs:
             mixer_kwargs["np"] = np
 
-        self.setup_kappa_mixer(**mixer_kwargs)
-        self.setup_t_mixer(**mixer_kwargs)
-        self.setup_l_mixer(**mixer_kwargs)
+        self.kappa_up_mixer = self.mixer(**mixer_kwargs)
+        self.kappa_down_mixer = self.mixer(**mixer_kwargs)
+        self.t_2_mixer = self.mixer(**mixer_kwargs)
+        self.l_2_mixer = self.mixer(**mixer_kwargs)
 
         amp_tol = 0.1
-        # self.t_2.fill(0)
-        # self.l_2.fill(0)
+        W = self.system.u
+        H = self.system.h
+        o, v = self.o, self.v
+        n, m = self.n, self.m
+        epsilon1 = np.zeros((n, m), dtype=self.t_2.dtype)
+        epsilon2 = np.zeros((n, n, m, m), dtype=self.t_2.dtype)
+        self.t_2.fill(0)
+        self.l_2.fill(0)
 
-        for i in range(max_iterations):
-            self.S = expm(self.kappa)
-            self.S_inv = expm(-self.kappa)
+        for k_it in range(max_iterations):
+            S = expm(self.kappa)
+            invS = expm(-self.kappa)
 
-            self.h = self.S_inv @ self.system.h @ self.S
-            self.u = transform_two_body_tensor(
-                self.system.u, self.S, self.S_inv, np
+            W_NO = np.einsum(
+                "pP,qQ,PQRS,Rr,Ss->pqrs", invS, invS, W, S, S, optimize=True
             )
-            self.f = self.system.construct_fock_matrix(self.h, self.u)
-            self.off_diag_f = remove_diagonal_in_matrix(self.f, np)
+            H_NO = np.einsum("pP,PQ,Qq->pq", invS, H, S, optimize=True)
+            F_NO = H_NO + np.einsum("PiQi->PQ", W_NO[:, o, :, o], optimize=True)
 
-            self.d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
-            self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
-            self.d_l_1 = self.d_t_1.T.copy()
-            self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
+            print(f"\nIteration: {k_it}")
 
-            # self.t_2_mixer.clear_vectors()
-            # self.l_2_mixer.clear_vectors()
+            epsilon = np.diag(F_NO)
 
-            # for j in range(max_iterations):
-            #    self.rhs_t_2.fill(0)
-            #    compute_t_2_amplitudes(
-            #        self.f,
-            #        self.u,
-            #        self.t_2,
-            #        self.o,
-            #        self.v,
-            #        out=self.rhs_t_2,
-            #        np=np
-            #    )
-            #    self.t_2 = self.t_2_mixer.compute_new_vector(
-            #        self.t_2, self.rhs_t_2 / self.d_t_2, self.rhs_t_2
-            #    )
+            for i in range(self.n):
+                for a in range(self.m):
+                    epsilon1[i, a] = epsilon[a + self.n] - epsilon[i]
 
-            #    residual_t_2 = np.linalg.norm(self.rhs_t_2)
+                    for j in range(self.n):
+                        for b in range(self.m):
+                            epsilon2[i, j, a, b] = (
+                                epsilon[a + self.n]
+                                + epsilon[b + self.n]
+                                - epsilon[i]
+                                - epsilon[j]
+                            )
 
-            #    if abs(residual_t_2) < amp_tol:
-            #        print(f"Tol t_2: {residual_t_2}\tIterations: {j}")
-            #        break
+            self.t_2_mixer.clear_vectors()
+            self.l_2_mixer.clear_vectors()
 
-            # for j in range(max_iterations):
-            #    self.rhs_l_2.fill(0)
-            #    compute_l_2_amplitudes(
-            #        self.f,
-            #        self.u,
-            #        self.t_2,
-            #        self.l_2,
-            #        self.o,
-            #        self.v,
-            #        out=self.rhs_l_2,
-            #        np=np
-            #    )
-            #    self.l_2 = self.l_2_mixer.compute_new_vector(
-            #        self.l_2, self.rhs_l_2 / self.d_l_2, self.rhs_l_2
-            #    )
-
-            #    residual_l_2 = np.linalg.norm(self.rhs_l_2)
-
-            #    if abs(residual_l_2) < amp_tol:
-            #        print(f"Tol l_2: {residual_l_2}\tIterations: {j}")
-            #        break
-
-            self.iterate_t_amplitudes(
-                max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
-            )
-
-            self.iterate_l_amplitudes(
-                max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
-            )
-
-            kappa_up_derivative = Ku_der_fun(
-                self.n,
-                self.m,
-                self.o,
-                self.v,
-                self.t_2.transpose(2, 3, 0, 1),
-                self.l_2,
-                self.f,
-                self.u,
-                np,
-            )
-            kappa_down_derivative = Kd_der_fun(
-                self.n,
-                self.m,
-                self.o,
-                self.v,
-                self.t_2.transpose(2, 3, 0, 1),
-                self.l_2,
-                self.f,
-                self.u,
-                np,
-            )
-
-            residual_up = np.linalg.norm(kappa_up_derivative)
-            residual_down = np.linalg.norm(kappa_down_derivative)
-
-            if self.verbose:
-                print(
-                    (
-                        f"Iteration: {i}\n"
-                        + f"Residual up: {residual_up}\n"
-                        + f"Residual down: {residual_down}"
-                    )
+            for t_it in range(max_iterations):
+                omega_2 = compute_t_2_amplitudes(
+                    F_NO, W_NO, self.t_2, self.o, self.v, np
                 )
 
-            if abs(residual_up) < tol and abs(residual_down) < tol:
+                self.t_2 = self.t_2_mixer.compute_new_vector(
+                    self.t_2,
+                    -omega_2 / epsilon2.transpose(2, 3, 0, 1),
+                    -omega_2,
+                )
+
+                residual_t_2 = np.linalg.norm(omega_2)
+
+                if np.abs(residual_t_2) < amp_tol:
+                    break
+
+            print(f"\nT converged in {t_it} iterations")
+            print(f"\nT residual is: {residual_t_2}\n")
+
+            for l_it in range(max_iterations):
+                t_omega_2 = compute_l_2_amplitudes(
+                    F_NO, W_NO, self.t_2, self.l_2, self.o, self.v, np
+                )
+
+                self.l_2 = self.l_2_mixer.compute_new_vector(
+                    self.l_2, -t_omega_2 / epsilon2, -t_omega_2
+                )
+
+                residual_l_2 = np.linalg.norm(t_omega_2)
+
+                if np.abs(residual_l_2) < amp_tol:
+                    break
+
+            print(f"\nL converged in {l_it} iterations")
+            print(f"\nL residual is: {residual_l_2}\n")
+
+            Ku_der = Ku_der_fun(
+                self.n,
+                self.m,
+                self.o,
+                self.v,
+                self.t_2.transpose(2, 3, 0, 1),
+                self.l_2,
+                F_NO,
+                W_NO,
+                np,
+            )
+            Kd_der = Kd_der_fun(
+                self.n,
+                self.m,
+                self.o,
+                self.v,
+                self.t_2.transpose(2, 3, 0, 1),
+                self.l_2,
+                F_NO,
+                W_NO,
+                np,
+            )
+
+            residual_up = np.linalg.norm(Ku_der)
+            residual_down = np.linalg.norm(Kd_der)
+
+            print(f"\nResidual up: {residual_up}")
+            print(f"Residual down: {residual_down}")
+
+            if np.abs(residual_up) < tol and np.abs(residual_down) < tol:
                 break
 
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
-                self.kappa_up,
-                -kappa_down_derivative / self.d_t_1,
-                kappa_down_derivative,
+                self.kappa_up, Kd_der / epsilon1.T, Kd_der
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
-                self.kappa_down,
-                -kappa_up_derivative.T / self.d_t_1.T,
-                kappa_up_derivative.T,
+                self.kappa_down, Ku_der.T / epsilon1, Ku_der.T
             )
 
-            self.kappa[self.o, self.v] = self.kappa_down
-            self.kappa[self.v, self.o] = self.kappa_up
+            self.kappa[v, o] = self.kappa_up
+            self.kappa[o, v] = self.kappa_down
 
             amp_tol = min(residual_up, residual_down) * tol_factor
             amp_tol = max(amp_tol, termination_tol)
 
+            self.h = H_NO
+            self.f = F_NO
+            self.u = W_NO
             print("Energy: {0}".format(self.compute_energy()))
+
+    # def compute_ground_state(
+    #    self,
+    #    max_iterations=100,
+    #    tol=1e-4,
+    #    termination_tol=1e-4,
+    #    tol_factor=0.1,
+    #    **mixer_kwargs,
+    # ):
+    #    # Note: The tolerance in the t- and l-amplitudes can be lowered.
+    #    np = self.np
+
+    #    if not np in mixer_kwargs:
+    #        mixer_kwargs["np"] = np
+
+    #    self.setup_kappa_mixer(**mixer_kwargs)
+    #    self.setup_t_mixer(**mixer_kwargs)
+    #    self.setup_l_mixer(**mixer_kwargs)
+
+    #    amp_tol = 0.1
+    #    # self.t_2.fill(0)
+    #    # self.l_2.fill(0)
+
+    #    for i in range(max_iterations):
+    #        self.S = expm(self.kappa)
+    #        self.S_inv = expm(-self.kappa)
+
+    #        self.h = self.S_inv @ self.system.h @ self.S
+    #        self.u = transform_two_body_tensor(
+    #            self.system.u, self.S, self.S_inv, np
+    #        )
+    #        self.f = self.system.construct_fock_matrix(self.h, self.u)
+    #        self.off_diag_f = remove_diagonal_in_matrix(self.f, np)
+
+    #        self.d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
+    #        self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
+    #        self.d_l_1 = self.d_t_1.T.copy()
+    #        self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
+
+    #        # self.t_2_mixer.clear_vectors()
+    #        # self.l_2_mixer.clear_vectors()
+
+    #        # for j in range(max_iterations):
+    #        #    self.rhs_t_2.fill(0)
+    #        #    compute_t_2_amplitudes(
+    #        #        self.f,
+    #        #        self.u,
+    #        #        self.t_2,
+    #        #        self.o,
+    #        #        self.v,
+    #        #        out=self.rhs_t_2,
+    #        #        np=np
+    #        #    )
+    #        #    self.t_2 = self.t_2_mixer.compute_new_vector(
+    #        #        self.t_2, self.rhs_t_2 / self.d_t_2, self.rhs_t_2
+    #        #    )
+
+    #        #    residual_t_2 = np.linalg.norm(self.rhs_t_2)
+
+    #        #    if abs(residual_t_2) < amp_tol:
+    #        #        print(f"Tol t_2: {residual_t_2}\tIterations: {j}")
+    #        #        break
+
+    #        # for j in range(max_iterations):
+    #        #    self.rhs_l_2.fill(0)
+    #        #    compute_l_2_amplitudes(
+    #        #        self.f,
+    #        #        self.u,
+    #        #        self.t_2,
+    #        #        self.l_2,
+    #        #        self.o,
+    #        #        self.v,
+    #        #        out=self.rhs_l_2,
+    #        #        np=np
+    #        #    )
+    #        #    self.l_2 = self.l_2_mixer.compute_new_vector(
+    #        #        self.l_2, self.rhs_l_2 / self.d_l_2, self.rhs_l_2
+    #        #    )
+
+    #        #    residual_l_2 = np.linalg.norm(self.rhs_l_2)
+
+    #        #    if abs(residual_l_2) < amp_tol:
+    #        #        print(f"Tol l_2: {residual_l_2}\tIterations: {j}")
+    #        #        break
+
+    #        self.iterate_t_amplitudes(
+    #            max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
+    #        )
+
+    #        self.iterate_l_amplitudes(
+    #            max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
+    #        )
+
+    #        kappa_up_derivative = Ku_der_fun(
+    #            self.n,
+    #            self.m,
+    #            self.o,
+    #            self.v,
+    #            self.t_2.transpose(2, 3, 0, 1),
+    #            self.l_2,
+    #            self.f,
+    #            self.u,
+    #            np,
+    #        )
+    #        kappa_down_derivative = Kd_der_fun(
+    #            self.n,
+    #            self.m,
+    #            self.o,
+    #            self.v,
+    #            self.t_2.transpose(2, 3, 0, 1),
+    #            self.l_2,
+    #            self.f,
+    #            self.u,
+    #            np,
+    #        )
+
+    #        residual_up = np.linalg.norm(kappa_up_derivative)
+    #        residual_down = np.linalg.norm(kappa_down_derivative)
+
+    #        if self.verbose:
+    #            print(
+    #                (
+    #                    f"Iteration: {i}\n"
+    #                    + f"Residual up: {residual_up}\n"
+    #                    + f"Residual down: {residual_down}"
+    #                )
+    #            )
+
+    #        if abs(residual_up) < tol and abs(residual_down) < tol:
+    #            break
+
+    #        self.kappa_up = self.kappa_up_mixer.compute_new_vector(
+    #            self.kappa_up,
+    #            -kappa_down_derivative / self.d_t_1,
+    #            kappa_down_derivative,
+    #        )
+    #        self.kappa_down = self.kappa_down_mixer.compute_new_vector(
+    #            self.kappa_down,
+    #            -kappa_up_derivative.T / self.d_t_1.T,
+    #            kappa_up_derivative.T,
+    #        )
+
+    #        self.kappa[self.o, self.v] = self.kappa_down
+    #        self.kappa[self.v, self.o] = self.kappa_up
+
+    #        amp_tol = min(residual_up, residual_down) * tol_factor
+    #        amp_tol = max(amp_tol, termination_tol)
+
+    #        print("Energy: {0}".format(self.compute_energy()))
 
 
 def Ku_der_fun(nocc, nvirt, o, v, T2, L2, F, W, np):
