@@ -47,17 +47,21 @@ class CoupledClusterDoubles(CoupledCluster):
     def _get_l_copy(self):
         return [self.l_2.copy()]
 
+    def compute_l_residuals(self):
+        return [self.np.linalg.norm(self.rhs_l_2)]
+
+    def compute_t_residuals(self):
+        return [self.np.linalg.norm(self.rhs_t_2)]
+
     def setup_l_mixer(self, **kwargs):
         if self.l_2_mixer is None:
             self.l_2_mixer = self.mixer(**kwargs)
-            return
 
         self.l_2_mixer.clear_vectors()
 
     def setup_t_mixer(self, **kwargs):
         if self.t_2_mixer is None:
             self.t_2_mixer = self.mixer(**kwargs)
-            return
 
         self.t_2_mixer.clear_vectors()
 

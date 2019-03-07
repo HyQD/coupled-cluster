@@ -76,6 +76,14 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def setup_t_mixer(self, **kwargs):
         pass
 
+    @abc.abstractmethod
+    def compute_l_residuals(self):
+        pass
+
+    @abc.abstractmethod
+    def compute_t_residuals(self):
+        pass
+
     def compute_particle_density(self):
         np = self.np
 
@@ -105,24 +113,15 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.setup_l_mixer(**mixer_kwargs)
 
-        l_list = self._get_l_copy()
-        l_diff = [100 for l in l_list]
-
         for i in range(max_iterations):
-            if self.verbose:
-                print(f"Iteration: {i}\tDiff (l): {l_diff}")
-
-            if all([l_d < tol for l_d in l_diff]):
-                break
-
             self.compute_l_amplitudes()
-            new_l_list = self._get_l_copy()
-            l_diff = [
-                np.amax(np.abs(l - l_new))
-                for l, l_new in zip(l_list, new_l_list)
-            ]
+            residuals = self.compute_l_residuals()
 
-            l_list = new_l_list
+            if self.verbose:
+                print(f"Iteration: {i}\tResiduals (l): {residuals}")
+
+            if all(res < tol for res in residuals):
+                break
 
     def iterate_t_amplitudes(
         self, max_iterations=100, tol=1e-4, **mixer_kwargs
@@ -134,21 +133,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.setup_t_mixer(**mixer_kwargs)
 
-        t_list = self._get_t_copy()
-        t_diff = [100 for t in t_list]
-
         for i in range(max_iterations):
-            if self.verbose:
-                print(f"Iteration: {i}\tDiff (t): {t_diff}")
-
-            if all([t_d < tol for t_d in t_diff]):
-                break
-
             self.compute_t_amplitudes()
-            new_t_list = self._get_t_copy()
-            t_diff = [
-                np.amax(np.abs(t - t_new))
-                for t, t_new in zip(t_list, new_t_list)
-            ]
+            residuals = self.compute_t_residuals()
 
-            t_list = new_t_list
+            if self.verbose:
+                print(f"Iteration: {i}\tResiduals (t): {residuals}")
+
+            if all(res < tol for res in residuals):
+                break
