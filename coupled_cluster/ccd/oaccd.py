@@ -53,8 +53,6 @@ class OACCD(CoupledClusterDoubles):
         self.l_2_mixer = self.mixer(**mixer_kwargs)
 
         amp_tol = 0.1
-        o, v = self.o, self.v
-        n, m = self.n, self.m
 
         self.t_2.fill(0)
         self.l_2.fill(0)
@@ -69,9 +67,9 @@ class OACCD(CoupledClusterDoubles):
 
             print(f"\nIteration: {k_it}")
 
-            d_t_1 = construct_d_t_1_matrix(self.f, o, v, np)
+            d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
             d_l_1 = d_t_1.T.copy()
-            d_t_2 = construct_d_t_2_matrix(self.f, o, v, np)
+            d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
             d_l_2 = d_t_2.transpose(2, 3, 0, 1).copy()
 
             self.t_2_mixer.clear_vectors()
@@ -128,7 +126,7 @@ class OACCD(CoupledClusterDoubles):
             print(f"\nLambda converged in {l_it} iterations")
             print(f"Lambda residual is {residual_l_2}")
 
-            Ku_der = Ku_der_fun(
+            kappa_up_derivative = Ku_der_fun(
                 self.n,
                 self.m,
                 self.o,
@@ -139,7 +137,7 @@ class OACCD(CoupledClusterDoubles):
                 self.u,
                 np,
             )
-            Kd_der = Kd_der_fun(
+            kappa_down_derivative = Kd_der_fun(
                 self.n,
                 self.m,
                 self.o,
@@ -151,8 +149,8 @@ class OACCD(CoupledClusterDoubles):
                 np,
             )
 
-            residual_up = np.linalg.norm(Ku_der)
-            residual_down = np.linalg.norm(Kd_der)
+            residual_up = np.linalg.norm(kappa_up_derivative)
+            residual_down = np.linalg.norm(kappa_down_derivative)
 
             print(f"\nResidual norms: ru = {residual_up}")
             print(f"Residual norms: rd = {residual_down}")
@@ -161,14 +159,18 @@ class OACCD(CoupledClusterDoubles):
                 break
 
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
-                self.kappa_up, -Kd_der / d_t_1, Kd_der
+                self.kappa_up,
+                -kappa_down_derivative / d_t_1,
+                kappa_down_derivative,
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
-                self.kappa_down, -Ku_der.T / d_l_1, Ku_der.T
+                self.kappa_down,
+                -kappa_up_derivative.T / d_l_1,
+                kappa_up_derivative.T,
             )
 
-            self.kappa[v, o] = self.kappa_up
-            self.kappa[o, v] = self.kappa_down
+            self.kappa[self.v, self.o] = self.kappa_up
+            self.kappa[self.o, self.v] = self.kappa_down
 
             amp_tol = min(residual_up, residual_down) * tol_factor
             amp_tol = max(amp_tol, termination_tol)
