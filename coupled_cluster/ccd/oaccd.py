@@ -80,18 +80,18 @@ class OACCD(CoupledClusterDoubles):
                 self.m,
                 self.o,
                 self.v,
-                self.t_2.transpose(2, 3, 0, 1),
+                self.t_2,
                 self.l_2,
                 self.f,
                 self.u,
                 np,
-            ).T.copy()
+            )
             kappa_down_derivative = Kd_der_fun(
                 self.n,
                 self.m,
                 self.o,
                 self.v,
-                self.t_2.transpose(2, 3, 0, 1),
+                self.t_2,
                 self.l_2,
                 self.f,
                 self.u,
@@ -127,7 +127,8 @@ class OACCD(CoupledClusterDoubles):
             print("Total NOCCD energy: {0}".format(self.compute_energy()))
 
 
-def Ku_der_fun(nocc, nvirt, o, v, T2, L2, F, W, np):
+def Ku_der_fun(nocc, nvirt, o, v, t_2, L2, F, W, np):
+    T2 = t_2.transpose(2, 3, 0, 1)
     result = np.zeros((nvirt, nocc))
     result += 0.5 * np.einsum(
         "Ikcd,cdAk->AI", L2, W[v, v, v, o], optimize=["einsum_path", (0, 1)]
@@ -192,10 +193,11 @@ def Ku_der_fun(nocc, nvirt, o, v, T2, L2, F, W, np):
         optimize=["einsum_path", (0, 1), (0, 1)],
     )
     result += np.einsum("IA->AI", F[o, v], optimize=["einsum_path", (0,)])
-    return result
+    return result.T.copy()
 
 
-def Kd_der_fun(nocc, nvirt, o, v, T2, L2, F, W, np):
+def Kd_der_fun(nocc, nvirt, o, v, t_2, L2, F, W, np):
+    T2 = t_2.transpose(2, 3, 0, 1)
     result = np.zeros((nvirt, nocc))
     result += -1.0 * np.einsum(
         "AI->AI", F[v, o], optimize=["einsum_path", (0,)]
