@@ -60,7 +60,7 @@ def iterated_ccd_amplitudes(helium_system, beryllium_system, neon_system):
             from tdhf import HartreeFock
 
             hf = HartreeFock(system)
-            C = hf.scf(tolerance=1e-10)
+            C = hf.scf(tolerance=1e-8)
             system.change_basis(C)
         except ImportError:
             warnings.warn("Running without Hartree-Fock basis")
