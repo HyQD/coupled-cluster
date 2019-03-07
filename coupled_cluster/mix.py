@@ -5,7 +5,12 @@ class AlphaMixer:
         self.theta = theta
 
     def compute_new_vector(self, trial_vector, direction_vector, error_vector):
-        return (1 - self.theta) * direction_vector + self.theta * trial_vector
+        # Compute new trial vector for mixing with full right hand side. See
+        # T. Helgaker's book "Molecular Electron-Structure Theory" equations
+        # (13.4.3), (13.4.6) and (13.4.10).
+        new_trial = trial_vector + direction_vector
+
+        return (1 - self.theta) * new_trial + self.theta * trial_vector
 
     def clear_vectors(self):
         pass

@@ -5,7 +5,6 @@ import warnings
 from coupled_cluster.cc_helper import (
     AmplitudeContainer,
     compute_reference_energy,
-    remove_diagonal_in_matrix,
     compute_particle_density,
 )
 from coupled_cluster.mix import AlphaMixer
@@ -33,7 +32,6 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.h = self.system.h
         self.u = self.system.u
         self.f = self.system.construct_fock_matrix(self.h, self.u)
-        self.off_diag_f = remove_diagonal_in_matrix(self.f, np=self.np)
 
         self.o, self.v = self.system.o, self.system.v
 

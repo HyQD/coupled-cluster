@@ -68,16 +68,15 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def compute_t_amplitudes(self):
         np = self.np
-        f = self.off_diag_f if self.mixer == AlphaMixer else self.f
 
         self.rhs_t_2.fill(0)
         compute_t_2_amplitudes(
-            f, self.u, self.t_2, self.o, self.v, out=self.rhs_t_2, np=np
+            self.f, self.u, self.t_2, self.o, self.v, out=self.rhs_t_2, np=np
         )
 
         trial_vector = self.t_2
         direction_vector = np.divide(self.rhs_t_2, self.d_t_2)
-        error_vector = self.rhs_t_2
+        error_vector = -self.rhs_t_2
 
         self.t_2 = self.t_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
@@ -85,11 +84,10 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def compute_l_amplitudes(self):
         np = self.np
-        f = self.off_diag_f if self.mixer == AlphaMixer else self.f
 
         self.rhs_l_2.fill(0)
         compute_l_2_amplitudes(
-            f,
+            self.f,
             self.u,
             self.t_2,
             self.l_2,
@@ -101,7 +99,7 @@ class CoupledClusterDoubles(CoupledCluster):
 
         trial_vector = self.l_2
         direction_vector = np.divide(self.rhs_l_2, self.d_l_2)
-        error_vector = self.rhs_l_2
+        error_vector = -self.rhs_l_2
 
         self.l_2 = self.l_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
