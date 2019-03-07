@@ -82,15 +82,17 @@ class OACCD(CoupledClusterDoubles):
             self.l_2_mixer.clear_vectors()
 
             for t_it in range(max_iterations):
-                omega_2 = compute_t_2_amplitudes(
-                    F_NO, W_NO, self.t_2, self.o, self.v, np
+                self.rhs_t_2.fill(0)
+
+                compute_t_2_amplitudes(
+                    F_NO, W_NO, self.t_2, self.o, self.v, np, out=self.rhs_t_2
                 )
 
                 self.t_2 = self.t_2_mixer.compute_new_vector(
-                    self.t_2, omega_2 / d_t_2, -omega_2
+                    self.t_2, self.rhs_t_2 / d_t_2, -self.rhs_t_2
                 )
 
-                residual_t_2 = np.linalg.norm(omega_2)
+                residual_t_2 = np.linalg.norm(self.rhs_t_2)
 
                 if np.abs(residual_t_2) < amp_tol:
                     break
@@ -99,15 +101,24 @@ class OACCD(CoupledClusterDoubles):
             print(f"T residual is {residual_t_2}")
 
             for l_it in range(max_iterations):
-                t_omega_2 = compute_l_2_amplitudes(
-                    F_NO, W_NO, self.t_2, self.l_2, self.o, self.v, np
+                self.rhs_l_2.fill(0)
+
+                compute_l_2_amplitudes(
+                    F_NO,
+                    W_NO,
+                    self.t_2,
+                    self.l_2,
+                    self.o,
+                    self.v,
+                    np,
+                    out=self.rhs_l_2,
                 )
 
                 self.l_2 = self.l_2_mixer.compute_new_vector(
-                    self.l_2, t_omega_2 / d_l_2, -t_omega_2
+                    self.l_2, self.rhs_l_2 / d_l_2, -self.rhs_l_2
                 )
 
-                residual_l_2 = np.linalg.norm(t_omega_2)
+                residual_l_2 = np.linalg.norm(self.rhs_l_2)
 
                 if np.abs(residual_l_2) < amp_tol:
                     break
