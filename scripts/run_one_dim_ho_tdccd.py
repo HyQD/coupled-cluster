@@ -26,7 +26,7 @@ omega = 0.25
 laser_frequency = 8 * omega
 laser_strength = 1
 theta_t = 0.5
-theta_l = 0.9
+theta_l = 0.8
 tol = 1e-4
 
 odho = OneDimensionalHarmonicOscillator(
