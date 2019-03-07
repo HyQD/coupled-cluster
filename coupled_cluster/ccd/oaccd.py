@@ -63,6 +63,7 @@ class OACCD(CoupledClusterDoubles):
             S = expm(self.kappa)
             S_inv = expm(-self.kappa)
 
+            self.h = S_inv @ self.system.h @ S
             self.u = np.einsum(
                 "pP,qQ,PQRS,Rr,Ss->pqrs",
                 S_inv,
@@ -71,9 +72,6 @@ class OACCD(CoupledClusterDoubles):
                 S,
                 S,
                 optimize=True,
-            )
-            self.h = np.einsum(
-                "pP,PQ,Qq->pq", S_inv, self.system.h, S, optimize=True
             )
             self.f = self.system.construct_fock_matrix(self.h, self.u)
 
