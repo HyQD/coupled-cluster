@@ -126,7 +126,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         if self.include_singles:
             compute_t_1_amplitudes(
-                self.off_diag_f,
+                self.f,
                 self.u,
                 self.t_1,
                 self.t_2,
@@ -137,7 +137,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             )
 
         compute_t_2_amplitudes(
-            self.off_diag_f,
+            self.f,
             self.u,
             self.t_1,
             self.t_2,
@@ -158,7 +158,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         if self.include_singles:
             trial_vector = self.t_1
             direction_vector = np.divide(self.rhs_t_1, self.d_1_t)
-            error_vector = self.rhs_t_1
+            error_vector = -self.rhs_t_1
 
             self.t_1 = self.t_1_mixer.compute_new_vector(
                 trial_vector, direction_vector, error_vector
@@ -166,7 +166,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         trial_vector = self.t_2
         direction_vector = np.divide(self.rhs_t_2, self.d_2_t)
-        error_vector = self.rhs_t_2
+        error_vector = -self.rhs_t_2
 
         self.t_2 = self.t_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
@@ -195,7 +195,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         if self.include_singles:
             trial_vector = self.l_1
             direction_vector = np.divide(self.rhs_l_1, self.d_1_l)
-            error_vector = self.rhs_l_1
+            error_vector = -self.rhs_l_1
 
             self.l_1 = self.l_1_mixer.compute_new_vector(
                 trial_vector, direction_vector, error_vector
@@ -203,7 +203,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         trial_vector = self.l_2
         direction_vector = np.divide(self.rhs_l_2, self.d_2_l)
-        error_vector = self.rhs_l_2
+        error_vector = -self.rhs_l_2
 
         self.l_2 = self.l_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
@@ -315,11 +315,9 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np = self.np
         o, v = self.o, self.v
 
-        f = self.off_diag_f
-
         self.rhs_t_1.fill(0)
 
-        self.rhs_t_1 += f[v, o]
+        self.rhs_t_1 += self.f[v, o]
         self.rhs_t_1 += np.dot(self.F_pp, self.t_1)
         self.rhs_t_1 -= np.dot(self.t_1, self.F_hh)
         self.rhs_t_1 += np.einsum(
@@ -478,12 +476,10 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np = self.np
         o, v = self.o, self.v
 
-        f = self.off_diag_f
-
         # One-body intermediate F_{ae}
         self.F_pp.fill(0)
-        self.F_pp += f[v, v]
-        self.F_pp -= 0.5 * np.dot(self.t_1, f[o, v])
+        self.F_pp += self.f[v, v]
+        self.F_pp -= 0.5 * np.dot(self.t_1, self.f[o, v])
         self.F_pp += np.tensordot(
             self.u[v, o, v, v], self.t_1, axes=((1, 3), (1, 0))
         )
@@ -493,8 +489,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         # One-body intermediate F_{mi}
         self.F_hh.fill(0)
-        self.F_hh += f[o, o]
-        self.F_hh += 0.5 * np.dot(f[o, v], self.t_1)
+        self.F_hh += self.f[o, o]
+        self.F_hh += 0.5 * np.dot(self.f[o, v], self.t_1)
         self.F_hh += np.einsum(
             "en, mnie -> mi", self.t_1, self.u[o, o, o, v], optimize=True
         )
@@ -504,7 +500,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         # One-body intermediate F_{me}
         self.F_hp.fill(0)
-        self.F_hp += f[o, v]
+        self.F_hp += self.f[o, v]
         self.F_hp += np.einsum(
             "fn, mnef -> me", self.t_1, self.u[o, o, v, v], optimize=True
         )
