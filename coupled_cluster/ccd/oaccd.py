@@ -136,7 +136,7 @@ class OACCD(CoupledClusterDoubles):
                 self.f,
                 self.u,
                 np,
-            )
+            ).T.copy()
             kappa_down_derivative = Kd_der_fun(
                 self.n,
                 self.m,
@@ -165,8 +165,8 @@ class OACCD(CoupledClusterDoubles):
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
                 self.kappa_down,
-                -kappa_up_derivative.T / d_l_1,
-                kappa_up_derivative.T,
+                -kappa_up_derivative / d_l_1,
+                kappa_up_derivative,
             )
 
             self.kappa[self.v, self.o] = self.kappa_up
