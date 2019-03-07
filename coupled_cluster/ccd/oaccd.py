@@ -46,10 +46,7 @@ class OACCD(CoupledClusterDoubles):
         if not np in mixer_kwargs:
             mixer_kwargs["np"] = np
 
-        self.kappa_up_mixer = self.mixer(**mixer_kwargs)
-        self.kappa_down_mixer = self.mixer(**mixer_kwargs)
-        self.t_2_mixer = self.mixer(**mixer_kwargs)
-        self.l_2_mixer = self.mixer(**mixer_kwargs)
+        self.setup_kappa_mixer(**mixer_kwargs)
 
         amp_tol = 0.1
 
@@ -71,59 +68,12 @@ class OACCD(CoupledClusterDoubles):
             d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
             d_l_2 = d_t_2.transpose(2, 3, 0, 1).copy()
 
-            self.t_2_mixer.clear_vectors()
-            self.l_2_mixer.clear_vectors()
-
-            for t_it in range(max_iterations):
-                self.rhs_t_2.fill(0)
-
-                compute_t_2_amplitudes(
-                    self.f,
-                    self.u,
-                    self.t_2,
-                    self.o,
-                    self.v,
-                    np,
-                    out=self.rhs_t_2,
-                )
-
-                self.t_2 = self.t_2_mixer.compute_new_vector(
-                    self.t_2, self.rhs_t_2 / d_t_2, -self.rhs_t_2
-                )
-
-                residual_t_2 = np.linalg.norm(self.rhs_t_2)
-
-                if np.abs(residual_t_2) < amp_tol:
-                    break
-
-            print(f"\nT converged in {t_it} iterations")
-            print(f"T residual is {residual_t_2}")
-
-            for l_it in range(max_iterations):
-                self.rhs_l_2.fill(0)
-
-                compute_l_2_amplitudes(
-                    self.f,
-                    self.u,
-                    self.t_2,
-                    self.l_2,
-                    self.o,
-                    self.v,
-                    np,
-                    out=self.rhs_l_2,
-                )
-
-                self.l_2 = self.l_2_mixer.compute_new_vector(
-                    self.l_2, self.rhs_l_2 / d_l_2, -self.rhs_l_2
-                )
-
-                residual_l_2 = np.linalg.norm(self.rhs_l_2)
-
-                if np.abs(residual_l_2) < amp_tol:
-                    break
-
-            print(f"\nLambda converged in {l_it} iterations")
-            print(f"Lambda residual is {residual_l_2}")
+            self.iterate_t_amplitudes(
+                max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
+            )
+            self.iterate_l_amplitudes(
+                max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
+            )
 
             kappa_up_derivative = Ku_der_fun(
                 self.n,
