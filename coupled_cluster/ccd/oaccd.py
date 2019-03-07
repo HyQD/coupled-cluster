@@ -57,8 +57,7 @@ class OACCD(CoupledClusterDoubles):
         H = self.system.h
         o, v = self.o, self.v
         n, m = self.n, self.m
-        epsilon1 = np.zeros((n, m), dtype=self.t_2.dtype)
-        epsilon2 = np.zeros((n, n, m, m), dtype=self.t_2.dtype)
+
         self.t_2.fill(0)
         self.l_2.fill(0)
 
@@ -74,20 +73,10 @@ class OACCD(CoupledClusterDoubles):
 
             print(f"\nIteration: {k_it}")
 
-            epsilon = np.diag(F_NO)
-
-            for i in range(self.n):
-                for a in range(self.m):
-                    epsilon1[i, a] = epsilon[a + self.n] - epsilon[i]
-
-                    for j in range(self.n):
-                        for b in range(self.m):
-                            epsilon2[i, j, a, b] = (
-                                epsilon[a + self.n]
-                                + epsilon[b + self.n]
-                                - epsilon[i]
-                                - epsilon[j]
-                            )
+            epsilon1 = -construct_d_t_1_matrix(F_NO, o, v, np).transpose()
+            epsilon2 = -construct_d_t_2_matrix(F_NO, o, v, np).transpose(
+                2, 3, 0, 1
+            )
 
             self.t_2_mixer.clear_vectors()
             self.l_2_mixer.clear_vectors()
