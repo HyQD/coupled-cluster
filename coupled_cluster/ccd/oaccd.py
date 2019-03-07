@@ -65,8 +65,8 @@ class OACCD(CoupledClusterDoubles):
 
             d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
             d_l_1 = d_t_1.T.copy()
-            d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
-            d_l_2 = d_t_2.transpose(2, 3, 0, 1).copy()
+            self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
+            self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
 
             self.iterate_t_amplitudes(
                 max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
