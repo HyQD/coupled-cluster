@@ -61,12 +61,20 @@ class OACCD(CoupledClusterDoubles):
 
         for k_it in range(max_iterations):
             S = expm(self.kappa)
-            invS = expm(-self.kappa)
+            S_inv = expm(-self.kappa)
 
             self.u = np.einsum(
-                "pP,qQ,PQRS,Rr,Ss->pqrs", invS, invS, self.system.u, S, S, optimize=True
+                "pP,qQ,PQRS,Rr,Ss->pqrs",
+                S_inv,
+                S_inv,
+                self.system.u,
+                S,
+                S,
+                optimize=True,
             )
-            self.h = np.einsum("pP,PQ,Qq->pq", invS, self.system.h, S, optimize=True)
+            self.h = np.einsum(
+                "pP,PQ,Qq->pq", S_inv, self.system.h, S, optimize=True
+            )
             self.f = self.system.construct_fock_matrix(self.h, self.u)
 
             print(f"\nIteration: {k_it}")
@@ -83,7 +91,13 @@ class OACCD(CoupledClusterDoubles):
                 self.rhs_t_2.fill(0)
 
                 compute_t_2_amplitudes(
-                    self.f, self.u, self.t_2, self.o, self.v, np, out=self.rhs_t_2
+                    self.f,
+                    self.u,
+                    self.t_2,
+                    self.o,
+                    self.v,
+                    np,
+                    out=self.rhs_t_2,
                 )
 
                 self.t_2 = self.t_2_mixer.compute_new_vector(
