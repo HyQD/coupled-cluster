@@ -5,7 +5,6 @@ from coupled_cluster.cc_helper import (
     transform_two_body_tensor,
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
-    remove_diagonal_in_matrix,
 )
 
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
