@@ -64,15 +64,7 @@ class OACCD(CoupledClusterDoubles):
             S_inv = expm(-self.kappa)
 
             self.h = S_inv @ self.system.h @ S
-            self.u = np.einsum(
-                "pP,qQ,PQRS,Rr,Ss->pqrs",
-                S_inv,
-                S_inv,
-                self.system.u,
-                S,
-                S,
-                optimize=True,
-            )
+            self.u = transform_two_body_tensor(self.system.u, S, S_inv, np)
             self.f = self.system.construct_fock_matrix(self.h, self.u)
 
             print(f"\nIteration: {k_it}")
