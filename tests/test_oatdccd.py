@@ -45,6 +45,7 @@ def test_oatdccd(
     omega = 2.873_564_3
     E = 100  # 0.05-5
     laser_duration = 5
+    tol = 1e-7
 
     system = helium_system
     hf = HartreeFock(system, verbose=True)
@@ -54,11 +55,12 @@ def test_oatdccd(
     integrator = GaussIntegrator(np=np, eps=1e-10)
     cc_kwargs = dict(verbose=True)
     oatdccd = OATDCCD(system, integrator=integrator, np=np, **cc_kwargs)
-    t_kwargs = dict(theta=0, tol=1e-10)
+    t_kwargs = dict(theta=0.1, tol=tol)
     oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
+
     assert (
         abs(ccd_groundstate_He_energy - oatdccd.compute_ground_state_energy())
-        < 1e-6
+        < tol
     )
 
     polarization = np.zeros(3)
@@ -111,15 +113,15 @@ def test_oatdccd(
             )
 
     np.testing.assert_allclose(
-        td_energies, oatdccd_helium_td_energies, atol=1e-10
+        td_energies, oatdccd_helium_td_energies, atol=tol
     )
 
     np.testing.assert_allclose(
-        td_energies_imag, oatdccd_helium_td_energies_imag, atol=1e-10
+        td_energies_imag, oatdccd_helium_td_energies_imag, atol=tol
     )
 
-    np.testing.assert_allclose(dip_z, oatdccd_helium_dip_z, atol=1e-10)
+    np.testing.assert_allclose(dip_z, oatdccd_helium_dip_z, atol=tol)
 
-    np.testing.assert_allclose(norm_t2, oatdccd_helium_norm_t2, atol=1e-10)
+    np.testing.assert_allclose(norm_t2, oatdccd_helium_norm_t2, atol=tol)
 
-    np.testing.assert_allclose(norm_l2, oatdccd_helium_norm_l2, atol=1e-10)
+    np.testing.assert_allclose(norm_l2, oatdccd_helium_norm_l2, atol=tol)
