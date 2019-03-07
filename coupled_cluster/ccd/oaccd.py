@@ -76,26 +76,10 @@ class OACCD(CoupledClusterDoubles):
             )
 
             kappa_up_derivative = Ku_der_fun(
-                self.n,
-                self.m,
-                self.o,
-                self.v,
-                self.t_2,
-                self.l_2,
-                self.f,
-                self.u,
-                np,
+                self.f, self.u, self.t_2, self.l_2, self.o, self.v, np
             )
             kappa_down_derivative = Kd_der_fun(
-                self.n,
-                self.m,
-                self.o,
-                self.v,
-                self.t_2,
-                self.l_2,
-                self.f,
-                self.u,
-                np,
+                self.f, self.u, self.t_2, self.l_2, self.o, self.v, np
             )
 
             residual_up = np.linalg.norm(kappa_up_derivative)
@@ -127,7 +111,13 @@ class OACCD(CoupledClusterDoubles):
             print("Total NOCCD energy: {0}".format(self.compute_energy()))
 
 
-def Ku_der_fun(nocc, nvirt, o, v, t_2, L2, F, W, np):
+def Ku_der_fun(f, u, t_2, l_2, o, v, np):
+    L2 = l_2
+    F = f
+    W = u
+    nocc = o.stop
+    nvirt = v.stop - o.stop
+
     T2 = t_2.transpose(2, 3, 0, 1)
     result = np.zeros((nvirt, nocc))
     result += 0.5 * np.einsum(
@@ -196,7 +186,13 @@ def Ku_der_fun(nocc, nvirt, o, v, t_2, L2, F, W, np):
     return result.T.copy()
 
 
-def Kd_der_fun(nocc, nvirt, o, v, t_2, L2, F, W, np):
+def Kd_der_fun(f, u, t_2, l_2, o, v, np):
+    L2 = l_2
+    F = f
+    W = u
+    nocc = o.stop
+    nvirt = v.stop - o.stop
+
     T2 = t_2.transpose(2, 3, 0, 1)
     result = np.zeros((nvirt, nocc))
     result += -1.0 * np.einsum(
