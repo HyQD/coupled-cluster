@@ -53,8 +53,6 @@ class OACCD(CoupledClusterDoubles):
         self.l_2_mixer = self.mixer(**mixer_kwargs)
 
         amp_tol = 0.1
-        W = self.system.u
-        H = self.system.h
         o, v = self.o, self.v
         n, m = self.n, self.m
 
@@ -65,17 +63,17 @@ class OACCD(CoupledClusterDoubles):
             S = expm(self.kappa)
             invS = expm(-self.kappa)
 
-            W_NO = np.einsum(
-                "pP,qQ,PQRS,Rr,Ss->pqrs", invS, invS, W, S, S, optimize=True
+            self.u = np.einsum(
+                "pP,qQ,PQRS,Rr,Ss->pqrs", invS, invS, self.system.u, S, S, optimize=True
             )
-            H_NO = np.einsum("pP,PQ,Qq->pq", invS, H, S, optimize=True)
-            F_NO = H_NO + np.einsum("PiQi->PQ", W_NO[:, o, :, o], optimize=True)
+            self.h = np.einsum("pP,PQ,Qq->pq", invS, self.system.h, S, optimize=True)
+            self.f = self.system.construct_fock_matrix(self.h, self.u)
 
             print(f"\nIteration: {k_it}")
 
-            d_t_1 = construct_d_t_1_matrix(F_NO, o, v, np)
+            d_t_1 = construct_d_t_1_matrix(self.f, o, v, np)
             d_l_1 = d_t_1.T.copy()
-            d_t_2 = construct_d_t_2_matrix(F_NO, o, v, np)
+            d_t_2 = construct_d_t_2_matrix(self.f, o, v, np)
             d_l_2 = d_t_2.transpose(2, 3, 0, 1).copy()
 
             self.t_2_mixer.clear_vectors()
@@ -85,7 +83,7 @@ class OACCD(CoupledClusterDoubles):
                 self.rhs_t_2.fill(0)
 
                 compute_t_2_amplitudes(
-                    F_NO, W_NO, self.t_2, self.o, self.v, np, out=self.rhs_t_2
+                    self.f, self.u, self.t_2, self.o, self.v, np, out=self.rhs_t_2
                 )
 
                 self.t_2 = self.t_2_mixer.compute_new_vector(
@@ -104,8 +102,8 @@ class OACCD(CoupledClusterDoubles):
                 self.rhs_l_2.fill(0)
 
                 compute_l_2_amplitudes(
-                    F_NO,
-                    W_NO,
+                    self.f,
+                    self.u,
                     self.t_2,
                     self.l_2,
                     self.o,
@@ -133,8 +131,8 @@ class OACCD(CoupledClusterDoubles):
                 self.v,
                 self.t_2.transpose(2, 3, 0, 1),
                 self.l_2,
-                F_NO,
-                W_NO,
+                self.f,
+                self.u,
                 np,
             )
             Kd_der = Kd_der_fun(
@@ -144,8 +142,8 @@ class OACCD(CoupledClusterDoubles):
                 self.v,
                 self.t_2.transpose(2, 3, 0, 1),
                 self.l_2,
-                F_NO,
-                W_NO,
+                self.f,
+                self.u,
                 np,
             )
 
@@ -171,9 +169,6 @@ class OACCD(CoupledClusterDoubles):
             amp_tol = min(residual_up, residual_down) * tol_factor
             amp_tol = max(amp_tol, termination_tol)
 
-            self.h = H_NO
-            self.f = F_NO
-            self.u = W_NO
             print("Total NOCCD energy: {0}".format(self.compute_energy()))
 
     # def compute_ground_state(
