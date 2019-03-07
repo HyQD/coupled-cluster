@@ -75,10 +75,10 @@ class OACCD(CoupledClusterDoubles):
                 max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
             )
 
-            kappa_up_derivative = Ku_der_fun(
+            kappa_up_derivative = compute_kappa_up_rhs(
                 self.f, self.u, self.t_2, self.l_2, self.o, self.v, np
             )
-            kappa_down_derivative = Kd_der_fun(
+            kappa_down_derivative = compute_kappa_down_rhs(
                 self.f, self.u, self.t_2, self.l_2, self.o, self.v, np
             )
 
@@ -111,7 +111,7 @@ class OACCD(CoupledClusterDoubles):
             print("Total NOCCD energy: {0}".format(self.compute_energy()))
 
 
-def Ku_der_fun(f, u, t_2, l_2, o, v, np):
+def compute_kappa_up_rhs(f, u, t_2, l_2, o, v, np):
     L2 = l_2
     F = f
     W = u
@@ -186,7 +186,7 @@ def Ku_der_fun(f, u, t_2, l_2, o, v, np):
     return result.T.copy()
 
 
-def Kd_der_fun(f, u, t_2, l_2, o, v, np):
+def compute_kappa_down_rhs(f, u, t_2, l_2, o, v, np):
     L2 = l_2
     F = f
     W = u
