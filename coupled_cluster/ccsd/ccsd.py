@@ -68,6 +68,11 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.W_hphh_lambda = np.zeros((n, m, n, n), dtype=np.complex128)
         self.W_ppph_lambda = np.zeros((m, m, m, n), dtype=np.complex128)
 
+        self.l_1_mixer = None
+        self.l_2_mixer = None
+        self.t_1_mixer = None
+        self.t_2_mixer = None
+
         self.compute_initial_guess()
 
         self.rho_qp = np.zeros((self.l, self.l), dtype=np.complex128)
@@ -96,13 +101,37 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def _get_l_copy(self):
         return [self.l_1.copy(), self.l_2.copy()]
 
+    def compute_l_residuals(self):
+        return [
+            self.np.linalg.norm(self.rhs_l_1),
+            self.np.linalg.norm(self.rhs_l_2),
+        ]
+
+    def compute_t_residuals(self):
+        return [
+            self.np.linalg.norm(self.rhs_t_1),
+            self.np.linalg.norm(self.rhs_t_2),
+        ]
+
     def setup_l_mixer(self, **kwargs):
-        self.l_1_mixer = self.mixer(**kwargs)
-        self.l_2_mixer = self.mixer(**kwargs)
+        if self.l_1_mixer is None:
+            self.l_1_mixer = self.mixer(**kwargs)
+
+        if self.l_2_mixer is None:
+            self.l_2_mixer = self.mixer(**kwargs)
+
+        self.l_1_mixer.clear_vectors()
+        self.l_2_mixer.clear_vectors()
 
     def setup_t_mixer(self, **kwargs):
-        self.t_1_mixer = self.mixer(**kwargs)
-        self.t_2_mixer = self.mixer(**kwargs)
+        if self.t_1_mixer is None:
+            self.t_1_mixer = self.mixer(**kwargs)
+
+        if self.t_2_mixer is None:
+            self.t_2_mixer = self.mixer(**kwargs)
+
+        self.t_1_mixer.clear_vectors()
+        self.t_2_mixer.clear_vectors()
 
     def compute_energy(self):
         np = self.np
