@@ -52,8 +52,10 @@ from coupled_cluster.mix import DIIS
 
 
 @pytest.fixture(scope="session")
-def iterated_ccd_amplitudes(helium_system, beryllium_system, neon_system):
-
+def iterated_ccd_amplitudes(
+    scoped_helium_system, beryllium_system, neon_system
+):
+    helium_system = scoped_helium_system
     ccd_list = []
     for system in [helium_system, beryllium_system, neon_system]:
         try:
