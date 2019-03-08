@@ -58,8 +58,6 @@ class OACCD(CoupledClusterDoubles):
             self.u = transform_two_body_tensor(self.system.u, S, S_inv, np)
             self.f = self.system.construct_fock_matrix(self.h, self.u)
 
-            print(f"\nIteration: {k_it}")
-
             d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
             d_l_1 = d_t_1.T.copy()
             self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
@@ -82,12 +80,6 @@ class OACCD(CoupledClusterDoubles):
             residual_up = np.linalg.norm(kappa_up_rhs)
             residual_down = np.linalg.norm(kappa_down_rhs)
 
-            print(f"\nResidual norms: rd = {residual_down}")
-            print(f"Residual norms: ru = {residual_up}")
-
-            if np.abs(residual_up) < tol and np.abs(residual_down) < tol:
-                break
-
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
                 self.kappa_up, -kappa_up_rhs / d_t_1, kappa_up_rhs
             )
@@ -101,7 +93,13 @@ class OACCD(CoupledClusterDoubles):
             amp_tol = min(residual_up, residual_down) * tol_factor
             amp_tol = max(amp_tol, termination_tol)
 
-            print("Total NOCCD energy: {0}".format(self.compute_energy()))
+            if np.abs(residual_up) < tol and np.abs(residual_down) < tol:
+                break
+
+            if self.verbose:
+                print(f"\nIteration: {k_it}")
+                print(f"\nResidual norms: rd = {residual_down}")
+                print(f"Residual norms: ru = {residual_up}")
 
 
 def compute_kappa_down_rhs(f, u, t_2, l_2, o, v, np):
