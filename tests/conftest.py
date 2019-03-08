@@ -269,8 +269,19 @@ def time_params():
     return {"t_start": t_start, "t_end": t_end, "num_timesteps": num_timesteps}
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def helium_system():
+    He = """
+    He 0.0 0.0 0.0
+    symmetry c1
+    """
+    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
+
+    return construct_psi4_system(He, options)
+
+
+@pytest.fixture(scope="session")
+def scoped_helium_system():
     He = """
     He 0.0 0.0 0.0
     symmetry c1

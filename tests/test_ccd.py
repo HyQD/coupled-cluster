@@ -52,15 +52,17 @@ from coupled_cluster.mix import DIIS
 
 
 @pytest.fixture(scope="session")
-def iterated_ccd_amplitudes(helium_system, beryllium_system, neon_system):
-
+def iterated_ccd_amplitudes(
+    scoped_helium_system, beryllium_system, neon_system
+):
+    helium_system = scoped_helium_system
     ccd_list = []
     for system in [helium_system, beryllium_system, neon_system]:
         try:
             from tdhf import HartreeFock
 
             hf = HartreeFock(system)
-            C = hf.scf(tolerance=1e-10)
+            C = hf.scf(tolerance=1e-8)
             system.change_basis(C)
         except ImportError:
             warnings.warn("Running without Hartree-Fock basis")

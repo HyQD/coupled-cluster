@@ -237,8 +237,33 @@ def compute_oa_particle_density(rho_qp, bra_spf, ket_spf, np):
     return rho
 
 
-def remove_diagonal_in_matrix(matrix, np):
-    off_diag = matrix.copy()
-    np.fill_diagonal(off_diag, 0)
+def transform_two_body_tensor(u, C, C_tilde, np):
+    # abcd, ds -> abcs
+    _u = np.tensordot(u, C, axes=(3, 0))
+    # abcs, cr -> absr -> abrs
+    _u = np.tensordot(_u, C, axes=(2, 0)).transpose(0, 1, 3, 2)
+    # abrs, qb -> arsq -> aqrs
+    _u = np.tensordot(_u, C_tilde, axes=(1, 1)).transpose(0, 3, 1, 2)
+    # pa, aqrs -> pqrs
+    _u = np.tensordot(C_tilde, _u, axes=(1, 0))
 
-    return off_diag
+    return _u
+
+
+def construct_d_t_1_matrix(f, o, v, np):
+    f_diag = np.diag(f)
+    d_t_1 = f_diag[o] - f_diag[v].reshape(-1, 1)
+
+    return d_t_1
+
+
+def construct_d_t_2_matrix(f, o, v, np):
+    f_diag = np.diag(f)
+    d_t_2 = (
+        f_diag[o]
+        + f_diag[o].reshape(-1, 1)
+        - f_diag[v].reshape(-1, 1, 1)
+        - f_diag[v].reshape(-1, 1, 1, 1)
+    )
+
+    return d_t_2

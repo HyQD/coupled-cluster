@@ -7,6 +7,7 @@ from coupled_cluster.ccd.density_matrices import (
     compute_two_body_density_matrix,
 )
 from coupled_cluster.mix import AlphaMixer
+from coupled_cluster.cc_helper import construct_d_t_2_matrix
 
 
 class CoupledClusterDoubles(CoupledCluster):
@@ -22,13 +23,11 @@ class CoupledClusterDoubles(CoupledCluster):
         self.t_2 = np.zeros_like(self.rhs_t_2)
         self.l_2 = np.zeros_like(self.rhs_l_2)
 
-        self.d_t_2 = (
-            np.diag(self.f)[self.o]
-            + np.diag(self.f)[self.o].reshape(-1, 1)
-            - np.diag(self.f)[self.v].reshape(-1, 1, 1)
-            - np.diag(self.f)[self.v].reshape(-1, 1, 1, 1)
-        )
+        self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
         self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
+
+        self.l_2_mixer = None
+        self.t_2_mixer = None
 
         self.compute_initial_guess()
 
@@ -48,11 +47,23 @@ class CoupledClusterDoubles(CoupledCluster):
     def _get_l_copy(self):
         return [self.l_2.copy()]
 
+    def compute_l_residuals(self):
+        return [self.np.linalg.norm(self.rhs_l_2)]
+
+    def compute_t_residuals(self):
+        return [self.np.linalg.norm(self.rhs_t_2)]
+
     def setup_l_mixer(self, **kwargs):
-        self.l_2_mixer = self.mixer(**kwargs)
+        if self.l_2_mixer is None:
+            self.l_2_mixer = self.mixer(**kwargs)
+
+        self.l_2_mixer.clear_vectors()
 
     def setup_t_mixer(self, **kwargs):
-        self.t_2_mixer = self.mixer(**kwargs)
+        if self.t_2_mixer is None:
+            self.t_2_mixer = self.mixer(**kwargs)
+
+        self.t_2_mixer.clear_vectors()
 
     def compute_energy(self):
         return compute_ccd_ground_state_energy(
@@ -61,16 +72,15 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def compute_t_amplitudes(self):
         np = self.np
-        f = self.off_diag_f if self.mixer == AlphaMixer else self.f
 
         self.rhs_t_2.fill(0)
         compute_t_2_amplitudes(
-            f, self.u, self.t_2, self.o, self.v, out=self.rhs_t_2, np=np
+            self.f, self.u, self.t_2, self.o, self.v, out=self.rhs_t_2, np=np
         )
 
         trial_vector = self.t_2
         direction_vector = np.divide(self.rhs_t_2, self.d_t_2)
-        error_vector = self.rhs_t_2
+        error_vector = -self.rhs_t_2
 
         self.t_2 = self.t_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
@@ -78,11 +88,10 @@ class CoupledClusterDoubles(CoupledCluster):
 
     def compute_l_amplitudes(self):
         np = self.np
-        f = self.off_diag_f if self.mixer == AlphaMixer else self.f
 
         self.rhs_l_2.fill(0)
         compute_l_2_amplitudes(
-            f,
+            self.f,
             self.u,
             self.t_2,
             self.l_2,
@@ -94,7 +103,7 @@ class CoupledClusterDoubles(CoupledCluster):
 
         trial_vector = self.l_2
         direction_vector = np.divide(self.rhs_l_2, self.d_l_2)
-        error_vector = self.rhs_l_2
+        error_vector = -self.rhs_l_2
 
         self.l_2 = self.l_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
