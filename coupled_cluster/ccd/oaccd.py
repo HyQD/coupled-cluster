@@ -50,9 +50,6 @@ class OACCD(CoupledClusterDoubles):
 
         amp_tol = 0.1
 
-        self.t_2.fill(0)
-        self.l_2.fill(0)
-
         for k_it in range(max_iterations):
             S = expm(self.kappa)
             S_inv = expm(-self.kappa)
