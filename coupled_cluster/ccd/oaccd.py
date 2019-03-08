@@ -237,221 +237,270 @@ def compute_kappa_down_rhs(f, u, t_2, l_2, o, v, np):
 
 
 def compute_kappa_up_rhs(f, u, t_2, l_2, o, v, np):
-    L2 = l_2
-    F = f
-    W = u
-    nocc = o.stop
-    nvirt = v.stop - o.stop
+    # L2 = l_2
+    # F = f
+    # W = u
+    # nocc = o.stop
+    # nvirt = v.stop - o.stop
 
-    T2 = t_2.transpose(2, 3, 0, 1)
-    result = np.zeros((nvirt, nocc))
-    result += -1.0 * np.einsum(
-        "AI->AI", F[v, o], optimize=["einsum_path", (0,)]
-    )
+    # T2 = t_2.transpose(2, 3, 0, 1)
+    # result = np.zeros((nvirt, nocc))
+    # result += -1.0 * np.einsum(
+    #    "AI->AI", F[v, o], optimize=["einsum_path", (0,)]
+    # )
 
     res = -f[v, o]
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += 0.5 * np.einsum(
-        "lkAc,lkIc->AI", T2, W[o, o, o, v], optimize=["einsum_path", (0, 1)]
-    )
+    # result += 0.5 * np.einsum(
+    #    "lkAc,lkIc->AI", T2, W[o, o, o, v], optimize=["einsum_path", (0, 1)]
+    # )
 
     res += 0.5 * np.tensordot(t_2, u[o, o, o, v], axes=((1, 2, 3), (3, 0, 1)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += -0.5 * np.einsum(
-        "Ikcd,Akcd->AI", T2, W[v, o, v, v], optimize=["einsum_path", (0, 1)]
-    )
+    # result += -0.5 * np.einsum(
+    #    "Ikcd,Akcd->AI", T2, W[v, o, v, v], optimize=["einsum_path", (0, 1)]
+    # )
 
     res -= 0.5 * np.tensordot(u[v, o, v, v], t_2, axes=((1, 2, 3), (3, 0, 1)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += np.einsum(
-        "lkcd,mkAc,dmIl->AI",
-        L2,
-        T2,
-        W[v, o, o, o],
-        optimize=["einsum_path", (0, 2), (0, 1)],
-    )
+    # result += np.einsum(
+    #    "lkcd,mkAc,dmIl->AI",
+    #    L2,
+    #    T2,
+    #    W[v, o, o, o],
+    #    optimize=["einsum_path", (0, 2), (0, 1)],
+    # )
 
     temp_amld = np.tensordot(t_2, l_2, axes=((1, 3), (2, 1)))
     res += np.tensordot(temp_amld, u[v, o, o, o], axes=((1, 2, 3), (1, 3, 0)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += np.einsum(
-        "lkcd,Ikec,Adel->AI",
-        L2,
-        T2,
-        W[v, v, v, o],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
+    # result += np.einsum(
+    #    "lkcd,Ikec,Adel->AI",
+    #    L2,
+    #    T2,
+    #    W[v, v, v, o],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
 
     temp_eild = np.tensordot(t_2, l_2, axes=((1, 3), (2, 1)))
     res += np.tensordot(u[v, v, v, o], temp_eild, axes=((1, 2, 3), (3, 0, 2)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += 0.5 * np.einsum(
-        "lkcd,Ikcd,Al->AI",
-        L2,
-        T2,
-        F[v, o],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
+    # result += 0.5 * np.einsum(
+    #    "lkcd,Ikcd,Al->AI",
+    #    L2,
+    #    T2,
+    #    F[v, o],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
 
     temp_li = 0.5 * np.tensordot(l_2, t_2, axes=((1, 2, 3), (3, 0, 1)))
     res += np.dot(f[v, o], temp_li)
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += 0.5 * np.einsum(
-        "lkcd,mkcd,AmIl->AI",
-        L2,
-        T2,
-        W[v, o, o, o],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
+    # result += 0.5 * np.einsum(
+    #    "lkcd,mkcd,AmIl->AI",
+    #    L2,
+    #    T2,
+    #    W[v, o, o, o],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
 
     temp_lm = 0.5 * np.tensordot(l_2, t_2, axes=((1, 2, 3), (3, 0, 1)))
     res += np.tensordot(u[v, o, o, o], temp_lm, axes=((1, 3), (1, 0)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += 0.5 * np.einsum(
-        "lkcd,lkec,AdIe->AI",
-        L2,
-        T2,
-        W[v, v, o, v],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
+    # result += 0.5 * np.einsum(
+    #    "lkcd,lkec,AdIe->AI",
+    #    L2,
+    #    T2,
+    #    W[v, v, o, v],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
 
     temp_ed = 0.5 * np.tensordot(t_2, l_2, axes=((1, 2, 3), (2, 0, 1)))
     res += np.tensordot(u[v, v, o, v], temp_ed, axes=((1, 3), (1, 0)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += -0.5 * np.einsum(
-        "lkcd,lkAc,dI->AI",
-        L2,
-        T2,
-        F[v, o],
-        optimize=["einsum_path", (0, 2), (0, 1)],
-    )
+    # result += -0.5 * np.einsum(
+    #    "lkcd,lkAc,dI->AI",
+    #    L2,
+    #    T2,
+    #    F[v, o],
+    #    optimize=["einsum_path", (0, 2), (0, 1)],
+    # )
 
     temp_ad = -0.5 * np.tensordot(t_2, l_2, axes=((1, 2, 3), (2, 0, 1)))
     res += np.dot(temp_ad, f[v, o])
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += -0.25 * np.einsum(
-        "lkcd,Imcd,Amlk->AI",
-        L2,
-        T2,
-        W[v, o, o, o],
-        optimize=["einsum_path", (0, 1), (0, 1)],
-    )
+    # result += -0.25 * np.einsum(
+    #    "lkcd,Imcd,Amlk->AI",
+    #    L2,
+    #    T2,
+    #    W[v, o, o, o],
+    #    optimize=["einsum_path", (0, 1), (0, 1)],
+    # )
 
     temp_lkim = -0.25 * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))
     res += np.tensordot(u[v, o, o, o], temp_lkim, axes=((1, 2, 3), (3, 0, 1)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += 0.25 * np.einsum(
-        "lkcd,lkAe,cdIe->AI",
-        L2,
-        T2,
-        W[v, v, o, v],
-        optimize=["einsum_path", (0, 2), (0, 1)],
-    )
+    # result += 0.25 * np.einsum(
+    #    "lkcd,lkAe,cdIe->AI",
+    #    L2,
+    #    T2,
+    #    W[v, v, o, v],
+    #    optimize=["einsum_path", (0, 2), (0, 1)],
+    # )
 
     temp_lkie = 0.25 * np.tensordot(l_2, u[v, v, o, v], axes=((2, 3), (0, 1)))
     res += np.tensordot(t_2, temp_lkie, axes=((1, 2, 3), (3, 0, 1)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += 0.5 * np.einsum(
-        "lkcd,lkec,Imfd,Amef->AI",
-        L2,
-        T2,
-        T2,
-        W[v, o, v, v],
-        optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
-    )
+    # result += 0.5 * np.einsum(
+    #    "lkcd,lkec,Imfd,Amef->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[v, o, v, v],
+    #    optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
+    # )
 
     temp_ed = 0.5 * np.tensordot(t_2, l_2, axes=((1, 2, 3), (2, 0, 1)))
     temp_aedi = np.tensordot(u[v, o, v, v], t_2, axes=((1, 3), (3, 0)))
     res += np.tensordot(temp_aedi, temp_ed, axes=((1, 2), (0, 1)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += -1.0 * np.einsum(
-        "lkcd,lnAd,mkec,mnIe->AI",
-        L2,
-        T2,
-        T2,
-        W[o, o, o, v],
-        optimize=["einsum_path", (2, 3), (0, 2), (0, 1)],
-    )
+    # result += -1.0 * np.einsum(
+    #    "lkcd,lnAd,mkec,mnIe->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[o, o, o, v],
+    #    optimize=["einsum_path", (2, 3), (0, 2), (0, 1)],
+    # )
 
     temp_ankc = -np.tensordot(t_2, l_2, axes=((1, 2), (3, 0)))
     temp_anem = np.tensordot(temp_ankc, t_2, axes=((2, 3), (3, 1)))
     res += np.tensordot(temp_anem, u[o, o, o, v], axes=((1, 2, 3), (1, 3, 0)))
-    np.testing.assert_allclose(result, res)
+    # np.testing.assert_allclose(result, res)
 
-    result += -1.0 * np.einsum(
-        "lkcd,mkec,Ilfd,Amef->AI",
-        L2,
-        T2,
-        T2,
-        W[v, o, v, v],
-        optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
-    )
-    result += -0.5 * np.einsum(
-        "lkcd,lnAe,mkcd,mnIe->AI",
-        L2,
-        T2,
-        T2,
-        W[o, o, o, v],
-        optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
-    )
-    result += -0.125 * np.einsum(
-        "lkcd,Imcd,lkef,Amef->AI",
-        L2,
-        T2,
-        T2,
-        W[v, o, v, v],
-        optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
-    )
-    result += 0.25 * np.einsum(
-        "lkcd,lkAd,mnec,mnIe->AI",
-        L2,
-        T2,
-        T2,
-        W[o, o, o, v],
-        optimize=["einsum_path", (2, 3), (0, 2), (0, 1)],
-    )
-    result += 0.25 * np.einsum(
-        "lkcd,mnAd,lkec,mnIe->AI",
-        L2,
-        T2,
-        T2,
-        W[o, o, o, v],
-        optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
-    )
-    result += 0.25 * np.einsum(
-        "lkcd,Ilcd,mkef,Amef->AI",
-        L2,
-        T2,
-        T2,
-        W[v, o, v, v],
-        optimize=["einsum_path", (0, 1), (0, 1), (0, 1)],
-    )
-    result += 0.25 * np.einsum(
-        "lkcd,mkcd,Ilef,Amef->AI",
-        L2,
-        T2,
-        T2,
-        W[v, o, v, v],
-        optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
-    )
-    result += 0.125 * np.einsum(
-        "lkcd,lkAe,mncd,mnIe->AI",
-        L2,
-        T2,
-        T2,
-        W[o, o, o, v],
-        optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
-    )
-    return result
+    # result += -1.0 * np.einsum(
+    #    "lkcd,mkec,Ilfd,Amef->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[v, o, v, v],
+    #    optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
+    # )
+
+    temp_ldem = -np.tensordot(l_2, t_2, axes=((1, 2), (3, 0)))
+    temp_emfi = np.tensordot(temp_ldem, t_2, axes=((0, 1), (3, 0)))
+    res += np.tensordot(u[v, o, v, v], temp_emfi, axes=((1, 2, 3), (1, 0, 2)))
+    # np.testing.assert_allclose(result, res)
+
+    # result += -0.5 * np.einsum(
+    #    "lkcd,lnAe,mkcd,mnIe->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[o, o, o, v],
+    #    optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
+    # )
+
+    temp_lm = -0.5 * np.tensordot(l_2, t_2, axes=((1, 2, 3), (3, 0, 1)))
+    temp_lnie = np.tensordot(temp_lm, u[o, o, o, v], axes=((1), (0)))
+    res += np.tensordot(t_2, temp_lnie, axes=((1, 2, 3), (3, 0, 1)))
+    # np.testing.assert_allclose(result, res)
+
+    # result += -0.125 * np.einsum(
+    #    "lkcd,Imcd,lkef,Amef->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[v, o, v, v],
+    #    optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
+    # )
+
+    temp_lkim = -0.125 * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))
+    temp_amlk = np.tensordot(u[v, o, v, v], t_2, axes=((2, 3), (0, 1)))
+    res += np.tensordot(temp_amlk, temp_lkim, axes=((1, 2, 3), (3, 0, 1)))
+    # np.testing.assert_allclose(result, res)
+
+    # result += 0.25 * np.einsum(
+    #    "lkcd,lkAd,mnec,mnIe->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[o, o, o, v],
+    #    optimize=["einsum_path", (2, 3), (0, 2), (0, 1)],
+    # )
+
+    temp_ac = 0.25 * np.tensordot(t_2, l_2, axes=((1, 2, 3), (3, 0, 1)))
+    temp_ci = np.tensordot(t_2, u[o, o, o, v], axes=((0, 2, 3), (3, 0, 1)))
+    res += np.dot(temp_ac, temp_ci)
+    # np.testing.assert_allclose(result, res)
+
+    # result += 0.25 * np.einsum(
+    #    "lkcd,mnAd,lkec,mnIe->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[o, o, o, v],
+    #    optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
+    # )
+
+    temp_ed = 0.25 * np.tensordot(t_2, l_2, axes=((1, 2, 3), (2, 0, 1)))
+    temp_adie = np.tensordot(t_2, u[o, o, o, v], axes=((2, 3), (0, 1)))
+    res += np.tensordot(temp_adie, temp_ed, axes=((1, 3), (1, 0)))
+    # np.testing.assert_allclose(result, res)
+
+    # result += 0.25 * np.einsum(
+    #    "lkcd,Ilcd,mkef,Amef->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[v, o, v, v],
+    #    optimize=["einsum_path", (0, 1), (0, 1), (0, 1)],
+    # )
+
+    temp_ki = 0.25 * np.tensordot(l_2, t_2, axes=((0, 2, 3), (3, 0, 1)))
+    temp_ak = np.tensordot(u[v, o, v, v], t_2, axes=((1, 2, 3), (2, 0, 1)))
+    res += np.dot(temp_ak, temp_ki)
+    # np.testing.assert_allclose(result, res)
+
+    # result += 0.25 * np.einsum(
+    #    "lkcd,mkcd,Ilef,Amef->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[v, o, v, v],
+    #    optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
+    # )
+
+    temp_lm = 0.25 * np.tensordot(l_2, t_2, axes=((1, 2, 3), (3, 0, 1)))
+    temp_amil = np.tensordot(u[v, o, v, v], t_2, axes=((2, 3), (0, 1)))
+    res += np.tensordot(temp_amil, temp_lm, axes=((1, 3), (1, 0)))
+    # np.testing.assert_allclose(result, res)
+
+    # result += 0.125 * np.einsum(
+    #    "lkcd,lkAe,mncd,mnIe->AI",
+    #    L2,
+    #    T2,
+    #    T2,
+    #    W[o, o, o, v],
+    #    optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
+    # )
+
+    temp_lkmn = 0.125 * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))
+    temp_aemn = np.tensordot(t_2, temp_lkmn, axes=((2, 3), (0, 1)))
+    res += np.tensordot(temp_aemn, u[o, o, o, v], axes=((1, 2, 3), (3, 0, 1)))
+    # np.testing.assert_allclose(result, res, atol=1e-10)
+
+    # return result
+    return res
