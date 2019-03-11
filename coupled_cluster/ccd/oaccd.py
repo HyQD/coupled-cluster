@@ -101,6 +101,13 @@ class OACCD(CoupledClusterDoubles):
                 print(f"\nResidual norms: rd = {residual_down}")
                 print(f"Residual norms: ru = {residual_up}")
 
+        S = expm(self.kappa)
+        S_inv = expm(-self.kappa)
+
+        self.h = S_inv @ self.system.h @ S
+        self.u = transform_two_body_tensor(self.system.u, S, S_inv, np)
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
+
 
 def compute_kappa_down_rhs(f, u, t_2, l_2, o, v, np):
     # L2 = l_2
