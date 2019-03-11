@@ -15,9 +15,8 @@ from coupled_cluster.cc_helper import (
     construct_d_t_2_matrix,
 )
 
-from coupled_cluster.ccd.density_matrices import (
+from coupled_cluster.ccsd.density_matrices import (
     compute_one_body_density_matrix,
-    compute_two_body_density_matrix,
 )
 
 
@@ -224,50 +223,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
     def compute_one_body_density_matrix(self):
 
-        # Does this work?
         return compute_one_body_density_matrix(
-            self.t_2, self.l_2, self.o, self.v, np=self.np
+            self.t_1, self.t_2, self.l_1, self.l_2, self.o, self.v, np=self.np
         )
-
-        # np = self.np
-        # o, v = self.o, self.v
-
-        # self.rho_qp.fill(0)
-
-        # self.rho_qp[v, v] += np.dot(self.t_1, self.l_1)
-        # self.rho_qp[v, v] += 0.5 * np.tensordot(
-        #     self.t_2, self.l_2, axes=((1, 2, 3), (3, 0, 1))
-        # )
-
-        # self.rho_qp[o, v] += self.l_1
-
-        # self.rho_qp[o, o] += np.eye(self.n)
-        # self.rho_qp[o, o] -= np.dot(self.l_1, self.t_1)
-        # self.rho_qp[o, o] += 0.5 * np.tensordot(
-        #     self.l_2, self.t_2, axes=((1, 2, 3), (2, 0, 1))
-        # )
-
-        # self.rho_qp[v, o] += self.t_1
-        # self.rho_qp[v, o] += np.tensordot(
-        #     self.l_1,
-        #     self.t_2 - np.einsum("bi, aj -> abij", self.t_1, self.t_1),
-        #     axes=((0, 1), (3, 1)),
-        # )
-        # self.rho_qp[v, o] += 0.5 * np.einsum(
-        #     "bi, kjcb, ackj -> ai", self.t_1, self.l_2, self.t_2, optimize=True
-        # )
-        # self.rho_qp[v, o] -= 0.5 * np.einsum(
-        #     "aj, kjcb, cbki -> ai", self.t_1, self.l_2, self.t_2, optimize=True
-        # )
-
-        # return self.rho_qp
 
     def compute_two_body_density_matrix(self):
 
-        # Same question as above; does this work?
-        return compute_two_body_density_matrix(
-            self.t_2, self.l_2, self.o, self.v, np=self.np
-        )
+        pass
 
 
 """
