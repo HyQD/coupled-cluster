@@ -9,6 +9,7 @@ from coupled_cluster.cc_helper import (
 
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
+from coupled_cluster.mix import DIIS
 
 
 class OACCD(CoupledClusterDoubles):
@@ -19,6 +20,9 @@ class OACCD(CoupledClusterDoubles):
     """
 
     def __init__(self, system, **kwargs):
+        if "mixer" not in kwargs:
+            kwargs["mixer"] = DIIS
+
         super().__init__(system, **kwargs)
 
         np = self.np
