@@ -10,12 +10,12 @@ from coupled_cluster.ccd.time_dependent_overlap import (
     compute_orbital_adaptive_time_dependent_overlap,
 )
 from coupled_cluster.ccd.p_space_equations import compute_eta
-from coupled_cluster.ccd import CoupledClusterDoubles
+from coupled_cluster.ccd import OACCD
 
 
 class OATDCCD(OATDCC):
     def __init__(self, *args, **kwargs):
-        super().__init__(CoupledClusterDoubles, *args, **kwargs)
+        super().__init__(OACCD, *args, **kwargs)
 
     def rhs_t_amplitudes(self):
         yield compute_t_2_amplitudes
