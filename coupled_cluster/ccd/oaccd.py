@@ -43,6 +43,7 @@ class OACCD(CoupledClusterDoubles):
         tol=1e-4,
         termination_tol=1e-4,
         tol_factor=0.1,
+        change_system_basis=False,
         **mixer_kwargs,
     ):
         np = self.np
@@ -111,6 +112,12 @@ class OACCD(CoupledClusterDoubles):
         self.h = S_inv @ self.system.h @ S
         self.u = transform_two_body_tensor(self.system.u, S, S_inv, np)
         self.f = self.system.construct_fock_matrix(self.h, self.u)
+
+        if change_system_basis:
+            if self.verbose:
+                print("Changing system basis...")
+
+            self.system.change_basis(c=S, c_tilde=S_inv)
 
 
 def compute_kappa_down_rhs(f, u, t_2, l_2, o, v, np):
