@@ -1,6 +1,6 @@
 import pytest
+import warnings
 import numpy as np
-
 from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
 from coupled_cluster.ccsd.rhs_t import (
     add_s1_t,
@@ -39,7 +39,6 @@ from coupled_cluster.ccsd.rhs_t import (
     add_d8b_t,
     add_d9_t,
 )
-
 from coupled_cluster.ccsd.rhs_l import (
     add_s1_l,
     add_s2a_l,
@@ -119,6 +118,37 @@ from coupled_cluster.ccsd.rhs_l import (
     add_d12b_l,
     add_d12c_l,
 )
+from coupled_cluster.ccsd.density_matrices import (
+    compute_one_body_density_matrix,
+    add_rho_ba,
+    add_rho_ia,
+    add_rho_ai,
+    add_rho_ji,
+)
+
+@pytest.fixture(scope="session")
+def iterated_ccsd_amplitudes(
+    scoped_helium_system, beryllium_system, neon_system
+):
+    helium_system = scoped_helium_system
+    ccsd_list = []
+    for system in [helium_system, beryllium_system, neon_system]:
+        try:
+            from tdhf import HartreeFock
+
+            hf = HartreeFock(system)
+            C = hf.scf(tolerance=1e-8)
+            system.change_basis(C)
+        except ImportError:
+            warnings.warn("Running without Hartree-Fock basis")
+
+        ccsd = CoupledClusterSinglesDoubles(system, verbose=False)
+        ccsd.iterate_t_amplitudes(theta=0.9)
+        ccsd.iterate_l_amplitudes(theta=0.9)
+
+        ccsd_list.append(ccsd)
+
+    return ccsd_list
 
 
 def test_add_s1_t(large_system_ccsd):
@@ -1893,6 +1923,16 @@ def test_add_d12c_l(large_system_ccsd):
     out_e -= out_e.swapaxes(0, 1)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
+
+# Density matrix tests
+
+def test_one_body_density_matrix(iterated_ccsd_amplitudes):
+    ccsd_list = iterated_ccsd_amplitudes
+
+    for ccsd in ccsd_list:
+        rho_qp = ccsd.compute_one_body_density_matrix()
+
+        assert abs(np.trace(rho_qp) - ccsd.n) < 1e-8
 
 
 def test_mbpt_enegy(tdho):
