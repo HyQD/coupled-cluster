@@ -5,11 +5,12 @@ from coupled_cluster.ccsd import TDCCSD, CoupledClusterSinglesDoubles
 from coupled_cluster.ccd import TDCCD, CoupledClusterDoubles
 
 
-@pytest.fixture()
-def ccsd_sans_singles(zanghellini_system):
-    return CoupledClusterSinglesDoubles(
-        zanghellini_system, include_singles=False
-    )
+# This shit is obsolute
+# @pytest.fixture()
+# def ccsd_sans_singles(zanghellini_system):
+#     return CoupledClusterSinglesDoubles(
+#         zanghellini_system, include_singles=False
+#     )
 
 
 @pytest.fixture()
@@ -17,8 +18,14 @@ def ccd(zanghellini_system):
     return CoupledClusterDoubles(zanghellini_system)
 
 
-def test_ground_state(ccd, ccsd_sans_singles, t_kwargs):
-    ccsd = ccsd_sans_singles
+@pytest.fixture()
+def ccsd(zanghellini_system):
+    return CoupledClusterSinglesDoubles(zanghellini_system)
+
+
+def test_ground_state(ccd, ccsd, t_kwargs):
+    # ccsd = ccsd_sans_singles
+    ccsd = ccsd
 
     ccd.iterate_t_amplitudes(**t_kwargs)
     ccsd.iterate_t_amplitudes(**t_kwargs)
@@ -26,6 +33,9 @@ def test_ground_state(ccd, ccsd_sans_singles, t_kwargs):
     energy_ccd = ccd.compute_energy()
     energy_ccsd = ccsd.compute_energy()
 
+    print(f"CCD energy:  {energy_ccd:7.5}")
+    print(f"CCSD energy: {energy_ccsd:7.5}")
+    # This does not pass now.
     assert abs(energy_ccd - energy_ccsd) < 1e-10
 
     np.testing.assert_allclose(ccsd.t_1, np.zeros_like(ccsd.t_1), atol=1e-10)
