@@ -17,6 +17,12 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     transforming the ground state orbitals to the Hartree-Fock basis.
     """
 
+    def compute_ground_state(self, *args, **kwargs):
+        if "change_system_basis" not in kwargs:
+            kwargs["change_system_basis"] = True
+
+        self.cc.compute_ground_state(*args, **kwargs)
+
     def set_initial_conditions(self, amplitudes=None, C=None, C_tilde=None):
         if amplitudes is None:
             # Create copy of ground state amplitudes for time-integration
