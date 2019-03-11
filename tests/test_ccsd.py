@@ -126,6 +126,7 @@ from coupled_cluster.ccsd.density_matrices import (
     add_rho_ji,
 )
 
+
 @pytest.fixture(scope="session")
 def iterated_ccsd_amplitudes(
     scoped_helium_system, beryllium_system, neon_system
@@ -1924,7 +1925,9 @@ def test_add_d12c_l(large_system_ccsd):
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
+
 # Density matrix tests
+
 
 def test_one_body_density_matrix(iterated_ccsd_amplitudes):
     ccsd_list = iterated_ccsd_amplitudes
