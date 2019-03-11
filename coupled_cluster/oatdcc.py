@@ -65,7 +65,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # pa, a -> p
         # C_tilde, spf^{*} -> spf_tilde
-        bra_spf = np.tensordot(C_tilde, self.system.spf.conj(), axes=((1), (0)))
+        bra_spf = np.tensordot(C_tilde, self.system.bra_spf, axes=((1), (0)))
         # ap, a -> p
         # C, spf -> spf
         ket_spf = np.tensordot(C, self.system.spf, axes=((0), (0)))
