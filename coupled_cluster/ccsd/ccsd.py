@@ -21,12 +21,14 @@ from coupled_cluster.ccsd.density_matrices import (
 
 
 class CoupledClusterSinglesDoubles(CoupledCluster):
-    def __init__(self, system, **kwargs):
+    def __init__(self, system, include_singles=True, **kwargs):
         super().__init__(system, **kwargs)
 
         np = self.np
         n, m = self.n, self.m
 
+        self.include_singles = include_singles
+        
         # Singles
         self.rhs_t_1 = np.zeros((m, n), dtype=self.f.dtype)  # ai
         self.rhs_l_1 = np.zeros((n, m), dtype=self.f.dtype)  # ia
@@ -38,7 +40,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.d_l_1 = self.d_t_1.transpose(1, 0).copy()
 
         self.t_1_mixer = None
-        self.t_2_mixer = None
+        self.l_1_mixer = None
 
         # Doubles
         self.rhs_t_2 = np.zeros((m, m, n, n), dtype=self.u.dtype)  # abij
@@ -50,7 +52,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
         self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
 
-        self.l_1_mixer = None
+        self.t_2_mixer = None
         self.l_2_mixer = None
 
         # Go!
@@ -61,11 +63,12 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         o, v = self.o, self.v
 
         # Singles
-        np.copyto(self.rhs_t_1, self.f[v, o])
-        np.divide(self.rhs_t_1, self.d_t_1, out=self.t_1)
+        if self.include_singles:
+            np.copyto(self.rhs_t_1, self.f[v, o])
+            np.divide(self.rhs_t_1, self.d_t_1, out=self.t_1)
 
-        np.copyto(self.rhs_l_1, self.f[o, v])
-        np.divide(self.rhs_l_1, self.d_l_1, out=self.l_1)
+            np.copyto(self.rhs_l_1, self.f[o, v])
+            np.divide(self.rhs_l_1, self.d_l_1, out=self.l_1)
 
         # Doubles
         np.copyto(self.rhs_t_2, self.u[v, v, o, o])
@@ -130,25 +133,26 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np = self.np
 
         # Singles
-        self.rhs_t_1.fill(0)
-        compute_t_1_amplitudes(
-            self.f,
-            self.u,
-            self.t_1,
-            self.t_2,
-            self.o,
-            self.v,
-            out=self.rhs_t_1,
-            np=np,
-        )
+        if self.include_singles:
+            self.rhs_t_1.fill(0)
+            compute_t_1_amplitudes(
+                self.f,
+                self.u,
+                self.t_1,
+                self.t_2,
+                self.o,
+                self.v,
+                out=self.rhs_t_1,
+                np=np,
+            )
 
-        trial_vector = self.t_1
-        direction_vector = np.divide(self.rhs_t_1, self.d_t_1)
-        error_vector = -self.rhs_t_1
+            trial_vector = self.t_1
+            direction_vector = np.divide(self.rhs_t_1, self.d_t_1)
+            error_vector = -self.rhs_t_1
 
-        self.t_1 = self.t_1_mixer.compute_new_vector(
-            trial_vector, direction_vector, error_vector
-        )
+            self.t_1 = self.t_1_mixer.compute_new_vector(
+                trial_vector, direction_vector, error_vector
+            )
 
         # Doubles
         self.rhs_t_2.fill(0)
@@ -175,28 +179,28 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np = self.np
 
         # Singles
-        self.rhs_l_1.fill(0)
+        if self.include_singles:
+            self.rhs_l_1.fill(0)
+            compute_l_1_amplitudes(
+                self.f,
+                self.u,
+                self.t_1,
+                self.t_2,
+                self.l_1,
+                self.l_2,
+                self.o,
+                self.v,
+                out=self.rhs_l_1,
+                np=np,
+            )
 
-        compute_l_1_amplitudes(
-            self.f,
-            self.u,
-            self.t_1,
-            self.t_2,
-            self.l_1,
-            self.l_2,
-            self.o,
-            self.v,
-            out=self.rhs_l_1,
-            np=np,
-        )
+            trial_vector = self.l_1
+            direction_vector = np.divide(self.rhs_l_1, self.d_l_1)
+            error_vector = -self.rhs_l_1
 
-        trial_vector = self.l_1
-        direction_vector = np.divide(self.rhs_l_1, self.d_l_1)
-        error_vector = -self.rhs_l_1
-
-        self.l_1 = self.l_1_mixer.compute_new_vector(
-            trial_vector, direction_vector, error_vector
-        )
+            self.l_1 = self.l_1_mixer.compute_new_vector(
+                trial_vector, direction_vector, error_vector
+            )
 
         # Doubles
         self.rhs_l_2.fill(0)
