@@ -9,6 +9,8 @@ def compute_one_body_density_matrix(t_1, t_2, l_1, l_2, o, v, np, out=None):
     add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np)
     add_rho_ji(t_1, t_2, l_1, l_2, o, v, out, np)
 
+    return out
+
 
 def add_rho_ba(t_1, t_2, l_1, l_2, o, v, out, np):
     """Function for adding v-v part of the one-body density matrix
@@ -18,7 +20,7 @@ def add_rho_ba(t_1, t_2, l_1, l_2, o, v, out, np):
     """
 
     term = np.tensordot(l_1, t_1, axes=((0), (1)))  # ab
-    out += term - (0.5) * np.tensordot(
+    out[v, v] += term - (0.5) * np.tensordot(
         l_2, t_2, axes=((0, 1, 3), (2, 3, 0))
     )  # ac
 
@@ -30,7 +32,7 @@ def add_rho_ia(l_1, o, v, out, np):
 
     """
 
-    out += l_1
+    out[o, v] += l_1
 
 
 def add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np):
@@ -59,7 +61,7 @@ def add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np):
     term2 = np.tensordot(term2, t_2, axes=((0, 1, 2), (2, 0, 1)))  # ck (ai)
     term += term2
 
-    out += term + t_1
+    out[v, o] += term + t_1
 
 
 def add_rho_ji(t_1, t_2, l_1, l_2, o, v, out, np):
@@ -73,6 +75,6 @@ def add_rho_ji(t_1, t_2, l_1, l_2, o, v, out, np):
     delta = np.eye(o.stop)
 
     term = delta - np.tensordot(l_1, t_1, axes=((1), (0)))  # ij
-    out += term + (0.5) * np.tensordot(
+    out[o, o] += term + (0.5) * np.tensordot(
         l_2, t_2, axes=((1, 2, 3), (2, 0, 1))
     )  # ik (ij)
