@@ -4,96 +4,76 @@ from coupled_cluster.ccsd.rhs_t import (
     compute_t_1_amplitudes,
     compute_t_2_amplitudes,
 )
+
+from coupled_cluster.ccsd.rhs_l import (
+    compute_l_1_amplitudes,
+    compute_l_2_amplitudes,
+)
+
 from coupled_cluster.cc_helper import (
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
 )
 
+from coupled_cluster.ccd.density_matrices import (
+    compute_one_body_density_matrix,
+    compute_two_body_density_matrix,
+)
+
 
 class CoupledClusterSinglesDoubles(CoupledCluster):
-    def __init__(self, system, include_singles=True, **kwargs):
+    def __init__(self, system, **kwargs):
         super().__init__(system, **kwargs)
 
         np = self.np
-        # Add option to run ccd instead of ccsd. This is mostly used for
-        # testing.
-        self.include_singles = include_singles
-
         n, m = self.n, self.m
 
-        self.rhs_t_1 = np.zeros((m, n), dtype=np.complex128)
-        self.rhs_t_2 = np.zeros((m, m, n, n), dtype=np.complex128)
-
-        self.rhs_l_1 = np.zeros((n, m), dtype=np.complex128)
-        self.rhs_l_2 = np.zeros((n, n, m, m), dtype=np.complex128)
+        # Singles
+        self.rhs_t_1 = np.zeros((m, n), dtype=self.f.dtype)  # ai
+        self.rhs_l_1 = np.zeros((n, m), dtype=self.f.dtype)  # ia
 
         self.t_1 = np.zeros_like(self.rhs_t_1)
-        self.t_2 = np.zeros_like(self.rhs_t_2)
-
         self.l_1 = np.zeros_like(self.rhs_l_1)
-        self.l_2 = np.zeros_like(self.rhs_l_2)
 
-        self.d_1_t = construct_d_t_1_matrix(self.f, self.o, self.v, np)
-        self.d_2_t = construct_d_t_2_matrix(self.f, self.o, self.v, np)
-        # Copying the transposed matrices for the lambda amplitudes (especially
-        # d_2) greatly increases the speed of the division later on.
-        self.d_1_l = self.d_1_t.T.copy()
-        self.d_2_l = self.d_2_t.transpose(2, 3, 0, 1).copy()
+        self.d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
+        self.d_l_1 = self.d_t_1.transpose(1, 0).copy()
 
-        self.xi = np.zeros((m, m, n, n), dtype=np.complex128)
-        self.tau = np.zeros((m, m, n, n), dtype=np.complex128)
-
-        self.G_pp = np.zeros((m, m), dtype=np.complex128)
-        self.G_hh = np.zeros((n, n), dtype=np.complex128)
-
-        # Intermediates for t amplitudes
-        self.F_pp = np.zeros((m, m), dtype=np.complex128)
-        self.F_hh = np.zeros((n, n), dtype=np.complex128)
-        self.F_hp = np.zeros((n, m), dtype=np.complex128)
-
-        self.W_hhhh = np.zeros((n, n, n, n), dtype=np.complex128)
-        self.W_pppp = np.zeros((m, m, m, m), dtype=np.complex128)
-        self.W_hpph = np.zeros((n, m, m, n), dtype=np.complex128)
-
-        # Intermediates for lambda amplitudes
-        self.F_pp_lambda = np.zeros((m, m), dtype=np.complex128)
-        self.F_hh_lambda = np.zeros((n, n), dtype=np.complex128)
-        self.F_hp_lambda = self.F_hp
-
-        self.W_hhhh_lambda = np.zeros((n, n, n, n), dtype=np.complex128)
-        self.W_pppp_lambda = np.zeros((m, m, m, m), dtype=np.complex128)
-        self.W_hpph_lambda = np.zeros((n, m, m, n), dtype=np.complex128)
-        self.W_hhhp_lambda = np.zeros((n, n, n, m), dtype=np.complex128)
-        self.W_phpp_lambda = np.zeros((m, n, m, m), dtype=np.complex128)
-        self.W_hphh_lambda = np.zeros((n, m, n, n), dtype=np.complex128)
-        self.W_ppph_lambda = np.zeros((m, m, m, n), dtype=np.complex128)
-
-        self.l_1_mixer = None
-        self.l_2_mixer = None
         self.t_1_mixer = None
         self.t_2_mixer = None
 
-        self.compute_initial_guess()
+        # Doubles
+        self.rhs_t_2 = np.zeros((m, m, n, n), dtype=self.u.dtype)  # abij
+        self.rhs_l_2 = np.zeros((n, n, m, m), dtype=self.u.dtype)  # ijab
 
-        self.rho_qp = np.zeros((self.l, self.l), dtype=np.complex128)
-        self.changed_t = False
+        self.t_2 = np.zeros_like(self.rhs_t_2)
+        self.l_2 = np.zeros_like(self.rhs_l_2)
+
+        self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
+        self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
+
+        self.l_1_mixer = None
+        self.l_2_mixer = None
+
+        # Go!
+        self.compute_initial_guess()
 
     def compute_initial_guess(self):
         np = self.np
         o, v = self.o, self.v
 
-        if self.include_singles:
-            np.copyto(self.rhs_t_1, self.f[v, o])
-            np.divide(self.rhs_t_1, self.d_1_t, out=self.t_1)
+        # Singles
+        np.copyto(self.rhs_t_1, self.f[v, o])
+        np.divide(self.rhs_t_1, self.d_t_1, out=self.t_1)
 
-            np.copyto(self.rhs_l_1, self.f[o, v])
-            np.divide(self.rhs_l_1, self.d_1_l, out=self.l_1)
+        np.copyto(self.rhs_l_1, self.f[o, v])
+        np.divide(self.rhs_l_1, self.d_l_1, out=self.l_1)
 
+        # Doubles
         np.copyto(self.rhs_t_2, self.u[v, v, o, o])
-        np.divide(self.rhs_t_2, self.d_2_t, out=self.t_2)
+        np.divide(self.rhs_t_2, self.d_t_2, out=self.t_2)
 
         np.copyto(self.rhs_l_2, self.u[o, o, v, v])
-        np.divide(self.rhs_l_2, self.d_2_l, out=self.l_2)
+        np.divide(self.rhs_l_2, self.d_l_2, out=self.l_2)
 
     def _get_t_copy(self):
         return [self.t_1.copy(), self.t_2.copy()]
@@ -150,21 +130,29 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def compute_t_amplitudes(self):
         np = self.np
 
+        # Singles
         self.rhs_t_1.fill(0)
+        compute_t_1_amplitudes(
+            self.f,
+            self.u,
+            self.t_1,
+            self.t_2,
+            self.o,
+            self.v,
+            out=self.rhs_t_1,
+            np=np,
+        )
+
+        trial_vector = self.t_1
+        direction_vector = np.divide(self.rhs_t_1, self.d_t_1)
+        error_vector = -self.rhs_t_1
+
+        self.t_1 = self.t_1_mixer.compute_new_vector(
+            trial_vector, direction_vector, error_vector
+        )
+
+        # Doubles
         self.rhs_t_2.fill(0)
-
-        if self.include_singles:
-            compute_t_1_amplitudes(
-                self.f,
-                self.u,
-                self.t_1,
-                self.t_2,
-                self.o,
-                self.v,
-                out=self.rhs_t_1,
-                np=np,
-            )
-
         compute_t_2_amplitudes(
             self.f,
             self.u,
@@ -176,62 +164,58 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             np=np,
         )
 
-        # self._compute_effective_amplitudes()
-        # self._compute_intermediates()
-
-        # if self.include_singles:
-        #    self._compute_ccsd_amplitude_s()
-
-        # self._compute_ccsd_amplitude_d()
-
-        if self.include_singles:
-            trial_vector = self.t_1
-            direction_vector = np.divide(self.rhs_t_1, self.d_1_t)
-            error_vector = -self.rhs_t_1
-
-            self.t_1 = self.t_1_mixer.compute_new_vector(
-                trial_vector, direction_vector, error_vector
-            )
-
         trial_vector = self.t_2
-        direction_vector = np.divide(self.rhs_t_2, self.d_2_t)
+        direction_vector = np.divide(self.rhs_t_2, self.d_t_2)
         error_vector = -self.rhs_t_2
 
         self.t_2 = self.t_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
         )
 
-        # Notify a change in t for recalculation of intermediates
-        self.changed_t = True
-
     def compute_l_amplitudes(self):
         np = self.np
 
-        if self.changed_t:
-            # Make sure that we use updated intermediates for lambda
-            self._compute_effective_amplitudes()
-            self._compute_intermediates()
-            self.changed_t = False
+        # Singles
+        self.rhs_l_1.fill(0)
 
-        self._compute_effective_three_body_intermediates()
-        self._compute_lambda_intermediates()
+        compute_l_1_amplitudes(
+            self.f,
+            self.u,
+            self.t_1,
+            self.t_2,
+            self.l_1,
+            self.l_2,
+            self.o,
+            self.v,
+            out=self.rhs_l_1,
+            np=np,
+        )
 
-        if self.include_singles:
-            self._compute_ccsd_lambda_amplitudes_s()
+        trial_vector = self.l_1
+        direction_vector = np.divide(self.rhs_l_1, self.d_l_1)
+        error_vector = -self.rhs_l_1
 
-        self._compute_ccsd_lambda_amplitudes_d()
+        self.l_1 = self.l_1_mixer.compute_new_vector(
+            trial_vector, direction_vector, error_vector
+        )
 
-        if self.include_singles:
-            trial_vector = self.l_1
-            direction_vector = np.divide(self.rhs_l_1, self.d_1_l)
-            error_vector = -self.rhs_l_1
-
-            self.l_1 = self.l_1_mixer.compute_new_vector(
-                trial_vector, direction_vector, error_vector
-            )
+        # Doubles
+        self.rhs_l_2.fill(0)
+        compute_l_2_amplitudes(
+            self.f,
+            self.u,
+            self.t_1,
+            self.t_2,
+            self.l_1,
+            self.l_2,
+            self.o,
+            self.v,
+            out=self.rhs_l_2,
+            np=np,
+        )
 
         trial_vector = self.l_2
-        direction_vector = np.divide(self.rhs_l_2, self.d_2_l)
+        direction_vector = np.divide(self.rhs_l_2, self.d_l_2)
         error_vector = -self.rhs_l_2
 
         self.l_2 = self.l_2_mixer.compute_new_vector(
@@ -239,42 +223,54 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         )
 
     def compute_one_body_density_matrix(self):
-        np = self.np
-        o, v = self.o, self.v
 
-        self.rho_qp.fill(0)
-
-        self.rho_qp[v, v] += np.dot(self.t_1, self.l_1)
-        self.rho_qp[v, v] += 0.5 * np.tensordot(
-            self.t_2, self.l_2, axes=((1, 2, 3), (3, 0, 1))
+        # Does this work?
+        return compute_one_body_density_matrix(
+            self.t_2, self.l_2, self.o, self.v, np=self.np
         )
 
-        self.rho_qp[o, v] += self.l_1
+        # np = self.np
+        # o, v = self.o, self.v
 
-        self.rho_qp[o, o] += np.eye(self.n)
-        self.rho_qp[o, o] -= np.dot(self.l_1, self.t_1)
-        self.rho_qp[o, o] += 0.5 * np.tensordot(
-            self.l_2, self.t_2, axes=((1, 2, 3), (2, 0, 1))
-        )
+        # self.rho_qp.fill(0)
 
-        self.rho_qp[v, o] += self.t_1
-        self.rho_qp[v, o] += np.tensordot(
-            self.l_1,
-            self.t_2 - np.einsum("bi, aj -> abij", self.t_1, self.t_1),
-            axes=((0, 1), (3, 1)),
-        )
-        self.rho_qp[v, o] += 0.5 * np.einsum(
-            "bi, kjcb, ackj -> ai", self.t_1, self.l_2, self.t_2, optimize=True
-        )
-        self.rho_qp[v, o] -= 0.5 * np.einsum(
-            "aj, kjcb, cbki -> ai", self.t_1, self.l_2, self.t_2, optimize=True
-        )
+        # self.rho_qp[v, v] += np.dot(self.t_1, self.l_1)
+        # self.rho_qp[v, v] += 0.5 * np.tensordot(
+        #     self.t_2, self.l_2, axes=((1, 2, 3), (3, 0, 1))
+        # )
 
-        return self.rho_qp
+        # self.rho_qp[o, v] += self.l_1
+
+        # self.rho_qp[o, o] += np.eye(self.n)
+        # self.rho_qp[o, o] -= np.dot(self.l_1, self.t_1)
+        # self.rho_qp[o, o] += 0.5 * np.tensordot(
+        #     self.l_2, self.t_2, axes=((1, 2, 3), (2, 0, 1))
+        # )
+
+        # self.rho_qp[v, o] += self.t_1
+        # self.rho_qp[v, o] += np.tensordot(
+        #     self.l_1,
+        #     self.t_2 - np.einsum("bi, aj -> abij", self.t_1, self.t_1),
+        #     axes=((0, 1), (3, 1)),
+        # )
+        # self.rho_qp[v, o] += 0.5 * np.einsum(
+        #     "bi, kjcb, ackj -> ai", self.t_1, self.l_2, self.t_2, optimize=True
+        # )
+        # self.rho_qp[v, o] -= 0.5 * np.einsum(
+        #     "aj, kjcb, cbki -> ai", self.t_1, self.l_2, self.t_2, optimize=True
+        # )
+
+        # return self.rho_qp
 
     def compute_two_body_density_matrix(self):
-        pass
 
+        # Same question as above; does this work?
+        return compute_two_body_density_matrix(
+            self.t_2, self.l_2, self.o, self.v, np=self.np
+        )
+
+
+"""
     def _compute_time_evolution_probability(self):
         np = self.np
         t_1_0, t_2_0 = self._t_0
@@ -660,3 +656,4 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         term = np.tensordot(self.t_1, term, axes=((1), (0)))
         term -= term.swapaxes(0, 1)
         self.W_ppph_lambda -= term
+"""
