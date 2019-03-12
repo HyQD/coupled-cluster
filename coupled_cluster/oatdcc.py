@@ -1,8 +1,8 @@
 import abc
 from coupled_cluster.cc_helper import (
     OACCVector,
-    compute_oa_particle_density,
     transform_two_body_tensor,
+    compute_particle_density,
 )
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 from coupled_cluster.integrators import RungeKutta4
@@ -70,7 +70,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         # C, spf -> spf
         ket_spf = np.tensordot(C, self.system.spf, axes=((0), (0)))
 
-        rho = compute_oa_particle_density(rho_qp, bra_spf, ket_spf, np=np)
+        rho = compute_particle_density(rho_qp, bra_spf, ket_spf, np=np)
 
         return rho
 
