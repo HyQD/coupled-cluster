@@ -41,22 +41,21 @@ With static orbitals they only manage E=0.3 and the method breaks completely dow
 """
 
 omega = 0.206_817_5
-E = 1  # E = 0.3, 1
+E = 1
 laser_duration = 5
 
 
 system = construct_psi4_system(Be, options)
-hf = HartreeFock(system, verbose=True)
-C = hf.scf(tolerance=1e-12)
-system.change_basis(C)
+system.change_to_hf_basis(tolerance=1e-12, verbose=True)
 
 integrator = GaussIntegrator(np=np, eps=1e-10)
 cc_kwargs = dict(verbose=True)
 oatdccd = OATDCCD(system, integrator=integrator, np=np, **cc_kwargs)
-t_kwargs = dict(theta=0, tol=1e-10)
-oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
+oatdccd.compute_ground_state()
 print(
-    "Ground state CCD energy: {0}".format(oatdccd.compute_ground_state_energy())
+    "Ground state NOCCD energy: {0}".format(
+        oatdccd.compute_ground_state_energy()
+    )
 )
 
 polarization = np.zeros(3)
@@ -71,7 +70,7 @@ system.set_time_evolution_operator(
 oatdccd.set_initial_conditions()
 
 dt = 1e-2
-Tfinal = 10
+Tfinal = 5
 Nsteps = int(Tfinal / dt) + 1
 timestep_stop_laser = int(laser_duration / dt)
 
@@ -88,8 +87,23 @@ norm_l2 = np.zeros(len(time_points))
 dip_z = np.zeros(len(time_points))
 td_energies[0] = oatdccd.compute_energy()
 
-# norm_t2[0] = np.linalg.norm(oatdccd.t)
-# norm_l2[0] = np.linalg.norm(oatdccd.l)
+
+t, l, C, C_tilde = oatdccd.amplitudes
+
+energy = oatdccd.compute_energy()
+td_energies[0] = energy.real
+td_energies_imag[0] = energy.imag
+
+rho_qp = oatdccd.one_body_density_matrix(t, l)
+rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
+
+z = system.dipole_moment[2].copy()
+z = C_tilde @ z @ C
+
+dip_z[0] = (np.einsum("qp,pq->", rho_qp_hermitian, z)).real
+
+norm_t2[0] = np.linalg.norm(t)
+norm_l2[0] = np.linalg.norm(l)
 
 
 for i, amp in enumerate(oatdccd.solve(time_points)):
@@ -115,11 +129,6 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
         print(np.allclose(eye, np.eye(eye.shape[0]), atol=1e-4))
         print("norm(t2): %g" % np.linalg.norm(t))
         print("norm(l2): %g" % np.linalg.norm(l))
-    # print(eye)
-    # print(np.diag(eye))
-    # np.testing.assert_allclose(C_tilde @ C, np.eye(C_tilde.shape[0]), atol=1e-10)
-    # if i == 1:
-    #    break
 
 plt.figure()
 plt.plot(time_points, td_energies)
