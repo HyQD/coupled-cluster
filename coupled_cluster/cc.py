@@ -94,7 +94,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             warn = warn.format(np.trace(rho_qp), self.n)
             warnings.warn(warn)
 
-        rho = compute_particle_density(rho_qp, self.system.spf, np=np)
+        rho = compute_particle_density(
+            rho_qp, self.system.bra_spf, self.system.spf, np=np
+        )
 
         return rho
 

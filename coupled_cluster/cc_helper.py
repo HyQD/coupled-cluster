@@ -212,18 +212,7 @@ def compute_reference_energy(f, u, o, v, np):
     )
 
 
-def compute_particle_density(rho_qp, spf, np):
-    rho = np.zeros(spf.shape[1:], dtype=spf.dtype)
-    spf_slice = slice(0, spf.shape[0])
-
-    for _i in np.ndindex(rho.shape):
-        i = (spf_slice, *_i)
-        rho[_i] += np.dot(spf[i].conj(), np.dot(rho_qp, spf[i]))
-
-    return rho
-
-
-def compute_oa_particle_density(rho_qp, bra_spf, ket_spf, np):
+def compute_particle_density(rho_qp, bra_spf, ket_spf, np):
     assert bra_spf.shape == ket_spf.shape
     assert bra_spf.dtype == ket_spf.dtype
 
