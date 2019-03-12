@@ -28,6 +28,7 @@ class LaserPulse:
         )
 
 
+@pytest.mark.skip
 def test_oatdccd(
     helium_system,
     ccd_groundstate_He_energy,
@@ -55,8 +56,7 @@ def test_oatdccd(
     integrator = GaussIntegrator(np=np, eps=1e-10)
     cc_kwargs = dict(verbose=True)
     oatdccd = OATDCCD(system, integrator=integrator, np=np, **cc_kwargs)
-    t_kwargs = dict(theta=0.1, tol=tol)
-    oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
+    oatdccd.compute_ground_state(tol=1e-10, termination_tol=1e-12)
 
     assert (
         abs(ccd_groundstate_He_energy - oatdccd.compute_ground_state_energy())
