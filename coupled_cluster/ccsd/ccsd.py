@@ -28,10 +28,10 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         n, m = self.n, self.m
 
         self.include_singles = include_singles
-        
+
         # Singles
-        self.rhs_t_1 = np.zeros((m, n), dtype=self.f.dtype)  # ai
-        self.rhs_l_1 = np.zeros((n, m), dtype=self.f.dtype)  # ia
+        self.rhs_t_1 = np.zeros((m, n), dtype=self.u.dtype)  # ai
+        self.rhs_l_1 = np.zeros((n, m), dtype=self.u.dtype)  # ia
 
         self.t_1 = np.zeros_like(self.rhs_t_1)
         self.l_1 = np.zeros_like(self.rhs_l_1)
