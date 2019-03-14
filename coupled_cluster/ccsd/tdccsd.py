@@ -7,9 +7,14 @@ from coupled_cluster.ccsd.rhs_l import (
     compute_l_1_amplitudes,
     compute_l_2_amplitudes,
 )
+from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
+from coupled_cluster.ccsd.energies import compute_time_dependent_energy
 
 
 class TDCCSD(TimeDependentCoupledCluster):
+    def __init__(self, *args, **kwargs):
+        super().__init__(CoupledClusterSinglesDoubles, *args, **kwargs)
+
     def rhs_t_amplitudes(self):
         yield compute_t_1_amplitudes
         yield compute_t_2_amplitudes
@@ -24,3 +29,14 @@ class TDCCSD(TimeDependentCoupledCluster):
         return compute_time_dependent_energy(
             self.f, self.u, *t, *l, self.system.o, self.system.v, np=self.np
         )
+
+
+    # TODO: Implement these?
+    def compute_one_body_density_matrix(self):
+        pass
+    
+    def compute_two_body_density_matrix(self):
+        pass
+
+    def compute_time_dependent_overlap(self):
+        pass

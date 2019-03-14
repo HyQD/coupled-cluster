@@ -30,7 +30,7 @@ def compute_oatdccd_energy(f, u, t, l, o, v, np):
     # energy += lagrangian_funtional(
     #    t.transpose(2, 3, 0, 1), l, f, u, o, v, np=np
     # )
-    energy += lagrangian_funtional(f, u, t, l, o, v, np=np)
+    energy += lagrangian_functional(f, u, t, l, o, v, np=np)
     # t0 = time.time()
     # lagrangian_trans = lagrangian_funtional_trans(
     #    t.transpose(2, 3, 0, 1), l, f, u, o, v, np=np
@@ -51,7 +51,7 @@ def compute_oatdccd_energy(f, u, t, l, o, v, np):
     return energy
 
 
-def lagrangian_funtional(f, u, t, l, o, v, np):
+def lagrangian_functional(f, u, t, l, o, v, np):
     """
     Eq [A8] in Kvaal sans the reference energy
 
