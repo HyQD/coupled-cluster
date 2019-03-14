@@ -1,6 +1,8 @@
 import pytest
 import warnings
 import numpy as np
+from coupled_cluster.mix import DIIS
+from quantum_systems import construct_psi4_system
 from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
 from coupled_cluster.ccsd.rhs_t import (
     add_s1_t,
@@ -127,13 +129,45 @@ from coupled_cluster.ccsd.density_matrices import (
 )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
+def ccsd_helium_system():
+    He = """
+    He 0.0 0.0 0.0
+    symmetry c1
+    """
+    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
+
+    return construct_psi4_system(He, options)
+
+
+@pytest.fixture
+def ccsd_beryllium_system():
+    Be = """
+    Be 0.0 0.0 0.0
+    symmetry c1
+    """
+    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
+
+    return construct_psi4_system(Be, options)
+
+
+@pytest.fixture
+def ccsd_neon_system():
+    Ne = """
+    Ne 0.0 0.0 0.0
+    symmetry c1
+    """
+    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
+
+    return construct_psi4_system(Ne, options)
+
+
+@pytest.fixture
 def iterated_ccsd_amplitudes(
-    scoped_helium_system, beryllium_system, neon_system
+    ccsd_helium_system, ccsd_beryllium_system, ccsd_neon_system
 ):
-    helium_system = scoped_helium_system
     ccsd_list = []
-    for system in [helium_system, beryllium_system, neon_system]:
+    for system in [ccsd_helium_system, ccsd_beryllium_system, ccsd_neon_system]:
         try:
             from tdhf import HartreeFock
 
@@ -143,9 +177,9 @@ def iterated_ccsd_amplitudes(
         except ImportError:
             warnings.warn("Running without Hartree-Fock basis")
 
-        ccsd = CoupledClusterSinglesDoubles(system, verbose=False)
-        ccsd.iterate_t_amplitudes(theta=0.9)
-        ccsd.iterate_l_amplitudes(theta=0.9)
+        ccsd = CoupledClusterSinglesDoubles(system, mixer=DIIS, verbose=False)
+        ccsd.iterate_t_amplitudes()
+        ccsd.iterate_l_amplitudes()
 
         ccsd_list.append(ccsd)
 

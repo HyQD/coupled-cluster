@@ -55,6 +55,38 @@ def compute_l_2_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(l_2)
 
+    add_d1_l(u, o, v, out, np=np)
+    add_d2a_l(u, l_2, o, v, out, np=np)
+    add_d2b_l(u, l_2, o, v, out, np=np)
+    add_d3a_l(f, l_2, o, v, out, np=np)
+    add_d3b_l(u, l_1, o, v, out, np=np)
+    add_d4a_l(u, l_2, t_1, o, v, out, np=np)
+    add_d4b_l(u, l_2, t_1, o, v, out, np=np)
+    add_d5a_l(f, l_2, o, v, out, np=np)
+    add_d5b_l(u, l_1, o, v, out, np=np)
+    add_d6a_l(u, l_2, t_2, o, v, out, np=np)
+    add_d6b_l(u, l_2, t_2, o, v, out, np=np)
+    add_d7a_l(f, l_1, o, v, out, np=np)
+    add_d7b_l(f, l_2, t_1, o, v, out, np=np)
+    add_d7c_l(f, l_2, t_1, o, v, out, np=np)
+    add_d8a_l(u, l_1, t_1, o, v, out, np=np)
+    add_d8b_l(u, l_1, t_1, o, v, out, np=np)
+    add_d8c_l(u, l_2, t_1, o, v, out, np=np)
+    add_d8d_l(u, l_2, t_1, o, v, out, np=np)
+    add_d8e_l(u, l_2, o, v, out, np=np)
+    add_d9a_l(u, l_2, t_2, o, v, out, np=np)
+    add_d9b_l(u, l_2, t_2, o, v, out, np=np)
+    add_d9c_l(u, l_2, t_2, o, v, out, np=np)
+    add_d9d_l(u, l_2, t_2, o, v, out, np=np)
+    add_d10a_l(u, l_2, t_1, o, v, out, np=np)
+    add_d10b_l(u, l_2, t_1, o, v, out, np=np)
+    add_d11a_l(u, l_1, t_1, o, v, out, np=np)
+    add_d11b_l(u, l_2, t_1, o, v, out, np=np)
+    add_d11c_l(u, l_2, t_1, o, v, out, np=np)
+    add_d11d_l(u, l_2, t_2, o, v, out, np=np)
+    add_d12a_l(u, l_2, t_1, o, v, out, np=np)
+    add_d12b_l(u, l_2, t_1, o, v, out, np=np)
+
     return out
 
 
