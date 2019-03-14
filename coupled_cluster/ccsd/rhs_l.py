@@ -1,5 +1,6 @@
 import coupled_cluster.ccd.rhs_l as ccd_l
 
+
 def compute_l_1_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(l_1)
@@ -58,18 +59,10 @@ def compute_l_2_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
         out = np.zeros_like(l_2)
 
     ccd_l.compute_l_2_amplitudes(f, u, t_2, l_2, o, v, np=np, out=out)
-    # Thirteen of these can be imported from ccd.rhs_l
-    # add_d1_l(u, o, v, out, np=np) # This
-    # add_d2a_l(u, l_2, o, v, out, np=np) # This
-    # add_d2b_l(u, l_2, o, v, out, np=np) # This
-    # add_d3a_l(f, l_2, o, v, out, np=np) # This
     add_d3b_l(u, l_1, o, v, out, np=np)
     add_d4a_l(u, l_2, t_1, o, v, out, np=np)
     add_d4b_l(u, l_2, t_1, o, v, out, np=np)
-    # add_d5a_l(f, l_2, o, v, out, np=np) # This
     add_d5b_l(u, l_1, o, v, out, np=np)
-    # add_d6a_l(u, l_2, t_2, o, v, out, np=np) # This
-    # add_d6b_l(u, l_2, t_2, o, v, out, np=np) # This
     add_d7a_l(f, l_1, o, v, out, np=np)
     add_d7b_l(f, l_2, t_1, o, v, out, np=np)
     add_d7c_l(f, l_2, t_1, o, v, out, np=np)
@@ -77,17 +70,11 @@ def compute_l_2_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
     add_d8b_l(u, l_1, t_1, o, v, out, np=np)
     add_d8c_l(u, l_2, t_1, o, v, out, np=np)
     add_d8d_l(u, l_2, t_1, o, v, out, np=np)
-    # add_d8e_l(u, l_2, o, v, out, np=np) # This 
-    # add_d9a_l(u, l_2, t_2, o, v, out, np=np) # This
-    # add_d9b_l(u, l_2, t_2, o, v, out, np=np) # This
-    # add_d9c_l(u, l_2, t_2, o, v, out, np=np) # This
-    # add_d9d_l(u, l_2, t_2, o, v, out, np=np) # This
     add_d10a_l(u, l_2, t_1, o, v, out, np=np)
     add_d10b_l(u, l_2, t_1, o, v, out, np=np)
     add_d11a_l(u, l_1, t_1, o, v, out, np=np)
     add_d11b_l(u, l_2, t_1, o, v, out, np=np)
     add_d11c_l(u, l_2, t_1, o, v, out, np=np)
-    # add_d11d_l(u, l_2, t_2, o, v, out, np=np) # This
     add_d12a_l(u, l_2, t_1, o, v, out, np=np)
     add_d12b_l(u, l_2, t_1, o, v, out, np=np)
 
@@ -711,60 +698,6 @@ def add_s12b_l(u, l_2, t_1, o, v, out, np):
 # I also don't understand the naming convention at all..
 
 
-# Same as D1 in CCD
-def add_d1_l(u, o, v, out, np):
-    """Function for adding the D1 diagram
-
-        g*(f, u, l, t) <- u^{ij}_{ab}
-
-    Number of FLOPS required: 0
-    """
-
-    out += u[o, o, v, v]
-
-# Same as D2b in CCD
-def add_d2a_l(u, l_2, o, v, out, np):
-    """Function for adding the D2a diagram
-
-        g*(f, u, l, t) <- (0.5) l^{ij}_{cd} u^{cd}_{ab}
-
-    Number of FLOPS required: 
-    """
-
-    out += (0.5) * np.tensordot(
-        l_2, u[v, v, v, v], axes=((2, 3), (0, 1))
-    )  # ijab
-
-
-# Same as D2a in CCD
-def add_d2b_l(u, l_2, o, v, out, np):
-    """Function for adding the D2b diagram
-
-        g*(f, u, l, t) <- (0.5) l^{kl}_{ab} u^{ij}_{kl}
-
-    Number of FLOPS required: 
-    """
-
-    out += (0.5) * np.tensordot(
-        l_2, u[o, o, o, o], axes=((0, 1), (2, 3))
-    ).transpose(
-        2, 3, 0, 1
-    )  # abij -> ijab
-
-# Same as D2d in CCD
-def add_d3a_l(f, l_2, o, v, out, np):
-    """Function for adding the D3a diagram
-
-        g*(f, u, l, t) <- f^{i}_{k} l^{jk}_{ab} P(ij)
-
-    Number of FLOPS required:
-    """
-
-    term = np.tensordot(f[o, o], l_2, axes=((1), (1)))  # ijab
-    term -= term.swapaxes(0, 1)
-    out += term
-
-
 def add_d3b_l(u, l_1, o, v, out, np):
     """Function for adding the D3b diagram
 
@@ -806,22 +739,6 @@ def add_d4b_l(u, l_2, t_1, o, v, out, np):
     )  # abij -> ijab
 
 
-# Same as D2c in CCD
-def add_d5a_l(f, l_2, o, v, out, np):
-    """Function for adding the D5a diagram
-
-        g*(f, u, l, t) <- (-1) f^{c}_{a} l^{ij}_{bc} P(ab)
-
-    Number of FLOPS required:
-    """
-
-    term = (-1) * np.tensordot(f[v, v], l_2, axes=((0), (3))).transpose(
-        1, 2, 0, 3
-    )  # aijb -> ijab
-    term -= term.swapaxes(2, 3)
-    out += term
-
-
 def add_d5b_l(u, l_1, o, v, out, np):
     """Function for adding the D5b diagram
 
@@ -833,34 +750,6 @@ def add_d5b_l(u, l_1, o, v, out, np):
     term = (-1) * np.tensordot(l_1, u[o, v, v, v], axes=((1), (1)))  # ijab
     term -= term.swapaxes(0, 1)
     out += term
-
-
-# Same as D3b in CCD
-def add_d6a_l(u, l_2, t_2, o, v, out, np):
-    """Function for adding the D6a diagram
-
-        g*(f, u, l, t) <- (0.25) l^{ij}_{cd} t^{cd}_{kl} u^{kl}_{ab}
-
-    Number of FLOPS required:
-    """
-
-    term = (0.25) * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))  # ijkl
-    out += np.tensordot(term, u[o, o, v, v], axes=((2, 3), (0, 1)))  # ijab
-
-
-# Same as D3f in CCD
-def add_d6b_l(u, l_2, t_2, o, v, out, np):
-    """Function for adding the D6b diagram
-
-        g*(f, u, l, t) <- (0.25) l^{kl}_{ab} t^{cd}_{kl} u^{ij}_{cd}
-
-    Number of FLOPS required:
-    """
-
-    term = (0.25) * np.tensordot(l_2, t_2, axes=((0, 1), (2, 3)))  # abcd
-    out += np.tensordot(term, u[o, o, v, v], axes=((2, 3), (2, 3))).transpose(
-        2, 3, 0, 1
-    )  # abij -> ijab
 
 
 def add_d7a_l(f, l_1, o, v, out, np):
@@ -971,88 +860,6 @@ def add_d8d_l(u, l_2, t_1, o, v, out, np):
     out += term
 
 
-def add_d8e_l(u, l_2, o, v, out, np):
-    """Function for adding the D8e diagram
-
-        g*(f, u, l, t) <- l^{ik}_{ac} u^{jc}_{bk} P(ab) P(ij)
-
-    Number of FLOPS required: 
-    """
-
-    term = np.tensordot(l_2, u[o, v, v, o], axes=((1, 3), (3, 1))).transpose(
-        0, 2, 1, 3
-    )  # iajb
-    term -= term.swapaxes(0, 1)
-    term -= term.swapaxes(2, 3)
-    out += term
-
-
-def add_d9a_l(u, l_2, t_2, o, v, out, np):
-    """Function for adding the D9a diagram
-
-        g*(f, u, l, t) <- (-0.5) l^{ij}_{ac} t^{cd}_{kl} u^{kl}_{bd} P(ab)
-
-    Number of FLOPS required:
-    """
-
-    # Start with term 2 and 3
-    term = (-0.5) * np.tensordot(
-        t_2, u[o, o, v, v], axes=((1, 2, 3), (3, 0, 1))
-    )  # cb
-    term = np.tensordot(l_2, term, axes=((3), (0)))  # ijab
-    term -= term.swapaxes(2, 3)
-    out += term
-
-
-def add_d9b_l(u, l_2, t_2, o, v, out, np):
-    """Function for adding the D9b diagram
-
-        g*(f, u, l, t) <- (-0.5) l^{ik}_{ab} t^{cd}_{kl} u^{jl}_{cd} P(ij)
-
-    Number of FLOPS required:
-    """
-
-    # Start with term 2 and 3
-    term = (-0.5) * np.tensordot(
-        t_2, u[o, o, v, v], axes=((0, 1, 3), (2, 3, 1))
-    )  # kj
-    term = np.tensordot(l_2, term, axes=((1), (0))).transpose(
-        0, 3, 1, 2
-    )  # iabj -> ijab
-    term -= term.swapaxes(0, 1)
-    out += term
-
-
-def add_d9c_l(u, l_2, t_2, o, v, out, np):
-    """Function for adding the D9c diagram
-
-        g*(f, u, l, t) <- (-0.5) l^{ik}_{cd} t^{cd}_{kl} u^{jl}_{ab} P(ij)
-
-    Number of FLOPS required:
-    """
-
-    term = (-0.5) * np.tensordot(l_2, t_2, axes=((1, 2, 3), (2, 0, 1)))  # il
-    term = np.tensordot(term, u[o, o, v, v], axes=((1), (1)))  # ijab
-    term -= term.swapaxes(0, 1)
-    out += term
-
-
-def add_d9d_l(u, l_2, t_2, o, v, out, np):
-    """Function for adding the D9d diagram
-
-        g*(f, u, l, t) <- (-0.5) l^{kl}_{ac} t^{cd}_{kl} u^{ij}_{bd} P(ab)
-
-    Number of FLOPS required:
-    """
-
-    term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 1, 3), (2, 3, 0)))  # ad
-    term = np.tensordot(term, u[o, o, v, v], axes=((1), (3))).transpose(
-        1, 2, 0, 3
-    )  # aijb -> ijab
-    term -= term.swapaxes(2, 3)
-    out += term
-
-
 def add_d10a_l(u, l_2, t_1, o, v, out, np):
     """Function for adding the D10a diagram
 
@@ -1124,23 +931,6 @@ def add_d11c_l(u, l_2, t_1, o, v, out, np):
 
     term = (-1) * np.tensordot(l_2, t_1, axes=((3), (0)))  # ikal
     term = np.tensordot(term, u[o, o, v, o], axes=((1, 3), (3, 1))).transpose(
-        0, 2, 1, 3
-    )  # iajb -> ijab
-    term -= term.swapaxes(2, 3)
-    term -= term.swapaxes(0, 1)
-    out += term
-
-
-def add_d11d_l(u, l_2, t_2, o, v, out, np):
-    """Function for adding the D11d diagram
-
-        g*(f, u, l, t) <- l^{ik}_{ac} t^{cd}_{kl} u^{jl}_{bd} P(ab) P(ij)
-
-    Number of FLOPS required:
-    """
-
-    term = np.tensordot(l_2, t_2, axes=((1, 3), (2, 0)))  # iadl
-    term = np.tensordot(term, u[o, o, v, v], axes=((2, 3), (3, 1))).transpose(
         0, 2, 1, 3
     )  # iajb -> ijab
     term -= term.swapaxes(2, 3)

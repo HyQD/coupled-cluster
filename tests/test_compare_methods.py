@@ -17,14 +17,8 @@ def ccd(zanghellini_system):
     return CoupledClusterDoubles(zanghellini_system)
 
 
-# @pytest.fixture()
-# def ccsd(zanghellini_system):
-#     return CoupledClusterSinglesDoubles(zanghellini_system)
-
-
 def test_ground_state(ccd, ccsd_sans_singles, t_kwargs):
     ccsd = ccsd_sans_singles
-    # ccsd = ccsd
 
     ccd.iterate_t_amplitudes(**t_kwargs)
     ccsd.iterate_t_amplitudes(**t_kwargs)
