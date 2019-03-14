@@ -4,6 +4,7 @@ import numpy as np
 from coupled_cluster.mix import DIIS
 from quantum_systems import construct_psi4_system
 from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
+import coupled_cluster.ccd.rhs_l as ccd_l
 from coupled_cluster.ccsd.rhs_t import (
     add_s1_t,
     add_s2a_t,
@@ -1998,3 +1999,31 @@ def test_lambda_amplitude_iterations(tdho):
     cc_scheme.iterate_t_amplitudes()
 
     assert True
+
+def test_l_2_ccd_import(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    f = cs.f
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    out = np.zeros_like(l_2)
+    add_d1_l(u, o, v, out, np=np)                                   
+    add_d2a_l(u, l_2, o, v, out, np=np)
+    add_d2b_l(u, l_2, o, v, out, np=np)
+    add_d3a_l(f, l_2, o, v, out, np=np)
+    add_d5a_l(f, l_2, o, v, out, np=np)
+    add_d6a_l(u, l_2, t_2, o, v, out, np=np)
+    add_d6b_l(u, l_2, t_2, o, v, out, np=np)
+    add_d8e_l(u, l_2, o, v, out, np=np) 
+    add_d9a_l(u, l_2, t_2, o, v, out, np=np)
+    add_d9b_l(u, l_2, t_2, o, v, out, np=np)
+    add_d9c_l(u, l_2, t_2, o, v, out, np=np)
+    add_d9d_l(u, l_2, t_2, o, v, out, np=np)
+    add_d11d_l(u, l_2, t_2, o, v, out, np=np)
+
+    out_e = np.zeros_like(l_2)
+    ccd_l.compute_l_2_amplitudes(f, u, t_2, l_2, o, v, np=np, out=out_e)
+
+    np.testing.assert_allclose(out, out_e, atol=1e-10)
