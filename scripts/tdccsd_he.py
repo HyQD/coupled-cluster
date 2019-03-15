@@ -8,7 +8,7 @@ from quantum_systems import construct_psi4_system
 from quantum_systems.time_evolution_operators import LaserField
 from tdhf import HartreeFock
 from coupled_cluster.ccsd import TDCCSD
-from coupled_cluster.integrators import GaussIntegrator
+from coupled_cluster.integrators import GaussIntegrator, RungeKutta4
 
 
 class LaserPulse:
@@ -38,7 +38,7 @@ He = """
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-6}
 omega = 2.873_564_3
-E = 1
+E = 10
 laser_duration = 5
 
 system = construct_psi4_system(He, options)
@@ -46,7 +46,8 @@ hf = HartreeFock(system, verbose=True)
 C = hf.scf(tolerance=1e-15)
 system.change_basis(C)
 
-integrator = GaussIntegrator(np=np, eps=1e-10)
+integrator = GaussIntegrator(s=3,np=np, eps=1e-6)
+#integrator = RungeKutta4(np=np)
 tdccsd = TDCCSD(system, integrator=integrator, np=np, verbose=True)
 t_kwargs = dict(theta=0, tol=1e-10)
 tdccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
@@ -65,7 +66,7 @@ system.set_time_evolution_operator(
 
 tdccsd.set_initial_conditions()
 dt = 1e-2
-T = 10
+T = 5
 num_steps = int(T // dt) + 1
 t_stop_laser = int(laser_duration // dt)
 
@@ -73,18 +74,29 @@ time_points = np.linspace(0, T, num_steps)
 print(f"Total iterations: {num_steps}")
 
 td_energies = np.zeros(len(time_points))
+dip_z = np.zeros(len(time_points))
 # td_energies_imag = np.zeros(len(time_points))
 td_energies[0] = tdccsd.compute_energy()
 
 for i, amp in enumerate(tqdm.tqdm(tdccsd.solve(time_points))):
-    # t_1, t_2, l_1, l_2 = amp
+    t, l = amp
     energy = tdccsd.compute_energy()
     td_energies[i + 1] = energy.real
     # td_energies_imag[i + 1] = energy.imag
+    rho_qp = tdccsd.compute_one_body_density_matrix()
+    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
+
+    z = system.dipole_moment[2].copy()
+    dip_z[i + 1] = (np.einsum("qp,pq->", rho_qp_hermitian, z)).real
 
 plt.figure()
-plt.plot(time_points[time_points > laser_duration], td_energies[time_points > laser_duration])
-plt.title("Energy after laser is turned off")
+plt.plot(time_points, td_energies)
+plt.title("Time-dependent energy")
+plt.grid()
+
+plt.figure()
+plt.plot(time_points, dip_z)
+plt.title("Induced dipole moment")
 plt.grid()
 
 plt.show()
