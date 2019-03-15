@@ -94,6 +94,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             warn = warn.format(np.trace(rho_qp), self.n)
             warnings.warn(warn)
 
+        # DEPRECIATED!?
+        # 'OneDimensionalHarmonicOscillator' has not attribute 'bra_spf'
+        # But is should? It inherits from QuantumSystem
         rho = compute_particle_density(
             rho_qp, self.system.bra_spf, self.system.spf, np=np
         )
