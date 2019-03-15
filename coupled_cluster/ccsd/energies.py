@@ -37,10 +37,8 @@ def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
 
 def compute_time_dependent_energy(f, u, t_1, t_2, l_1, l_2, o, v, np):
     energy = compute_ccsd_ground_state_energy(f, u, t_1, t_2, o, v, np=np)
-    rhs_t_1 = compute_t_1_amplitudes(f, u, t_1, t_2, o, v, np=np)
-    rhs_t_2 = compute_t_2_amplitudes(f, u, t_1, t_2, o, v, np=np)
-    # TODO: Another energy computation guy/friend/buddy here.
-
+    energy += lagrangian_functional(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
+    
     return energy
 
 
