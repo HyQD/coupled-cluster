@@ -37,10 +37,10 @@ def test_ground_state(ccd, ccsd_sans_singles, t_kwargs):
     np.testing.assert_allclose(ccsd.l_1, np.zeros_like(ccsd.l_1), atol=1e-10)
     np.testing.assert_allclose(ccsd.l_2, ccd.l_2, atol=1e-10)
 
-    rho_ccd = ccd.compute_particle_density()
-    rho_ccsd = ccsd.compute_particle_density()
+    # rho_ccd = ccd.compute_particle_density()
+    # rho_ccsd = ccsd.compute_particle_density()
 
-    np.testing.assert_allclose(rho_ccsd, rho_ccd, atol=1e-10)
+    # np.testing.assert_allclose(rho_ccsd, rho_ccd, atol=1e-10)
 
 
 @pytest.mark.skip
