@@ -115,3 +115,6 @@ venv.bak/
 
 # Travis files
 miniconda.sh
+
+# F-ing stupid mac folder directory thingy
+.DS_Store
