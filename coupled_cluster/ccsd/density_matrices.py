@@ -20,7 +20,7 @@ def add_rho_ba(t_1, t_2, l_1, l_2, o, v, out, np):
     """
 
     out[v, v] += np.dot(t_1, l_1)  # ab -> ba
-    out[v, v] -= (0.5) * np.tensordot(
+    out[v, v] += (0.5) * np.tensordot(
         l_2, t_2, axes=((0, 1, 3), (2, 3, 1))
     ).transpose()  # ab???
 
@@ -41,28 +41,22 @@ def add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np):
         rho^{a}_{i} = (-1) l^{i}_{a} t^{a}_{j} t^{b}_{i} + l^{i}_{a} t^{ab}_{ij}
             + (0.5) l^{ij}_{ab} t^{a}_{k} t^{bc}_{ij}
             + (0.5) l^{ij}_{ab} t^{c}_{i} t^{ab}_{jk} + t^{a}_{i}
+
+        alternative first line:
+        l^{i}_{a} ( t^{ab}_{ij} - t^{b}_{i} t^{a}_{j} )
     
     """
 
-    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0)))  # ij
-    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(
-        1, 0
-    )  # jb -> bj (ai)
+    out[v, o] += t_1
 
-    term += np.tensordot(l_1, t_2, axes=((0, 1), (2, 0)))  # bi (ai)
+    term = t_2 - np.einsum("bi, aj->abij", t_1, t_1)
+    out[v, o] += np.tensordot(l_1, term, axes=((0, 1), (3, 1)))
 
-    term2 = (0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijbk
-    term2 = np.tensordot(term2, t_2, axes=((0, 1, 2), (2, 3, 1))).transpose(
-        1, 0
-    )  # kc -> ck (ai)
-    term += term2
+    term = (0.5) * np.tensordot(t_1, l_2, axes=((0), (3))) # ikjc
+    out[v, o] += np.tensordot(term, t_2, axes=((1, 2, 3), (2, 3, 1))).transpose() # ia->ai
 
-    term2 = (0.5) * np.tensordot(l_2, t_1, axes=((0), (1)))  # jabc
-    term2 = np.tensordot(term2, t_2, axes=((0, 1, 2), (2, 0, 1)))  # ck (ai)
-    term += term2
-
-    out[v, o] += term + t_1
-
+    term = -(0.5) * np.tensordot(t_1, l_2, axes=((1), (1))) # akcb
+    out[v, o] += np.tensordot(term, t_2, axes=((1, 2, 3), (2, 0, 1))) # ai
 
 def add_rho_ji(t_1, t_2, l_1, l_2, o, v, out, np):
     """Function for adding the o-o part of the one-body density matrix
