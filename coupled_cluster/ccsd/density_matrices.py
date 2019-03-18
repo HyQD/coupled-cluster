@@ -52,11 +52,14 @@ def add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np):
     term = t_2 - np.einsum("bi, aj->abij", t_1, t_1)
     out[v, o] += np.tensordot(l_1, term, axes=((0, 1), (3, 1)))
 
-    term = (0.5) * np.tensordot(t_1, l_2, axes=((0), (3))) # ikjc
-    out[v, o] += np.tensordot(term, t_2, axes=((1, 2, 3), (2, 3, 1))).transpose() # ia->ai
+    term = (0.5) * np.tensordot(t_1, l_2, axes=((0), (3)))  # ikjc
+    out[v, o] += np.tensordot(
+        term, t_2, axes=((1, 2, 3), (2, 3, 1))
+    ).transpose()  # ia->ai
 
-    term = -(0.5) * np.tensordot(t_1, l_2, axes=((1), (1))) # akcb
-    out[v, o] += np.tensordot(term, t_2, axes=((1, 2, 3), (2, 0, 1))) # ai
+    term = -(0.5) * np.tensordot(t_1, l_2, axes=((1), (1)))  # akcb
+    out[v, o] += np.tensordot(term, t_2, axes=((1, 2, 3), (2, 0, 1)))  # ai
+
 
 def add_rho_ji(t_1, t_2, l_1, l_2, o, v, out, np):
     """Function for adding the o-o part of the one-body density matrix

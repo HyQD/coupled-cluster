@@ -51,8 +51,9 @@ def test_one_body_density(zanghellini_system, np=np):
     )
 
     np.testing.assert_allclose(rho_qp[v, o], rho_est[v, o])
-    
+
     np.testing.assert_allclose(rho_qp, rho_est, atol=1e-7)
+
 
 def test_v_o_term(zanghellini_system):
 
@@ -67,7 +68,7 @@ def test_v_o_term(zanghellini_system):
 
     term_1 = np.tensordot(
         l_1, t_2 - np.einsum("bi, aj -> abij", t_1, t_1), axes=((0, 1), (3, 1))
-    ) 
+    )
 
     term = t_2 - np.einsum("bi, aj->abij", t_1, t_1)
     term_2 = np.tensordot(l_1, term, axes=((0, 1), (3, 1)))
@@ -76,10 +77,12 @@ def test_v_o_term(zanghellini_system):
 
     term_1 = 0.5 * np.einsum(
         "bi, kjcb, ackj -> ai", t_1, l_2, t_2, optimize=True
-    ) 
+    )
 
     term = 0.5 * np.tensordot(t_1, l_2, axes=((0), (3)))
-    term_2 = np.tensordot(term, t_2, axes=((1, 2, 3), (2, 3, 1))).transpose() # ia->ai
+    term_2 = np.tensordot(
+        term, t_2, axes=((1, 2, 3), (2, 3, 1))
+    ).transpose()  # ia->ai
 
     np.testing.assert_allclose(term_1, term_2)
 
@@ -87,8 +90,7 @@ def test_v_o_term(zanghellini_system):
         "aj, kjcb, cbki -> ai", t_1, l_2, t_2, optimize=True
     )
 
-    term = -(0.5) * np.tensordot(t_1, l_2, axes=((1), (1))) # akcb
-    term_2 = np.tensordot(term, t_2, axes=((1, 2, 3), (2, 0, 1))) # ai
+    term = -(0.5) * np.tensordot(t_1, l_2, axes=((1), (1)))  # akcb
+    term_2 = np.tensordot(term, t_2, axes=((1, 2, 3), (2, 0, 1)))  # ai
 
     np.testing.assert_allclose(term_1, term_2)
-
