@@ -76,7 +76,9 @@ dip_z = np.zeros(len(time_points))
 # td_energies_imag = np.zeros(len(time_points))
 td_energies[0] = tdccsd.compute_energy()
 
-for i, amp in tqdm.tqdm(enumerate(tdccsd.solve(time_points)), total=num_steps-1):
+for i, amp in tqdm.tqdm(
+    enumerate(tdccsd.solve(time_points)), total=num_steps - 1
+):
     t, l = amp
     energy = tdccsd.compute_energy()
     td_energies[i + 1] = energy.real
