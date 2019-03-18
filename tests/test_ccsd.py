@@ -1740,6 +1740,11 @@ def test_add_d12c_l(large_system_ccsd):
 
 
 def test_one_body_density_matrix(iterated_ccsd_amplitudes):
+    try:
+        from tdhf import HartreeFock
+    except ImportError:
+        pytest.skip("Cannot import module tdhf")
+
     ccsd_list = iterated_ccsd_amplitudes
 
     for ccsd in ccsd_list:
