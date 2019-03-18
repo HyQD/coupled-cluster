@@ -19,10 +19,10 @@ def add_rho_ba(t_1, t_2, l_1, l_2, o, v, out, np):
 
     """
 
-    term = np.tensordot(l_1, t_1, axes=((0), (1)))  # ab
-    out[v, v] += term - (0.5) * np.tensordot(
-        l_2, t_2, axes=((0, 1, 3), (2, 3, 0))
-    )  # ac
+    out[v, v] += np.dot(t_1, l_1)  # ab -> ba
+    out[v, v] -= (0.5) * np.tensordot(
+        l_2, t_2, axes=((0, 1, 3), (2, 3, 1))
+    ).transpose()  # ab???
 
 
 def add_rho_ia(l_1, o, v, out, np):

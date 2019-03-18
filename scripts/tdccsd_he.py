@@ -69,6 +69,8 @@ T = 5
 num_steps = int(T // dt) + 1
 t_stop_laser = int(laser_duration // dt)
 
+print(f"Laser stops @ {t_stop_laser}")
+
 time_points = np.linspace(0, T, num_steps)
 
 td_energies = np.zeros(len(time_points))
@@ -76,7 +78,9 @@ dip_z = np.zeros(len(time_points))
 # td_energies_imag = np.zeros(len(time_points))
 td_energies[0] = tdccsd.compute_energy()
 
-for i, amp in tqdm.tqdm(enumerate(tdccsd.solve(time_points)), total=num_steps-1):
+for i, amp in tqdm.tqdm(
+    enumerate(tdccsd.solve(time_points)), total=num_steps - 1
+):
     t, l = amp
     energy = tdccsd.compute_energy()
     td_energies[i + 1] = energy.real

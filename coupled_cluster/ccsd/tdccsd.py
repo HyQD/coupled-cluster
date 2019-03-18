@@ -57,7 +57,6 @@ class TDCCSD(TimeDependentCoupledCluster):
     def compute_time_dependent_overlap(self):
         t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
 
-        # print(t_1)
         assert not self.np.any(self.np.isnan(t_1))
         assert not self.np.any(self.np.isnan(t_2))
         assert not self.np.any(self.np.isnan(l_1))
