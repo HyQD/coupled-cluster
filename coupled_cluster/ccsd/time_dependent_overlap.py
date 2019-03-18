@@ -11,6 +11,7 @@ def compute_time_dependent_overlap(
     psi_t_0 -= np.einsum("ijab, ai, bj ->", l_2, t_1, t_1_0, optimize=True)
     psi_t_0 -= 0.5 * np.einsum("ijab, aj, bi ->", l_2, t_1, t_1, optimize=True)
     psi_t_0 -= 0.25 * np.einsum("ijab, abij ->", l_2, t_2)
+
     psi_0_t = 1
     psi_0_t += np.einsum("ia, ai ->", l_1_0, t_1)
     psi_0_t -= np.einsum("ia, ai ->", l_1_0, t_1_0)
