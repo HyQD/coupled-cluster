@@ -2,7 +2,6 @@ import numpy as np
 from coupled_cluster.ccsd.tdccsd import TDCCSD
 
 
-@pytest.mark.skip
 def test_one_body_density(zanghellini_system, np=np):
 
     zang_tdccsd = TDCCSD(zanghellini_system, np=np, verbose=True)
@@ -52,5 +51,44 @@ def test_one_body_density(zanghellini_system, np=np):
     )
 
     np.testing.assert_allclose(rho_qp[v, o], rho_est[v, o])
-
+    
     np.testing.assert_allclose(rho_qp, rho_est, atol=1e-7)
+
+def test_v_o_term(zanghellini_system):
+
+    zang_tdccsd = TDCCSD(zanghellini_system, np=np, verbose=True)
+
+    t_kwargs = dict(theta=0.8)
+    zang_tdccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
+
+    zang_tdccsd.set_initial_conditions()
+
+    t_1, t_2, l_1, l_2, = zang_tdccsd.amplitudes.unpack()
+
+    term_1 = np.tensordot(
+        l_1, t_2 - np.einsum("bi, aj -> abij", t_1, t_1), axes=((0, 1), (3, 1))
+    ) 
+
+    term = t_2 - np.einsum("bi, aj->abij", t_1, t_1)
+    term_2 = np.tensordot(l_1, term, axes=((0, 1), (3, 1)))
+
+    np.testing.assert_allclose(term_1, term_2)
+
+    term_1 = 0.5 * np.einsum(
+        "bi, kjcb, ackj -> ai", t_1, l_2, t_2, optimize=True
+    ) 
+
+    term = 0.5 * np.tensordot(t_1, l_2, axes=((0), (3)))
+    term_2 = np.tensordot(term, t_2, axes=((1, 2, 3), (2, 3, 1))).transpose() # ia->ai
+
+    np.testing.assert_allclose(term_1, term_2)
+
+    term_1 = -0.5 * np.einsum(
+        "aj, kjcb, cbki -> ai", t_1, l_2, t_2, optimize=True
+    )
+
+    term = -(0.5) * np.tensordot(t_1, l_2, axes=((1), (1))) # akcb
+    term_2 = np.tensordot(term, t_2, axes=((1, 2, 3), (2, 0, 1))) # ai
+
+    np.testing.assert_allclose(term_1, term_2)
+
