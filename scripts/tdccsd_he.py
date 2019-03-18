@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib
+
 matplotlib.use("TKAgg")
 import matplotlib.pyplot as plt
 import tqdm
@@ -46,21 +47,19 @@ hf = HartreeFock(system, verbose=True)
 C = hf.scf(tolerance=1e-15)
 system.change_basis(C)
 
-integrator = GaussIntegrator(s=3,np=np, eps=1e-6)
-#integrator = RungeKutta4(np=np)
+integrator = GaussIntegrator(s=3, np=np, eps=1e-6)
+# integrator = RungeKutta4(np=np)
 tdccsd = TDCCSD(system, integrator=integrator, np=np, verbose=True)
 t_kwargs = dict(theta=0, tol=1e-10)
 tdccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
-print(
-    f"Ground state CCSD energy: {tdccsd.compute_ground_state_energy()}"
-)
+print(f"Ground state CCSD energy: {tdccsd.compute_ground_state_energy()}")
 
 polarization = np.zeros(3)
 polarization[2] = 1
 system.set_time_evolution_operator(
     LaserField(
         LaserPulse(td=laser_duration, omega=omega, E=E),
-        polarization_vector=polarization
+        polarization_vector=polarization,
     )
 )
 
