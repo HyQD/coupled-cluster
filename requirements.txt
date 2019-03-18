@@ -31,6 +31,3 @@ matplotlib
 
 # Install black
 black
-
-# Ensure tornado version
-tornado == 5.1.1
