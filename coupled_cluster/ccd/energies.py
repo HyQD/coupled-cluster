@@ -16,34 +16,13 @@ def compute_ground_state_energy_correction(u, t, o, v, np):
 
 
 def compute_time_dependent_energy(f, u, t, l, o, v, np):
-    # import time
-
     energy = compute_reference_energy(f, u, o, v, np=np)
-    # energy += lagrangian_funtional(
-    #    t.transpose(2, 3, 0, 1), l, f, u, o, v, np=np
-    # )
-    energy += lagrangian_functional(f, u, t, l, o, v, np=np)
-    # t0 = time.time()
-    # lagrangian_trans = lagrangian_funtional_trans(
-    #    t.transpose(2, 3, 0, 1), l, f, u, o, v, np=np
-    # )
-    # t1 = time.time()
-    # total = t1 - t0
-    # print(f"Trans: {total} sec")
-    # t0 = time.time()
-    # lagrangian = lagrangian_funtional(f, u, t, l, o, v, np=np)
-    # t1 = time.time()
-    # total = t1 - t0
-    # print(f"Non  : {total} sec")
-
-    # assert abs(lagrangian_trans - lagrangian) < 1e-12
-
-    # energy += lagrangian
+    energy += compute_lagrangian_functional(f, u, t, l, o, v, np=np)
 
     return energy
 
 
-def lagrangian_functional(f, u, t, l, o, v, np):
+def compute_lagrangian_functional(f, u, t, l, o, v, np):
     """
     Eq [A8] in Kvaal sans the reference energy
 

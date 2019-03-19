@@ -3,7 +3,7 @@ from coupled_cluster.ccsd.rhs_t import (
     compute_t_1_amplitudes,
     compute_t_2_amplitudes,
 )
-from coupled_cluster.ccd.energies import lagrangian_functional as ccd_functional
+from coupled_cluster.ccd.energies import compute_lagrangian_functional as ccd_functional
 
 
 def compute_ccsd_ground_state_energy(f, u, t_1, t_2, o, v, np):
