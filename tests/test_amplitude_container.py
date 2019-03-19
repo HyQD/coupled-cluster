@@ -206,3 +206,35 @@ def test_multiplication_double_amp_oaccvector(large_system_ccsd):
     np.testing.assert_allclose(l_2 * l_2, new_l[1], atol=1e-10)
     np.testing.assert_allclose(C * C, new_C, atol=1e-10)
     np.testing.assert_allclose(C_tilde * C_tilde, new_C_tilde, atol=1e-10)
+
+
+def test_amplitude_divide_and_join(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    amp_container = AmplitudeContainer([t_1, t_2], [l_1, l_2], np=np)
+    concat_amp = amp_container.asarray()
+
+    i = 0
+    for amp in amp_container.unpack():
+
+        np.testing.assert_allclose(amp.ravel(), concat_amp[i : i + amp.size])
+
+        i += amp.size
+
+    some_number = np.random.rand()
+    concat_amp += some_number
+    amp_container = amp_container + some_number
+    new_amp_container = AmplitudeContainer.from_array(amp_container, concat_amp)
+
+    for amp, amp_e in zip(amp_container.unpack(), new_amp_container.unpack()):
+        np.testing.assert_allclose(amp, amp_e)
+
+
+def test_splat(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    amp_container = AmplitudeContainer([t_1, t_2], [l_1, l_2], np=np)
+    t_sp, l_sp = amp_container
+
+    for amp, amp_e in zip(amp_container.unpack(), [*t_sp, *l_sp]):
+        np.testing.assert_allclose(amp, amp_e)
