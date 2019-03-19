@@ -39,7 +39,7 @@ He = """
 
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-6}
 omega = 2.873_564_3
-E = 10
+E = 5
 laser_duration = 5
 
 system = construct_psi4_system(He, options)
@@ -64,7 +64,7 @@ system.set_time_evolution_operator(
 )
 
 tdccsd.set_initial_conditions()
-dt = 1e-2
+dt = 1e-3
 T = 5
 num_steps = int(T // dt) + 1
 t_stop_laser = int(laser_duration // dt)
