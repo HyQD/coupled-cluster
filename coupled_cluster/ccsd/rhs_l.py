@@ -77,6 +77,7 @@ def compute_l_2_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
     add_d11c_l(u, l_2, t_1, o, v, out, np=np)
     add_d12a_l(u, l_2, t_1, o, v, out, np=np)
     add_d12b_l(u, l_2, t_1, o, v, out, np=np)
+    add_d12c_l(u, l_2, t_1, o, v, out, np=np)
 
     return out
 
