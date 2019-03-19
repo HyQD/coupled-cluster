@@ -262,7 +262,7 @@ def t_kwargs():
 
 @pytest.fixture
 def l_kwargs():
-    theta = 0.9
+    theta = 0.8
     tol = 1e-4
 
     return {"theta": theta, "tol": tol}
