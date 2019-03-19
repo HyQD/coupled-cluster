@@ -4,6 +4,9 @@ from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
 from coupled_cluster.ccd import CoupledClusterDoubles
 from tdhf import HartreeFock
 
+import matplotlib
+
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
 
