@@ -4,7 +4,6 @@ import numpy as np
 from coupled_cluster.ccd import TDCCD
 
 
-@pytest.mark.skip
 def test_time_dependent_observables(
     zanghellini_system,
     tdccd_zanghellini_ground_state_energy,
