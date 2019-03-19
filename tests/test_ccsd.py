@@ -1756,7 +1756,9 @@ def test_auto_gen_rhs(large_system_ccsd):
     t_2_auto = T2_RHS(t_1.T.copy(), t_2.transpose(2, 3, 0, 1).copy(), f, u)
     t_2_diag = compute_t_2_amplitudes(f, u, t_1, t_2, o, v, np=np)
 
-    np.testing.assert_allclose(t_2_diag, t_2_auto.transpose(2, 3, 0, 1), atol=1e-10)
+    np.testing.assert_allclose(
+        t_2_diag, t_2_auto.transpose(2, 3, 0, 1), atol=1e-10
+    )
 
     l_1_auto = L1_RHS(
         t_1.T.copy(), t_2.transpose(2, 3, 0, 1).copy(), l_1, l_2, f, u
