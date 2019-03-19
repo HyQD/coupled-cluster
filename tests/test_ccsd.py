@@ -6,6 +6,8 @@ from quantum_systems import construct_psi4_system
 from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
 import coupled_cluster.ccd.rhs_l as ccd_l
 from coupled_cluster.ccsd.rhs_t import (
+    compute_t_1_amplitudes,
+    compute_t_2_amplitudes,
     add_s1_t,
     add_s2a_t,
     add_s2b_t,
@@ -43,6 +45,8 @@ from coupled_cluster.ccsd.rhs_t import (
     add_d9_t,
 )
 from coupled_cluster.ccsd.rhs_l import (
+    compute_l_1_amplitudes,
+    compute_l_2_amplitudes,
     add_s1_l,
     add_s2a_l,
     add_s2b_l,
@@ -1736,6 +1740,39 @@ def test_add_d12c_l(large_system_ccsd):
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
 
+def test_auto_gen_rhs(large_system_ccsd):
+    t_1, t_2, l_1, l_2, cs = large_system_ccsd
+
+    f = cs.f
+    u = cs.u
+    o = cs.o
+    v = cs.v
+
+    t_1_auto = T1_RHS(t_1.T.copy(), t_2.transpose(2, 3, 0, 1).copy(), f, u)
+    t_1_diag = compute_t_1_amplitudes(f, u, t_1, t_2, o, v, np=np)
+
+    np.testing.assert_allclose(t_1_diag, t_1_auto.T)
+
+    t_2_auto = T2_RHS(t_1.T.copy(), t_2.transpose(2, 3, 0, 1).copy(), f, u)
+    t_2_diag = compute_t_2_amplitudes(f, u, t_1, t_2, o, v, np=np)
+
+    np.testing.assert_allclose(t_2_diag, t_2_auto.transpose(2, 3, 0, 1), atol=1e-10)
+
+    l_1_auto = L1_RHS(
+        t_1.T.copy(), t_2.transpose(2, 3, 0, 1).copy(), l_1, l_2, f, u
+    )
+    l_1_diag = compute_l_1_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
+
+    np.testing.assert_allclose(l_1_diag, l_1_auto)
+
+    l_2_auto = L2_RHS(
+        t_1.T.copy(), t_2.transpose(2, 3, 0, 1).copy(), l_1, l_2, f, u
+    )
+    l_2_diag = compute_l_2_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
+
+    np.testing.assert_allclose(l_2_diag, l_2_auto, atol=1e-8)
+
+
 # Density matrix tests
 
 
@@ -1779,3 +1816,906 @@ def test_lambda_amplitude_iterations(tdho):
     cc_scheme.iterate_t_amplitudes()
 
     assert True
+
+
+def T1_RHS(T1, T2, F, W):
+    N, L = T1.shape[0], F.shape[0]
+    o, v = slice(0, N), slice(N, L)
+
+    result = np.einsum(
+        "Ic,Ac->IA", T1, F[v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += np.einsum(
+        "kc,AkIc->IA", T1, W[v, o, o, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += np.einsum(
+        "IkAc,kc->IA", T2, F[o, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += 0.5 * np.einsum(
+        "Ikdc,Akdc->IA", T2, W[v, o, v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += -1.0 * np.einsum(
+        "kA,kI->IA", T1, F[o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += -0.5 * np.einsum(
+        "lkAc,lkIc->IA", T2, W[o, o, o, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += np.einsum(
+        "kc,Id,Akdc->IA",
+        T1,
+        T1,
+        W[v, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += np.einsum(
+        "kc,IlAd,lkdc->IA",
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "kA,Ildc,lkdc->IA",
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "Ic,lkAd,lkdc->IA",
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "kA,Ic,kc->IA",
+        T1,
+        T1,
+        F[o, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "lA,kc,lkIc->IA",
+        T1,
+        T1,
+        W[o, o, o, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "lA,kc,Id,lkdc->IA",
+        T1,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 3), (1, 2), (0, 1)],
+    )
+    result += np.einsum("AI->IA", F[v, o], optimize=["einsum_path", (0,)])
+    return result
+
+
+def T2_RHS(T1, T2, F, W):
+    N, L = T1.shape[0], F.shape[0]
+    o, v = slice(0, N), slice(N, L)
+
+    result = 0.5 * np.einsum(
+        "lkAB,lkIJ->IJAB", T2, W[o, o, o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += 0.5 * np.einsum(
+        "IJdc,ABdc->IJAB", T2, W[v, v, v, v], optimize=["einsum_path", (0, 1)]
+    )
+    temp = np.einsum(
+        "kA,BkIJ->IJAB", T1, W[v, o, o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = np.einsum(
+        "IJAc,Bc->IJAB", T2, F[v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += -1.0 * np.einsum(
+        "kA,lB,lkIJ->IJAB",
+        T1,
+        T1,
+        W[o, o, o, o],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "Ic,Jd,ABdc->IJAB",
+        T1,
+        T1,
+        W[v, v, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    temp = -1.0 * np.einsum(
+        "Ic,ABJc->IJAB", T1, W[v, v, o, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = -1.0 * np.einsum(
+        "IkAB,kJ->IJAB", T2, F[o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += 0.25 * np.einsum(
+        "lkAB,IJdc,lkdc->IJAB",
+        T2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    temp = np.einsum(
+        "kA,IJBc,kc->IJAB",
+        T1,
+        T2,
+        F[o, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = np.einsum(
+        "Ic,JkAB,kc->IJAB",
+        T1,
+        T2,
+        F[o, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = np.einsum(
+        "kc,IJAd,Bkdc->IJAB",
+        T1,
+        T2,
+        W[v, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = np.einsum(
+        "IkAc,BkJc->IJAB", T2, W[v, o, o, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = 0.5 * np.einsum(
+        "kA,IJdc,Bkdc->IJAB",
+        T1,
+        T2,
+        W[v, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = 0.5 * np.einsum(
+        "IJAc,lkBd,lkdc->IJAB",
+        T2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = -1.0 * np.einsum(
+        "kc,IlAB,lkJc->IJAB",
+        T1,
+        T2,
+        W[o, o, o, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = -1.0 * np.einsum(
+        "JkAc,IlBd,lkdc->IJAB",
+        T2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += -0.5 * np.einsum(
+        "kA,lB,IJdc,lkdc->IJAB",
+        T1,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (2, 3), (0, 2), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "Ic,Jd,lkAB,lkdc->IJAB",
+        T1,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 3), (0, 2), (0, 1)],
+    )
+    temp = -0.5 * np.einsum(
+        "Ic,lkAB,lkJc->IJAB",
+        T1,
+        T2,
+        W[o, o, o, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = -0.5 * np.einsum(
+        "IlAB,Jkdc,lkdc->IJAB",
+        T2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += np.einsum(
+        "kA,lB,Ic,Jd,lkdc->IJAB",
+        T1,
+        T1,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (2, 4), (2, 3), (0, 2), (0, 1)],
+    )
+    temp = np.einsum(
+        "kA,lB,Ic,lkJc->IJAB",
+        T1,
+        T1,
+        T1,
+        W[o, o, o, v],
+        optimize=["einsum_path", (2, 3), (0, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = np.einsum(
+        "lA,kc,IJBd,lkdc->IJAB",
+        T1,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 3), (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = np.einsum(
+        "Ic,JkAd,Bkdc->IJAB",
+        T1,
+        T2,
+        W[v, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = np.einsum(
+        "kc,Id,JlAB,lkdc->IJAB",
+        T1,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 3), (0, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = -1.0 * np.einsum(
+        "kA,Ic,Jd,Bkdc->IJAB",
+        T1,
+        T1,
+        T1,
+        W[v, o, v, v],
+        optimize=["einsum_path", (1, 3), (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = -1.0 * np.einsum(
+        "kA,Ic,BkJc->IJAB",
+        T1,
+        T1,
+        W[v, o, o, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = -1.0 * np.einsum(
+        "kA,IlBc,lkJc->IJAB",
+        T1,
+        T2,
+        W[o, o, o, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = -1.0 * np.einsum(
+        "kA,Ic,JlBd,lkdc->IJAB",
+        T1,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (2, 3), (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    result += np.einsum(
+        "ABIJ->IJAB", W[v, v, o, o], optimize=["einsum_path", (0,)]
+    )
+    return result
+
+
+def L1_RHS(T1, T2, L1, L2, F, W):
+    N, L = T1.shape[0], F.shape[0]
+    o, v = slice(0, N), slice(N, L)
+
+    result = np.einsum(
+        "Ic,cA->IA", L1, F[v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += np.einsum(
+        "kc,IcAk->IA", L1, W[o, v, v, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += np.einsum(
+        "kc,IkAc->IA", T1, W[o, o, v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += 0.5 * np.einsum(
+        "Ikdc,dcAk->IA", L2, W[v, v, v, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += -1.0 * np.einsum(
+        "kA,Ik->IA", L1, F[o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += -0.5 * np.einsum(
+        "lkAc,Iclk->IA", L2, W[o, v, o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += np.einsum(
+        "Ic,kd,ckAd->IA",
+        L1,
+        T1,
+        W[v, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += np.einsum(
+        "kA,lc,Ilck->IA",
+        L1,
+        T1,
+        W[o, o, v, o],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += np.einsum(
+        "kc,kd,IcAd->IA",
+        L1,
+        T1,
+        W[o, v, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += np.einsum(
+        "kc,lkdc,IlAd->IA",
+        L1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += np.einsum(
+        "lkAc,kd,Icdl->IA",
+        L2,
+        T1,
+        W[o, v, v, o],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += np.einsum(
+        "lkAc,mkdc,Imdl->IA",
+        L2,
+        T2,
+        W[o, o, v, o],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "Ic,lkdc,lkAd->IA",
+        L1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "kA,lkdc,Ildc->IA",
+        L1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "Ikdc,ke,dcAe->IA",
+        L2,
+        T1,
+        W[v, v, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "lkAc,mc,Imlk->IA",
+        L2,
+        T1,
+        W[o, o, o, o],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "Ic,kc,kA->IA",
+        L1,
+        T1,
+        F[o, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "kA,kc,Ic->IA",
+        L1,
+        T1,
+        F[o, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "kc,lc,IlAk->IA",
+        L1,
+        T1,
+        W[o, o, v, o],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "Ikdc,lc,dlAk->IA",
+        L2,
+        T1,
+        W[v, o, v, o],
+        optimize=["einsum_path", (0, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "Ikdc,lkce,dlAe->IA",
+        L2,
+        T2,
+        W[v, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "Ikdc,lkdc,lA->IA",
+        L2,
+        T2,
+        F[o, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "lkAc,lkdc,Id->IA",
+        L2,
+        T2,
+        F[o, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "lkdc,lkce,IdAe->IA",
+        L2,
+        T2,
+        W[o, v, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "lkdc,mkdc,ImAl->IA",
+        L2,
+        T2,
+        W[o, o, v, o],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += -0.25 * np.einsum(
+        "lkAc,lkde,Icde->IA",
+        L2,
+        T2,
+        W[o, v, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += 0.25 * np.einsum(
+        "Ikdc,lmdc,lmAk->IA",
+        L2,
+        T2,
+        W[o, o, v, o],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += np.einsum(
+        "Ic,kc,ld,lkAd->IA",
+        L1,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (2, 3), (0, 1), (0, 1)],
+    )
+    result += np.einsum(
+        "kA,kc,ld,Ildc->IA",
+        L1,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (2, 3), (1, 2), (0, 1)],
+    )
+    result += np.einsum(
+        "lkAc,kd,lmce,Imde->IA",
+        L2,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "Ikdc,mc,ld,lmAk->IA",
+        L2,
+        T1,
+        T1,
+        W[o, o, v, o],
+        optimize=["einsum_path", (0, 1), (1, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "Ikdc,le,mkdc,lmAe->IA",
+        L2,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "kc,lc,kd,IlAd->IA",
+        L1,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "Ikdc,lc,ke,dlAe->IA",
+        L2,
+        T1,
+        T1,
+        W[v, o, v, v],
+        optimize=["einsum_path", (0, 1), (1, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "Ikdc,lc,mkde,lmAe->IA",
+        L2,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
+    )
+    result += -1.0 * np.einsum(
+        "lkAc,mc,kd,Imdl->IA",
+        L2,
+        T1,
+        T1,
+        W[o, o, v, o],
+        optimize=["einsum_path", (2, 3), (0, 2), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "lkAc,ld,ke,Icde->IA",
+        L2,
+        T1,
+        T1,
+        W[o, v, v, v],
+        optimize=["einsum_path", (1, 3), (0, 2), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "lkAc,md,lkce,Imde->IA",
+        L2,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "lkdc,mc,lkde,ImAe->IA",
+        L2,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 2), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "lkdc,ke,lmdc,ImAe->IA",
+        L2,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (0, 1), (0, 1)],
+    )
+    result += 0.25 * np.einsum(
+        "Ikdc,ke,lmdc,lmAe->IA",
+        L2,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 2), (1, 2), (0, 1)],
+    )
+    result += 0.25 * np.einsum(
+        "lkAc,mc,lkde,Imde->IA",
+        L2,
+        T1,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (2, 3), (0, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "Ikdc,mc,ld,ke,lmAe->IA",
+        L2,
+        T1,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 3), (1, 2), (0, 1)],
+    )
+    result += 0.5 * np.einsum(
+        "lkAc,mc,ld,ke,Imde->IA",
+        L2,
+        T1,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 2), (1, 2), (0, 1)],
+    )
+    result += np.einsum("IA->IA", F[o, v], optimize=["einsum_path", (0,)])
+    return result
+
+
+def L2_RHS(T1, T2, L1, L2, F, W):
+    N, L = T1.shape[0], F.shape[0]
+    o, v = slice(0, N), slice(N, L)
+
+    result = 0.5 * np.einsum(
+        "IJdc,dcAB->IJAB", L2, W[v, v, v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += 0.5 * np.einsum(
+        "lkAB,IJlk->IJAB", L2, W[o, o, o, o], optimize=["einsum_path", (0, 1)]
+    )
+    temp = np.einsum(
+        "kA,IJBk->IJAB", L1, W[o, o, v, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = np.einsum(
+        "IJAc,cB->IJAB", L2, F[v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = -1.0 * np.einsum(
+        "Ic,JcAB->IJAB", L1, W[o, v, v, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += -1.0 * np.einsum(
+        "IJdc,kc,dkAB->IJAB",
+        L2,
+        T1,
+        W[v, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    temp = -1.0 * np.einsum(
+        "IkAB,Jk->IJAB", L2, F[o, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += -1.0 * np.einsum(
+        "lkAB,kc,IJcl->IJAB",
+        L2,
+        T1,
+        W[o, o, v, o],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += 0.25 * np.einsum(
+        "IJdc,lkdc,lkAB->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += 0.25 * np.einsum(
+        "lkAB,lkdc,IJdc->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    temp = np.einsum(
+        "IA,JB->IJAB", L1, F[o, v], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = np.einsum(
+        "Ic,kc,JkAB->IJAB",
+        L1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = np.einsum(
+        "kA,kc,IJBc->IJAB",
+        L1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = np.einsum(
+        "IJAc,kd,ckBd->IJAB",
+        L2,
+        T1,
+        W[v, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = np.einsum(
+        "IkAB,lc,Jlck->IJAB",
+        L2,
+        T1,
+        W[o, o, v, o],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = np.einsum(
+        "IkAc,JcBk->IJAB", L2, W[o, v, v, o], optimize=["einsum_path", (0, 1)]
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = 0.5 * np.einsum(
+        "IJAc,lkdc,lkBd->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = 0.5 * np.einsum(
+        "IkAB,lkdc,Jldc->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = 0.5 * np.einsum(
+        "Ikdc,lkdc,JlAB->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = 0.5 * np.einsum(
+        "lkAc,lkdc,IJBd->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = -1.0 * np.einsum(
+        "IJAc,kc,kB->IJAB",
+        L2,
+        T1,
+        F[o, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = -1.0 * np.einsum(
+        "IkAB,kc,Jc->IJAB",
+        L2,
+        T1,
+        F[o, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += -0.5 * np.einsum(
+        "IJdc,lc,kd,lkAB->IJAB",
+        L2,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 2), (0, 1)],
+    )
+    result += -0.5 * np.einsum(
+        "lkAB,lc,kd,IJdc->IJAB",
+        L2,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 3), (1, 2), (0, 1)],
+    )
+    temp = np.einsum(
+        "IA,kc,JkBc->IJAB",
+        L1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = np.einsum(
+        "IJAc,kc,ld,lkBd->IJAB",
+        L2,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (2, 3), (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    temp = np.einsum(
+        "IkAB,kc,ld,Jldc->IJAB",
+        L2,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (2, 3), (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    temp = np.einsum(
+        "IkAc,kd,JcBd->IJAB",
+        L2,
+        T1,
+        W[o, v, v, v],
+        optimize=["einsum_path", (1, 2), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = np.einsum(
+        "IkAc,lkdc,JlBd->IJAB",
+        L2,
+        T2,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = -1.0 * np.einsum(
+        "IkAc,lc,JlBk->IJAB",
+        L2,
+        T1,
+        W[o, o, v, o],
+        optimize=["einsum_path", (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    temp = -1.0 * np.einsum(
+        "IkAc,lc,kd,JlBd->IJAB",
+        L2,
+        T1,
+        T1,
+        W[o, o, v, v],
+        optimize=["einsum_path", (0, 1), (0, 1), (0, 1)],
+    )
+    result += temp
+    result += (-1) * np.swapaxes(temp, 0, 1)
+    result += (-1) * np.swapaxes(temp, 2, 3)
+    result += (1) * np.swapaxes(np.swapaxes(temp, 2, 3), 0, 1)
+    result += np.einsum(
+        "IJAB->IJAB", W[o, o, v, v], optimize=["einsum_path", (0,)]
+    )
+
+    return result
