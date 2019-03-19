@@ -50,11 +50,15 @@ def tdho(_omega):
 @pytest.fixture(scope="session")
 def large_system_ccd(_n_large):
     n = _n_large
-    l = l_large
+    l = l_large * 2
     m = l - n
 
-    h = np.random.random((l, l)) + 1j * np.random.random((l, l))
-    u = np.random.random((l, l, l, l)) + 1j * np.random.random((l, l, l, l))
+    h = np.random.random((l // 2, l // 2)) + 1j * np.random.random(
+        (l // 2, l // 2)
+    )
+    u = np.random.random(
+        (l // 2, l // 2, l // 2, l // 2)
+    ) + 1j * np.random.random((l // 2, l // 2, l // 2, l // 2))
     # Make u symmetric
     u = u + u.transpose(1, 0, 3, 2)
 
@@ -72,11 +76,15 @@ def large_system_ccd(_n_large):
 @pytest.fixture(scope="session")
 def large_system_ccsd(_n_large):
     n = _n_large
-    l = l_large
+    l = l_large * 2
     m = l - n
 
-    h = np.random.random((l, l)) + 1j * np.random.random((l, l))
-    u = np.random.random((l, l, l, l)) + 1j * np.random.random((l, l, l, l))
+    h = np.random.random((l // 2, l // 2)) + 1j * np.random.random(
+        (l // 2, l // 2)
+    )
+    u = np.random.random(
+        (l // 2, l // 2, l // 2, l // 2)
+    ) + 1j * np.random.random((l // 2, l // 2, l // 2, l // 2))
     # Make u symmetric
     u = u + u.transpose(1, 0, 3, 2)
 
