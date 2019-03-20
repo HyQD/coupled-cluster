@@ -10,14 +10,7 @@ def he_groundstate_oaccd():
 
 
 def test_he_oaccd_groundstate(helium_system, he_groundstate_oaccd):
-    try:
-        from tdhf import HartreeFock
-    except ImportError:
-        pytest.skip("Cannot import module tdhf")
-
-    hf = HartreeFock(helium_system, verbose=True)
-    C = hf.scf(tolerance=1e-10)
-    helium_system.change_basis(C)
+    helium_system.change_to_hf_basis(verbose=True, tolerance=1e-10)
 
     energy_tol = 1e-8
 

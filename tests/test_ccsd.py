@@ -160,16 +160,8 @@ def iterated_ccsd_amplitudes(
 ):
     ccsd_list = []
     for system in [ccsd_helium_system, ccsd_beryllium_system, ccsd_neon_system]:
-        try:
-            from tdhf import HartreeFock
-
-            hf = HartreeFock(system)
-            C = hf.scf(tolerance=1e-8)
-            system.change_basis(C)
-        except ImportError:
-            warnings.warn("Running without Hartree-Fock basis")
-
-        ccsd = CoupledClusterSinglesDoubles(system, mixer=DIIS, verbose=False)
+        system.change_to_hf_basis(verbose=True, tolerance=1e-8)
+        ccsd = CoupledClusterSinglesDoubles(system, mixer=DIIS, verbose=True)
         ccsd.iterate_t_amplitudes()
         ccsd.iterate_l_amplitudes()
 
@@ -1779,11 +1771,6 @@ def test_auto_gen_rhs(large_system_ccsd):
 
 
 def test_one_body_density_matrix(iterated_ccsd_amplitudes):
-    try:
-        from tdhf import HartreeFock
-    except ImportError:
-        pytest.skip("Cannot import module tdhf")
-
     ccsd_list = iterated_ccsd_amplitudes
 
     for ccsd in ccsd_list:
