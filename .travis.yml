@@ -1,21 +1,27 @@
 language: python
 python:
-    - "3.6"
+- '3.6'
 install:
-    - sudo apt update
-    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-    - bash miniconda.sh -b -p $HOME/miniconda
-    - export PATH="$HOME/miniconda/bin:$PATH"
-    - hash -r
-    - conda config --set always_yes yes --set changeps1 no
-    - conda update -q conda
-
-    # Useful for debugging any issues with conda
-    - conda info -a
-    - conda env create -f environment.yml
-    - source activate cc
+- sudo apt update
+- wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- conda update -q conda
+- conda info -a
+- conda env create -f environment.yml
+- source activate cc
 script:
-    - pytest
+- pytest
 after_success:
-    - black .
-    - bash push_formatting.sh
+  - |
+
+       $(npm bin)/set-up-ssh --key "$encrypted_b81543db4359_key" \
+                             --iv "$encrypted_b81543db4359_iv" \
+                             --path-encrypted-key ".travis/github_deploy_key.enc"
+- black .
+- bash push_formatting.sh
+before_install:
+- openssl aes-256-cbc -K $encrypted_b81543db4359_key -iv $encrypted_b81543db4359_iv
+  -in github_deploy_key.enc -out github_deploy_key -d
