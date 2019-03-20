@@ -118,3 +118,6 @@ miniconda.sh
 
 # F-ing stupid mac folder directory thingy
 .DS_Store
+
+# Private deploy key
+github_deploy_key
