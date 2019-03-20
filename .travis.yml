@@ -15,13 +15,5 @@ install:
 script:
 - pytest
 after_success:
-- |
-
-   $(npm bin)/set-up-ssh --key "$encrypted_b81543db4359_key" \
-                         --iv "$encrypted_b81543db4359_iv" \
-                         --path-encrypted-key ".travis/github_deploy_key.enc"
 - black .
 - bash push_formatting.sh
-before_install:
-- openssl aes-256-cbc -K $encrypted_b81543db4359_key -iv $encrypted_b81543db4359_iv
-  -in .travis/github_deploy_key.enc -out .travis/github_deploy_key -d
