@@ -38,20 +38,13 @@ def test_oatdccd(
     oatdccd_helium_norm_t2,
     oatdccd_helium_norm_l2,
 ):
-    try:
-        from tdhf import HartreeFock
-    except ImportError:
-        pytest.skip("Cannot import module tdhf")
-
     omega = 2.873_564_3
     E = 100  # 0.05-5
     laser_duration = 5
     tol = 1e-7
 
     system = helium_system
-    hf = HartreeFock(system, verbose=True)
-    C = hf.scf(tolerance=1e-8)
-    system.change_basis(C)
+    system.change_to_hf_basis(verbose=True, tolerance=1e-8)
 
     integrator = GaussIntegrator(np=np, eps=1e-10)
     cc_kwargs = dict(verbose=True)

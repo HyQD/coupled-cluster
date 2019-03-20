@@ -58,16 +58,8 @@ def iterated_ccd_amplitudes(
     helium_system = scoped_helium_system
     ccd_list = []
     for system in [helium_system, beryllium_system, neon_system]:
-        try:
-            from tdhf import HartreeFock
-
-            hf = HartreeFock(system)
-            C = hf.scf(tolerance=1e-8)
-            system.change_basis(C)
-        except ImportError:
-            warnings.warn("Running without Hartree-Fock basis")
-
-        ccd = CoupledClusterDoubles(system, verbose=False)
+        system.change_to_hf_basis(verbose=True, tolerance=1e-8)
+        ccd = CoupledClusterDoubles(system, verbose=True)
         ccd.iterate_t_amplitudes(theta=0.9)
         ccd.iterate_l_amplitudes(theta=0.9)
 
@@ -986,17 +978,7 @@ def test_ccd_energy(tdho, ccd_energy):
 def test_ccd_diis_energy(tdho, tdho_ccd_hf_energy, ccd_energy):
     tol = 1e-4
 
-    try:
-        from tdhf import HartreeFock
-
-        hf = HartreeFock(tdho)
-        C = hf.scf(tolerance=1e-15)
-        tdho.change_basis(C)
-
-    except ImportError:
-        warnings.warn("Running without Hartree-Fock basis")
-        tdho_ccd_hf_energy = ccd_energy
-
+    tdho.change_to_hf_basis(verbose=True, tolerance=1e-15)
     cc_scheme = CoupledClusterDoubles(tdho, mixer=DIIS, verbose=True)
     cc_scheme.iterate_t_amplitudes(tol=tol, num_vecs=3)
     energy = cc_scheme.compute_energy()
