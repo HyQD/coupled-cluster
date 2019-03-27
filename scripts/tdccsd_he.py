@@ -73,18 +73,18 @@ print(f"Laser stops @ {t_stop_laser}")
 
 time_points = np.linspace(0, T, num_steps)
 
-td_energies = np.zeros(len(time_points))
+td_energies = np.zeros(len(time_points), dtype=np.complex128)
 dip_z = np.zeros(len(time_points))
-# td_energies_imag = np.zeros(len(time_points))
 td_energies[0] = tdccsd.compute_energy()
+phase = np.zeros_like(td_energies)
 
 for i, amp in tqdm.tqdm(
     enumerate(tdccsd.solve(time_points)), total=num_steps - 1
 ):
     t, l = amp
     energy = tdccsd.compute_energy()
-    td_energies[i + 1] = energy.real
-    # td_energies_imag[i + 1] = energy.imag
+    td_energies[i + 1] = energy
+    phase[i + 1] = t[0][0]
     rho_qp = tdccsd.compute_one_body_density_matrix()
     rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
@@ -92,8 +92,13 @@ for i, amp in tqdm.tqdm(
     dip_z[i + 1] = (np.einsum("qp,pq->", rho_qp_hermitian, z)).real
 
 plt.figure()
-plt.plot(time_points, td_energies)
+plt.plot(time_points, td_energies.real)
 plt.title("Time-dependent energy")
+plt.grid()
+
+plt.figure()
+plt.plot(time_points, np.abs(np.exp(phase)) ** 2)
+plt.title("Phase")
 plt.grid()
 
 plt.figure()
