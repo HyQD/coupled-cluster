@@ -25,4 +25,4 @@ def compute_time_dependent_overlap(t, l, t_t, l_t, np):
 
 
 def compute_orbital_adaptive_time_dependent_overlap(t, l, t_t, l_t, np):
-    pass
+    return 0
