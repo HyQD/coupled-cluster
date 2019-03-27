@@ -1,7 +1,10 @@
 from coupled_cluster.oatdcc import OATDCC
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
-from coupled_cluster.ccd.energies import compute_time_dependent_energy
+from coupled_cluster.ccd.energies import (
+    compute_time_dependent_energy,
+    compute_ccd_ground_state_energy,
+)
 from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
@@ -16,6 +19,9 @@ from coupled_cluster.ccd import OACCD
 class OATDCCD(OATDCC):
     def __init__(self, *args, **kwargs):
         super().__init__(OACCD, *args, **kwargs)
+
+    def rhs_t_0_amplitude(self, *args, **kwargs):
+        return compute_ccd_ground_state_energy(*args, **kwargs)
 
     def rhs_t_amplitudes(self):
         yield compute_t_2_amplitudes
