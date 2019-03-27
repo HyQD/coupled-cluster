@@ -57,10 +57,12 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.cc.iterate_t_amplitudes(*t_args, **t_kwargs)
         self.cc.iterate_l_amplitudes(*l_args, **l_kwargs)
 
-    def set_initial_conditions(self, amplitudes=None):
+    def set_initial_conditions(self, amplitudes=None, sample_t_0=False):
+        self.sample_t_0 = sample_t_0
+
         if amplitudes is None:
             # Create copy of ground state amplitudes for time-integration
-            amplitudes = self.cc.get_amplitudes()
+            amplitudes = self.cc.get_amplitudes(get_t_0=self.sample_t_0)
 
         self._amplitudes = amplitudes
 
@@ -82,6 +84,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             )
 
             yield self._amplitudes
+
+    @abc.abstractmethod
+    def rhs_t_0_amplitude(self, *args, **kwargs):
+        pass
 
     @abc.abstractmethod
     def rhs_t_amplitudes(self):
@@ -147,10 +153,19 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         prev_amp = AmplitudeContainer.from_array(self._amplitudes, prev_amp)
         t_old, l_old = prev_amp
 
+        if self.sample_t_0:
+            t_0_old = t_old.pop(0)
+
         t_new = [
             -1j * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
+
+        if self.sample_t_0:
+            t_0_new = -1j * self.rhs_t_0_amplitude(
+                self.f, self.u, *t_old, self.o, self.v, np=self.np
+            )
+            t_new = [t_0_new, *t_new]
 
         l_new = [
             1j * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)

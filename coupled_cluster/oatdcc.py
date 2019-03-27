@@ -23,10 +23,14 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         self.cc.compute_ground_state(*args, **kwargs)
 
-    def set_initial_conditions(self, amplitudes=None, C=None, C_tilde=None):
+    def set_initial_conditions(
+        self, amplitudes=None, C=None, C_tilde=None, sample_t_0=False
+    ):
+        self.sample_t_0 = sample_t_0
+
         if amplitudes is None:
             # Create copy of ground state amplitudes for time-integration
-            amplitudes = self.cc.get_amplitudes()
+            amplitudes = self.cc.get_amplitudes(get_t_0=self.sample_t_0)
 
         if C is None:
             C = self.np.eye(self.system.l)
@@ -95,12 +99,21 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
+        if self.sample_t_0:
+            t_0_old = t_old.pop(0)
+
         # OATDCC procedure:
         # Do amplitude step
         t_new = [
             -1j * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
+
+        if self.sample_t_0:
+            t_0_new = -1j * self.rhs_t_0_amplitude(
+                self.f, self.u, *t_old, self.o, self.v, np=self.np
+            )
+            t_new = [t_0_new, *t_new]
 
         l_new = [
             1j * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
