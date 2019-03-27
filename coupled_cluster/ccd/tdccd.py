@@ -29,28 +29,28 @@ class TDCCD(TimeDependentCoupledCluster):
         yield compute_l_2_amplitudes
 
     def compute_energy(self):
-        t_2, l_2 = self._amplitudes.unpack()
+        t_0, t_2, l_2 = self._amplitudes.unpack()
 
         return compute_time_dependent_energy(
             self.f, self.u, t_2, l_2, self.o, self.v, np=self.np
         )
 
     def compute_one_body_density_matrix(self):
-        t_2, l_2 = self._amplitudes.unpack()
+        t_0, t_2, l_2 = self._amplitudes.unpack()
 
         return compute_one_body_density_matrix(
             t_2, l_2, self.o, self.v, np=self.np
         )
 
     def compute_two_body_density_matrix(self):
-        t_2, l_2 = self._amplitudes.unpack()
+        t_0, t_2, l_2 = self._amplitudes.unpack()
 
         return compute_two_body_density_matrix(
             t_2, l_2, self.o, self.v, np=self.np
         )
 
     def compute_time_dependent_overlap(self):
-        t_2, l_2 = self._amplitudes.unpack()
+        t_0, t_2, l_2 = self._amplitudes.unpack()
 
         return compute_time_dependent_overlap(
             self.cc.t_2, self.cc.l_2, t_2, l_2, np=self.np
