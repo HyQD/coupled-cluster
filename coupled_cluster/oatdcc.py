@@ -96,7 +96,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
         # Remove t_0 phase as this is not used in any of the equations
-        t_0_old = t_old.pop(0)
+        t_old = t_old[1:]
 
         # OATDCC procedure:
         # Do amplitude step

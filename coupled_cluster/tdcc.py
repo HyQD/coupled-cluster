@@ -152,7 +152,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         t_old, l_old = prev_amp
 
         # Remove phase from t-amplitude list
-        t_0_old = t_old.pop(0)
+        t_old = t_old[1:]
 
         t_new = [
             -1j * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
