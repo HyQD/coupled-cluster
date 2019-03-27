@@ -73,9 +73,6 @@ class OATDCCD(OATDCC):
             self.cc.t_2, self.cc.l_2, t_2, l_2, np=self.np
         )
 
-    def compute_time_dependent_overlap(self):
-        return 0
-
     def compute_p_space_equations(self):
         eta = compute_eta(
             self.h,
