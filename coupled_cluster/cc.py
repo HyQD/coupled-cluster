@@ -38,7 +38,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def get_amplitudes(self, get_t_0=False):
         if get_t_0:
             return AmplitudeContainer(
-                t=[0, *self._get_t_copy()], l=self._get_l_copy(), np=self.np
+                t=[self.np.array([0]), *self._get_t_copy()],
+                l=self._get_l_copy(),
+                np=self.np,
             )
 
         return AmplitudeContainer(
