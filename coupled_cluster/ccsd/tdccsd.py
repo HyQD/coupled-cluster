@@ -36,7 +36,7 @@ class TDCCSD(TimeDependentCoupledCluster):
         yield compute_l_2_amplitudes
 
     def compute_energy(self):
-        t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
+        t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
 
         return compute_time_dependent_energy(
             self.f,
@@ -51,7 +51,7 @@ class TDCCSD(TimeDependentCoupledCluster):
         )
 
     def compute_one_body_density_matrix(self):
-        t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
+        t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
         return compute_one_body_density_matrix(
             t_1, t_2, l_1, l_2, self.o, self.v, np=self.np
         )
@@ -61,12 +61,7 @@ class TDCCSD(TimeDependentCoupledCluster):
         pass
 
     def compute_time_dependent_overlap(self):
-        t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
-
-        assert not self.np.any(self.np.isnan(t_1))
-        assert not self.np.any(self.np.isnan(t_2))
-        assert not self.np.any(self.np.isnan(l_1))
-        assert not self.np.any(self.np.isnan(l_2))
+        t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
 
         return compute_time_dependent_overlap(
             self.cc.t_1,
