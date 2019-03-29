@@ -106,16 +106,15 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         ]
 
         # Compute derivative of phase
-        e_hf = (
-            np.einsum("ii->", self.h[o, o])
-            + 0.5 * np.einsum("ijij->", self.u[o, o, o, o])
-            )
-        e_ccd = 0.25*np.einsum('abij,ijab->',t_old[0],self.u[o,o,v,v])
+        e_hf = np.einsum("ii->", self.h[o, o]) + 0.5 * np.einsum(
+            "ijij->", self.u[o, o, o, o]
+        )
+        e_ccd = 0.25 * np.einsum("abij,ijab->", t_old[0], self.u[o, o, v, v])
 
-        #t_0_new = -1j * self.rhs_t_0_amplitude(
+        # t_0_new = -1j * self.rhs_t_0_amplitude(
         #    self.f, self.u, *t_old, self.o, self.v, np=self.np
-        #)
-        t_0_new = -1j*(e_hf+e_ccd)
+        # )
+        t_0_new = -1j * (e_hf + e_ccd)
 
         t_new = [t_0_new, *t_new]
 
