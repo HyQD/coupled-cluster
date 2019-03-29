@@ -10,8 +10,13 @@ def compute_ccd_ground_state_energy(f, u, t, o, v, np):
 
 
 def compute_ground_state_energy_correction(u, t, o, v, np):
+    """Ground state correlation energy for the coupled cluster doubles method
+
+        \Delta E_{CCD} = 0.25 * t^{ab}_{ij} u^{ij}_{ab}.
+    """
+
     return 0.25 * np.tensordot(
-        u[v, v, o, o], t, axes=((0, 1, 2, 3), (0, 1, 2, 3))
+        t, u[o, o, v, v], axes=((0, 1, 2, 3), (2, 3, 0, 1))
     )
 
 
