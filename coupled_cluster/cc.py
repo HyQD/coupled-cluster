@@ -112,9 +112,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             self.f, self.u, self.o, self.v, np=self.np
         )
 
-    def compute_ground_state(
-        self, *args, **kwargs
-    ):
+    def compute_ground_state(self, *args, **kwargs):
         iterate_t_amplitudes(*args, **kwargs)
         iterate_l_amplitudes(*args, **kwargs)
 
