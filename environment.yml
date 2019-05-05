@@ -1,11 +1,13 @@
 name: cc
 channels:
     - psi4
+    - pyscf
     - anaconda
     - conda-forge
 dependencies:
     - python
     - psi4
+    - pyscf
     - pip
     - pip:
         - -r requirements.txt
