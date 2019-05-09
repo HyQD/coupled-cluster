@@ -1,13 +1,40 @@
 class AlphaMixer:
+    """Basic mixer class
+    """
+
     def __init__(self, theta=0.1, np=None):
+        """Constructor for alpha mixcer class
+
+        Parameters
+        ----------
+        theta : float
+            Mixing parameter. Must be in [0, 1]
+        
+        """
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
 
         self.theta = theta
 
     def compute_new_vector(self, trial_vector, direction_vector, error_vector):
-        # Compute new trial vector for mixing with full right hand side. See
-        # T. Helgaker's book "Molecular Electron-Structure Theory" equations
-        # (13.4.3), (13.4.6) and (13.4.10).
+        """Compute new trial vector for mixing with full right hand side. 
+        
+        See T. Helgaker's book "Molecular Electron-Structure Theory" equations
+        (13.4.3), (13.4.6) and (13.4.10).
+        
+        Parameters
+        ----------
+        trial_vector : np.array
+            Inital vector for mixing.
+        direction_vector : np.array
+            Vector to be addet to trial_vector.
+        error_vector : np.array
+            Not used in alpha mixer, for DIIS mixer.
+
+        Returns
+        -------
+        np.array
+            New mixed vector.
+        """
         new_trial = trial_vector + direction_vector
 
         return (1 - self.theta) * new_trial + self.theta * trial_vector
@@ -17,8 +44,9 @@ class AlphaMixer:
 
 
 class DIIS(AlphaMixer):
-    """"
-    Quite general class to accelerate quasi-Newton 
+    """Direct Inversion in Iterative Subspace (DIIS)
+
+    General vector mixing class to accelerate quasi-Newton 
     using direct inversion of iterative space.
 
     Code inherited from Simen Kvaal.
@@ -26,10 +54,14 @@ class DIIS(AlphaMixer):
 
     def __init__(self, num_vecs=10, np=None):
         """
-        Setup a diis solver
-        Input:
-            num_vecs - Number of vectors to keep in memory
-            np - Matrix library to be used, e.g., numpy, cupy, etc.
+        Setup a DIIS solver
+
+        Parameters
+        ----------
+        num_vecs : int
+            Number of vectors to keep in memory 
+        np : module
+            Matrix library to be used, e.g., numpy, cupy, etc.
         """
 
         if np is None:
@@ -44,8 +76,24 @@ class DIIS(AlphaMixer):
         self.error_vectors = [0] * self.num_vecs
 
     def compute_new_vector(self, trial_vector, direction_vector, error_vector):
-        np = self.np
+        """DIIS mixing scheme
 
+        Parameters
+        ----------
+        trial_vector : np.array
+            Inital vector for mixing.
+        direction_vector : np.array
+            Vector to be addet to trial_vector.
+        error_vector : np.array
+
+        Returns
+        -------
+        np.array
+            New mixed vector
+        """
+
+        np = self.np
+        
         new_pos = self.stored % self.num_vecs
         self.stored += 1
 
@@ -98,7 +146,7 @@ class DIIS(AlphaMixer):
 
     def clear_vectors(self):
         """
-        Delete all stored vectors and start fresh
+        Delete all stored vectors and start fresh.
         """
 
         self.trial_vectors = [0] * self.num_vecs
