@@ -1,4 +1,16 @@
 class AmplitudeContainer:
+    """Container for Amplitude functions
+
+    Parameters
+    ----------
+    t : list, tuple, set
+        Tau amplitudes
+    l : list, tuple, set
+        Lambda amplitude
+    np : module
+        Matrix library to be used, e.g., numpy, cupy, etc.
+    """
+    
     def __init__(self, t, l, np):
         self.np = np
         self.n = 0
@@ -70,10 +82,20 @@ class AmplitudeContainer:
         yield self._l
 
     def unpack(self):
+        """
+        :rtype: Iterator
+        """
         yield from self._t
         yield from self._l
 
     def asarray(self):
+        """Returns amplitudes as numpy array
+
+        Returns
+        -------
+        np.array
+            Amplitude vector
+        """
         np = self.np
 
         amp_vec = np.zeros(self.n)
@@ -137,8 +159,21 @@ class AmplitudeContainer:
 
 
 class OACCVector(AmplitudeContainer):
-    """This is a container for the amplitudes, t and l, and the orbital
+    """Container for OA amplitudes
+    
+    This is a container for the amplitudes, t and l, and the orbital
     transformation coefficients C and C_tilde.
+
+    Parameters
+    ----------
+    t: ?
+        Tau amplitudes
+    l: ?
+        Lambda amplitude
+    C: ?
+        RHS coefficient matrix
+    C_tilde: ?
+        LHS coefficient matrix
     """
 
     def __init__(self, t, l, C, C_tilde, np):
@@ -207,6 +242,27 @@ class OACCVector(AmplitudeContainer):
 
 
 def compute_reference_energy(f, u, o, v, np):
+    """
+    Computes reference energy
+
+    Parameters
+    ----------
+    f: np.array
+        One-particle operator (Fock matrix)
+    u: np.array
+        Two-particle operator
+    o: Slice
+        Occupied orbitals
+    v: Slice
+        Virtual orbitals
+    np: Module
+        Matrix library
+
+    Returns
+    -------
+    np.float
+        Reference energy
+    """
     return np.trace(f[o, o]) - 0.5 * np.trace(
         np.trace(u[o, o, o, o], axis1=1, axis2=3)
     )

@@ -11,8 +11,19 @@ from coupled_cluster.mix import AlphaMixer
 
 
 class CoupledCluster(metaclass=abc.ABCMeta):
-    """Abstract base class defining the skeleton of a Coupled Cluster ground
-    state solver class.
+    """Coupled Cluster Abstract class
+    
+    Abstract base class defining the skeleton of a 
+    Coupled Cluster ground state solver class.
+
+    Parameters
+    ----------
+    system : Class
+        Quantum systems class instance
+    mixer : Class
+        AlpaMixer object
+    verbose : bool
+        Prints iterations for ground state computation if True
     """
 
     def __init__(self, system, mixer=AlphaMixer, verbose=False, np=None):
@@ -36,6 +47,19 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.o, self.v = self.system.o, self.system.v
 
     def get_amplitudes(self, get_t_0=False):
+        """Getter for amplitudes
+
+        Parameters
+        ----------
+        get_t_0 : bool
+            Returns amplitude at t=0 if True
+
+        Returns
+        -------
+        AmplitudeContainer
+            Amplitude container class object
+        """
+
         if get_t_0:
             return AmplitudeContainer(
                 t=[self.np.array([0]), *self._get_t_copy()],

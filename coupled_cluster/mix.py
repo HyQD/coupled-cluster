@@ -1,16 +1,15 @@
 class AlphaMixer:
     """Basic mixer class
+    
+    Parameters
+    ----------
+    theta : float
+        Mixing parameter. Must be in [0, 1]
+    np : module
+        Matrix library to be used, e.g., numpy, cupy, etc.
     """
 
     def __init__(self, theta=0.1, np=None):
-        """Constructor for alpha mixcer class
-
-        Parameters
-        ----------
-        theta : float
-            Mixing parameter. Must be in [0, 1]
-        
-        """
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
 
         self.theta = theta
@@ -50,20 +49,16 @@ class DIIS(AlphaMixer):
     using direct inversion of iterative space.
 
     Code inherited from Simen Kvaal.
+
+    Parameters
+    ----------
+    num_vecs : int
+        Number of vectors to keep in memory 
+    np : module
+        Matrix library to be used, e.g., numpy, cupy, etc.
     """
 
     def __init__(self, num_vecs=10, np=None):
-        """
-        Setup a DIIS solver
-
-        Parameters
-        ----------
-        num_vecs : int
-            Number of vectors to keep in memory 
-        np : module
-            Matrix library to be used, e.g., numpy, cupy, etc.
-        """
-
         if np is None:
             import numpy as np
 
