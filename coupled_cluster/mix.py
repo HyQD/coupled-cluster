@@ -88,7 +88,7 @@ class DIIS(AlphaMixer):
         """
 
         np = self.np
-        
+
         new_pos = self.stored % self.num_vecs
         self.stored += 1
 
