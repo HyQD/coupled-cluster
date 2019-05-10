@@ -11,6 +11,17 @@ from coupled_cluster.cc_helper import construct_d_t_2_matrix
 
 
 class CoupledClusterDoubles(CoupledCluster):
+    """Coupled Cluster Doubles
+
+    Class for Coupled Cluster solver, including 
+    double excitations.
+
+    Parameters
+    ----------
+    system : QuantumSystem
+        QuantumSystem class describing the system
+    """
+
     def __init__(self, system, **kwargs):
         super().__init__(system, **kwargs)
 

@@ -10,7 +10,7 @@ class AmplitudeContainer:
     np : module
         Matrix library to be used, e.g., numpy, cupy, etc.
     """
-    
+
     def __init__(self, t, l, np):
         self.np = np
         self.n = 0

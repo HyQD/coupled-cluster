@@ -18,9 +18,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    system : Class
+    system : QuantumSystems
         Quantum systems class instance
-    mixer : Class
+    mixer : AlphaMixer
         AlpaMixer object
     verbose : bool
         Prints iterations for ground state computation if True
@@ -57,7 +57,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         Returns
         -------
         AmplitudeContainer
-            Amplitude container class object
+            Amplitudes in AmplitudeContainer object
         """
 
         if get_t_0:
@@ -116,6 +116,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     def compute_particle_density(self):
+        """Computes one-particle density
+
+        Returns
+        -------
+        np.array
+            Particle density        
+        """
         np = self.np
 
         rho_qp = self.compute_one_body_density_matrix()
@@ -132,11 +139,21 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         return rho
 
     def compute_reference_energy(self):
+        """Computes reference energy
+
+        Returns
+        -------
+        np.array
+            Reference energy
+        """
+
         return compute_reference_energy(
             self.f, self.u, self.o, self.v, np=self.np
         )
 
     def compute_ground_state(self, *args, **kwargs):
+        """Compute ground state energy
+        """
         iterate_t_amplitudes(*args, **kwargs)
         iterate_l_amplitudes(*args, **kwargs)
 

@@ -3,6 +3,11 @@ from scipy.interpolate import barycentric_interpolate
 
 
 class Integrator(metaclass=abc.ABCMeta):
+    """Integrator Abstract Parent Class
+
+    Sub-class must impement step-method
+    """
+
     def __init__(self, np):
         self.np = np
 
@@ -21,7 +26,28 @@ class Integrator(metaclass=abc.ABCMeta):
 
 
 class RungeKutta4(Integrator):
+    """The Classical Runge-Kutta Method
+
+    """
+
     def step(self, u, t, dt):
+        """One integration step
+
+        Parameters
+        ----------
+        u : np.array
+            Flattened array of amplitudes    
+        t : float
+            Current time step
+        dt : float
+            Time step size (h)
+        
+        Returns
+        -------
+        np.array
+            New flattened array of amplitudes after integration
+        """
+
         f = self.rhs
 
         K1 = dt * f(u, t)
@@ -36,12 +62,24 @@ class RungeKutta4(Integrator):
 
 
 class GaussIntegrator(Integrator):
-    """
-    Simple implemenation of a Gauss integrator,
-    order 4 and 6 (s=2 and 3).
+    """Gaussian Quadrature
+    
+    Simple implementation of a symplectic Gauss integrator,
+    order 4 and 6 (s=2 and s=3).
 
     Note, this is a modified code recieved from Simen Kvaal and
     Thomas Bondo Pedersen.
+    
+    Parameters
+    ----------
+    np : module
+        Matrix / Linear algebra library; eg numpy, cupy
+    s : int
+        order = 2 * s
+    maxit : int
+        Maximum number of iterations
+    eps : float
+        Tolerance parameter; e.g. 1e-8
     """
 
     def __init__(self, np, s=2, maxit=20, eps=1e-14):
@@ -64,9 +102,23 @@ class GaussIntegrator(Integrator):
         return self.rhs(y, t)
 
     def Z_solve(self, y, Z0, t, dt):
-        """Solve the problem Z = h*f(y + Z)*a^T by fix point iterations Use Z0
-        as initial guess, and maxit iterations, and residual norm tolerance eps.
+        """Solver method
+
+        Solves the problem Z = h*f(y + Z)*a^T by fix point iterations. 
+        Use Z0 as initial guess, and maxit iterations, and residual norm tolerance eps.
+        
+        Parameters
+        ----------
+        y : np.array
+            Flattened array of amplitudes ??
+        Z0 : np.array
+            Initial guess
+        t : float
+            Current time step
+        dt : float
+            Time step length
         """
+
         np = self.np
 
         Z = Z0
@@ -92,7 +144,24 @@ class GaussIntegrator(Integrator):
         return Z, F
 
     def step(self, u, t, dt):
-        """ Do a time step. Return u at next time step. """
+        """One integration step
+
+        Parameters
+        ----------
+        y : np.array
+            Flattened array of amplitudes ??
+        Z0 : np.array
+            Initial guess
+        t : float
+            Current time step
+        dt : float
+            Time step length
+
+        Returns
+        -------
+        np.array
+            New flattened array of amplitudes after integration step.
+        """
 
         # Predict solution Z of nonlinear equations
         # Note that a fixed 8th order predictor is implemented

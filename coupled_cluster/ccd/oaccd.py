@@ -13,10 +13,20 @@ from coupled_cluster.mix import DIIS
 
 
 class OACCD(CoupledClusterDoubles):
-    """Implementation of the non-orthogonal coupled cluster doubles method. The
-    code is based on a script written by Rolf H. Myhre and Simen Kvaal.
+    """Orbital Adaptive Coupled Cluster Doubles
+    
+    Implementation of the non-orthogonal coupled cluster method with
+    double excitations. The code is based on a script written by 
+    Rolf H. Myhre and Simen Kvaal.
+
+    Requires orthonormal basis functions.
 
     https://doi.org/10.1063/1.5006160
+
+    Parameters
+    ----------
+    system : QuantumSystem
+        QuantumSystem class instance description of system
     """
 
     def __init__(self, system, **kwargs):
@@ -46,6 +56,19 @@ class OACCD(CoupledClusterDoubles):
         change_system_basis=False,
         **mixer_kwargs,
     ):
+        """Compute ground state
+
+        Parameters
+        ----------
+        max_iterations : int
+            Maximum number of iterations
+        tol : float
+            Tolerance parameter, e.g. 1e-4
+        tol_factor : float
+            Tolerance factor
+        change_system_basis : bool
+            Changes basis when ground state is reached
+        """
         np = self.np
 
         if not np in mixer_kwargs:

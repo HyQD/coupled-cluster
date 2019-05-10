@@ -9,8 +9,21 @@ from coupled_cluster.integrators import RungeKutta4
 
 
 class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
-    """Abstract base class defining the skeleton of a time-dependent Coupled
+    """Time Dependent Coupled Cluster Parent Class
+    
+    Abstract base class defining the skeleton of a time-dependent Coupled
     Cluster solver class.
+
+    Parameters
+    ----------
+    cc : CoupledCluster
+        Class instance defining the ground state solver
+    system : QuantumSystem
+        Class instance defining the system to be solved
+    np : module
+        Matrix/linear algebra library to be uses, like numpy or cupy
+    integrator : Integrator
+        Integrator class instance (RK4, GaussIntegrator)
     """
 
     def __init__(self, cc, system, np=None, integrator=None, **cc_kwargs):
@@ -53,11 +66,26 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     def compute_ground_state(
         self, t_args=[], t_kwargs={}, l_args=[], l_kwargs={}
     ):
+        """Calls on method from CoupledCluster class to compute
+        ground state of system.
+        """
         # Compute ground state amplitudes
         self.cc.iterate_t_amplitudes(*t_args, **t_kwargs)
         self.cc.iterate_l_amplitudes(*l_args, **l_kwargs)
 
     def set_initial_conditions(self, amplitudes=None):
+        """Set initial condition of system.
+
+        Necessary to call this function befor computing 
+        time development. Can be passed without arguments,
+        will revert to amplitudes of ground state solver.
+
+        Parameters
+        ----------
+        amplitudes : AmplitudeContainer
+            Amplitudes for the system
+        """
+
         if amplitudes is None:
             # Create copy of ground state amplitudes for time-integration
             amplitudes = self.cc.get_amplitudes(get_t_0=True)
@@ -126,6 +154,13 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     def compute_particle_density(self):
+        """Computes current one-body density
+
+        Returns
+        -------
+        np.array
+            One-body density of system at current time step
+        """
         np = self.np
 
         rho_qp = self.compute_one_body_density_matrix()

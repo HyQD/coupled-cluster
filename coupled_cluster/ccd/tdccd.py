@@ -16,6 +16,23 @@ from coupled_cluster.ccd import CoupledClusterDoubles
 
 
 class TDCCD(TimeDependentCoupledCluster):
+    """Time Dependent Coupled Cluster Doubles
+
+    Computes time development of system, employd coupled
+    cluster method with double exctiations.
+
+    Parameters
+    ----------
+    cc : CoupledCluster
+        Class instance defining the ground state solver
+    system : QuantumSystem
+        Class instance defining the system to be solved
+    np : module
+        Matrix/linear algebra library to be uses, like numpy or cupy
+    integrator : Integrator
+        Integrator class instance (RK4, GaussIntegrator)
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(CoupledClusterDoubles, *args, **kwargs)
 
@@ -29,6 +46,13 @@ class TDCCD(TimeDependentCoupledCluster):
         yield compute_l_2_amplitudes
 
     def compute_energy(self):
+        """Computes energy at current time step.
+        
+        Returns
+        -------
+        float
+            Energy 
+        """
         t_0, t_2, l_2 = self._amplitudes.unpack()
 
         return compute_time_dependent_energy(
@@ -36,6 +60,14 @@ class TDCCD(TimeDependentCoupledCluster):
         )
 
     def compute_one_body_density_matrix(self):
+        """Computes one-body density matrix at
+        current time step.
+
+        Returns
+        -------
+        np.array
+            One-body density matrix
+        """
         t_0, t_2, l_2 = self._amplitudes.unpack()
 
         return compute_one_body_density_matrix(
@@ -43,6 +75,15 @@ class TDCCD(TimeDependentCoupledCluster):
         )
 
     def compute_two_body_density_matrix(self):
+        """Computes two-body density matrix at
+        current time step.
+
+        Returns
+        -------
+        np.array
+            Two-body density matrix
+        """
+
         t_0, t_2, l_2 = self._amplitudes.unpack()
 
         return compute_two_body_density_matrix(
@@ -50,6 +91,14 @@ class TDCCD(TimeDependentCoupledCluster):
         )
 
     def compute_time_dependent_overlap(self):
+        """Computes overlap of current time-developed
+        state with the ground state. 
+
+        Returns
+        -------
+        np.complex128
+            Probability of ground state
+        """
         t_0, t_2, l_2 = self._amplitudes.unpack()
 
         return compute_time_dependent_overlap(

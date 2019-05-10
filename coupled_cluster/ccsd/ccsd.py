@@ -21,6 +21,19 @@ from coupled_cluster.ccsd.density_matrices import (
 
 
 class CoupledClusterSinglesDoubles(CoupledCluster):
+    """Coupled Cluster Singels Doubles
+
+    Coupled Cluster solver with single-, and double
+    excitations.
+
+    Parameters
+    ----------
+    system : QuantumSystems
+        QuantumSystems class instance describing the system to be solved
+    include_singles : bool
+        Include singles
+    """
+
     def __init__(self, system, include_singles=True, **kwargs):
         super().__init__(system, **kwargs)
 
@@ -116,6 +129,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.t_2_mixer.clear_vectors()
 
     def compute_energy(self):
+        """Compute Energy
+
+        Returns
+        -------
+        float
+            Energy of current state
+        """
         np = self.np
         o, v = self.o, self.v
 
@@ -226,6 +246,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         )
 
     def compute_one_body_density_matrix(self):
+        """Computes one-body density matrix
+
+        Returns
+        -------
+        np.array
+            One-body density matrix
+        """
 
         return compute_one_body_density_matrix(
             self.t_1, self.t_2, self.l_1, self.l_2, self.o, self.v, np=self.np
