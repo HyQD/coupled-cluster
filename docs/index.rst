@@ -6,15 +6,19 @@
 Welcome to CC's documentation!
 ==============================
 
+This python module is a coupled cluster solver for single-reference
+many-body quantum mechanical problems, with an emphasis on time-development.
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :titlesonly:
+    :caption: Contents:
 
-.. autoclass:: coupled_cluster.mix.AlphaMixer
-    :members:
+    get_started
+    ground_state
+    time_development
+    integrators
 
-.. autoclass:: coupled_cluster.mix.DIIS
-    :members:
+
 
 Indices and tables
 ==================

@@ -16,13 +16,14 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("."))
+sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
 
 project = "CC"
-copyright = "2019, Schoyen, greg_winther"
-author = "Schoyen, greg_winther"
+copyright = "2019, Schoyen, gregwinther"
+author = "Schoyen, gregwinther"
 
 # The short X.Y version
 version = ""
@@ -39,7 +40,7 @@ release = ""
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.mathjax"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.mathjax", "sphinx.ext.napoleon"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -74,7 +75,8 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+# html_theme = "alabaster"
+html_theme = "classic"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -125,13 +127,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (
-        master_doc,
-        "CC.tex",
-        "CC Documentation",
-        "Schoyen, greg\\_winther",
-        "manual",
-    )
+    (master_doc, "CC.tex", "CC Documentation", "Schoyen, gregwinther", "manual")
 ]
 
 
