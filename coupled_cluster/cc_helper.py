@@ -188,7 +188,7 @@ class OACCVector(AmplitudeContainer):
     @property
     def C(self):
         return self._C
-    
+
     @property
     def C_tilde(self):
         return self._C_tilde
