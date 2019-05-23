@@ -185,6 +185,14 @@ class OACCVector(AmplitudeContainer):
         self.n += self._C.size
         self.n += self._C_tilde.size
 
+    @property
+    def C(self):
+        return self._C
+    
+    @property
+    def C_tilde(self):
+        return self._C_tilde
+
     def __add__(self, k):
         # Check if k is a constant to be added to all l- and t-amplitudes and
         # coefficients.
