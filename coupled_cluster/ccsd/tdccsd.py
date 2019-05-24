@@ -68,6 +68,7 @@ class TDCCSD(TimeDependentCoupledCluster):
             self.cc.t_2,
             self.cc.l_1,
             self.cc.l_2,
+            t_0,
             t_1,
             t_2,
             l_1,

@@ -1,5 +1,5 @@
 def compute_time_dependent_overlap(
-    t_1_0, t_2_0, l_1_0, l_2_0, t_1, t_2, l_1, l_2, np, use_old=False
+    t_1_0, t_2_0, l_1_0, l_2_0, t_0, t_1, t_2, l_1, l_2, np, use_old=False
 ):
     psi_t_0 = 1
     psi_t_0 += np.einsum("ia, ai ->", l_1, t_1_0)
@@ -26,7 +26,8 @@ def compute_time_dependent_overlap(
     psi_0_t -= 0.25 * np.einsum("ijab, abij ->", l_2_0, t_2_0)
 
     # This computation is taken from Pedersen & Kvaal (2018), eq 18
-    auto_corr = 0.5 * (psi_t_0 + psi_0_t.conj())
+    # auto_corr = 0.5 * (psi_t_0 + psi_0_t.conj())
+    auto_corr = 0.5 * (psi_t_0 * np.exp(-t_0) + (psi_0_t * np.exp(t_0)).conj())
     auto_corr = np.abs(auto_corr) ** 2
 
     if use_old:
