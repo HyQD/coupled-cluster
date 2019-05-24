@@ -60,7 +60,7 @@ class TDCCSD(TimeDependentCoupledCluster):
     def compute_two_body_density_matrix(self):
         pass
 
-    def compute_time_dependent_overlap(self):
+    def compute_time_dependent_overlap(self, use_old=False):
         t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
 
         return compute_time_dependent_overlap(
@@ -73,4 +73,5 @@ class TDCCSD(TimeDependentCoupledCluster):
             l_1,
             l_2,
             np=self.np,
+            use_old=use_old,
         )
