@@ -300,7 +300,7 @@ def scoped_helium_system():
 
 
 @pytest.fixture
-def ccd_groundstate_He_energy():
+def oaccd_groundstate_helium_energy():
     return -2.8875947783360814
 
 
