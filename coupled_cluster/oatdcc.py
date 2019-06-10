@@ -132,15 +132,15 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # Compute the inverse of rho_qp needed in Q-space eqs.
         """
-        If rho_qp is singular we can regularize it as, 
-        
+        If rho_qp is singular we can regularize it as,
+
         rho_qp_reg = rho_qp + eps*expm( -(1.0/eps) * rho_qp) Eq [3.14]
         Multidimensional Quantum Dynamics, Meyer
-        
+
         with eps = 1e-8 (or some small number). It seems like it is standard in
         the MCTDHF literature to always work with the regularized rho_qp. Note
         here that expm refers to the matrix exponential which I can not find in
-        numpy only in scipy. 
+        numpy only in scipy.
         """
         # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
@@ -148,7 +148,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         C_new = np.dot(C, eta)
         C_tilde_new = -np.dot(eta, C_tilde)
 
-        """   
+        """
         C_new = -1j * compute_q_space_ket_equations(
             C,
             C_tilde,
