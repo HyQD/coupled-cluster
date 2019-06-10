@@ -30,7 +30,7 @@ class LaserPulse:
 
 def test_oatdccd(
     helium_system,
-    ccd_groundstate_He_energy,
+    oaccd_groundstate_helium_energy,
     oatdccd_helium_td_energies,
     oatdccd_helium_td_energies_imag,
     oatdccd_helium_dip_z,
@@ -40,7 +40,7 @@ def test_oatdccd(
     omega = 2.873_564_3
     E = 100  # 0.05-5
     laser_duration = 5
-    tol = 1e-5
+    tol = 1e-7
 
     system = helium_system
     system.change_to_hf_basis(verbose=True, tolerance=1e-8)
@@ -48,10 +48,13 @@ def test_oatdccd(
     integrator = GaussIntegrator(np=np, eps=1e-10)
     cc_kwargs = dict(verbose=True)
     oatdccd = OATDCCD(system, integrator=integrator, np=np, **cc_kwargs)
-    oatdccd.compute_ground_state(tol=1e-10, termination_tol=1e-12)
+    oatdccd.compute_ground_state()
 
     assert (
-        abs(ccd_groundstate_He_energy - oatdccd.compute_ground_state_energy())
+        abs(
+            oaccd_groundstate_helium_energy
+            - oatdccd.compute_ground_state_energy()
+        )
         < tol
     )
 
@@ -78,7 +81,22 @@ def test_oatdccd(
     norm_t2 = np.zeros(len(time_points))
     norm_l2 = np.zeros(len(time_points))
     dip_z = np.zeros(len(time_points))
-    td_energies[0] = oatdccd.compute_energy()
+
+    t, l, C, C_tilde = oatdccd.amplitudes
+
+    energy = oatdccd.compute_energy()
+    td_energies[0] = energy.real
+    td_energies_imag[0] = energy.imag
+
+    rho_qp = oatdccd.compute_one_body_density_matrix()
+    rho_qp = 0.5 * (rho_qp.conj().T + rho_qp)
+
+    z = C_tilde @ system.dipole_moment[2] @ C
+
+    dip_z[0] = np.trace(rho_qp @ z).real
+
+    norm_t2[0] = np.linalg.norm(t[1])
+    norm_l2[0] = np.linalg.norm(l)
 
     for i, amp in enumerate(oatdccd.solve(time_points)):
         t, l, C, C_tilde = amp
@@ -105,15 +123,11 @@ def test_oatdccd(
             )
 
     np.testing.assert_allclose(
-        td_energies, oatdccd_helium_td_energies, atol=0.1
+        td_energies, oatdccd_helium_td_energies, atol=1e-7
     )
-
     np.testing.assert_allclose(
-        td_energies_imag, oatdccd_helium_td_energies_imag, atol=0.1
+        td_energies_imag, oatdccd_helium_td_energies_imag, atol=1e-7
     )
-
-    np.testing.assert_allclose(dip_z, oatdccd_helium_dip_z, atol=0.1)
-
-    np.testing.assert_allclose(norm_t2, oatdccd_helium_norm_t2, atol=0.1)
-
-    np.testing.assert_allclose(norm_l2, oatdccd_helium_norm_l2, atol=0.1)
+    np.testing.assert_allclose(dip_z, oatdccd_helium_dip_z, atol=1e-7)
+    np.testing.assert_allclose(norm_t2, oatdccd_helium_norm_t2, atol=1e-7)
+    np.testing.assert_allclose(norm_l2, oatdccd_helium_norm_l2, atol=1e-7)
