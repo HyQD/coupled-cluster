@@ -301,7 +301,7 @@ def scoped_helium_system():
 
 @pytest.fixture
 def ccd_groundstate_He_energy():
-    return -2.8875924
+    return -2.8875947783360814
 
 
 @pytest.fixture(scope="session")
