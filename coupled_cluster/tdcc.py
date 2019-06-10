@@ -96,7 +96,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     def amplitudes(self):
         return self._amplitudes
 
-    def solve(self, time_points):
+    def solve(self, time_points, timestep_tol=1e-8):
         n = len(time_points)
 
         for i in range(n - 1):
@@ -108,6 +108,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             self._amplitudes = type(self._amplitudes).from_array(
                 self._amplitudes, amp_vec
             )
+
+            if abs(self.last_timestep - (time_points[i] + dt)) > timestep_tol:
+                self.update_hamiltonian(time_points[i] + dt, self._amplitudes)
+                self.last_timestep = time_points[i] + dt
 
             yield self._amplitudes
 
@@ -176,15 +180,22 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return rho
 
+    def update_hamiltonian(self, current_time, amplitudes):
+        if self.system.has_one_body_time_evolution_operator:
+            self.h = self.system.h_t(current_time)
+
+        if self.system.has_two_body_time_evolution_operator:
+            self.u = self.system.u_t(current_time)
+
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
+
     def __call__(self, prev_amp, current_time):
         o, v = self.system.o, self.system.v
 
-        self.h = self.system.h_t(current_time)
-        self.u = self.system.u_t(current_time)
-        self.f = self.system.construct_fock_matrix(self.h, self.u)
-
         prev_amp = AmplitudeContainer.from_array(self._amplitudes, prev_amp)
         t_old, l_old = prev_amp
+
+        self.update_hamiltonian(current_time, prev_amp)
 
         # Remove phase from t-amplitude list
         t_old = t_old[1:]
@@ -204,5 +215,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             1j * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
             for rhs_l_func in self.rhs_l_amplitudes()
         ]
+
+        self.last_timestep = current_time
 
         return AmplitudeContainer(t=t_new, l=l_new, np=self.np).asarray()

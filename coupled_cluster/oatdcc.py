@@ -84,6 +84,23 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
+    def update_hamiltonian(self, current_time, amplitudes):
+        C = amplitudes.C
+        C_tilde = amplitudes.C_tilde
+
+        # Evolve system in time
+        if self.system.has_one_body_time_evolution_operator:
+            self.h_orig = self.system.h_t(current_time)
+
+        if self.system.has_two_body_time_evolution_operator:
+            self.u_orig = self.system.u_t(current_time)
+
+        # Change basis to C and C_tilde
+        self.h = C_tilde @ self.h_orig @ C
+        self.u = transform_two_body_tensor(self.u_orig, C, C_tilde, self.np)
+
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
+
     def __call__(self, prev_amp, current_time):
         np = self.np
         o, v = self.o, self.v
@@ -91,15 +108,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         prev_amp = OACCVector.from_array(self._amplitudes, prev_amp)
         t_old, l_old, C, C_tilde = prev_amp
 
-        # Evolve system in time
-        self.h_orig = self.system.h_t(current_time)
-        self.u_orig = self.system.u_t(current_time)
-
-        # Change basis to C and C_tilde
-        self.h = C_tilde @ self.h_orig @ C
-        self.u = transform_two_body_tensor(self.u_orig, C, C_tilde, np)
-
-        self.f = self.system.construct_fock_matrix(self.h, self.u)
+        self.update_hamiltonian(current_time, prev_amp)
 
         # Remove t_0 phase as this is not used in any of the equations
         t_old = t_old[1:]
@@ -174,6 +183,8 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             np=np,
         )
         """
+
+        self.last_timestep = current_time
 
         # Return amplitudes and C and C_tilde
         return OACCVector(
