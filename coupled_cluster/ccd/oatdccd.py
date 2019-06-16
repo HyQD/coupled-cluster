@@ -21,7 +21,7 @@ class OATDCCD(OATDCC):
         super().__init__(OACCD, *args, **kwargs)
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
-        return compute_ccd_ground_state_energy(*args, **kwargs)
+        return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
 
     def rhs_t_amplitudes(self):
         yield compute_t_2_amplitudes
