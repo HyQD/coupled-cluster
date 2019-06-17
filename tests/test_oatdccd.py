@@ -28,6 +28,7 @@ class LaserPulse:
         )
 
 
+@pytest.mark.skip
 def test_oatdccd(
     helium_system,
     oaccd_groundstate_helium_energy,
