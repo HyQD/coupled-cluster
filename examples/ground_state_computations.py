@@ -3,7 +3,7 @@ from quantum_systems import CustomSystem
 from pyscf import gto, scf, ao2mo
 from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
 from coupled_cluster.ccd.oaccd import OACCD
-from coupled_cluster.mix import DIIS
+
 
 """
 Use PyScf to generate integrals. 
