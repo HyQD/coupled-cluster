@@ -151,11 +151,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             self.f, self.u, self.o, self.v, np=self.np
         )
 
-    def compute_ground_state(self, *args, **kwargs):
+    def compute_ground_state(
+        self, t_args=[], t_kwargs={}, l_args=[], l_kwargs={}
+    ):
         """Compute ground state energy
         """
-        iterate_t_amplitudes(*args, **kwargs)
-        iterate_l_amplitudes(*args, **kwargs)
+        self.iterate_t_amplitudes(*t_args, **t_kwargs)
+        self.iterate_l_amplitudes(*l_args, **l_kwargs)
 
     def iterate_l_amplitudes(
         self, max_iterations=100, tol=1e-4, **mixer_kwargs
