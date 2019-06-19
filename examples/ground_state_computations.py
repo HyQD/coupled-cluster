@@ -22,14 +22,19 @@ myhf = scf.RHF(mol)
 myhf.conv_tol = 1e-10
 ehf = myhf.kernel()
 
-# Change to MO basis
+"""
+Change to MO basis, store full eri tensor (compact=False) and switch to 
+4-dimensional array representation and physicists notation.
+"""
 H = myhf.mo_coeff.T.dot(myhf.get_hcore()).dot(myhf.mo_coeff)
-# Store full eri tensor and switch to rank 4 representation and physicists notation
 eri = ao2mo.kernel(mol, myhf.mo_coeff, compact=False)
 eri = np.asarray(eri).reshape(n_ao, n_ao, n_ao, n_ao).transpose(0, 2, 1, 3)
 
-# Make a custom system, change to spin orbital basis and antisymmetrize eri tensor
-# Even indices correspond to alpha-spin and odd indices to beta-spin
+"""
+Make a custom system, change to spin orbital basis and antisymmetrize eri tensor
+If integrals are already in spin orbital basis, set add_spin = False and anti_symmetrize = False
+Even indices correspond to alpha-spin and odd indices to beta-spin
+"""
 system = CustomSystem(n_electrons, n_spin_orbitals)
 system.set_h(H, add_spin=True)
 system.set_u(eri, add_spin=True, anti_symmetrize=True)
