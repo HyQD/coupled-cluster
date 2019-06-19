@@ -7,7 +7,7 @@ from coupled_cluster.cc_helper import (
     compute_reference_energy,
     compute_particle_density,
 )
-from coupled_cluster.mix import AlphaMixer
+from coupled_cluster.mix import AlphaMixer, DIIS
 
 
 class CoupledCluster(metaclass=abc.ABCMeta):
@@ -26,7 +26,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         Prints iterations for ground state computation if True
     """
 
-    def __init__(self, system, mixer=AlphaMixer, verbose=False, np=None):
+    def __init__(self, system, mixer=DIIS, verbose=False, np=None):
         if np is None:
             import numpy as np
 
