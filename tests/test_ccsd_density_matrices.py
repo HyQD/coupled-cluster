@@ -1,10 +1,11 @@
 import numpy as np
 from coupled_cluster.ccsd.tdccsd import TDCCSD
+from coupled_cluster.mix import AlphaMixer,DIIS
 
 
 def test_one_body_density(zanghellini_system, np=np):
 
-    zang_tdccsd = TDCCSD(zanghellini_system, np=np, verbose=True)
+    zang_tdccsd = TDCCSD(zanghellini_system, np=np, verbose=True,mixer=AlphaMixer)
 
     t_kwargs = dict(theta=0.8)
     zang_tdccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
@@ -57,7 +58,7 @@ def test_one_body_density(zanghellini_system, np=np):
 
 def test_v_o_term(zanghellini_system):
 
-    zang_tdccsd = TDCCSD(zanghellini_system, np=np, verbose=True)
+    zang_tdccsd = TDCCSD(zanghellini_system, np=np, verbose=True,mixer=AlphaMixer)
 
     t_kwargs = dict(theta=0.8)
     zang_tdccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
