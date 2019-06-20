@@ -84,7 +84,7 @@ Set peak electric field strength and laser frequency. Define polarization axis a
 set the time evolution operator of system.
 """
 omega = 2.8735643
-E = 100
+E = 1
 laser_duration = 5
 
 polarization = np.zeros(3)
@@ -105,7 +105,7 @@ integrator = GaussIntegrator(s=3, np=np, eps=1e-10)
 oatdccd = OATDCCD(system, integrator=integrator)
 
 
-oatdccd.compute_ground_state(tol=1e-10,termination_tol=1e-10)
+oatdccd.compute_ground_state(tol=1e-15,termination_tol=1e-15)
 print("Ground state CCSD energy: {0}".format(oatdccd.compute_ground_state_energy()))
 oatdccd.set_initial_conditions()
 
@@ -113,7 +113,7 @@ oatdccd.set_initial_conditions()
 Define integration paramters
 """
 dt = 1e-2
-Tfinal = 5
+Tfinal = 100
 num_steps = int(Tfinal / dt) + 1
 timestep_stop_laser = int(laser_duration / dt)
 time_points = np.linspace(0, Tfinal, num_steps)
@@ -192,5 +192,21 @@ plt.plot(time_points,np.abs(exp_tau0)**2,label=r'$|e^{\tau_0(t)}|^2$')
 plt.plot(time_points,norm_t2,label=r'$||\tau_2(t)||$')
 plt.legend()
 plt.grid()
+
+from scipy.fftpack import fft, ifft, fftshift, fftfreq
+# Fourier transform of dip_z after pulse.
+freq = fftshift(fftfreq(len(time_points[timestep_stop_laser:]))) * (
+    2 * np.pi / dt
+)
+a = np.abs(fftshift(fft(dip_z[timestep_stop_laser:].real)))
+amax = a.max()
+a = a / amax
+
+plt.figure()
+plt.plot(freq, a, label=r"$\vert \tilde{d_z} \vert$")
+plt.title(r"Fourier transform of $\langle z(t)\rangle$")
+plt.legend()
+plt.xlim(0, 6)
+plt.xlabel("frequency/au")
 
 plt.show()
