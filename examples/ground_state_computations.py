@@ -69,4 +69,4 @@ oaccd.compute_ground_state(
     termination_tol=1e-12,
     tol_factor=1e-1,
 )
-print("EOACCD={0}".format(oaccd.compute_energy())) 
+print("EOACCD={0}".format(oaccd.compute_energy()))

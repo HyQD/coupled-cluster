@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 
 from coupled_cluster.ccd import TDCCD
-from coupled_cluster.mix import AlphaMixer,DIIS
+from coupled_cluster.mix import AlphaMixer, DIIS
+
 
 def test_time_dependent_observables(
     zanghellini_system,
@@ -15,7 +16,7 @@ def test_time_dependent_observables(
     time_params,
 ):
 
-    tdccd = TDCCD(zanghellini_system, np=np,mixer=AlphaMixer)
+    tdccd = TDCCD(zanghellini_system, np=np, mixer=AlphaMixer)
     tdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
 
     assert (
