@@ -1,6 +1,6 @@
 import numpy as np
 from pyscf import gto, scf, ao2mo
-from quantum_systems import CustomSystem
+from quantum_systems import CustomSystem, construct_pyscf_system_rhf
 
 from coupled_cluster.ccsd import TDCCSD
 from coupled_cluster.ccd import OATDCCD
@@ -11,49 +11,9 @@ from coupled_cluster.integrators import GaussIntegrator, RungeKutta4
 import matplotlib.pyplot as plt
 import tqdm
 
-"""
-Use PyScf to generate integrals. 
-This can be substituted with other integrals, such as those from Quest.
-"""
-mol = gto.Mole()
-mol.unit = "bohr"
-mol.build(atom="he 0.0 0.0 0.0", basis="cc-pvdz", symmetry=False)
-
-n_electrons = mol.nelectron
-n_ao = mol.nao
-n_spin_orbitals = 2 * n_ao
-
-# Do RHF calculation
-myhf = scf.RHF(mol)
-myhf.conv_tol = 1e-10
-ehf = myhf.kernel()
-
-"""
-Change to MO basis, store full eri tensor (compact=False) and switch to 
-4-dimensional array representation and physicists notation.
-"""
-H = myhf.mo_coeff.T.dot(myhf.get_hcore()).dot(myhf.mo_coeff)
-eri = ao2mo.kernel(mol, myhf.mo_coeff, compact=False)
-eri = np.asarray(eri).reshape(n_ao, n_ao, n_ao, n_ao).transpose(0, 2, 1, 3)
-dipole_integrals = mol.intor("int1e_r").reshape(3, n_ao, n_ao)
-for i in range(3):
-    dipole_integrals[i] = myhf.mo_coeff.T @ (dipole_integrals[i]) @ myhf.mo_coeff
-
-"""
-Make a custom system, change to spin orbital basis and antisymmetrize eri tensor
-If integrals are already in spin orbital basis, set add_spin = False and anti_symmetrize = False
-Even indices correspond to alpha-spin and odd indices to beta-spin
-"""
-system = CustomSystem(n_electrons, n_spin_orbitals)
-system.set_h(H, add_spin=True)
-system.set_u(eri, add_spin=True, anti_symmetrize=True)
-system.set_dipole_moment(dipole_integrals, add_spin=True)
-system.set_nuclear_repulsion_energy(0)
-
-"""
-Define a laser pulse. Ideally there should exist a set of predefined laser pulses 
-that can be imported but we show it here explicitly. 
-"""
+system = construct_pyscf_system_rhf(
+    molecule="he 0.0 0.0 0.0", basis="cc-pvdz", symmetry=False
+)
 class laser_pulse:
     def __init__(self, t_0=0, t_l=5, omega=0.1, E=0.03, np=None):
         if np is None:
