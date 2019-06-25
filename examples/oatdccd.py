@@ -16,6 +16,7 @@ system = construct_pyscf_system_rhf(
     molecule="he 0.0 0.0 0.0", basis="cc-pvdz", symmetry=False
 )
 
+
 class laser_pulse:
     def __init__(self, t_0=0, t_l=5, omega=0.1, E=0.03, np=None):
         if np is None:
