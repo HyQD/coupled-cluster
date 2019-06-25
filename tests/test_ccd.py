@@ -48,7 +48,7 @@ from coupled_cluster.ccd.p_space_equations import (
     compute_R_tilde_ai,
     compute_A_ibaj,
 )
-from coupled_cluster.mix import AlphaMixer,DIIS
+from coupled_cluster.mix import AlphaMixer, DIIS
 
 
 @pytest.fixture(scope="session")
@@ -59,7 +59,7 @@ def iterated_ccd_amplitudes(
     ccd_list = []
     for system in [helium_system, beryllium_system, neon_system]:
         system.change_to_hf_basis(verbose=True, tolerance=1e-8)
-        ccd = CoupledClusterDoubles(system, verbose=True,mixer=AlphaMixer)
+        ccd = CoupledClusterDoubles(system, verbose=True, mixer=AlphaMixer)
         ccd.iterate_t_amplitudes(theta=0.9)
         ccd.iterate_l_amplitudes(theta=0.9)
 
@@ -959,7 +959,7 @@ def test_A_ibaj(iterated_ccd_amplitudes):
 def test_reference_energy(tdho, ref_energy):
     tol = 1e-4
 
-    cc_scheme = CoupledClusterDoubles(tdho, verbose=True,mixer=AlphaMixer)
+    cc_scheme = CoupledClusterDoubles(tdho, verbose=True, mixer=AlphaMixer)
     e_ref = cc_scheme.compute_reference_energy()
 
     assert abs(e_ref - ref_energy) < tol
@@ -968,7 +968,7 @@ def test_reference_energy(tdho, ref_energy):
 def test_ccd_energy(tdho, ccd_energy):
     tol = 1e-4
 
-    cc_scheme = CoupledClusterDoubles(tdho, verbose=True,mixer=AlphaMixer)
+    cc_scheme = CoupledClusterDoubles(tdho, verbose=True, mixer=AlphaMixer)
     cc_scheme.iterate_t_amplitudes(tol=tol)
     energy = cc_scheme.compute_energy()
 
