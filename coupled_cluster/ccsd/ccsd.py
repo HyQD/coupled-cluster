@@ -52,9 +52,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
         self.d_l_1 = self.d_t_1.transpose(1, 0).copy()
 
-        self.t_1_mixer = None
-        self.l_1_mixer = None
-
         # Doubles
         self.rhs_t_2 = np.zeros((m, m, n, n), dtype=self.u.dtype)  # abij
         self.rhs_l_2 = np.zeros((n, n, m, m), dtype=self.u.dtype)  # ijab
@@ -65,8 +62,9 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
         self.d_l_2 = self.d_t_2.transpose(2, 3, 0, 1).copy()
 
-        self.t_2_mixer = None
-        self.l_2_mixer = None
+        #Mixer
+        self.t_mixer = None
+        self.l_mixer = None
 
         # Go!
         self.compute_initial_guess()
@@ -109,24 +107,16 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         ]
 
     def setup_l_mixer(self, **kwargs):
-        if self.l_1_mixer is None:
-            self.l_1_mixer = self.mixer(**kwargs)
+        if self.l_mixer is None:
+            self.l_mixer = self.mixer(**kwargs)
 
-        if self.l_2_mixer is None:
-            self.l_2_mixer = self.mixer(**kwargs)
-
-        self.l_1_mixer.clear_vectors()
-        self.l_2_mixer.clear_vectors()
+        self.l_mixer.clear_vectors()
 
     def setup_t_mixer(self, **kwargs):
-        if self.t_1_mixer is None:
-            self.t_1_mixer = self.mixer(**kwargs)
+        if self.t_mixer is None:
+            self.t_mixer = self.mixer(**kwargs)
 
-        if self.t_2_mixer is None:
-            self.t_2_mixer = self.mixer(**kwargs)
-
-        self.t_1_mixer.clear_vectors()
-        self.t_2_mixer.clear_vectors()
+        self.t_mixer.clear_vectors()
 
     def compute_energy(self):
         """Compute Energy
@@ -152,6 +142,10 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def compute_t_amplitudes(self):
         np = self.np
 
+        trial_vector = np.array([], dtype=self.u.dtype)
+        direction_vector = np.array([], dtype=self.u.dtype)
+        error_vector = np.array([], dtype=self.u.dtype)
+
         # Singles
         if self.include_singles:
             self.rhs_t_1.fill(0)
@@ -166,13 +160,9 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
                 np=np,
             )
 
-            trial_vector = self.t_1
-            direction_vector = np.divide(self.rhs_t_1, self.d_t_1)
-            error_vector = -self.rhs_t_1
-
-            self.t_1 = self.t_1_mixer.compute_new_vector(
-                trial_vector, direction_vector, error_vector
-            )
+            trial_vector = self.t_1.ravel()
+            direction_vector = (self.rhs_t_1/self.d_t_1).ravel()
+            error_vector = -self.rhs_t_1.ravel()
 
         # Doubles
         self.rhs_t_2.fill(0)
@@ -187,16 +177,27 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             np=np,
         )
 
-        trial_vector = self.t_2
-        direction_vector = np.divide(self.rhs_t_2, self.d_t_2)
-        error_vector = -self.rhs_t_2
+        trial_vector = np.concatenate((trial_vector, self.t_2.ravel()), axis=0)
+        direction_vector = np.concatenate((direction_vector, (self.rhs_t_2/self.d_t_2).ravel()), axis=0)
+        error_vector = np.concatenate((error_vector, -self.rhs_t_2.ravel()), axis=0)
 
-        self.t_2 = self.t_2_mixer.compute_new_vector(
+        newvectors = self.t_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
         )
 
+        n_t1 = 0
+        if self.include_singles:
+            n_t1 = self.m*self.n
+            self.t_1 = np.reshape(newvectors[:n_t1],self.t_1.shape)
+
+        self.t_2 = np.reshape(newvectors[n_t1:],self.t_2.shape)
+
     def compute_l_amplitudes(self):
         np = self.np
+
+        trial_vector = np.array([], dtype=self.u.dtype)  #Empty array
+        direction_vector = np.array([], dtype=self.u.dtype)  #Empty array
+        error_vector = np.array([], dtype=self.u.dtype)  #Empty array
 
         # Singles
         if self.include_singles:
@@ -214,13 +215,11 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
                 np=np,
             )
 
-            trial_vector = self.l_1
-            direction_vector = np.divide(self.rhs_l_1, self.d_l_1)
-            error_vector = -self.rhs_l_1
+            
+            trial_vector = self.l_1.ravel()
+            direction_vector = (self.rhs_l_1/self.d_l_1).ravel()
+            error_vector = -self.rhs_l_1.ravel()
 
-            self.l_1 = self.l_1_mixer.compute_new_vector(
-                trial_vector, direction_vector, error_vector
-            )
 
         # Doubles
         self.rhs_l_2.fill(0)
@@ -237,13 +236,20 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             np=np,
         )
 
-        trial_vector = self.l_2
-        direction_vector = np.divide(self.rhs_l_2, self.d_l_2)
-        error_vector = -self.rhs_l_2
+        trial_vector = np.concatenate((trial_vector, self.l_2.ravel()), axis=0)
+        direction_vector = np.concatenate((direction_vector, (self.rhs_l_2/self.d_l_2).ravel()), axis=0)
+        error_vector = np.concatenate((error_vector, -self.rhs_l_2.ravel()), axis=0)
 
-        self.l_2 = self.l_2_mixer.compute_new_vector(
+        newvectors = self.l_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
         )
+
+        n_l1 = 0
+        if self.include_singles:
+            n_l1 = self.m*self.n
+            self.l_1 = np.reshape(newvectors[:n_l1],self.l_1.shape)
+
+        self.l_2 = np.reshape(newvectors[n_l1:],self.l_2.shape)
 
     def compute_one_body_density_matrix(self):
         """Computes one-body density matrix
