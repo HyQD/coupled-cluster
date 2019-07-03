@@ -144,7 +144,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         trial_vector = np.array([], dtype=self.u.dtype)
         direction_vector = np.array([], dtype=self.u.dtype)
-        trial_vector = np.array([], dtype=self.u.dtype)
+        error_vector = np.array([], dtype=self.u.dtype)
 
         # Singles
         if self.include_singles:
