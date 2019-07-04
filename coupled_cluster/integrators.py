@@ -84,7 +84,6 @@ class SimpleRosenbrock(Integrator):
 
         self.rhs_der = rhs_der
 
-
     def step(self, u, t, dt):
         """One integration step
 
@@ -108,11 +107,11 @@ class SimpleRosenbrock(Integrator):
         K1 = dt * f(u, t)
         K2 = dt * f(u + K1, t + dt)
 
-        if(diag):
-            u_new = u + dt*(K1 + (K2-K1)/(1 - dt*rhs_der(u,t)))
+        if diag:
+            u_new = u + dt * (K1 + (K2 - K1) / (1 - dt * rhs_der(u, t)))
         else:
-            inv_mat = np.linalg.inv(np.identity(len(a)) - dt*rhs_der(u,t))
-            u_new = u + dt*(K1 + inv_mat*(K2-K1))
+            inv_mat = np.linalg.inv(np.identity(len(a)) - dt * rhs_der(u, t))
+            u_new = u + dt * (K1 + inv_mat * (K2 - K1))
 
         self.rhs_evals += 2
 

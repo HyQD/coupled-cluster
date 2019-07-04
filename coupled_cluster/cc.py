@@ -27,7 +27,14 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         Prints iterations for ground state computation if True
     """
 
-    def __init__(self, system, mixer=DIIS, integrator=SimpleRosenbrock, verbose=False, np=None):
+    def __init__(
+        self,
+        system,
+        mixer=DIIS,
+        integrator=SimpleRosenbrock,
+        verbose=False,
+        np=None,
+    ):
         if np is None:
             import numpy as np
 
@@ -210,14 +217,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         """
         self.propagate_t_amplitudes(*t_args, **t_kwargs)
 
-
     def setup_t_integrator(self, **kwargs):
         if self.t_integrator is None:
             self.t_integrator = self.integrator.set_rhs(self.call_t)
 
         if self.t_integrator is SimpleRosenbrock:
             self.t_integrator.set_rhs_der(self.t_rhs_der())
-
 
     def call_t(self, prev_amp, current_time):
         """Like __call__ for tdcc
@@ -229,12 +234,11 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         """
         o, v = self.system.o, self.system.v
 
-
         for amps in t_old:
             print(amps)
 
         t_new = [
-            - rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
+            -rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
@@ -253,10 +257,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.setup_t_integrator(**integrate_kwargs)
 
-        
         for i in range(max_steps):
 
-            amp_vec = self.integrator.step(self.get_amplitudes().asarray(),0,dt)
+            amp_vec = self.integrator.step(
+                self.get_amplitudes().asarray(), 0, dt
+            )
+
 
 #            residuals = self.compute_t_residuals()
 #
@@ -265,4 +271,3 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 #
 #            if all(res < tol for res in residuals):
 #                break
-

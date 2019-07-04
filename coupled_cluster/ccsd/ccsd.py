@@ -122,9 +122,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         self.t_mixer.clear_vectors()
 
-            
-
-
     def compute_energy(self):
         """Compute Energy
 
@@ -290,14 +287,13 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             yield compute_t_1_amplitudes
         yield compute_t_2_amplitudes
 
-
     def t_rhs_der(self, prev_amp, time):
         """Return approximate derivative of rhs
         """
 
         if self.include_singles:
-            return np.concatenate((self.d_t_1.ravel(),self.d_t_2.ravel()),axis=0)
+            return np.concatenate(
+                (self.d_t_1.ravel(), self.d_t_2.ravel()), axis=0
+            )
         else:
             return self.d_t_2.ravel()
-
-
