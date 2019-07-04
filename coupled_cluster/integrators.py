@@ -61,6 +61,64 @@ class RungeKutta4(Integrator):
         return u_new
 
 
+class SimpleRosenbrock(Integrator):
+    """The Most Simple Rosenbrock method
+
+    Similar to implicit Euler, but K1 = f(u + dt*K1) is 
+    not solved exactly. Instead, the newton iteration is 
+    terminated after the first step. This can be approximated 
+    further by using an approximate derivative of f in the 
+    Newton solver.
+
+    """
+
+    def set_rhs_der(self, rhs_der, diagonal=True):
+        """Set derivative of rhs
+
+        In practice, calculating the full Jacobian of rhs will be too expensive to do in CC,
+        especially since it has to be inverted, so a diagonal approximation will be used. 
+        """
+
+        if not callable(rhs_der):
+            rhs = lambda u, t: rhs_der
+
+        self.rhs_der = rhs_der
+
+
+    def step(self, u, t, dt):
+        """One integration step
+
+        Parameters
+        ----------
+        u : np.array
+            Flattened array of amplitudes    
+        t : float
+            Current time step
+        dt : float
+            Time step size (h)
+        
+        Returns
+        -------
+        np.array
+            New flattened array of amplitudes after integration
+        """
+
+        f = self.rhs
+
+        K1 = dt * f(u, t)
+        K2 = dt * f(u + K1, t + dt)
+
+        if(diag):
+            u_new = u + dt*(K1 + (K2-K1)/(1 - dt*rhs_der(u,t)))
+        else:
+            inv_mat = np.linalg.inv(np.identity(len(a)) - dt*rhs_der(u,t))
+            u_new = u + dt*(K1 + inv_mat*(K2-K1))
+
+        self.rhs_evals += 2
+
+        return u_new
+
+
 class GaussIntegrator(Integrator):
     """Gaussian Quadrature
     

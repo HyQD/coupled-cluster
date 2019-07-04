@@ -8,6 +8,7 @@ from coupled_cluster.cc_helper import (
     compute_particle_density,
 )
 from coupled_cluster.mix import AlphaMixer, DIIS
+from coupled_cluster.integrators import SimpleRosenbrock
 
 
 class CoupledCluster(metaclass=abc.ABCMeta):
@@ -26,7 +27,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         Prints iterations for ground state computation if True
     """
 
-    def __init__(self, system, mixer=DIIS, verbose=False, np=None):
+    def __init__(self, system, mixer=DIIS, integrator=SimpleRosenbrock, verbose=False, np=None):
         if np is None:
             import numpy as np
 
@@ -35,6 +36,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.system = system
         self.verbose = verbose
         self.mixer = mixer
+        self.integrator = integrator(np=self.np)
 
         self.n = self.system.n
         self.l = self.system.l
@@ -43,6 +45,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.h = self.system.h
         self.u = self.system.u
         self.f = self.system.construct_fock_matrix(self.h, self.u)
+
+        self._amplitudes = None
 
         self.o, self.v = self.system.o, self.system.v
 
@@ -198,3 +202,67 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
             if all(res < tol for res in residuals):
                 break
+
+    def propagate_to_ground_state(
+        self, t_args=[], t_kwargs={}, l_args=[], l_kwargs={}
+    ):
+        """Propagate in complex time to ground state
+        """
+        self.propagate_t_amplitudes(*t_args, **t_kwargs)
+
+
+    def setup_t_integrator(self, **kwargs):
+        if self.t_integrator is None:
+            self.t_integrator = self.integrator.set_rhs(self.call_t)
+
+        if self.t_integrator is SimpleRosenbrock:
+            self.t_integrator.set_rhs_der(self.t_rhs_der())
+
+
+    def call_t(self, prev_amp, current_time):
+        """Like __call__ for tdcc
+        
+        Unlike call, it only returns the function for tau and there is 
+        no imaginary factor or t0 phase amplitude. 
+        Used for complex time propagation. current_time is a dummy to 
+        conform to integrators
+        """
+        o, v = self.system.o, self.system.v
+
+
+        for amps in t_old:
+            print(amps)
+
+        t_new = [
+            - rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
+            for rhs_t_func in self.rhs_t_amplitudes()
+        ]
+
+        return AmplitudeContainer(t=t_new, np=self.np).asarray()
+
+    def propagate_t_amplitudes(
+        self, dt=0.001, max_steps=2, tol=1e-6, **integrate_kwargs
+    ):
+        """Propagate t amplitudes in complex time to convergence. 
+        """
+
+        np = self.np
+
+        if not np in integrate_kwargs:
+            integrate_kwargs["np"] = np
+
+        self.setup_t_integrator(**integrate_kwargs)
+
+        
+        for i in range(max_steps):
+
+            amp_vec = self.integrator.step(self.get_amplitudes().asarray(),0,dt)
+
+#            residuals = self.compute_t_residuals()
+#
+#            if self.verbose:
+#                print(f"Iteration: {i}\tResiduals (t): {residuals}")
+#
+#            if all(res < tol for res in residuals):
+#                break
+
