@@ -229,16 +229,18 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         """
         o, v = self.system.o, self.system.v
 
+        prev_amp = AmplitudeContainer.from_array(
+                   AmplitudeContainer(t=[self.t_1,self.t_2], l=[], np=self.np), 
+                   prev_amp)
 
-        for amps in t_old:
-            print(amps)
+        t_old = prev_amp.t
 
         t_new = [
             - rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
-        return AmplitudeContainer(t=t_new, np=self.np).asarray()
+        return AmplitudeContainer(t=t_new, l=[], np=self.np).asarray()
 
     def propagate_t_amplitudes(
         self, dt=0.001, max_steps=2, tol=1e-6, **integrate_kwargs
