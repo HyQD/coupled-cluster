@@ -283,6 +283,11 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             yield compute_t_1_amplitudes
         yield compute_t_2_amplitudes
 
+    def rhs_l_amplitudes(self):
+        if self.include_singles:
+            yield compute_l_1_amplitudes
+        yield compute_l_2_amplitudes
+
     def t_rhs_der(self, prev_amp, time):
         """Return approximate derivative of rhs
         """
@@ -295,6 +300,19 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             )
         else:
             return self.d_t_2.ravel()
+
+    def l_rhs_der(self, prev_amp, time):
+        """Return approximate derivative of rhs
+        """
+
+        np = self.np
+
+        if self.include_singles:
+            return np.concatenate(
+                (self.d_l_1.ravel(), self.d_l_2.ravel()), axis=0
+            )
+        else:
+            return self.d_l_2.ravel()
 
     def t_shape(self, u):
         """Takes a flat vector u and returns it as tensors with the shapes of t1 and t2
@@ -314,8 +332,26 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         else:
             return u_2
 
-    def t_flat(self, u_1, u_2):
-        """Takes two tenors shaped like t1 and t2 and returns a single flat vector
+    def l_shape(self, u):
+        """Takes a flat vector u and returns it as tensors with the shapes of l1 and l2
+        """
+
+        np = self.np
+
+        n_u1 = 0
+        if self.include_singles:
+            n_u1 = self.m * self.n
+            u_1 = np.reshape(u[:n_u1], self.l_1.shape)
+
+        u_2 = np.reshape(u[n_u1:], self.l_2.shape)
+
+        if self.include_singles:
+            return u_1, u_2
+        else:
+            return u_2
+
+    def u_flat(self, u_1, u_2):
+        """Takes two tenors shaped like returns a single flat vector
         """
 
         np = self.np
@@ -325,12 +361,42 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         else:
             return self.u_2.ravel()
 
+
+    def get_t_flat(self):
+        """Return t1 and t2 as a flat vector
+        """
+
+        np = self.np
+
+        if self.include_singles:
+            return np.concatenate((self.t_1.ravel(),self.t_2.ravel()),axis=0)
+        else:
+            return self.t_2.ravel()
+
+    def get_l_flat(self):
+        """Return l1 and l2 as a flat vector
+        """
+
+        np = self.np
+
+        if self.include_singles:
+            return np.concatenate((self.l_1.ravel(),self.l_2.ravel()),axis=0)
+        else:
+            return self.l_2.ravel()
+
     def update_t_and_rhs(self, t_vector, rhs_vector):
         """update self.t and self.t_rhs with input vectors
         """
 
         self.t_1,self.t_2 = self.t_shape(t_vector)
         self.rhs_t_1,self.rhs_t_2 = self.t_shape(rhs_vector)
+
+    def update_l_and_rhs(self, l_vector, rhs_vector):
+        """update self.t and self.t_rhs with input vectors
+        """
+
+        self.l_1,self.l_2 = self.l_shape(l_vector)
+        self.rhs_l_1,self.rhs_l_2 = self.l_shape(rhs_vector)
 
     def get_zero_vec(self):
         """Return a zero vector with length n_t1 + n_t2
@@ -342,5 +408,18 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             return np.zeros(self.t_1.size + self.t_2.size)
         else:
             return np.zeros(self.t_2.size)
+
+
+    def get_t_amps(self):
+        """Return t amplitudes
+        """
+        return self.t_1, self.t_2
+
+    def get_l_amps(self):
+        """Return t amplitudes
+        """
+        return self.l_1, self.l_2
+
+
 
 

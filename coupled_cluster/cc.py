@@ -216,6 +216,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         """Propagate in complex time to ground state
         """
         self.propagate_t_amplitudes(*t_args, **t_kwargs)
+        self.propagate_l_amplitudes(*t_args, **t_kwargs)
 
     def setup_t_integrator(self, **kwargs):
         if self.t_integrator is None:
@@ -223,6 +224,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         if isinstance(self.t_integrator, SimpleRosenbrock):
             self.t_integrator.set_rhs_der(self.t_rhs_der)
+
+    def setup_l_integrator(self, **kwargs):
+        if self.l_integrator is None:
+            self.l_integrator = self.integrator.set_rhs(self.call_l)
+
+        if isinstance(self.l_integrator, SimpleRosenbrock):
+            self.l_integrator.set_rhs_der(self.l_rhs_der)
 
     def call_t(self, prev_amp, current_time):
         """Like __call__ for tdcc
@@ -241,7 +249,26 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
-        return self.t_flat(*t_new)
+        return self.u_flat(*t_new)
+
+    def call_l(self, prev_amp, current_time):
+        """Like __call__ for tdcc
+        
+        Unlike call, it only returns the function for lambda and there is 
+        no imaginary factor or t0 phase amplitude. 
+        Used for complex time propagation. current_time is a dummy to 
+        conform to integrators
+        """
+        o, v = self.system.o, self.system.v
+
+        l_old = self.l_shape(prev_amp)
+
+        l_new = [
+            -rhs_l_func(self.f, self.u, *self.get_t_amps(), *l_old, o, v, np=self.np)
+            for rhs_l_func in self.rhs_l_amplitudes()
+        ]
+
+        return self.u_flat(*l_new)
 
     def propagate_t_amplitudes(
         self, eps=0.005, max_steps=100, tol=1e-6, max_dt=1, **integrate_kwargs
@@ -263,7 +290,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         for i in range(max_steps):
 
-            amp_vec = self.t_integrator.step(self.t_flat(self.t_1,self.t_2),0,dt)
+            amp_vec = self.t_integrator.step(self.get_t_flat(),0,dt)
             error_vec = self.t_integrator.get_residual()
 
             self.update_t_and_rhs(amp_vec, error_vec)
@@ -287,4 +314,48 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             prev_amp = amp_vec
             prev_error = error_vec
 
+
+    def propagate_l_amplitudes(
+        self, eps=0.005, max_steps=100, tol=1e-6, max_dt=1, **integrate_kwargs
+    ):
+        """Propagate t amplitudes in complex time to convergence. 
+        """
+
+        np = self.np
+
+        if not np in integrate_kwargs:
+            integrate_kwargs["np"] = np
+
+        self.setup_l_integrator(**integrate_kwargs)
+
+        dt = np.sqrt(eps)
+
+        prev_amp = self.get_zero_vec()
+        prev_error = self.get_zero_vec()
+
+        for i in range(max_steps):
+
+            amp_vec = self.l_integrator.step(self.get_l_flat(),0,dt)
+            error_vec = self.l_integrator.get_residual()
+
+            self.update_l_and_rhs(amp_vec, error_vec)
+
+            residuals = self.compute_l_residuals()
+
+            if self.verbose:
+                print(f"Iteration: {i:{3}}\t delta t: {dt:.4f}\tResiduals (l): "\
+                      f"{residuals[0]:#.8g}  {residuals[1]:#.8g}")
+
+            if all(res < tol for res in residuals):
+                break
+
+            dl_norm  = np.linalg.norm(amp_vec - prev_amp)
+            rhs_norm = np.linalg.norm(error_vec - prev_error)
+            
+            dt = np.sqrt(2*eps*dl_norm/rhs_norm)
+            if(dt > max_dt):
+                dt = max_dt
+
+            prev_amp = amp_vec
+            prev_error = error_vec
 
