@@ -321,7 +321,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np = self.np
 
         if self.include_singles:
-            return np.concatenate((u_1.ravel(),u_2.ravel()),axis=0)
+            return np.concatenate((u_1.ravel(), u_2.ravel()), axis=0)
         else:
             return self.u_2.ravel()
 
@@ -329,8 +329,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         """update self.t and self.t_rhs with input vectors
         """
 
-        self.t_1,self.t_2 = self.t_shape(t_vector)
-        self.rhs_t_1,self.rhs_t_2 = self.t_shape(rhs_vector)
+        self.t_1, self.t_2 = self.t_shape(t_vector)
+        self.rhs_t_1, self.rhs_t_2 = self.t_shape(rhs_vector)
 
     def get_zero_vec(self):
         """Return a zero vector with length n_t1 + n_t2
@@ -342,5 +342,3 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
             return np.zeros(self.t_1.size + self.t_2.size)
         else:
             return np.zeros(self.t_2.size)
-
-
