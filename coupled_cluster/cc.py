@@ -298,17 +298,19 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             residuals = self.compute_t_residuals()
 
             if self.verbose:
-                print(f"Iteration: {i:{3}}\t delta t: {dt:.4f}\tResiduals (t): "\
-                      f"{residuals[0]:#.8g}  {residuals[1]:#.8g}")
+                print(
+                    f"Iteration: {i:{3}}\t delta t: {dt:.4f}\tResiduals (t): "
+                    f"{residuals[0]:#.8g}  {residuals[1]:#.8g}"
+                )
 
             if all(res < tol for res in residuals):
                 break
 
-            dt_norm  = np.linalg.norm(amp_vec - prev_amp)
+            dt_norm = np.linalg.norm(amp_vec - prev_amp)
             rhs_norm = np.linalg.norm(error_vec - prev_error)
-            
-            dt = np.sqrt(2*eps*dt_norm/rhs_norm)
-            if(dt > max_dt):
+
+            dt = np.sqrt(2 * eps * dt_norm / rhs_norm)
+            if dt > max_dt:
                 dt = max_dt
 
             prev_amp = amp_vec

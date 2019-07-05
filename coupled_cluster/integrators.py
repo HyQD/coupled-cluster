@@ -107,16 +107,18 @@ class SimpleRosenbrock(Integrator):
         """
 
         f = self.rhs
-        self.residual = f(u,t)
+        self.residual = f(u, t)
 
-        K1 = dt*self.residual
-        K2 = dt*f(u + K1, t + dt)
+        K1 = dt * self.residual
+        K2 = dt * f(u + K1, t + dt)
 
-        if(self.diagonal):
-            u_new = u + (K1 + (K2-K1)/(1 - dt*self.rhs_der(u,t)))
+        if self.diagonal:
+            u_new = u + (K1 + (K2 - K1) / (1 - dt * self.rhs_der(u, t)))
         else:
-            inv_mat = np.linalg.inv(np.identity(len(a)) - dt*self.rhs_der(u,t))
-            u_new = u + dt*(K1 + inv_mat*(K2-K1))
+            inv_mat = np.linalg.inv(
+                np.identity(len(a)) - dt * self.rhs_der(u, t)
+            )
+            u_new = u + dt * (K1 + inv_mat * (K2 - K1))
 
         self.rhs_evals += 2
 
