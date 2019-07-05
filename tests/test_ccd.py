@@ -59,9 +59,8 @@ def iterated_ccd_amplitudes(
     ccd_list = []
     for system in [helium_system, beryllium_system, neon_system]:
         system.change_to_hf_basis(verbose=True, tolerance=1e-8)
-        ccd = CoupledClusterDoubles(system, verbose=True, mixer=AlphaMixer)
-        ccd.iterate_t_amplitudes(theta=0.9)
-        ccd.iterate_l_amplitudes(theta=0.9)
+        ccd = CoupledClusterDoubles(system, verbose=True)
+        ccd.compute_ground_state()
 
         ccd_list.append(ccd)
 
