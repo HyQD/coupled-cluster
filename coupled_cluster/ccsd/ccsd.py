@@ -361,7 +361,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         else:
             return self.u_2.ravel()
 
-
     def get_t_flat(self):
         """Return t1 and t2 as a flat vector
         """
@@ -369,7 +368,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np = self.np
 
         if self.include_singles:
-            return np.concatenate((self.t_1.ravel(),self.t_2.ravel()),axis=0)
+            return np.concatenate((self.t_1.ravel(), self.t_2.ravel()), axis=0)
         else:
             return self.t_2.ravel()
 
@@ -380,7 +379,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         np = self.np
 
         if self.include_singles:
-            return np.concatenate((self.l_1.ravel(),self.l_2.ravel()),axis=0)
+            return np.concatenate((self.l_1.ravel(), self.l_2.ravel()), axis=0)
         else:
             return self.l_2.ravel()
 
@@ -395,8 +394,8 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         """update self.t and self.t_rhs with input vectors
         """
 
-        self.l_1,self.l_2 = self.l_shape(l_vector)
-        self.rhs_l_1,self.rhs_l_2 = self.l_shape(rhs_vector)
+        self.l_1, self.l_2 = self.l_shape(l_vector)
+        self.rhs_l_1, self.rhs_l_2 = self.l_shape(rhs_vector)
 
     def get_zero_vec(self):
         """Return a zero vector with length n_t1 + n_t2
@@ -409,7 +408,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         else:
             return np.zeros(self.t_2.size)
 
-
     def get_t_amps(self):
         """Return t amplitudes
         """
@@ -419,7 +417,3 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         """Return t amplitudes
         """
         return self.l_1, self.l_2
-
-
-
-

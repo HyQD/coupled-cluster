@@ -264,7 +264,9 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         l_old = self.l_shape(prev_amp)
 
         l_new = [
-            -rhs_l_func(self.f, self.u, *self.get_t_amps(), *l_old, o, v, np=self.np)
+            -rhs_l_func(
+                self.f, self.u, *self.get_t_amps(), *l_old, o, v, np=self.np
+            )
             for rhs_l_func in self.rhs_l_amplitudes()
         ]
 
@@ -290,7 +292,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         for i in range(max_steps):
 
-            amp_vec = self.t_integrator.step(self.get_t_flat(),0,dt)
+            amp_vec = self.t_integrator.step(self.get_t_flat(), 0, dt)
             error_vec = self.t_integrator.get_residual()
 
             self.update_t_and_rhs(amp_vec, error_vec)
@@ -316,7 +318,6 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             prev_amp = amp_vec
             prev_error = error_vec
 
-
     def propagate_l_amplitudes(
         self, eps=0.005, max_steps=100, tol=1e-6, max_dt=1, **integrate_kwargs
     ):
@@ -337,7 +338,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         for i in range(max_steps):
 
-            amp_vec = self.l_integrator.step(self.get_l_flat(),0,dt)
+            amp_vec = self.l_integrator.step(self.get_l_flat(), 0, dt)
             error_vec = self.l_integrator.get_residual()
 
             self.update_l_and_rhs(amp_vec, error_vec)
@@ -345,19 +346,20 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             residuals = self.compute_l_residuals()
 
             if self.verbose:
-                print(f"Iteration: {i:{3}}\t delta t: {dt:.4f}\tResiduals (l): "\
-                      f"{residuals[0]:#.8g}  {residuals[1]:#.8g}")
+                print(
+                    f"Iteration: {i:{3}}\t delta t: {dt:.4f}\tResiduals (l): "
+                    f"{residuals[0]:#.8g}  {residuals[1]:#.8g}"
+                )
 
             if all(res < tol for res in residuals):
                 break
 
-            dl_norm  = np.linalg.norm(amp_vec - prev_amp)
+            dl_norm = np.linalg.norm(amp_vec - prev_amp)
             rhs_norm = np.linalg.norm(error_vec - prev_error)
-            
-            dt = np.sqrt(2*eps*dl_norm/rhs_norm)
-            if(dt > max_dt):
+
+            dt = np.sqrt(2 * eps * dl_norm / rhs_norm)
+            if dt > max_dt:
                 dt = max_dt
 
             prev_amp = amp_vec
             prev_error = error_vec
-
