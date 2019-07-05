@@ -83,7 +83,10 @@ class SimpleRosenbrock(Integrator):
             rhs = lambda u, t: rhs_der
 
         self.rhs_der = rhs_der
+        self.diagonal = diagonal
 
+    def get_residual(self):
+        return self.residual
 
     def step(self, u, t, dt):
         """One integration step
@@ -104,14 +107,15 @@ class SimpleRosenbrock(Integrator):
         """
 
         f = self.rhs
+        self.residual = f(u,t)
 
-        K1 = dt * f(u, t)
-        K2 = dt * f(u + K1, t + dt)
+        K1 = dt*self.residual
+        K2 = dt*f(u + K1, t + dt)
 
-        if(diag):
-            u_new = u + dt*(K1 + (K2-K1)/(1 - dt*rhs_der(u,t)))
+        if(self.diagonal):
+            u_new = u + (K1 + (K2-K1)/(1 - dt*self.rhs_der(u,t)))
         else:
-            inv_mat = np.linalg.inv(np.identity(len(a)) - dt*rhs_der(u,t))
+            inv_mat = np.linalg.inv(np.identity(len(a)) - dt*self.rhs_der(u,t))
             u_new = u + dt*(K1 + inv_mat*(K2-K1))
 
         self.rhs_evals += 2

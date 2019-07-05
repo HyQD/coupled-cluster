@@ -281,10 +281,6 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
 
         pass
 
-    def t_rhs(self, u, t):
-        """Return 
-        """
-
     def rhs_t_amplitudes(self):
         if self.include_singles:
             yield compute_t_1_amplitudes
@@ -295,9 +291,59 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
         """Return approximate derivative of rhs
         """
 
+        np = self.np
+
         if self.include_singles:
             return np.concatenate((self.d_t_1.ravel(),self.d_t_2.ravel()),axis=0)
         else:
             return self.d_t_2.ravel()
+
+    def t_shape(self, u):
+        """Takes a flat vector u and returns it as tensors with the shapes of t1 and t2
+        """
+
+        np = self.np
+
+        n_u1 = 0
+        if self.include_singles:
+            n_u1 = self.m * self.n
+            u_1 = np.reshape(u[:n_u1], self.t_1.shape)
+
+        u_2 = np.reshape(u[n_u1:], self.t_2.shape)
+
+        if self.include_singles:
+            return u_1, u_2
+        else:
+            return u_2
+
+    def t_flat(self, u_1, u_2):
+        """Takes two tenors shaped like t1 and t2 and returns a single flat vector
+        """
+
+        np = self.np
+
+        if self.include_singles:
+            return np.concatenate((u_1.ravel(),u_2.ravel()),axis=0)
+        else:
+            return self.u_2.ravel()
+
+    def update_t_and_rhs(self, t_vector, rhs_vector):
+        """update self.t and self.t_rhs with input vectors
+        """
+
+        self.t_1,self.t_2 = self.t_shape(t_vector)
+        self.rhs_t_1,self.rhs_t_2 = self.t_shape(rhs_vector)
+
+    def get_zero_vec(self):
+        """Return a zero vector with length n_t1 + n_t2
+        """
+
+        np = self.np
+
+        if self.include_singles:
+            return np.zeros(self.t_1.size + self.t_2.size)
+        else:
+            return np.zeros(self.t_2.size)
+
 
 

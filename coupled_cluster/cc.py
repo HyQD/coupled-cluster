@@ -215,8 +215,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         if self.t_integrator is None:
             self.t_integrator = self.integrator.set_rhs(self.call_t)
 
-        if self.t_integrator is SimpleRosenbrock:
-            self.t_integrator.set_rhs_der(self.t_rhs_der())
+        if isinstance(self.t_integrator, SimpleRosenbrock):
+            self.t_integrator.set_rhs_der(self.t_rhs_der)
 
 
     def call_t(self, prev_amp, current_time):
@@ -229,21 +229,17 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         """
         o, v = self.system.o, self.system.v
 
-        prev_amp = AmplitudeContainer.from_array(
-                   AmplitudeContainer(t=[self.t_1,self.t_2], l=[], np=self.np), 
-                   prev_amp)
-
-        t_old = prev_amp.t
+        t_old = self.t_shape(prev_amp)
 
         t_new = [
             - rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
-        return AmplitudeContainer(t=t_new, l=[], np=self.np).asarray()
+        return self.t_flat(*t_new)
 
     def propagate_t_amplitudes(
-        self, dt=0.001, max_steps=2, tol=1e-6, **integrate_kwargs
+        self, eps=0.005, max_steps=100, tol=1e-6, max_dt=1, **integrate_kwargs
     ):
         """Propagate t amplitudes in complex time to convergence. 
         """
@@ -255,16 +251,35 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         self.setup_t_integrator(**integrate_kwargs)
 
-        
+        dt = np.sqrt(eps)
+
+        prev_amp = self.get_zero_vec()
+        prev_error = self.get_zero_vec()
+
         for i in range(max_steps):
 
-            amp_vec = self.integrator.step(self.get_amplitudes().asarray(),0,dt)
+            amp_vec = self.t_integrator.step(self.t_flat(self.t_1,self.t_2),0,dt)
+            error_vec = self.t_integrator.get_residual()
 
-#            residuals = self.compute_t_residuals()
-#
-#            if self.verbose:
-#                print(f"Iteration: {i}\tResiduals (t): {residuals}")
-#
-#            if all(res < tol for res in residuals):
-#                break
+            self.update_t_and_rhs(amp_vec, error_vec)
+
+            residuals = self.compute_t_residuals()
+
+            if self.verbose:
+                print(f"Iteration: {i:{3}}\t delta t: {dt:.4f}\tResiduals (t): "\
+                      f"{residuals[0]:#.8g}  {residuals[1]:#.8g}")
+
+            if all(res < tol for res in residuals):
+                break
+
+            dt_norm  = np.linalg.norm(amp_vec - prev_amp)
+            rhs_norm = np.linalg.norm(error_vec - prev_error)
+            
+            dt = np.sqrt(2*eps*dt_norm/rhs_norm)
+            if(dt > max_dt):
+                dt = max_dt
+
+            prev_amp = amp_vec
+            prev_error = error_vec
+
 
