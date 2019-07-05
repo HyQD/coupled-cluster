@@ -88,7 +88,7 @@ if __name__ == "__main__":
     print("t_2 equations")
     for term in t_2.args:
         print(latex(term))
-    
+
     print("\n\nl_2 equations")
     for term in l_2.args:
         print(latex(term))
