@@ -182,6 +182,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if all(res < tol for res in residuals):
                 break
 
+            assert i < (max_iterations - 1), f"The l amplitudes did not converge. Last residual: {residuals}"
+
     def iterate_t_amplitudes(
         self, max_iterations=100, tol=1e-4, **mixer_kwargs
     ):
@@ -201,3 +203,5 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
             if all(res < tol for res in residuals):
                 break
+
+            assert i < (max_iterations - 1), f"The t amplitudes did not converge. Last residual: {residuals}"
