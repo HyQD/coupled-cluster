@@ -63,15 +63,13 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             self.cc.compute_one_body_density_matrix
         )
 
-    def compute_ground_state(
-        self, t_args=[], t_kwargs={}, l_args=[], l_kwargs={}
-    ):
+    def compute_ground_state(self, *args, **kwargs):
         """Calls on method from CoupledCluster class to compute
         ground state of system.
         """
+
         # Compute ground state amplitudes
-        self.cc.iterate_t_amplitudes(*t_args, **t_kwargs)
-        self.cc.iterate_l_amplitudes(*l_args, **l_kwargs)
+        self.cc.compute_ground_state(*args, **kwargs)
 
     def set_initial_conditions(self, amplitudes=None):
         """Set initial condition of system.
