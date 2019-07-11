@@ -162,6 +162,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         self.iterate_t_amplitudes(*t_args, **t_kwargs)
         self.iterate_l_amplitudes(*l_args, **l_kwargs)
 
+        if self.verbose:
+            print(
+                f"Final {self.__class__.__name__} energy: "
+                + f"{self.compute_energy()}"
+            )
+
     def iterate_l_amplitudes(
         self, max_iterations=100, tol=1e-4, **mixer_kwargs
     ):
