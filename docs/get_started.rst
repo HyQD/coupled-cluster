@@ -15,7 +15,7 @@ with all dependencies. It can easily be created like this,::
     conda env create -f environment.yml
     conda activate cc
 
-This project has several dependecies, see
-`requirements.txt <https://github.com/Schoyen/coupled-cluster/requirements.txt>`_.
+This project has several dependencies, see
+`requirements.txt <https://github.com/Schoyen/coupled-cluster/blob/master/requirements.txt>`_.
 Of the dependecies, one is a custom module called
 `quantum-systems <https://github.com/Schoyen/quantum-systems>`_.
