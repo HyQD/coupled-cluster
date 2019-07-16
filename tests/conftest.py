@@ -5,9 +5,10 @@ import os
 from quantum_systems import (
     TwoDimensionalHarmonicOscillator,
     CustomSystem,
-    OneDimensionalHarmonicOscillator,
+    ODQD,
     construct_psi4_system,
 )
+from quantum_systems.quantum_dots.one_dim.one_dim_potentials import HOPotential
 from quantum_systems.time_evolution_operators import LaserField
 
 l = 12  # Number of orbitals
@@ -173,10 +174,8 @@ def zanghellini_system():
     laser_frequency = 8 * omega
     laser_strength = 1
 
-    odho = OneDimensionalHarmonicOscillator(
-        n, l, length, num_grid_points, omega=omega
-    )
-    odho.setup_system()
+    odho = ODQD(n, l, length, num_grid_points)
+    odho.setup_system(potential=HOPotential(omega))
     laser = LaserField(
         LaserPulse(
             laser_frequency=laser_frequency, laser_strength=laser_strength

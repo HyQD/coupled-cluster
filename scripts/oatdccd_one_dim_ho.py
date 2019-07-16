@@ -1,4 +1,5 @@
-from quantum_systems import OneDimensionalHarmonicOscillator
+from quantum_systems import ODQD
+from quantum_systems.quantum_dots.one_dim.one_dim_potentials import HOPotential
 from quantum_systems.time_evolution_operators import LaserField
 from coupled_cluster.ccd import OATDCCD
 
@@ -29,10 +30,8 @@ theta_t = 0.5
 theta_l = 0.9
 tol = 1e-4
 
-odho = OneDimensionalHarmonicOscillator(
-    n, l, length, num_grid_points, omega=omega
-)
-odho.setup_system()
+odho = ODQD(n, l, length, num_grid_points)
+odho.setup_system(potential=HOPotential(omega))
 laser = LaserField(
     LaserPulse(laser_frequency=laser_frequency, laser_strength=laser_strength)
 )
