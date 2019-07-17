@@ -142,6 +142,12 @@ class OACCD(CoupledClusterDoubles):
 
             self.system.change_basis(c=S, c_tilde=S_inv)
 
+        if self.verbose:
+            print(
+                f"Final {self.__class__.__name__} energy: "
+                + f"{self.compute_energy()}"
+            )
+
 
 def compute_kappa_down_rhs(f, u, t_2, l_2, o, v, np):
     # L2 = l_2
