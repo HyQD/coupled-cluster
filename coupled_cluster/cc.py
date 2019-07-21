@@ -12,8 +12,8 @@ from coupled_cluster.mix import AlphaMixer, DIIS
 
 class CoupledCluster(metaclass=abc.ABCMeta):
     """Coupled Cluster Abstract class
-    
-    Abstract base class defining the skeleton of a 
+
+    Abstract base class defining the skeleton of a
     Coupled Cluster ground state solver class.
 
     Parameters
@@ -124,7 +124,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         Returns
         -------
         np.array
-            Particle density        
+            Particle density
         """
         np = self.np
 
@@ -188,9 +188,10 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if all(res < tol for res in residuals):
                 break
 
-            assert i < (
-                max_iterations - 1
-            ), f"The l amplitudes did not converge. Last residual: {residuals}"
+        assert i < (max_iterations - 1), (
+            f"The l amplitudes did not converge. Last residual: "
+            + f"{self.compute_l_residuals()}"
+        )
 
     def iterate_t_amplitudes(
         self, max_iterations=100, tol=1e-4, **mixer_kwargs
@@ -212,6 +213,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             if all(res < tol for res in residuals):
                 break
 
-            assert i < (
-                max_iterations - 1
-            ), f"The t amplitudes did not converge. Last residual: {residuals}"
+        assert i < (max_iterations - 1), (
+            f"The t amplitudes did not converge. Last residual: "
+            + f"{self.compute_t_residuals()}"
+        )
