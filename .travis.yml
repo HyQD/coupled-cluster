@@ -14,6 +14,4 @@ install:
 - source activate cc
 script:
 - pytest
-after_success:
-- black .
-- bash push_formatting.sh
+- black --check .
