@@ -31,3 +31,7 @@ matplotlib
 
 # Install black
 black
+
+# Install sphinx for docs
+sphinx
+sphinx_rtd_theme
