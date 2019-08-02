@@ -36,12 +36,12 @@ class RungeKutta4(Integrator):
         Parameters
         ----------
         u : np.array
-            Flattened array of amplitudes    
+            Flattened array of amplitudes
         t : float
             Current time step
         dt : float
             Time step size (h)
-        
+
         Returns
         -------
         np.array
@@ -63,13 +63,13 @@ class RungeKutta4(Integrator):
 
 class GaussIntegrator(Integrator):
     """Gaussian Quadrature
-    
+
     Simple implementation of a symplectic Gauss integrator,
     order 4 and 6 (s=2 and s=3).
 
     Note, this is a modified code recieved from Simen Kvaal and
     Thomas Bondo Pedersen.
-    
+
     Parameters
     ----------
     np : module
@@ -102,11 +102,12 @@ class GaussIntegrator(Integrator):
         return self.rhs(y, t)
 
     def Z_solve(self, y, Z0, t, dt):
-        """Solver method
+        """Method solving the problem
 
-        Solves the problem Z = h*f(y + Z)*a^T by fix point iterations. 
-        Use Z0 as initial guess, and maxit iterations, and residual norm tolerance eps.
-        
+        .. math:: Z = hf(y + Z)a^T
+
+        by fix point iterations.
+
         Parameters
         ----------
         y : np.array
@@ -117,6 +118,12 @@ class GaussIntegrator(Integrator):
             Current time step
         dt : float
             Time step length
+
+        Returns
+        -------
+        tuple
+            The converged solution :math:`Z` and the right-hand side evaluations
+            :math:`F`.
         """
 
         np = self.np
