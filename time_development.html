@@ -1,0 +1,391 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Time Development &mdash; CC  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Integrators" href="integrators.html" />
+    <link rel="prev" title="Ground State Computations" href="ground_state.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CC
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ground_state.html">Ground State Computations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Time Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integrators.html">Integrators</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Time Development</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/time_development.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="time-development">
+<h1>Time Development<a class="headerlink" href="#time-development" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="time-dependent-cc-parent-class">
+<h2>Time Dependent CC parent class<a class="headerlink" href="#time-dependent-cc-parent-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.tdcc.</code><code class="sig-name descname">TimeDependentCoupledCluster</code><span class="sig-paren">(</span><em class="sig-param">cc</em>, <em class="sig-param">system</em>, <em class="sig-param">np=None</em>, <em class="sig-param">integrator=None</em>, <em class="sig-param">**cc_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time Dependent Coupled Cluster Parent Class</p>
+<p>Abstract base class defining the skeleton of a time-dependent Coupled
+Cluster solver class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cc</strong> (<a class="reference internal" href="ground_state.html#coupled_cluster.cc.CoupledCluster" title="coupled_cluster.cc.CoupledCluster"><em>CoupledCluster</em></a>) – Class instance defining the ground state solver</p></li>
+<li><p><strong>system</strong> (<em>QuantumSystem</em>) – Class instance defining the system to be solved</p></li>
+<li><p><strong>np</strong> (<em>module</em>) – Matrix/linear algebra library to be uses, like numpy or cupy</p></li>
+<li><p><strong>integrator</strong> (<a class="reference internal" href="integrators.html#coupled_cluster.integrators.Integrator" title="coupled_cluster.integrators.Integrator"><em>Integrator</em></a>) – Integrator class instance (RK4, GaussIntegrator)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_ground_state">
+<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_ground_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls on method from CoupledCluster class to compute
+ground state of system.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density">
+<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes current one-body density</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>One-body density of system at current time step</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_l_amplitudes">
+<em class="property">abstract </em><code class="sig-name descname">rhs_l_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that needs to be implemented as a generator. The generator
+should return the l-amplitudes right hand sides, in order of increasing
+excitation. For example, for ccsd, this function should contain:</p>
+<blockquote>
+<div><p>yield compute_l_1_amplitudes
+yield compute_l_2_amplitudes</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_t_amplitudes">
+<em class="property">abstract </em><code class="sig-name descname">rhs_t_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that needs to be implemented as a generator. The generator
+should return the t-amplitudes right hand sides, in order of increasing
+excitation. For example, for ccsd, this function should contain:</p>
+<blockquote>
+<div><p>yield compute_t_1_amplitudes
+yield compute_t_2_amplitudes</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.set_initial_conditions">
+<code class="sig-name descname">set_initial_conditions</code><span class="sig-paren">(</span><em class="sig-param">amplitudes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.set_initial_conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set initial condition of system.</p>
+<p>Necessary to call this function befor computing
+time development. Can be passed without arguments,
+will revert to amplitudes of ground state solver.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>amplitudes</strong> (<em>AmplitudeContainer</em>) – Amplitudes for the system</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="tdccsd">
+<h2>TDCCSD<a class="headerlink" href="#tdccsd" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="coupled_cluster.ccd.TDCCD">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">TDCCD</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time Dependent Coupled Cluster Doubles</p>
+<p>Computes time development of system, employd coupled
+cluster method with double exctiations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cc</strong> (<a class="reference internal" href="ground_state.html#coupled_cluster.cc.CoupledCluster" title="coupled_cluster.cc.CoupledCluster"><em>CoupledCluster</em></a>) – Class instance defining the ground state solver</p></li>
+<li><p><strong>system</strong> (<em>QuantumSystem</em>) – Class instance defining the system to be solved</p></li>
+<li><p><strong>np</strong> (<em>module</em>) – Matrix/linear algebra library to be uses, like numpy or cupy</p></li>
+<li><p><strong>integrator</strong> (<a class="reference internal" href="integrators.html#coupled_cluster.integrators.Integrator" title="coupled_cluster.integrators.Integrator"><em>Integrator</em></a>) – Integrator class instance (RK4, GaussIntegrator)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="coupled_cluster.ccd.TDCCD.compute_energy">
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes energy at current time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Energy</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.ccd.TDCCD.compute_one_body_density_matrix">
+<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes one-body density matrix at
+current time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>One-body density matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.ccd.TDCCD.compute_time_dependent_overlap">
+<code class="sig-name descname">compute_time_dependent_overlap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_time_dependent_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes overlap of current time-developed
+state with the ground state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Probability of ground state</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.complex128</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.ccd.TDCCD.compute_two_body_density_matrix">
+<code class="sig-name descname">compute_two_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_two_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes two-body density matrix at
+current time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Two-body density matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.ccd.TDCCD.rhs_l_amplitudes">
+<code class="sig-name descname">rhs_l_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that needs to be implemented as a generator. The generator
+should return the l-amplitudes right hand sides, in order of increasing
+excitation. For example, for ccsd, this function should contain:</p>
+<blockquote>
+<div><p>yield compute_l_1_amplitudes
+yield compute_l_2_amplitudes</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.ccd.TDCCD.rhs_t_amplitudes">
+<code class="sig-name descname">rhs_t_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that needs to be implemented as a generator. The generator
+should return the t-amplitudes right hand sides, in order of increasing
+excitation. For example, for ccsd, this function should contain:</p>
+<blockquote>
+<div><p>yield compute_t_1_amplitudes
+yield compute_t_2_amplitudes</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="integrators.html" class="btn btn-neutral float-right" title="Integrators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ground_state.html" class="btn btn-neutral float-left" title="Ground State Computations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Schoyen, gregwinther
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Ground State Computations &mdash; CC  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Time Development" href="time_development.html" />
+    <link rel="prev" title="Getting started" href="get_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CC
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Ground State Computations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="time_development.html">Time Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integrators.html">Integrators</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Ground State Computations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/ground_state.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ground-state-computations">
+<h1>Ground State Computations<a class="headerlink" href="#ground-state-computations" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="coupled-cluster-parent-class">
+<h2>Coupled Cluster parent class<a class="headerlink" href="#coupled-cluster-parent-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="coupled_cluster.cc.CoupledCluster">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.cc.</code><code class="sig-name descname">CoupledCluster</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">mixer=&lt;class 'coupled_cluster.mix.DIIS'&gt;</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">np=None</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coupled Cluster Abstract class</p>
+<p>Abstract base class defining the skeleton of a
+Coupled Cluster ground state solver class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> (<em>QuantumSystems</em>) – Quantum systems class instance</p></li>
+<li><p><strong>mixer</strong> (<em>AlphaMixer</em>) – AlpaMixer object</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Prints iterations for ground state computation if True</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="coupled_cluster.cc.CoupledCluster.compute_ground_state">
+<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param">t_args=[]</em>, <em class="sig-param">t_kwargs={}</em>, <em class="sig-param">l_args=[]</em>, <em class="sig-param">l_kwargs={}</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_ground_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute ground state energy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.cc.CoupledCluster.compute_particle_density">
+<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes one-particle density</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Particle density</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.cc.CoupledCluster.compute_reference_energy">
+<code class="sig-name descname">compute_reference_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_reference_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes reference energy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Reference energy</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.cc.CoupledCluster.get_amplitudes">
+<code class="sig-name descname">get_amplitudes</code><span class="sig-paren">(</span><em class="sig-param">get_t_0=False</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.get_amplitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for amplitudes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>get_t_0</strong> (<em>bool</em>) – Returns amplitude at t=0 if True</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Amplitudes in AmplitudeContainer object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>AmplitudeContainer</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="ccd">
+<h2>CCD<a class="headerlink" href="#ccd" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="coupled_cluster.ccd.CoupledClusterDoubles">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">CoupledClusterDoubles</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.CoupledClusterDoubles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coupled Cluster Doubles</p>
+<p>Class for Coupled Cluster solver, including
+double excitations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>system</strong> (<em>QuantumSystem</em>) – QuantumSystem class describing the system</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="ccsd">
+<h2>CCSD<a class="headerlink" href="#ccsd" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="coupled_cluster.ccsd.CoupledClusterSinglesDoubles">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccsd.</code><code class="sig-name descname">CoupledClusterSinglesDoubles</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">include_singles=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CoupledClusterSinglesDoubles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coupled Cluster Singels Doubles</p>
+<p>Coupled Cluster solver with single-, and double
+excitations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> (<em>QuantumSystems</em>) – QuantumSystems class instance describing the system to be solved</p></li>
+<li><p><strong>include_singles</strong> (<em>bool</em>) – Include singles</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="coupled_cluster.ccsd.CoupledClusterSinglesDoubles.compute_energy">
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CoupledClusterSinglesDoubles.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute Energy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Energy of current state</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.ccsd.CoupledClusterSinglesDoubles.compute_one_body_density_matrix">
+<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CoupledClusterSinglesDoubles.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes one-body density matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>One-body density matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="oaccd">
+<h2>OACCD<a class="headerlink" href="#oaccd" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="coupled_cluster.ccd.OACCD">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">OACCD</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Orbital Adaptive Coupled Cluster Doubles</p>
+<p>Implementation of the non-orthogonal coupled cluster method with
+double excitations. The code is based on a script written by
+Rolf H. Myhre and Simen Kvaal.</p>
+<p>Requires orthonormal basis functions.</p>
+<p><a class="reference external" href="https://doi.org/10.1063/1.5006160">https://doi.org/10.1063/1.5006160</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>system</strong> (<em>QuantumSystem</em>) – QuantumSystem class instance description of system</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="coupled_cluster.ccd.OACCD.compute_ground_state">
+<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param">max_iterations=100</em>, <em class="sig-param">tol=0.0001</em>, <em class="sig-param">termination_tol=0.0001</em>, <em class="sig-param">tol_factor=0.1</em>, <em class="sig-param">change_system_basis=False</em>, <em class="sig-param">**mixer_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.compute_ground_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute ground state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_iterations</strong> (<em>int</em>) – Maximum number of iterations</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – Tolerance parameter, e.g. 1e-4</p></li>
+<li><p><strong>tol_factor</strong> (<em>float</em>) – Tolerance factor</p></li>
+<li><p><strong>change_system_basis</strong> (<em>bool</em>) – Changes basis when ground state is reached</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="time_development.html" class="btn btn-neutral float-right" title="Time Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="get_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Schoyen, gregwinther
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
