@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Integrators &mdash; CC  documentation</title>
+  <title>Integrators &mdash; Coupled-cluster  documentation</title>
   
 
   
@@ -34,6 +34,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Time Development" href="time_development.html" /> 
@@ -50,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> CC
+            <a href="index.html" class="icon icon-home"> Coupled-cluster
           
 
           
@@ -82,6 +83,7 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ground_state.html">Ground State Computations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="time_development.html">Time Development</a></li>
@@ -100,7 +102,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">CC</a>
+          <a href="index.html">Coupled-cluster</a>
         
       </nav>
 
@@ -233,9 +235,10 @@ Thomas Bondo Pedersen.</p>
 <dl class="method">
 <dt id="coupled_cluster.integrators.GaussIntegrator.Z_solve">
 <code class="sig-name descname">Z_solve</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">Z0</em>, <em class="sig-param">t</em>, <em class="sig-param">dt</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.integrators.GaussIntegrator.Z_solve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Solver method</p>
-<p>Solves the problem Z = h*f(y + Z)*a^T by fix point iterations.
-Use Z0 as initial guess, and maxit iterations, and residual norm tolerance eps.</p>
+<dd><p>Method solving the problem</p>
+<div class="math notranslate nohighlight">
+\[Z = hf(y + Z)a^T\]</div>
+<p>by fix point iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -244,6 +247,13 @@ Use Z0 as initial guess, and maxit iterations, and residual norm tolerance eps.<
 <li><p><strong>t</strong> (<em>float</em>) – Current time step</p></li>
 <li><p><strong>dt</strong> (<em>float</em>) – Time step length</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The converged solution <span class="math notranslate nohighlight">\(Z\)</span> and the right-hand side evaluations
+<span class="math notranslate nohighlight">\(F\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
 </dd>
 </dl>
 </dd></dl>
