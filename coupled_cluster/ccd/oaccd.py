@@ -9,14 +9,15 @@ from coupled_cluster.cc_helper import (
 
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
+from coupled_cluster.ccd.energies import compute_time_dependent_energy
 from coupled_cluster.mix import DIIS
 
 
 class OACCD(CoupledClusterDoubles):
     """Orbital Adaptive Coupled Cluster Doubles
-    
+
     Implementation of the non-orthogonal coupled cluster method with
-    double excitations. The code is based on a script written by 
+    double excitations. The code is based on a script written by
     Rolf H. Myhre and Simen Kvaal.
 
     Requires orthonormal basis functions.
@@ -46,6 +47,11 @@ class OACCD(CoupledClusterDoubles):
     def setup_kappa_mixer(self, **kwargs):
         self.kappa_up_mixer = self.mixer(**kwargs)
         self.kappa_down_mixer = self.mixer(**kwargs)
+
+    def compute_energy(self):
+        return compute_time_dependent_energy(
+            self.f, self.u, self.t_2, self.l_2, self.o, self.v, np=self.np
+        )
 
     def compute_ground_state(
         self,
