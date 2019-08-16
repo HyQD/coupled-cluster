@@ -594,7 +594,13 @@ def add_d8a_t(u, t_1, o, v, out, np):
 
         g(f, u, t) <- (-1) * u^{kb}_{cd} t^{c}_{i} t^{a}_{k} t^{d}_{j} P(ab)
 
-    Number of FLOPS required O()
+    We do this in three steps
+
+        W^{kb}_{di} = (-1) * u^{kb}_{cd} t^{c}_{i}
+        W^{kb}_{ij} = W^{kb}_{di} t^{d}_{j}
+        g(f, u, t) <- t^{a}_{k} W^{kb}_{ij} P(ab)
+
+    Number of FLOPS required O(m^3 n^2)
 
     Note: The minus sign in this expression is in disagreement with the
     definition in Shavitt & Bartlett page 306. We believe this is an error in
@@ -602,10 +608,8 @@ def add_d8a_t(u, t_1, o, v, out, np):
     """
 
     term = np.tensordot(u[o, v, v, v], t_1, axes=((2), (0)))  # kbdi
-    term = np.tensordot(term, t_1, axes=((0), (1)))  # bdia
-    term = np.tensordot(term, t_1, axes=((1), (0))).transpose(
-        2, 0, 1, 3
-    )  # biaj -> abij
+    term = np.tensordot(term, t_1, axes=((2), (0)))  # kbij
+    term = np.tensordot(t_1, term, axes=((1), (0)))
     term -= term.swapaxes(0, 1)
 
     out -= term
@@ -614,16 +618,22 @@ def add_d8a_t(u, t_1, o, v, out, np):
 def add_d8b_t(u, t_1, o, v, out, np):
     """Function for adding the D8b diagram
 
-        g(f, u, t) <- u^{kl}_{cj} t^{c}_{i} t^{a}_{k} t^{b}_{l}
+        g(f, u, t) <- u^{kl}_{cj} t^{c}_{i} t^{a}_{k} t^{b}_{l} P(ij)
 
-    Number of FLOPS required O()
+    We do this in three steps
+
+        W^{kl}_{ji} = u^{kl}_{cj} t^{c}_{i}
+        W^{bk}_{ji} = t^{b}_{l} W^{kl}_{ji}
+        g(f, u, t) <- t^{a}_{k} W^{bk}_{ji} P(ij)
+
+    Number of FLOPS required O(m^2 n^3)
     """
 
     term = np.tensordot(u[o, o, v, o], t_1, axes=((2), (0)))  # klji
-    term = np.tensordot(term, t_1, axes=((0), (1)))  # ljia
-    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(
-        2, 3, 1, 0
-    )  # jiab -> abij
+    term = np.tensordot(t_1, term, axes=((1), (1)))  # bkji
+    # Note that the sign change removes the need for transposing the two last
+    # axes
+    term = -np.tensordot(t_1, term, axes=((1), (1)))
     term -= term.swapaxes(2, 3)
 
     out += term
@@ -634,14 +644,19 @@ def add_d9_t(u, t_1, o, v, out, np):
 
         g(f, u, t) <- u^{kl}_{cd} t^{c}_{i} t^{d}_{j} t^{a}_{k} t^{b}_{l}
 
-    Number of FLOPS required O()
+    We do this in four steps
+
+        W^{kl}_{di} = u^{kl}_{cd} t^{c}_{i}
+        W^{kl}_{ij} = W^{kl}_{di} t^{d}_{j}
+        W^{bk}_{ij} = t^{b}_{l} W^{kl}_{ij}
+        g(f, u, t) <- t^{a}_{k} W^{bk}_{ij}
+
+    Number of FLOPS required O(m^2 n^3)
     """
 
     term = np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))  # kldi
     term = np.tensordot(term, t_1, axes=((2), (0)))  # klij
-    term = np.tensordot(term, t_1, axes=((0), (1)))  # lija
-    term = np.tensordot(term, t_1, axes=((0), (1))).transpose(
-        2, 3, 0, 1
-    )  # ijab -> abij
+    term = np.tensordot(t_1, term, axes=((1), (1)))  # bkij
+    term = np.tensordot(t_1, term, axes=((1), (1)))
 
     out += term
