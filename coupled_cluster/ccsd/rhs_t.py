@@ -136,10 +136,15 @@ def add_s4a_t(u, t_1, t_2, o, v, out, np):
 
         g(f, u, t) <- -0.5 * u^{kl}_{cd} t^{c}_{i} t^{ad}_{kl}
 
-    Number of FLOPS required: O(m^3 n^3)
+    We do this in two steps
+
+        W^{kl}_{di} = -0.5 * u^{kl}_{cd} t^{c}_{i}
+        g(f, u, t) <- t^{ad}_{kl} W^{kl}_{di}
+
+    Number of FLOPS required: O(m^2 n^3)
     """
     W_kldi = -0.5 * np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))
-    out += np.tensordot(W_kldi, t_2, axes=((0, 1, 2), (2, 3, 1))).swapaxes(0, 1)
+    out += np.tensordot(t_2, W_kldi, axes=((1, 2, 3), (2, 0, 1)))
 
 
 def add_s4b_t(u, t_1, t_2, o, v, out, np):
@@ -147,10 +152,16 @@ def add_s4b_t(u, t_1, t_2, o, v, out, np):
 
         g(f, u, t) <- -0.5 * u^{kl}_{cd} t^{a}_{k} t^{cd}_{il}
 
-    Number of FLOPS required: O(m^3 n^3)
+    We do this in two steps
+
+        W^{k}_{i} = -0.5 u^{kl}_{cd} t^{cd}_{il}
+        g(f, u, t) <- t^{a}_{k} W^{k}_{i}
+
+    Number of FLOPS required: O(m^2 n^3)
     """
-    W_lcda = -0.5 * np.tensordot(u[o, o, v, v], t_1, axes=((0), (1)))
-    out += np.tensordot(W_lcda, t_2, axes=((1, 2, 0), (0, 1, 3)))
+
+    W_ki = -0.5 * np.tensordot(u[o, o, v, v], t_2, axes=((1, 2, 3), (3, 0, 1)))
+    out += np.dot(t_1, W_ki)
 
 
 def add_s4c_t(u, t_1, t_2, o, v, out, np):
@@ -158,8 +169,14 @@ def add_s4c_t(u, t_1, t_2, o, v, out, np):
 
         g(f, u, t) <- u^{kl}_{cd} t^{c}_{k} t^{da}_{li}
 
-    Number of FLOPS required: O(m^3 n^3)
+    We do this in two steps
+
+        W^{l}_{d} = u^{kl}_{cd} t^{c}_{k}
+        g(f, u, t) <- W^{l}_{d} t^{da}_{li}
+
+    Number of FLOPS required: O(m^2 n^2)
     """
+
     temp_ld = np.tensordot(u[o, o, v, v], t_1, axes=((0, 2), (1, 0)))
     out += np.tensordot(temp_ld, t_2, axes=((0, 1), (2, 0)))
 
@@ -167,12 +184,18 @@ def add_s4c_t(u, t_1, t_2, o, v, out, np):
 def add_s5a_t(f, t_1, o, v, out, np):
     """Function for adding the S5a diagram
 
-        g(f, u, t) <- f^{k}_{c} t^{c}_{i} t^{a}_{k}
+        g(f, u, t) <- -f^{k}_{c} t^{c}_{i} t^{a}_{k}
 
-    Number of FLOPS required: O(m^2, n^2)
+    We do this in two steps
+
+        W^{k}_{i} = -f^{k}_{c} t^{c}_{i}
+        g(f, u, t) <- t^{a}_{k} W^{k}_{i}
+
+    Number of FLOPS required: O(m n^2)
     """
-    temp_ki = -np.tensordot(f[o, v], t_1, axes=((1), (0)))
-    out += np.tensordot(temp_ki, t_1, axes=((0), (1))).swapaxes(0, 1)
+
+    W_ki = -np.dot(f[o, v], t_1)
+    out += np.dot(t_1, W_ki)
 
 
 def add_s5b_t(u, t_1, o, v, out, np):
@@ -180,7 +203,12 @@ def add_s5b_t(u, t_1, o, v, out, np):
 
         g(f, u, t) <- u^{ak}_{cd} t^{c}_{i} t^{d}_{k}
 
-    Number of FLOPS required: O(m^2 n^3)
+    We do this in two steps
+
+        W^{ak}_{di} = u^{ak}_{cd} t^{c}_{i}
+        g(f, u, t) <- W^{ak}_{di} t^{d}_{k}
+
+    Number of FLOPS required: O(m^3 n^2)
     """
     W_akdi = np.tensordot(u[v, o, v, v], t_1, axes=((2), (0)))
     out += np.tensordot(W_akdi, t_1, axes=((1, 2), (1, 0)))
@@ -191,10 +219,15 @@ def add_s5c_t(u, t_1, o, v, out, np):
 
         g(f, u, t) <- - u^{kl}_{ic} t^{a}_{k} t^{c}_{l}
 
-    Number of FLOPS required: O(m^2, n^3)
+    We do this in two steps
+
+        W^{k}_{i} = - u^{kl}_{ic} t^{c}_{l}
+        g(f, u, t) <- t^{a}_{k} W^{k}_{i}
+
+    Number of FLOPS required: O(m n^3)
     """
-    W_lica = -np.tensordot(u[o, o, o, v], t_1, axes=((0), (1)))
-    out += np.tensordot(W_lica, t_1, axes=((0, 2), (1, 0))).swapaxes(0, 1)
+    W_ki = -np.tensordot(u[o, o, o, v], t_1, axes=((1, 3), (1, 0)))
+    out += np.dot(t_1, W_ki)
 
 
 def add_s6_t(u, t_1, o, v, out, np):
@@ -202,11 +235,18 @@ def add_s6_t(u, t_1, o, v, out, np):
 
         g(f, u, t) <- (-1) * u ^{kl}_{cd} t^{c}_{i} t^{a}_{k} t^{d}_{l}
 
-    Number of FLOPS required: O(m^3 n^3)
+    We do this in three steps
+
+        W^{k}_{c} = - u^{kl}_{cd} t^{d}_{l}
+        W^{k}_{i} = W^{k}_{c} t^{c}_{i}
+        g(f, u, t) <- t^{a}_{k} W^{k}_{i}
+
+    Number of FLOPS required: O(m^2 n^2)
     """
-    W_kldi = -np.tensordot(u[o, o, v, v], t_1, axes=((2), (0)))
-    W_ldia = np.tensordot(W_kldi, t_1, axes=((0), (1)))
-    out += np.tensordot(W_ldia, t_1, axes=((0, 1), (1, 0))).swapaxes(0, 1)
+
+    W_kc = -np.tensordot(u[o, o, v, v], t_1, axes=((1, 3), (1, 0)))
+    W_ki = np.dot(W_kc, t_1)
+    out += np.dot(t_1, W_ki)
 
 
 # Diagrams for T_1 contributions to CCSD T_2 equations.
