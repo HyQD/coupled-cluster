@@ -91,7 +91,7 @@ class CoupledClusterDoubles(CoupledCluster):
 
         trial_vector = self.t_2
         direction_vector = np.divide(self.rhs_t_2, self.d_t_2)
-        error_vector = -self.rhs_t_2
+        error_vector = self.rhs_t_2.copy()
 
         self.t_2 = self.t_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
@@ -114,7 +114,7 @@ class CoupledClusterDoubles(CoupledCluster):
 
         trial_vector = self.l_2
         direction_vector = np.divide(self.rhs_l_2, self.d_l_2)
-        error_vector = -self.rhs_l_2
+        error_vector = self.rhs_l_2.copy()
 
         self.l_2 = self.l_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
