@@ -37,21 +37,9 @@ def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
     return energy
 
 
-# def compute_time_dependent_energy(f, u, t_1, t_2, l_1, l_2, o, v, np):
-#     energy = compute_ccsd_ground_state_energy(f, u, t_1, t_2, o, v, np=np)
-#     energy += lagrangian_functional(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
-#
-#     return energy
-
-
 def compute_time_dependent_energy(f, u, t_1, t_2, l_1, l_2, o, v, np):
-    energy = compute_ccsd_ground_state_energy(f, u, t_1, t_2, o, v, np=np)
-    rhs_t_1 = compute_t_1_amplitudes(f, u, t_1, t_2, o, v, np=np)
-    rhs_t_2 = compute_t_2_amplitudes(f, u, t_1, t_2, o, v, np=np)
-    energy += np.tensordot(l_1, rhs_t_1, axes=((0, 1), (1, 0)))
-    energy += 0.25 * np.tensordot(
-        l_2, rhs_t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
-    )
+    energy = compute_reference_energy(f, u, o, v, np=np)
+    energy += lagrangian_functional(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
 
     return energy
 
