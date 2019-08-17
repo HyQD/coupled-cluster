@@ -35,3 +35,6 @@ black
 # Install sphinx for docs
 sphinx
 sphinx_rtd_theme
+
+# Install PySCF
+pyscf
