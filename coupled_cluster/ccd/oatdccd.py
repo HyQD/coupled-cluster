@@ -55,7 +55,7 @@ class OATDCCD(OATDCC):
             self.rho_qspr.fill(0)
 
         return compute_two_body_density_matrix(
-            t_2, l_2, self.o, self.v, np=self.np, out=self.rho_qspr,
+            t_2, l_2, self.o, self.v, np=self.np, out=self.rho_qspr
         )
 
     def compute_one_body_density_matrix(self):
