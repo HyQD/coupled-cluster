@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-from quantum_systems import construct_psi4_system
+from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import LaserField
-from tdhf import HartreeFock
 from coupled_cluster.ccd import OATDCCD
 from coupled_cluster.integrators import GaussIntegrator
 
@@ -30,27 +29,19 @@ class LaserPulse:
 # Define system paramters
 He = """
 He 0.0 0.0 0.0
-symmetry c1
 """
 
 
-options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 omega = 2.873_564_3
 E = 100  # 0.05-5
 laser_duration = 5
 
 
-system = construct_psi4_system(He, options)
-hf = HartreeFock(system, verbose=True)
-C = hf.scf(tolerance=1e-15)
-system.change_basis(C)
+system = construct_pyscf_system_rhf(He)
 
-integrator = GaussIntegrator(np=np, eps=1e-10)
-# integrator = None
-cc_kwargs = dict(verbose=True)
-oatdccd = OATDCCD(system, integrator=integrator, np=np, **cc_kwargs)
-t_kwargs = dict(theta=0, tol=1e-10)
-oatdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
+integrator = GaussIntegrator(np=np, s=3, eps=1e-10)
+oatdccd = OATDCCD(system, integrator=integrator, np=np, verbose=True)
+oatdccd.compute_ground_state()
 print(
     "Ground state CCD energy: {0}".format(oatdccd.compute_ground_state_energy())
 )
@@ -88,7 +79,7 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
     td_energies[i + 1] = energy.real
     td_energies_imag[i + 1] = energy.imag
 
-    rho_qp = oatdccd.one_body_density_matrix(t, l)
+    rho_qp = oatdccd.compute_one_body_density_matrix()
     rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
     z = system.dipole_moment[2].copy()
@@ -96,8 +87,8 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
 
     dip_z[i + 1] = (np.einsum("qp,pq->", rho_qp_hermitian, z)).real
 
-    norm_t2[i + 1] = np.linalg.norm(t)
-    norm_l2[i + 1] = np.linalg.norm(l)
+    norm_t2[i + 1] = np.linalg.norm(t[1])
+    norm_l2[i + 1] = np.linalg.norm(l[0])
 
     if i % 100 == 0:
         print(f"i = {i}")
@@ -109,8 +100,8 @@ for i, amp in enumerate(oatdccd.solve(time_points)):
             "rho_qp_hermitian is hermitian: %s"
             % np.allclose(rho_qp_hermitian, rho_qp_hermitian.conj().T)
         )
-        print("norm(t2): %g" % np.linalg.norm(t))
-        print("norm(l2): %g" % np.linalg.norm(l))
+        print("norm(t2): %g" % np.linalg.norm(t[1]))
+        print("norm(l2): %g" % np.linalg.norm(l[0]))
 
 
 plt.figure()
