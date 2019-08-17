@@ -121,3 +121,6 @@ miniconda.sh
 
 # Numpy data files
 *.npy
+
+# Pipfile lock
+Pipfile.lock
