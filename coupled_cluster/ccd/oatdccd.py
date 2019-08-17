@@ -48,8 +48,14 @@ class OATDCCD(OATDCC):
         t_2 = t[0]
         l_2 = l[0]
 
+        # Avoid re-allocating memory for two-body density matrix
+        if not hasattr(self, "rho_qspr"):
+            self.rho_qspr = None
+        else:
+            self.rho_qspr.fill(0)
+
         return compute_two_body_density_matrix(
-            t_2, l_2, self.o, self.v, np=self.np
+            t_2, l_2, self.o, self.v, np=self.np, out=self.rho_qspr,
         )
 
     def compute_one_body_density_matrix(self):
