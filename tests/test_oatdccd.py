@@ -1,7 +1,8 @@
+import os
 import pytest
 
 import numpy as np
-from quantum_systems import construct_psi4_system
+from quantum_systems import construct_pyscf_system
 from quantum_systems.time_evolution_operators import LaserField
 
 
@@ -132,3 +133,77 @@ def test_oatdccd(
     np.testing.assert_allclose(dip_z, oatdccd_helium_dip_z, atol=1e-7)
     np.testing.assert_allclose(norm_t2, oatdccd_helium_norm_t2, atol=1e-7)
     np.testing.assert_allclose(norm_l2, oatdccd_helium_norm_l2, atol=1e-7)
+
+
+def test_oatdccd_helium():
+    omega = 2.873_564_3
+    E = 0.1
+    laser_duration = 5
+
+    system = construct_pyscf_system(molecule="he 0.0 0.0 0.0", basis="cc-pvdz")
+
+    integrator = GaussIntegrator(s=3, np=np, eps=1e-6)
+    oatdccd = OATDCCD(system, integrator=integrator, np=np, verbose=True)
+    oatdccd.compute_ground_state()
+    assert (
+        abs(oatdccd.compute_ground_state_energy() - -2.887_594_831_090_936)
+        < 1e-6
+    )
+
+    polarization = np.zeros(3)
+    polarization[2] = 1
+    system.set_time_evolution_operator(
+        LaserField(
+            LaserPulse(td=laser_duration, omega=omega, E=E),
+            polarization_vector=polarization,
+        )
+    )
+
+    oatdccd.set_initial_conditions()
+    dt = 1e-3
+    T = 1
+    num_steps = int(T // dt) + 1
+    t_stop_laser = int(laser_duration // dt) + 1
+
+    time_points = np.linspace(0, T, num_steps)
+
+    td_energies = np.zeros(len(time_points), dtype=np.complex128)
+    dip_z = np.zeros(len(time_points))
+
+    rho_qp = oatdccd.compute_one_body_density_matrix()
+    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
+
+    td_energies[0] = oatdccd.compute_energy()
+
+    t, l, C, C_tilde = oatdccd.amplitudes
+
+    z = C_tilde @ system.dipole_moment[2] @ C
+
+    dip_z[0] = np.einsum("qp,pq->", rho_qp_hermitian, z).real
+
+    for i, amp in enumerate(oatdccd.solve(time_points)):
+        td_energies[i + 1] = oatdccd.compute_energy()
+
+        rho_qp = oatdccd.compute_one_body_density_matrix()
+        rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
+
+        t, l, C, C_tilde = amp
+        z = C_tilde @ system.dipole_moment[2] @ C
+
+        dip_z[i + 1] = np.einsum("qp,pq->", rho_qp_hermitian, z).real
+
+    np.testing.assert_allclose(
+        td_energies.real,
+        np.loadtxt(
+            os.path.join("tests", "dat", "tdcisd_helium_energies_real_0.1.dat")
+        ),
+        atol=1e-5,
+    )
+
+    np.testing.assert_allclose(
+        dip_z,
+        np.loadtxt(
+            os.path.join("tests", "dat", "tdcisd_helium_dipole_z_0.1.dat")
+        ),
+        atol=1e-5,
+    )
