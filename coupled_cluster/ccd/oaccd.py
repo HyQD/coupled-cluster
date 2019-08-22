@@ -2,7 +2,6 @@ from scipy.linalg import expm
 
 from coupled_cluster.ccd.ccd import CoupledClusterDoubles
 from coupled_cluster.cc_helper import (
-    transform_two_body_tensor,
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
 )
@@ -88,8 +87,12 @@ class OACCD(CoupledClusterDoubles):
             S = expm(self.kappa)
             S_inv = expm(-self.kappa)
 
-            self.h = S_inv @ self.system.h @ S
-            self.u = transform_two_body_tensor(self.system.u, S, S_inv, np)
+            self.h = self.system.transform_one_body_elements(
+                self.system.h, S, S_inv
+            )
+            self.u = self.system.transform_two_body_elements(
+                self.system.u, S, S_inv
+            )
             self.f = self.system.construct_fock_matrix(self.h, self.u)
 
             d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
@@ -138,8 +141,12 @@ class OACCD(CoupledClusterDoubles):
         S = expm(self.kappa)
         S_inv = expm(-self.kappa)
 
-        self.h = S_inv @ self.system.h @ S
-        self.u = transform_two_body_tensor(self.system.u, S, S_inv, np)
+        self.h = self.system.transform_one_body_elements(
+            self.system.h, S, S_inv
+        )
+        self.u = self.system.transform_two_body_elements(
+            self.system.u, S, S_inv
+        )
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
         if change_system_basis:

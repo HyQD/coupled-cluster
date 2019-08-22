@@ -1,10 +1,6 @@
 import abc
 import warnings
-from coupled_cluster.cc_helper import (
-    OACCVector,
-    transform_two_body_tensor,
-    compute_particle_density,
-)
+from coupled_cluster.cc_helper import OACCVector, compute_particle_density
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 from coupled_cluster.integrators import RungeKutta4
 
@@ -93,8 +89,12 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             self.u_orig = self.system.u_t(current_time)
 
         # Change basis to C and C_tilde
-        self.h = C_tilde @ self.h_orig @ C
-        self.u = transform_two_body_tensor(self.u_orig, C, C_tilde, self.np)
+        self.h = self.system.transform_one_body_elements(
+            self.h_orig, C, C_tilde
+        )
+        self.u = self.system.transform_two_body_elements(
+            self.u_orig, C, C_tilde
+        )
 
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
