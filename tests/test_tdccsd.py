@@ -259,11 +259,7 @@ def test_tdccsd():
     ).real
     td_overlap[0] = tdccsd.compute_time_dependent_overlap()
 
-    import tqdm
-
-    for i, c in tqdm.tqdm(
-        enumerate(tdccsd.solve(time_points)), total=num_steps
-    ):
+    for i, c in enumerate(tdccsd.solve(time_points)):
         td_energies[i + 1] = tdccsd.compute_energy()
 
         rho_qp = tdccsd.compute_one_body_density_matrix()
