@@ -22,6 +22,10 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self.h_orig = self.system.h
         self.u_orig = self.system.u
 
+        self.h = self.system.h
+        self.u = self.system.u
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
+
     def set_initial_conditions(self, amplitudes=None, C=None, C_tilde=None):
         if amplitudes is None:
             # Create copy of ground state amplitudes for time-integration
