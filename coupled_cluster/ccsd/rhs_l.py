@@ -59,9 +59,9 @@ def compute_l_2_amplitudes(f, u, t_1, t_2, l_1, l_2, o, v, np, out=None):
         out = np.zeros_like(l_2)
 
     ccd_l.compute_l_2_amplitudes(f, u, t_2, l_2, o, v, np=np, out=out)
-    add_d3b_l(u, l_1, o, v, out, np=np)
     add_d4a_l(u, l_2, t_1, o, v, out, np=np)
     add_d4b_l(u, l_2, t_1, o, v, out, np=np)
+    add_d5a_l(u, l_1, o, v, out, np=np)
     add_d5b_l(u, l_1, o, v, out, np=np)
     add_d7a_l(f, l_1, o, v, out, np=np)
     add_d7b_l(f, l_2, t_1, o, v, out, np=np)
@@ -110,7 +110,7 @@ def add_s2a_l(f, l_1, o, v, out, np):
 
 def add_s2b_l(f, l_1, o, v, out, np):
     """Function for adding the S2b diagram
-    
+
         g*(f, u, l, t) <- (-1) f^{i}_{j} l^{j}_{a}
 
     Number of FLOPS: O(m n^2)
@@ -311,7 +311,7 @@ def add_s9a_l(u, l_2, t_2, o, v, out, np):
     """Function for adding the S9a diagram
 
         g*(f, u, l, t) <- (-1) l^{ij}_{bc} t^{bd}_{jk} u^{ck}_{ad}
-    
+
     Number of FLOPS required: O()
     """
 
@@ -699,27 +699,17 @@ def add_s12b_l(u, l_2, t_1, o, v, out, np):
 # I also don't understand the naming convention at all..
 
 
-def add_d3b_l(u, l_1, o, v, out, np):
-    """Function for adding the D3b diagram
-
-        g*(f, u, l, t) <- l^{k}_{a} u^{ij}_{bk} P(ab)
-
-    Number of FLOPS required:
-    """
-
-    term = np.tensordot(l_1, u[o, o, v, o], axes=((0), (3))).transpose(
-        1, 2, 0, 3
-    )  # aijb -> ijab
-    term -= term.swapaxes(2, 3)
-    out += term
-
-
 def add_d4a_l(u, l_2, t_1, o, v, out, np):
     """Function for adding the D4a diagram
 
-        g*(f, u, l, t) <- l^{ij}_{cd} t^{c}_{k} u^{dk}_(ab}
-        
-    Number of FLOPS required:
+        g*(f, u, l, t) <- l^{ij}_{cd} t^{c}_{k} u^{dk}_{ab}
+
+    We do this in two steps
+
+        W^{ij}_{dk} = l^{ij}_{cd} t^{c}_{k}
+        g*(f, u, l, t) <- W^{ij}_{dk} u^{dk}_{ab}
+
+    Number of FLOPS required: O(m^3 n^3)
     """
 
     term = np.tensordot(l_2, t_1, axes=((2), (0)))  # ijdk
@@ -731,21 +721,39 @@ def add_d4b_l(u, l_2, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- l^{kl}_{ab} t^{c}_{k} u^{ij}_{cl}
 
-    Number of FLOPS required:
+    We do this in two steps
+
+        W^{ij}_{kl} = t^{c}_{k} u^{ij}_{cl}
+        g*(f, u, l, t) <- W^{ij}_{kl} l^{kl}_{ab}
+
+    Number of FLOPS required: O(m^2 n^4)
     """
 
-    term = np.tensordot(l_2, t_1, axes=((0), (1)))  # labc
-    out += np.tensordot(term, u[o, o, v, o], axes=((0, 3), (3, 2))).transpose(
-        2, 3, 0, 1
-    )  # abij -> ijab
+    W_ijkl = np.tensordot(u[o, o, v, o], t_1, axes=((2), (0))).transpose(
+        0, 1, 3, 2
+    )
+    out += np.tensordot(W_ijkl, l_2, axes=((2, 3), (0, 1)))
+
+
+def add_d5a_l(u, l_1, o, v, out, np):
+    """Function for adding the D5a diagram
+
+        g*(f, u, l, t) <- l^{k}_{a} u^{ij}_{bk} P(ab)
+
+    Number of FLOPS required: O(m^2 n^3)
+    """
+
+    term = np.tensordot(u[o, o, v, o], l_1, axes=((3), (0)))
+    term -= term.swapaxes(2, 3)
+    out -= term
 
 
 def add_d5b_l(u, l_1, o, v, out, np):
     """Function for adding the D5b diagram
 
-        g*(f, u, l, t) <- l^{i}_{c} u^{jc}_{ab} P(ij)
+        g*(f, u, l, t) <- (-1) * l^{i}_{c} u^{jc}_{ab} P(ij)
 
-    Number of FLOPS required:
+    Number of FLOPS required: O(m^3 n^2)
     """
 
     term = (-1) * np.tensordot(l_1, u[o, v, v, v], axes=((1), (1)))  # ijab
@@ -960,7 +968,7 @@ def add_d12b_l(u, l_2, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- (-1) l^{ik}_{ab} t^{c}_{k} t^{d}_{l} u^{jl}_{cd} P(ij)
 
-    Number of FLOPS required: 
+    Number of FLOPS required:
     """
 
     # Starting from the back again
