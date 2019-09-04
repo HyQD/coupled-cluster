@@ -24,9 +24,9 @@ def generate_lagrangian(t_operators, l_operators):
 
 if __name__ == "__main__":
     from cluster_operators import (
-        # get_t_1_operator,
+        get_t_1_operator,
         get_t_2_operator,
-        # get_l_1_operator,
+        get_l_1_operator,
         get_l_2_operator,
     )
     from helper_functions import eval_equation
@@ -34,6 +34,22 @@ if __name__ == "__main__":
 
     lagrangian = eval_equation(
         generate_lagrangian([get_t_2_operator], [get_l_2_operator])
+    )
+
+    print("-" * 41 + "CCD" + "-" * 40)
+
+    print(latex(lagrangian))
+    print("\n\n")
+    for term in lagrangian.args:
+        print(latex(term))
+
+    print("-" * 40 + "CCSD" + "-" * 40)
+
+    lagrangian = eval_equation(
+        generate_lagrangian(
+            [get_t_1_operator, get_t_2_operator],
+            [get_l_1_operator, get_l_2_operator],
+        )
     )
 
     print(latex(lagrangian))
