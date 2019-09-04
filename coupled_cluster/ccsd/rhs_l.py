@@ -476,7 +476,12 @@ def add_s10e_l(u, l_2, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (-0.5) l^{jk}_{bc} t^{bc}_{jl} u^{il}_{ak}
 
-    Number of FLOPS required: O()
+    We do this in two steps
+
+        W^{k}_{l} = -0.5 l^{jk}_{bc} t^{bc}_{jl}
+        g*(f, u, l, t) <- W^{k}_{l} u^{il}_{ak}
+
+    Number of FLOPS required: O(m^2 n^3)
     """
 
     term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 2, 3), (2, 0, 1)))  # kl
@@ -488,15 +493,16 @@ def add_s10f_l(u, l_2, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (-0.25) l^{jk}_{ab} t^{cd}_{jk} u^{ib}_{cd}
 
-    Number of FLOPS required: O()
+    We do this in two steps
+
+        W^{ib}_{jk} = -0.25 u^{ib}_{cd} t^{cd}_{jk}
+        g*(f, u, l, t) <- W^{ib}_{jk} l^{jk}_{ab}
+
+    Number of FLOPS required: O(m^3 n^3)
     """
 
-    term = (-0.25) * np.tensordot(l_2, t_2, axes=((0, 1), (2, 3)))  # abcd
-    out += np.tensordot(
-        term, u[o, v, v, v], axes=((1, 2, 3), (1, 2, 3))
-    ).transpose(
-        1, 0
-    )  # ai -> ia
+    W_ibjk = -0.25 * np.tensordot(u[o, v, v, v], t_2, axes=((2, 3), (0, 1)))
+    out += np.tensordot(W_ibjk, l_2, axes=((1, 2, 3), (3, 0, 1)))
 
 
 def add_s10g_l(u, l_2, t_2, o, v, out, np):
@@ -504,7 +510,12 @@ def add_s10g_l(u, l_2, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (0.25) l^{ij}_{bc} t^{bc}_{kl} u^{kl}_{aj}
 
-    Number of FLOPS required: O()
+    We do this in two steps
+
+        W^{ij}_{kl} = 0.25 l^{ij}_{bc} t^{bc}_{kl}
+        g*(f, u, l, t) <- W^{ij}_{kl} u^{kl}_{aj}
+
+    Number of FLOPS required: O(m^2 n^4)
     """
 
     term = (0.25) * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))  # ijkl
@@ -516,7 +527,13 @@ def add_s11a_l(u, l_2, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- l^{ij}_{bc} t^{b}_{k} t^{d}_{j} u^{ck}_{ad}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{ij}_{ck} = l^{ij}_{bc} t^{b}_{k}
+        W^{ic}_{kd} = W^{ij}_{ck} t^{d}_{j}
+        g*(f, u, l, t) <- W^{ic}_{kd} u^{ck}_{ad}
+
+    Number of FLOPS required: O(m^3 n^2)
     """
 
     term = np.tensordot(l_2, t_1, axes=((2), (0)))  # ijck
@@ -529,14 +546,18 @@ def add_s11b_l(u, l_2, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- l^{jk}_{ab} t^{b}_{l} t^{c}_{j} u^{il}_{ck}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{jk}_{al} = l^{jk}_{ab} t^{b}_{l}
+        W^{ic}_{ja} = u^{il}_{ck} W^{jk}_{al}
+        g*(f, u, l, t) <- W^{ic}_{ja} t^{c}_{j}
+
+    Number of FLOPS required: O(m^2 n^4)
     """
 
     term = np.tensordot(l_2, t_1, axes=((3), (0)))  # jkal
-    term = np.tensordot(term, u[o, o, v, o], axes=((1, 3), (3, 1)))  # jaic
-    out += np.tensordot(t_1, term, axes=((0, 1), (3, 0))).transpose(
-        1, 0
-    )  # ai -> ia
+    term = np.tensordot(u[o, o, v, o], term, axes=((3, 1), (1, 3)))
+    out += np.tensordot(term, t_1, axes=((1, 2), (0, 1)))
 
 
 def add_s11c_l(u, l_2, t_1, o, v, out, np):
@@ -544,14 +565,18 @@ def add_s11c_l(u, l_2, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- (0.5) l^{jk}_{ab} t^{c}_{k} t^{d}_{j} u^{ib}_{cd}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{ib}_{cj} = 0.5 u^{ib}_{cd} t^{d}_{j}
+        W^{ib}_{jk} = W^{ib}_{cj} t^{c}_{k}
+        g*(f, u, l, t) <- W^{ib}_{jk} l^{jk}_{ab}
+
+    Number of FLOPS required: O(m^3 n^2)
     """
 
-    term = (0.5) * np.tensordot(l_2, t_1, axes=((1), (1)))  # jabc
-    term = np.tensordot(term, u[o, v, v, v], axes=((2, 3), (1, 2)))  # jaid
-    out += np.tensordot(t_1, term, axes=((0, 1), (3, 0))).transpose(
-        1, 0
-    )  # ai -> ia
+    term = 0.5 * np.tensordot(u[o, v, v, v], t_1, axes=((3), (0)))  # ibcj
+    term = np.tensordot(term, t_1, axes=((2), (0)))  # ibjk
+    out += np.tensordot(term, l_2, axes=((1, 2, 3), (3, 0, 1)))
 
 
 def add_s11d_l(u, l_2, t_1, t_2, o, v, out, np):
@@ -559,7 +584,13 @@ def add_s11d_l(u, l_2, t_1, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (0.5) l^{jk}_{bc} t^{b}_{l} t^{cd}_{jk} u^{il}_{ad}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{jk}_{cl} = 0.5 l^{jk}_{bc} t^{b}_{l}
+        W^{l}_{d} = W^{jk}_{cl} t^{cd}_{jk}
+        g*(f, u, l, t) <- W^{l}_{d} u^{il}_{ad}
+
+    Number of FLOPS required: O(m^2 n^3)
     """
 
     term = (0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # jkcl
@@ -572,7 +603,13 @@ def add_s11e_l(u, l_2, t_1, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (0.5) * l^{jk}_{bc} t^{d}_{j} t^{bc}_{kl} u^{il}_{ad}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{kb}_{cd} = 0.5 l^{jk}_{bc} t^{d}_{j}
+        W^{d}_{l} = W^{kb}_{cd} t^{bc}_{kl}
+        g*(f, u, l, t) <- W^{d}_{l} u^{il}_{ad}
+
+    Number of FLOPS required: O(m^3 n^2)
     """
 
     term = (0.5) * np.tensordot(l_2, t_1, axes=((0), (1)))  # kbcd
@@ -583,14 +620,20 @@ def add_s11e_l(u, l_2, t_1, t_2, o, v, out, np):
 def add_s11f_l(u, l_1, t_1, o, v, out, np):
     """Function for adding the S11f diagram
 
-        g*(f, u, l, t) <- l^{i}_{b} t^{b}_{j} t^{c}_{k} u^{jk}_{ac}
+        g*(f, u, l, t) <- (-1) l^{i}_{b} t^{b}_{j} t^{c}_{k} u^{jk}_{ac}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{i}_{j} = (-1) l^{i}_{b} t^{b}_{j}
+        Z^{j}_{a} = u^{jk}_{ac} t^{c}_{k}
+        g*(f, u, l, t) <- W^{i}_{j} Z^{j}_{a}
+
+    Number of FLOPS required: O(m^2 n^2)
     """
 
-    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0)))  # ij
-    term = np.tensordot(term, u[o, o, v, v], axes=((1), (0)))  # ikac
-    out += np.tensordot(t_1, term, axes=((0, 1), (3, 1)))  # ia
+    W_ij = -np.dot(l_1, t_1)
+    Z_ja = np.tensordot(u[o, o, v, v], t_1, axes=((1, 3), (1, 0)))
+    out += np.dot(W_ij, Z_ja)
 
 
 def add_s11g_l(u, l_1, t_1, o, v, out, np):
@@ -598,14 +641,18 @@ def add_s11g_l(u, l_1, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- (-1) l^{j}_{a} t^{b}_{j} t^{c}_{k} u^{ik}_{bc}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{i}_{b} = (-1) u^{ik}_{bc} t^{c}_{k}
+        W^{i}_{j} = W^{i}_{b} t^{b}_{j}
+        g*(f, u, l, t) <- W^{i}_{j} l^{j}_{a}
+
+    Number of FLOPS required: O(m^2 n^2)
     """
 
-    term = (-1) * np.tensordot(l_1, t_1, axes=((0), (1)))  # ab
-    term = np.tensordot(term, u[o, o, v, v], axes=((1), (2)))  # aikc
-    out += np.tensordot(t_1, term, axes=((0, 1), (3, 2))).transpose(
-        1, 0
-    )  # ai -> ia
+    W_ib = -np.tensordot(u[o, o, v, v], t_1, axes=((1, 3), (1, 0)))
+    W_ij = np.dot(W_ib, t_1)
+    out += np.dot(W_ij, l_1)
 
 
 def add_s11h_l(u, l_1, t_1, o, v, out, np):
@@ -613,12 +660,18 @@ def add_s11h_l(u, l_1, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- (-1) l^{j}_{b} t^{b}_{k} t^{c}_{j} u^{ik}_{ac}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{j}_{k} = (-1) l^{j}_{b} t^{b}_{k}
+        W^{c}_{k} = t^{c}_{j} W^{j}_{k}
+        g*(f, u, l, t) <- u^{ik}_{ac} W^{c}_{k}
+
+    Number of FLOPS required: O(m^2 n^2)
     """
 
-    term = (-1) * np.tensordot(l_1, t_1, axes=((1), (0)))  # jk
-    term = np.tensordot(term, t_1, axes=((0), (1)))  # kc
-    out += np.tensordot(term, u[o, o, v, v], axes=((0, 1), (1, 3)))  # ia
+    W_jk = -np.dot(l_1, t_1)
+    W_ck = np.dot(t_1, W_jk)
+    out += np.tensordot(u[o, o, v, v], W_ck, axes=((1, 3), (1, 0)))
 
 
 def add_s11i_l(u, l_2, t_1, t_2, o, v, out, np):
@@ -626,7 +679,13 @@ def add_s11i_l(u, l_2, t_1, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (-1) l^{ij}_{bc} t^{b}_{k} t^{cd}_{jl} u^{kl}_{ad}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{ij}_{ck} = (-1) l^{ij}_{bc} t^{b}_{k}
+        W^{ik}_{dl} = W^{ij}_{ck} t^{cd}_{jl}
+        g*(f, u, l, t) <- W^{ik}_{dl} u^{kl}_{ad}
+
+    Number of FLOPS required: O(m^2 n^3)
     """
 
     term = (-1) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijck
@@ -639,16 +698,18 @@ def add_s11j_l(u, l_2, t_1, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (-1) l^{jk}_{ab} t^{c}_{j} t^{bd}_{kl} u^{il}_{cd}
 
-    Number of FLOPS required: O
+    We do this in three steps
+
+        W^{ka}_{bc} = (-1) l^{jk}_{ab} t^{c}_{j}
+        W^{ac}_{dl} = W^{ka}_{bc} t^{bd}_{kl}
+        g*(f, u, l, t) <- u^{il}_{cd} W^{ac}_{dl}
+
+    Number of FLOPS required: O(m^4 n^2)
     """
 
     term = (-1) * np.tensordot(l_2, t_1, axes=((0), (1)))  # kabc
     term = np.tensordot(term, t_2, axes=((0, 2), (2, 0)))  # acdl
-    out += np.tensordot(
-        term, u[o, o, v, v], axes=((1, 2, 3), (2, 3, 1))
-    ).transpose(
-        1, 0
-    )  # ai -> ia
+    out += np.tensordot(u[o, o, v, v], term, axes=((2, 3, 1), (1, 2, 3)))
 
 
 def add_s11k_l(u, l_2, t_1, o, v, out, np):
@@ -656,7 +717,13 @@ def add_s11k_l(u, l_2, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- (-0.5) l^{ij}_{bc} t^{b}_{l} t^{c}_{k} u^{kl}_{aj}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{ij}_{cl} = (-0.5) l^{ij}_{bc} t^{b}_{l}
+        w^{ij}_{lk} = w^{ij}_{cl} t^{c}_{k}
+        g*(f, u, l, t) <- W^{ij}_{lk} u^{kl}_{aj}
+
+    Number of FLOPS required: O(m^2 n^3)
     """
 
     term = (-0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijcl
@@ -669,15 +736,18 @@ def add_s11l_l(u, l_2, t_1, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (-0.5) l^{ij}_{bc} t^{d}_{k} t^{bc}_{jl} u^{kl}_{ad}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{i}_{l} = (-0.5) l^{ij}_{bc} t^{bc}_{jl}
+        Z^{l}_{a} = t^{d}_{k} u^{kl}_{ad}
+        g*(f, u, l, t) <- W^{i}_{l} Z^{l}_{a}
+
+    Number of FLOPS required: O(m^2 n^3)
     """
 
-    # Starting with term 1 (l_2) and term 3 (t_2)
-    term = (-0.5) * np.tensordot(l_2, t_2, axes=((1, 2, 3), (2, 0, 1)))  # il
-    # Then term 4 (u)
-    term = np.tensordot(term, u[o, o, v, v], axes=((1), (1)))  # ikad
-    # Lastly, term 2 (t_1)
-    out += np.tensordot(t_1, term, axes=((0, 1), (3, 1)))  # ia
+    W_il = -0.5 * np.tensordot(l_2, t_2, axes=((1, 2, 3), (2, 0, 1)))
+    Z_la = np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (3, 0)))
+    out += np.dot(W_il, Z_la)
 
 
 def add_s11m_l(u, l_2, t_1, t_2, o, v, out, np):
@@ -685,18 +755,18 @@ def add_s11m_l(u, l_2, t_1, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (-0.5) l^{jk}_{ab} t^{c}_{l} t^{bd}_{jk} u^{il}_{cd}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{d}_{a} = (-0.5) t^{bd}_{jk} l^{jk}_{ab}
+        Z^{i}_{d} = t^{c}_{l} u^{il}_{cd}
+        g*(f, u, l, t) <- Z^{i}_{d} W^{d}_{a}
+
+    Number of FLOPS required: O(m^3 n^2)
     """
 
-    # Same as over,
-    # Starting with term 1 (l_2) and term 3 (t_2)
-    term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 1, 3), (2, 3, 0)))  # ad
-    # Then term 4 (u)
-    term = np.tensordot(term, u[o, o, v, v], axes=((1), (3)))  # ailc
-    # Lastly, term 2 (t_1)
-    out += np.tensordot(t_1, term, axes=((0, 1), (3, 2))).transpose(
-        1, 0
-    )  # ai -> ia
+    W_da = -0.5 * np.tensordot(t_2, l_2, axes=((0, 2, 3), (3, 0, 1)))
+    Z_id = np.tensordot(t_1, u[o, o, v, v], axes=((0, 1), (2, 1)))
+    out += np.dot(Z_id, W_da)
 
 
 def add_s11n_l(u, l_2, t_1, t_2, o, v, out, np):
@@ -704,12 +774,18 @@ def add_s11n_l(u, l_2, t_1, t_2, o, v, out, np):
 
         g*(f, u, l t) <- (0.25) l^{ij}_{bc} t^{d}_{j} t^{bc}_{kl} u^{kl}_{ad}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{ij}_{kl} = 0.25 l^{ij}_{bc} t^{bc}_{kl}
+        Z^{kl}_{aj} = u^{kl}_{ad} t^{d}_{j}
+        g*(f, u, l, t) <- W^{ij}_{kl} Z^{kl}_{aj}
+
+    Number of FLOPS required: O(m^2 n^4)
     """
 
-    term = (0.25) * np.tensordot(l_2, t_1, axes=((1), (1)))  # ibcd
-    term = np.tensordot(term, t_2, axes=((1, 2), (0, 1)))  # idkl
-    out += np.tensordot(term, u[o, o, v, v], axes=((1, 2, 3), (3, 0, 1)))  # ia
+    W_ijkl = 0.25 * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))
+    Z_klaj = np.tensordot(u[o, o, v, v], t_1, axes=((3), (0)))
+    out += np.tensordot(W_ijkl, Z_klaj, axes=((1, 2, 3), (3, 0, 1)))
 
 
 def add_s11o_l(u, l_2, t_1, t_2, o, v, out, np):
@@ -717,16 +793,18 @@ def add_s11o_l(u, l_2, t_1, t_2, o, v, out, np):
 
         g*(f, u, l, t) <- (0.25) l^{jk}_{ab} t^{b}_{l} t^{cd}_{jk} u^{il}_{cd}
 
-    Number of FLOPS required: O()
+    We do this in three steps
+
+        W^{il}_{jk} = 0.25 u^{il}_{cd} t^{cd}_{jk}
+        W^{il}_{ab} = W^{il}_{jk} l^{jk}_{ab}
+        g*(f, u, l, t) <- W^{il}_{ab} t^{b}_{l}
+
+    Number of FLOPS required: O(m^2 n^4)
     """
 
-    term = (0.25) * np.tensordot(l_2, t_1, axes=((3), (0)))  # jkal
-    term = np.tensordot(term, t_2, axes=((0, 1), (2, 3)))  # alcd
-    out += np.tensordot(
-        term, u[o, o, v, v], axes=((1, 2, 3), (1, 2, 3))
-    ).transpose(
-        1, 0
-    )  # ai -> ia
+    W_iljk = 0.25 * np.tensordot(u[o, o, v, v], t_2, axes=((2, 3), (0, 1)))
+    W_ilab = np.tensordot(W_iljk, l_2, axes=((2, 3), (0, 1)))
+    out += np.tensordot(W_ilab, t_1, axes=((1, 3), (1, 0)))
 
 
 def add_s12a_l(u, l_2, t_1, o, v, out, np):
@@ -734,7 +812,14 @@ def add_s12a_l(u, l_2, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- (-0.5) l^{ij}_{bc} t^{b}_{l} t^{c}_{k} t^{d}_{j} u^{kl}_{ad}
 
-    Number of FLOPS required: O()
+    We do this in four steps
+
+        W^{ij}_{cl} = (-0.5) l^{ij}_{bc} t^{b}_{l}
+        W^{ij}_{lk} = W^{ij}_{cl} t^{c}_{k}
+        W^{il}_{kd} = W^{ij}_{lk} t^{d}_{j}
+        g*(f, u, l, t) <- W^{il}_{kd} u^{kl}_{ad}
+
+    Number of FLOPS required: O(m^2 n^3)
     """
 
     term = (-0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijcl
@@ -748,17 +833,20 @@ def add_s12b_l(u, l_2, t_1, o, v, out, np):
 
         g*(f, u, l, t) <- (-0.5) * l^{jk}_{ab} t^{b}_{l} t^{c}_{k} t^{d}_{j} u^{il}_{cd}
 
-    Number of FLOPS required: O()
+    We do this in four steps
+
+        W^{jk}_{al} = (-0.5) l^{jk}_{ab} t^{b}_{l}
+        W^{ja}_{lc} = W^{jk}_{al} t^{c}_{k}
+        W^{al}_{cd} = W^{ja}_{lc} t^{d}_{j}
+        g*(f, u, l, t) <- u^{il}_{cd} W^{al}_{cd}
+
+    Number of FLOPS required: O(m^3 n^2)
     """
 
     term = (-0.5) * np.tensordot(l_2, t_1, axes=((3), (0)))  # jkal
     term = np.tensordot(term, t_1, axes=((1), (1)))  # jalc
     term = np.tensordot(term, t_1, axes=((0), (1)))  # alcd
-    out += np.tensordot(
-        term, u[o, o, v, v], axes=((1, 2, 3), (1, 2, 3))
-    ).transpose(
-        1, 0
-    )  # ai -> ia
+    out += np.tensordot(u[o, o, v, v], term, axes=((1, 2, 3), (1, 2, 3)))
 
 
 # You are now entering the land of L_2. Be cautious.
