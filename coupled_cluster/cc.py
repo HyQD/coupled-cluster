@@ -1,5 +1,4 @@
 import abc
-import tqdm
 import warnings
 
 from coupled_cluster.cc_helper import (
