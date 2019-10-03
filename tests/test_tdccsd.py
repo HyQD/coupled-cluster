@@ -4,7 +4,7 @@ sys.path.append(".")
 import os
 import numpy as np
 
-from quantum_systems import construct_pyscf_system
+from quantum_systems import construct_pyscf_system, construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import LaserField
 from coupled_cluster.ccsd.energies import lagrangian_functional
 from coupled_cluster.ccsd import TDCCSD
@@ -295,5 +295,63 @@ def test_tdccsd():
     )
 
 
+def test_tdccsd_phase():
+    t_f = 10
+    dt = 1e-2
+    num_timesteps = int(t_f / dt + 1)
+    time_points = np.linspace(0, t_f, num_timesteps)
+
+    polarization_vector = np.zeros(3)
+    polarization_vector[2] = 1
+
+    system = construct_pyscf_system_rhf("he", "cc-pvdz")
+    system.set_time_evolution_operator(
+        LaserField(
+            LaserPulse(E=100, omega=2.8735643, td=5, t0=0),
+            polarization_vector=polarization_vector,
+        )
+    )
+
+    integrator = GaussIntegrator(s=3, eps=1e-6, np=np)
+
+    tdccsd = TDCCSD(system, integrator=integrator, verbose=True)
+    tdccsd.compute_ground_state()
+    tdccsd.set_initial_conditions()
+
+    phase = np.zeros(num_timesteps, dtype=np.complex128)
+    phase[0] = tdccsd.compute_right_phase() * tdccsd.compute_left_phase()
+
+    i = 0
+
+    try:
+        for i, amp in enumerate(tdccsd.solve(time_points)):
+            phase[i + 1] = (
+                tdccsd.compute_left_phase() * tdccsd.compute_right_phase()
+            )
+    except AssertionError:
+        phase = phase[: i + 1]
+        time_points = time_points[: i + 1]
+
+    test_dat = np.loadtxt(
+        os.path.join("tests", "dat", "he_tdccsd_phase_real.dat")
+    )[:, 1]
+
+    np.testing.assert_allclose(
+        phase.real,
+        np.loadtxt(os.path.join("tests", "dat", "he_tdccsd_phase_real.dat"))[
+            :, 1
+        ],
+        atol=1e-7,
+    )
+
+    np.testing.assert_allclose(
+        phase.imag,
+        np.loadtxt(os.path.join("tests", "dat", "he_tdccsd_phase_imag.dat"))[
+            :, 1
+        ],
+        atol=1e-7,
+    )
+
+
 if __name__ == "__main__":
-    test_tdccsd()
+    test_tdccsd_phase()

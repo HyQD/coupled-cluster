@@ -37,6 +37,22 @@ class TDCCSD(TimeDependentCoupledCluster):
         yield compute_l_1_amplitudes
         yield compute_l_2_amplitudes
 
+    def left_reference_overlap(self):
+        np = self.np
+
+        t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
+
+        temp = np.einsum("ai, bj -> abij", t_1, t_1)
+        temp -= temp.swapaxes(2, 3)
+        temp -= temp.swapaxes(0, 1)
+
+        return (
+            1
+            - 0.25 * np.tensordot(l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+            - np.trace(l_1 @ t_1)
+            + 0.125 * np.tensordot(l_2, temp, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+        )
+
     def compute_energy(self):
         t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
 

@@ -45,13 +45,20 @@ class TDCCD(TimeDependentCoupledCluster):
     def rhs_l_amplitudes(self):
         yield compute_l_2_amplitudes
 
+    def left_reference_overlap(self):
+        t_0, t_2, l_2 = self._amplitudes.unpack()
+
+        return 1 - 0.25 * self.np.tensordot(
+            l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
+        )
+
     def compute_energy(self):
         """Computes energy at current time step.
-        
+
         Returns
         -------
         float
-            Energy 
+            Energy
         """
         t_0, t_2, l_2 = self._amplitudes.unpack()
 
@@ -92,7 +99,7 @@ class TDCCD(TimeDependentCoupledCluster):
 
     def compute_time_dependent_overlap(self):
         """Computes overlap of current time-developed
-        state with the ground state. 
+        state with the ground state.
 
         Returns
         -------
