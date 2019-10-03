@@ -181,6 +181,28 @@ ground state of system.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_left_phase">
+<code class="sig-name descname">compute_left_phase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_left_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function computing the inner product of the (potentially
+time-dependent) reference state and the left coupled-cluster wave
+function.
+That is,</p>
+<div class="math notranslate nohighlight">
+\[\langle \tilde{\Psi}(t) \rvert \Phi \rangle
+= \exp(-\tau_0)(1 - \langle \Phi \rvert \hat{\Lambda}(t) \hat{T}(t)
+\lvert \Phi \rangle,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\tau_0\)</span> is the zeroth cluster amplitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The left-phase describing the weight of the reference determinant.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>complex128</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density">
 <code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes current one-body density</p>
@@ -190,6 +212,26 @@ ground state of system.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase">
+<code class="sig-name descname">compute_right_phase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function computing the inner product of the (potentially
+time-dependent) reference state and the right coupled-cluster wave
+function.
+That is,</p>
+<div class="math notranslate nohighlight">
+\[\langle \Phi \rvert \Psi(t) \rangle = \exp(\tau_0),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\tau_0\)</span> is the zeroth cluster amplitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The right-phase describing the weight of the reference determinant.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>complex128</p>
 </dd>
 </dl>
 </dd></dl>
