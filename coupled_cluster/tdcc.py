@@ -10,7 +10,7 @@ from coupled_cluster.integrators import RungeKutta4
 
 class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     """Time Dependent Coupled Cluster Parent Class
-    
+
     Abstract base class defining the skeleton of a time-dependent Coupled
     Cluster solver class.
 
@@ -74,7 +74,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     def set_initial_conditions(self, amplitudes=None):
         """Set initial condition of system.
 
-        Necessary to call this function befor computing 
+        Necessary to call this function befor computing
         time development. Can be passed without arguments,
         will revert to amplitudes of ground state solver.
 
@@ -153,6 +153,50 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def compute_time_dependent_overlap(self):
+        pass
+
+    def compute_right_phase(self):
+        r"""Function computing the inner product of the (potentially
+        time-dependent) reference state and the right coupled-cluster wave
+        function.
+        That is,
+
+        .. math:: \langle \Phi \rvert \Psi(t) \rangle = \exp(\tau_0),
+
+        where :math:`\tau_0` is the zeroth cluster amplitude.
+
+        Returns
+        -------
+        complex128
+            The right-phase describing the weight of the reference determinant.
+        """
+        t_0 = self._amplitudes.t[0][0]
+
+        return self.np.exp(t_0)
+
+    def compute_left_phase(self):
+        r"""Function computing the inner product of the (potentially
+        time-dependent) reference state and the left coupled-cluster wave
+        function.
+        That is,
+
+        .. math:: \langle \tilde{\Psi}(t) \rvert \Phi \rangle
+            = \exp(-\tau_0)(1 - \langle \Phi \rvert \hat{\Lambda}(t) \hat{T}(t)
+            \lvert \Phi \rangle,
+
+        where :math:`\tau_0` is the zeroth cluster amplitude.
+
+        Returns
+        -------
+        complex128
+            The left-phase describing the weight of the reference determinant.
+        """
+        t_0 = self._amplitudes.t[0][0]
+
+        return self.np.exp(-t_0) * self.left_reference_overlap()
+
+    @abc.abstractmethod
+    def left_reference_overlap(self):
         pass
 
     def compute_particle_density(self):
