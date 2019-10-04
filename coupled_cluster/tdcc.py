@@ -181,8 +181,8 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         That is,
 
         .. math:: \langle \tilde{\Psi}(t) \rvert \Phi \rangle
-            = \exp(-\tau_0)[1 - \langle \Phi \rvert \hat{\Lambda}(t) \hat{T}(t)]
-            \lvert \Phi \rangle,
+            = \exp(-\tau_0)[1 - \langle \Phi \rvert \hat{\Lambda}(t) \hat{T}(t)
+            \lvert \Phi \rangle],
 
         where :math:`\tau_0` is the zeroth cluster amplitude.
 
