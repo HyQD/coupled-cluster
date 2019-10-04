@@ -1,6 +1,6 @@
 from scipy.linalg import expm
 
-from coupled_cluster.ccd.ccd import CoupledClusterDoubles
+from coupled_cluster.ccd.ccd import CCD
 from coupled_cluster.cc_helper import (
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
@@ -12,7 +12,7 @@ from coupled_cluster.ccd.energies import compute_time_dependent_energy
 from coupled_cluster.mix import DIIS
 
 
-class OACCD(CoupledClusterDoubles):
+class OACCD(CCD):
     """Orbital Adaptive Coupled Cluster Doubles
 
     Implementation of the non-orthogonal coupled cluster method with
