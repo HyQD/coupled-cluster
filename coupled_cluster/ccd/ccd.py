@@ -10,10 +10,10 @@ from coupled_cluster.mix import AlphaMixer
 from coupled_cluster.cc_helper import construct_d_t_2_matrix
 
 
-class CoupledClusterDoubles(CoupledCluster):
+class CCD(CoupledCluster):
     """Coupled Cluster Doubles
 
-    Class for Coupled Cluster solver, including 
+    Class for Coupled Cluster solver, including
     double excitations.
 
     Parameters
@@ -129,3 +129,7 @@ class CoupledClusterDoubles(CoupledCluster):
         return compute_two_body_density_matrix(
             self.t_2, self.l_2, self.o, self.v, np=self.np
         )
+
+
+# Keep alias for backwards compatibility
+CoupledClusterDoubles = CCD

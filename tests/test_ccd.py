@@ -1,7 +1,7 @@
 import pytest
 import warnings
 import numpy as np
-from coupled_cluster.ccd import CoupledClusterDoubles
+from coupled_cluster import CCD
 from coupled_cluster.ccd.rhs_t import (
     add_d1_t,
     add_d2a_t,
@@ -59,7 +59,7 @@ def iterated_ccd_amplitudes(
     ccd_list = []
     for system in [helium_system, beryllium_system, neon_system]:
         system.change_to_hf_basis(verbose=True, tolerance=1e-8)
-        ccd = CoupledClusterDoubles(system, verbose=True)
+        ccd = CCD(system, verbose=True)
         ccd.compute_ground_state()
 
         ccd_list.append(ccd)
@@ -958,7 +958,7 @@ def test_A_ibaj(iterated_ccd_amplitudes):
 def test_reference_energy(tdho, ref_energy):
     tol = 1e-4
 
-    cc_scheme = CoupledClusterDoubles(tdho, verbose=True, mixer=AlphaMixer)
+    cc_scheme = CCD(tdho, verbose=True, mixer=AlphaMixer)
     e_ref = cc_scheme.compute_reference_energy()
 
     assert abs(e_ref - ref_energy) < tol
@@ -967,7 +967,7 @@ def test_reference_energy(tdho, ref_energy):
 def test_ccd_energy(tdho, ccd_energy):
     tol = 1e-4
 
-    cc_scheme = CoupledClusterDoubles(tdho, verbose=True, mixer=AlphaMixer)
+    cc_scheme = CCD(tdho, verbose=True, mixer=AlphaMixer)
     cc_scheme.iterate_t_amplitudes(tol=tol)
     energy = cc_scheme.compute_energy()
 
@@ -978,7 +978,7 @@ def test_ccd_diis_energy(tdho, tdho_ccd_hf_energy, ccd_energy):
     tol = 1e-4
 
     tdho.change_to_hf_basis(verbose=True, tolerance=1e-15)
-    cc_scheme = CoupledClusterDoubles(tdho, mixer=DIIS, verbose=True)
+    cc_scheme = CCD(tdho, mixer=DIIS, verbose=True)
     cc_scheme.iterate_t_amplitudes(tol=tol, num_vecs=3)
     energy = cc_scheme.compute_energy()
 

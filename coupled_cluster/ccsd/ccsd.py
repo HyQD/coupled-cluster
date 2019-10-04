@@ -20,7 +20,7 @@ from coupled_cluster.ccsd.density_matrices import (
 )
 
 
-class CoupledClusterSinglesDoubles(CoupledCluster):
+class CCSD(CoupledCluster):
     """Coupled Cluster Singels Doubles
 
     Coupled Cluster solver with single-, and double
@@ -275,3 +275,7 @@ class CoupledClusterSinglesDoubles(CoupledCluster):
     def compute_two_body_density_matrix(self):
 
         pass
+
+
+# Keep alias for backwards compatibility
+CoupledClusterSinglesDoubles = CCSD

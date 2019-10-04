@@ -1,8 +1,7 @@
 import numpy as np
 from quantum_systems import CustomSystem
 from pyscf import gto, scf, ao2mo
-from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
-from coupled_cluster.ccd.oaccd import OACCD
+from coupled_cluster import CCSD, OACCD
 
 
 """
@@ -46,7 +45,7 @@ The verbose argument shows iteration of tau and lambda amplitudes.
 Other keyword arguments can be added to control the CCSD computation 
 in more detail. The default root finder is set to DIIS extrapolation.
 """
-ccsd = CoupledClusterSinglesDoubles(system, verbose=False)
+ccsd = CCSD(system, verbose=False)
 ccsd.compute_ground_state()
 print("ECCSD ={0}".format(ccsd.compute_energy()))
 

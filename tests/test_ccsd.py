@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 from coupled_cluster.mix import DIIS
 from quantum_systems import construct_pyscf_system_rhf
-from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
+from coupled_cluster import CCSD
 import coupled_cluster.ccd.rhs_l as ccd_l
 from coupled_cluster.ccsd.rhs_t import (
     compute_t_1_amplitudes,
@@ -126,7 +126,7 @@ def iterated_ccsd_amplitudes(helium_system, beryllium_system, neon_system):
     ccsd_list = []
     for system in [helium_system, beryllium_system, neon_system]:
         system.change_to_hf_basis(verbose=True, tolerance=1e-8)
-        ccsd = CoupledClusterSinglesDoubles(system, mixer=DIIS, verbose=True)
+        ccsd = CCSD(system, mixer=DIIS, verbose=True)
         ccsd.iterate_t_amplitudes()
         ccsd.iterate_l_amplitudes()
 
@@ -1746,7 +1746,7 @@ def test_one_body_density_matrix(iterated_ccsd_amplitudes):
 
 def test_mbpt_enegy(tdho):
 
-    cc_scheme = CoupledClusterSinglesDoubles(tdho, verbose=True)
+    cc_scheme = CCSD(tdho, verbose=True)
     energy = cc_scheme.compute_energy()
 
     assert True
@@ -1755,7 +1755,7 @@ def test_mbpt_enegy(tdho):
 def test_ccsd_energy(tdho, ccsd_energy):
     tol = 1e-4
 
-    cc_scheme = CoupledClusterSinglesDoubles(tdho, verbose=True)
+    cc_scheme = CCSD(tdho, verbose=True)
     cc_scheme.iterate_t_amplitudes(tol=tol)
     energy = cc_scheme.compute_energy()
 
@@ -1763,7 +1763,7 @@ def test_ccsd_energy(tdho, ccsd_energy):
 
 
 def test_lambda_amplitude_iterations(tdho):
-    cc_scheme = CoupledClusterSinglesDoubles(tdho, verbose=True)
+    cc_scheme = CCSD(tdho, verbose=True)
 
     cc_scheme.iterate_t_amplitudes()
     energy = cc_scheme.compute_energy()

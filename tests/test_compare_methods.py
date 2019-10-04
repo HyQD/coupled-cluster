@@ -1,22 +1,19 @@
 import pytest
 import numpy as np
 
-from coupled_cluster.ccsd import TDCCSD, CoupledClusterSinglesDoubles
-from coupled_cluster.ccd import TDCCD, CoupledClusterDoubles
+from coupled_cluster import CCD, CCSD, TDCCD, TDCCSD
 
 from coupled_cluster.mix import AlphaMixer, DIIS
 
 
 @pytest.fixture()
 def ccsd_sans_singles(zanghellini_system):
-    return CoupledClusterSinglesDoubles(
-        zanghellini_system, include_singles=False, mixer=AlphaMixer
-    )
+    return CCSD(zanghellini_system, include_singles=False, mixer=AlphaMixer)
 
 
 @pytest.fixture()
 def ccd(zanghellini_system):
-    return CoupledClusterDoubles(zanghellini_system, mixer=AlphaMixer)
+    return CCD(zanghellini_system, mixer=AlphaMixer)
 
 
 def test_ground_state(ccd, ccsd_sans_singles, t_kwargs):

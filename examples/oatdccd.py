@@ -2,8 +2,7 @@ import numpy as np
 from pyscf import gto, scf, ao2mo
 from quantum_systems import CustomSystem, construct_pyscf_system_rhf
 
-from coupled_cluster.ccsd import TDCCSD
-from coupled_cluster.ccd import OATDCCD
+from coupled_cluster import TDCCSD, OATDCCD
 
 from quantum_systems.time_evolution_operators import LaserField
 from coupled_cluster.integrators import GaussIntegrator, RungeKutta4

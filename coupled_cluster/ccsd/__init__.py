@@ -1,2 +1,2 @@
-from .ccsd import CoupledClusterSinglesDoubles
+from .ccsd import CCSD, CoupledClusterSinglesDoubles
 from .tdccsd import TDCCSD
