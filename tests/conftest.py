@@ -6,7 +6,7 @@ from quantum_systems import (
     TwoDimensionalHarmonicOscillator,
     CustomSystem,
     ODQD,
-    construct_psi4_system,
+    construct_pyscf_system_rhf,
 )
 from quantum_systems.quantum_dots.one_dim.one_dim_potentials import HOPotential
 from quantum_systems.time_evolution_operators import LaserField
@@ -278,24 +278,12 @@ def time_params():
 
 @pytest.fixture
 def helium_system():
-    He = """
-    He 0.0 0.0 0.0
-    symmetry c1
-    """
-    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-
-    return construct_psi4_system(He, options)
+    return construct_pyscf_system_rhf("he")
 
 
 @pytest.fixture(scope="session")
 def scoped_helium_system():
-    He = """
-    He 0.0 0.0 0.0
-    symmetry c1
-    """
-    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-
-    return construct_psi4_system(He, options)
+    return construct_pyscf_system_rhf("he")
 
 
 @pytest.fixture
@@ -305,21 +293,9 @@ def oaccd_groundstate_helium_energy():
 
 @pytest.fixture(scope="session")
 def beryllium_system():
-    Be = """
-    Be 0.0 0.0 0.0
-    symmetry c1
-    """
-    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-
-    return construct_psi4_system(Be, options)
+    return construct_pyscf_system_rhf("be")
 
 
 @pytest.fixture(scope="session")
 def neon_system():
-    Ne = """
-    Ne 0.0 0.0 0.0
-    symmetry c1
-    """
-    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-
-    return construct_psi4_system(Ne, options)
+    return construct_pyscf_system_rhf("ne")

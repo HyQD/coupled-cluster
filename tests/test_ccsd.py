@@ -2,7 +2,7 @@ import pytest
 import warnings
 import numpy as np
 from coupled_cluster.mix import DIIS
-from quantum_systems import construct_psi4_system
+from quantum_systems import construct_pyscf_system_rhf
 from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
 import coupled_cluster.ccd.rhs_l as ccd_l
 from coupled_cluster.ccsd.rhs_t import (
@@ -122,44 +122,9 @@ from coupled_cluster.ccsd.density_matrices import (
 
 
 @pytest.fixture
-def ccsd_helium_system():
-    He = """
-    He 0.0 0.0 0.0
-    symmetry c1
-    """
-    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-
-    return construct_psi4_system(He, options)
-
-
-@pytest.fixture
-def ccsd_beryllium_system():
-    Be = """
-    Be 0.0 0.0 0.0
-    symmetry c1
-    """
-    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-
-    return construct_psi4_system(Be, options)
-
-
-@pytest.fixture
-def ccsd_neon_system():
-    Ne = """
-    Ne 0.0 0.0 0.0
-    symmetry c1
-    """
-    options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
-
-    return construct_psi4_system(Ne, options)
-
-
-@pytest.fixture
-def iterated_ccsd_amplitudes(
-    ccsd_helium_system, ccsd_beryllium_system, ccsd_neon_system
-):
+def iterated_ccsd_amplitudes(helium_system, beryllium_system, neon_system):
     ccsd_list = []
-    for system in [ccsd_helium_system, ccsd_beryllium_system, ccsd_neon_system]:
+    for system in [helium_system, beryllium_system, neon_system]:
         system.change_to_hf_basis(verbose=True, tolerance=1e-8)
         ccsd = CoupledClusterSinglesDoubles(system, mixer=DIIS, verbose=True)
         ccsd.iterate_t_amplitudes()
