@@ -30,7 +30,7 @@ class OATDCCD(OATDCC):
         yield compute_l_2_amplitudes
 
     def left_reference_overlap(self):
-        t_0, t_2, l_2 = self._amplitudes.unpack()
+        t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
 
         return 1 - 0.25 * self.np.tensordot(
             l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
