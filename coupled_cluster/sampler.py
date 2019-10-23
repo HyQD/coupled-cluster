@@ -1,5 +1,3 @@
-import os
-
 from quantum_systems.sampler import SampleCollector, Sampler
 
 
