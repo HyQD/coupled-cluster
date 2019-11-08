@@ -281,11 +281,13 @@ def compute_particle_density(rho_qp, bra_spf, ket_spf, np):
     assert bra_spf.dtype == ket_spf.dtype
 
     rho = np.zeros(ket_spf.shape[1:], dtype=ket_spf.dtype)
-    spf_slice = slice(0, ket_spf.shape[0])
 
-    for _i in np.ndindex(rho.shape):
-        i = (spf_slice, *_i)
-        rho[_i] += np.dot(bra_spf[i], np.dot(rho_qp, ket_spf[i]))
+    for p in range(bra_spf.shape[0]):
+        phi_tilde_p = bra_spf[p]
+
+        for q in range(ket_spf.shape[0]):
+            phi_q = ket_spf[q]
+            rho += phi_tilde_p * rho_qp[q, p] * phi_q
 
     return rho
 
