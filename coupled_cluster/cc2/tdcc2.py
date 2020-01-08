@@ -20,7 +20,7 @@ from coupled_cluster.ccsd.time_dependent_overlap import (
 )
 
 
-class TDCCSD(TimeDependentCoupledCluster):
+class TDCC2(TimeDependentCoupledCluster):
     def __init__(self, *args, **kwargs):
         super().__init__(CoupledClusterSinglesDoubles, *args, **kwargs)
 
@@ -69,7 +69,6 @@ class TDCCSD(TimeDependentCoupledCluster):
         )
 
     def compute_one_body_density_matrix(self):
-        print("Heart of the swarm, 2.0")
         t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
         return compute_one_body_density_matrix(
             t_1, t_2, l_1, l_2, self.o, self.v, np=self.np
