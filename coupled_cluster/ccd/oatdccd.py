@@ -18,7 +18,7 @@ from coupled_cluster.ccd import OACCD
 
 class OATDCCD(OATDCC):
     def __init__(self, *args, **kwargs):
-        super().__init__(OACCD, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
@@ -38,9 +38,8 @@ class OATDCCD(OATDCC):
 
     def compute_energy(self):
         t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
-
         return compute_time_dependent_energy(
-            self.f, self.u, t_2, l_2, self.o, self.v, np=self.np
+            self.f_prime, self.u_prime, t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
     def one_body_density_matrix(self, t, l):
@@ -48,7 +47,7 @@ class OATDCCD(OATDCC):
         l_2 = l[0]
 
         return compute_one_body_density_matrix(
-            t_2, l_2, self.o, self.v, np=self.np
+            t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
     def two_body_density_matrix(self, t, l):
@@ -62,38 +61,41 @@ class OATDCCD(OATDCC):
             self.rho_qspr.fill(0)
 
         return compute_two_body_density_matrix(
-            t_2, l_2, self.o, self.v, np=self.np, out=self.rho_qspr
+            t_2, l_2, self.o_prime, self.v_prime, np=self.np, out=self.rho_qspr
         )
 
     def compute_one_body_density_matrix(self):
         t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
 
         return compute_one_body_density_matrix(
-            t_2, l_2, self.o, self.v, np=self.np
+            t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
     def compute_two_body_density_matrix(self):
         t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
 
         return compute_two_body_density_matrix(
-            t_2, l_2, self.o, self.v, np=self.np
+            t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
-    def compute_time_dependent_overlap(self):
+    def compute_time_dependent_overlap(self, cc):
+        """
+        Computes time dependent overlap with respect to a given cc-state
+        """
         t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
 
         return compute_orbital_adaptive_time_dependent_overlap(
-            self.cc.t_2, self.cc.l_2, t_2, l_2, np=self.np
+            cc.t_2, cc.l_2, t_2, l_2, np=self.np
         )
 
     def compute_p_space_equations(self):
         eta = compute_eta(
-            self.h,
-            self.u,
+            self.h_prime,
+            self.u_prime,
             self.rho_qp,
             self.rho_qspr,
-            self.o,
-            self.v,
+            self.o_prime,
+            self.v_prime,
             np=self.np,
         )
 
