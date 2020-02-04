@@ -217,6 +217,27 @@ That is,</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_reference_weight">
+<code class="sig-name descname">compute_reference_weight</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_reference_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function computing the weight of the reference state in the
+time-evolved coupled-cluster wave function. This is given by</p>
+<div class="math notranslate nohighlight">
+\[W(t) = \vert \langle \tilde{\Psi}(t) \rvert \Phi \rangle^{*}\]</div>
+<ul class="simple">
+<li><p>langle Phi rvert Psi(t) rangle vert^2,</p></li>
+</ul>
+<p>where the inner-products are the left- and right-phase expressions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The weight of the reference state in the time-evolved wave function.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>complex128</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase">
 <code class="sig-name descname">compute_right_phase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the inner product of the (potentially
