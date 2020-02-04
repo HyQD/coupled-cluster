@@ -196,7 +196,8 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         r"""Function computing the weight of the reference state in the
         time-evolved coupled-cluster wave function. This is given by
 
-        .. math:: W(t) = \vert \langle \tilde{\Psi}(t) \rvert \Phi \rangle^{*}
+        .. math:: W(t) = \frac{1}{4}
+        \vert \langle \tilde{\Psi}(t) \rvert \Phi \rangle^{*}
         + \langle \Phi \rvert \Psi(t) \rangle \vert^2,
 
         where the inner-products are the left- and right-phase expressions.
@@ -207,7 +208,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             The weight of the reference state in the time-evolved wave function.
         """
 
-        return (
+        return 0.25 * (
             self.np.abs(
                 self.compute_right_phase() + self.compute_left_phase().conj()
             )
