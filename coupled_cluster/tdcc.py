@@ -197,8 +197,8 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         time-evolved coupled-cluster wave function. This is given by
 
         .. math:: W(t) = \frac{1}{4}
-        \vert \langle \tilde{\Psi}(t) \rvert \Phi \rangle^{*}
-        + \langle \Phi \rvert \Psi(t) \rangle \vert^2,
+            \vert \langle \tilde{\Psi}(t) \rvert \Phi \rangle^{*}
+            + \langle \Phi \rvert \Psi(t) \rangle \vert^2,
 
         where the inner-products are the left- and right-phase expressions.
 
