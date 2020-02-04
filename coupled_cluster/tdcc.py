@@ -192,6 +192,28 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return self.np.exp(-t_0) * self.left_reference_overlap()
 
+    def compute_reference_weight(self):
+        r"""Function computing the weight of the reference state in the
+        time-evolved coupled-cluster wave function. This is given by
+
+        .. math:: W(t) = \vert \langle \tilde{\Psi}(t) \rvert \Phi \rangle^{*}
+        + \langle \Phi \rvert \Psi(t) \rangle \vert^2,
+
+        where the inner-products are the left- and right-phase expressions.
+
+        Returns
+        -------
+        complex128
+            The weight of the reference state in the time-evolved wave function.
+        """
+
+        return (
+            self.np.abs(
+                self.compute_right_phase() + self.compute_left_phase().conj()
+            )
+            ** 2
+        )
+
     @abc.abstractmethod
     def left_reference_overlap(self):
         pass
