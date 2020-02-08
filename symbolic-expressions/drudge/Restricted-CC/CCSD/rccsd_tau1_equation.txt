@@ -1,0 +1,105 @@
+    rhs = np.zeros((nv, no))
+
+    rhs += np.einsum(
+        "ab,bi->ai", f, t
+    )
+
+    rhs += np.einsum(
+        "ai->ai", f
+    )
+
+    rhs += np.einsum(
+        "ak,bcij,jkbc->ai", t, t, u
+    )
+
+    rhs += np.einsum(
+        "ci,abjk,jkbc->ai", t, t, u
+    )
+
+    rhs += np.einsum(
+        "ck,abji,jkcb->ai", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ak,bcij,jkcb->ai", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ci,abjk,jkcb->ai", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ck,abij,jkcb->ai", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ck,abji,jkbc->ai", t, t, u
+    )
+
+    rhs += 4 * np.einsum(
+        "ck,abij,jkbc->ai", t, t, u
+    )
+
+    rhs += np.einsum(
+        "aj,bi,ck,jkcb->ai", t, t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "aj,bi,ck,jkbc->ai", t, t, t, u
+    )
+
+    rhs -= np.einsum(
+        "jb,abji->ai", f, t
+    )
+
+    rhs -= np.einsum(
+        "bj,ajbi->ai", t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "jb,abij->ai", f, t
+    )
+
+    rhs += 2 * np.einsum(
+        "bj,ajib->ai", t, u
+    )
+
+    rhs -= np.einsum(
+        "jb,aj,bi->ai", f, t, t
+    )
+
+    rhs -= np.einsum(
+        "bcij,ajcb->ai", t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "bcij,ajbc->ai", t, u
+    )
+
+    rhs -= np.einsum(
+        "bi,cj,ajcb->ai", t, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "bi,cj,ajbc->ai", t, t, u
+    )
+
+    rhs -= np.einsum(
+        "ji,aj->ai", f, t
+    )
+
+    rhs += np.einsum(
+        "abjk,kjib->ai", t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "abjk,jkib->ai", t, u
+    )
+
+    rhs += np.einsum(
+        "aj,bk,kjib->ai", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "aj,bk,jkib->ai", t, t, u
+    )

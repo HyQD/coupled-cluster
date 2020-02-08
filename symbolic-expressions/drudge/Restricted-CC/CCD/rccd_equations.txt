@@ -1,0 +1,131 @@
+    rhs = np.zeros((nv, nv, no, no))
+
+    rhs += np.einsum(
+        "abij->abij", u
+    )
+
+    rhs += np.einsum(
+        "ac,bcji->abij", f, t
+    )
+
+    rhs += np.einsum(
+        "bc,acij->abij", f, t
+    )
+
+    rhs -= np.einsum(
+        "acik,bkcj->abij", t, u
+    )
+
+    rhs -= np.einsum(
+        "acki,bkjc->abij", t, u
+    )
+
+    rhs -= np.einsum(
+        "ackj,bkci->abij", t, u
+    )
+
+    rhs -= np.einsum(
+        "bcjk,akci->abij", t, u
+    )
+
+    rhs -= np.einsum(
+        "bcki,akcj->abij", t, u
+    )
+
+    rhs -= np.einsum(
+        "bckj,akic->abij", t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "acik,bkjc->abij", t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "bcjk,akic->abij", t, u
+    )
+
+    rhs += np.einsum(
+        "abkl,klij->abij", t, u
+    )
+
+    rhs += np.einsum(
+        "cdij,abcd->abij", t, u
+    )
+
+    rhs += np.einsum(
+        "abik,cdlj,klcd->abij", t, t, u
+    )
+
+    rhs += np.einsum(
+        "abkj,cdil,kldc->abij", t, t, u
+    )
+
+    rhs += np.einsum(
+        "abkl,cdij,klcd->abij", t, t, u
+    )
+
+    rhs += np.einsum(
+        "acij,bdkl,kldc->abij", t, t, u
+    )
+
+    rhs += np.einsum(
+        "acik,bdlj,kldc->abij", t, t, u
+    )
+
+    rhs += np.einsum(
+        "acki,bdjl,kldc->abij", t, t, u
+    )
+
+    rhs += np.einsum(
+        "acki,bdlj,klcd->abij", t, t, u
+    )
+
+    rhs += np.einsum(
+        "ackj,bdli,kldc->abij", t, t, u
+    )
+
+    rhs += np.einsum(
+        "ackl,bdji,klcd->abij", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "abik,cdlj,kldc->abij", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "abkj,cdil,klcd->abij", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "acij,bdkl,klcd->abij", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "acik,bdjl,kldc->abij", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "acik,bdlj,klcd->abij", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "acki,bdjl,klcd->abij", t, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ackl,bdji,kldc->abij", t, t, u
+    )
+
+    rhs += 4 * np.einsum(
+        "acik,bdjl,klcd->abij", t, t, u
+    )
+
+    rhs -= np.einsum(
+        "ki,abkj->abij", f, t
+    )
+
+    rhs -= np.einsum(
+        "kj,abik->abij", f, t
+    )
+
+    return rhs
