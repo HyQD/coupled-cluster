@@ -276,22 +276,6 @@ def compute_reference_energy(f, u, o, v, np):
     )
 
 
-def compute_particle_density(rho_qp, bra_spf, ket_spf, np):
-    assert bra_spf.shape == ket_spf.shape
-    assert bra_spf.dtype == ket_spf.dtype
-
-    rho = np.zeros(ket_spf.shape[1:], dtype=ket_spf.dtype)
-
-    for p in range(bra_spf.shape[0]):
-        phi_tilde_p = bra_spf[p]
-
-        for q in range(ket_spf.shape[0]):
-            phi_q = ket_spf[q]
-            rho += phi_tilde_p * rho_qp[q, p] * phi_q
-
-    return rho
-
-
 def construct_d_t_1_matrix(f, o, v, np):
     f_diag = np.diag(f)
     d_t_1 = f_diag[o] - f_diag[v].reshape(-1, 1)

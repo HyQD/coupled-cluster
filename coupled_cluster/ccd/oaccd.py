@@ -76,7 +76,7 @@ class OACCD(CCD):
         """
         np = self.np
 
-        if not np in mixer_kwargs:
+        if not "np" in mixer_kwargs:
             mixer_kwargs["np"] = np
 
         self.setup_kappa_mixer(**mixer_kwargs)

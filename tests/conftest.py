@@ -4,7 +4,7 @@ import os
 
 from quantum_systems import (
     TwoDimensionalHarmonicOscillator,
-    CustomSystem,
+    QuantumSystem,
     ODQD,
     construct_pyscf_system_rhf,
 )
@@ -63,7 +63,7 @@ def large_system_ccd(_n_large):
     # Make u symmetric
     u = u + u.transpose(1, 0, 3, 2)
 
-    cs = CustomSystem(n, l)
+    cs = QuantumSystem(n, l)
     cs.set_h(h, add_spin=True)
     cs.set_u(u, add_spin=True, anti_symmetrize=True)
     cs.f = cs.construct_fock_matrix(cs.h, cs.u)
@@ -89,7 +89,7 @@ def large_system_ccsd(_n_large):
     # Make u symmetric
     u = u + u.transpose(1, 0, 3, 2)
 
-    cs = CustomSystem(n, l)
+    cs = QuantumSystem(n, l)
     cs.set_h(h, add_spin=True)
     cs.set_u(u, add_spin=True, anti_symmetrize=True)
     cs.f = cs.construct_fock_matrix(cs.h, cs.u)

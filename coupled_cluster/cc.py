@@ -4,7 +4,6 @@ import warnings
 from coupled_cluster.cc_helper import (
     AmplitudeContainer,
     compute_reference_energy,
-    compute_particle_density,
 )
 from coupled_cluster.mix import AlphaMixer, DIIS
 
@@ -134,11 +133,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             warn = warn.format(np.trace(rho_qp), self.n)
             warnings.warn(warn)
 
-        rho = compute_particle_density(
-            rho_qp, self.system.bra_spf, self.system.spf, np=np
-        )
-
-        return rho
+        return self.system.compute_particle_density(rho_qp)
 
     def compute_reference_energy(self):
         """Computes reference energy
@@ -172,7 +167,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     ):
         np = self.np
 
-        if not np in mixer_kwargs:
+        if not "np" in mixer_kwargs:
             mixer_kwargs["np"] = np
 
         self.setup_l_mixer(**mixer_kwargs)
@@ -197,7 +192,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     ):
         np = self.np
 
-        if not np in mixer_kwargs:
+        if not "np" in mixer_kwargs:
             mixer_kwargs["np"] = np
 
         self.setup_t_mixer(**mixer_kwargs)
