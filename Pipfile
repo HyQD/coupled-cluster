@@ -17,6 +17,6 @@ matplotlib = "*"
 sphinx-rtd-theme = "*"
 pyscf = "*"
 Sphinx = "*"
-black = "==19.3b0"
+black = "*"
 quantum-systems = {editable = true,git = "https://github.com/Schoyen/quantum-systems.git"}
 tdhf = {editable = true,git = "ssh://git@github.com/haakoek/TDHF.git"}
