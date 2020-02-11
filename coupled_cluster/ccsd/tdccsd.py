@@ -7,7 +7,7 @@ from coupled_cluster.ccsd.rhs_l import (
     compute_l_1_amplitudes,
     compute_l_2_amplitudes,
 )
-from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
+from coupled_cluster.ccsd import CCSD
 from coupled_cluster.ccsd.energies import (
     compute_time_dependent_energy,
     compute_ccsd_ground_state_energy,
@@ -22,7 +22,7 @@ from coupled_cluster.ccsd.time_dependent_overlap import (
 
 class TDCCSD(TimeDependentCoupledCluster):
     def __init__(self, *args, **kwargs):
-        super().__init__(CoupledClusterSinglesDoubles, *args, **kwargs)
+        super().__init__(CCSD, *args, **kwargs)
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(
