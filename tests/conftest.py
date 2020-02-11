@@ -4,7 +4,7 @@ import os
 
 from quantum_systems import (
     TwoDimensionalHarmonicOscillator,
-    QuantumSystem,
+    RandomSystem,
     ODQD,
     construct_pyscf_system_rhf,
 )
@@ -49,29 +49,35 @@ def tdho(_omega):
 
 
 @pytest.fixture(scope="session")
+def large_system_ccs(_n_large):
+    n = _n_large
+    l = l_large * 2
+    m = l - n
+
+    rs = RandomSystem(n, l)
+    rs.setup_system(add_spin=True, anti_symmetrize=True)
+    rs.f = rs.construct_fock_matrix(rs.h, rs.u)
+
+    t_1 = np.random.random((m, n)) + 1j * np.random.random((m, n))
+    l_1 = np.random.random((n, m)) + 1j * np.random.random((n, m))
+
+    return t_1, l_1, rs
+
+
+@pytest.fixture(scope="session")
 def large_system_ccd(_n_large):
     n = _n_large
     l = l_large * 2
     m = l - n
 
-    h = np.random.random((l // 2, l // 2)) + 1j * np.random.random(
-        (l // 2, l // 2)
-    )
-    u = np.random.random(
-        (l // 2, l // 2, l // 2, l // 2)
-    ) + 1j * np.random.random((l // 2, l // 2, l // 2, l // 2))
-    # Make u symmetric
-    u = u + u.transpose(1, 0, 3, 2)
-
-    cs = QuantumSystem(n, l)
-    cs.set_h(h, add_spin=True)
-    cs.set_u(u, add_spin=True, anti_symmetrize=True)
-    cs.f = cs.construct_fock_matrix(cs.h, cs.u)
+    rs = RandomSystem(n, l)
+    rs.setup_system(add_spin=True, anti_symmetrize=True)
+    rs.f = rs.construct_fock_matrix(rs.h, rs.u)
 
     t = get_random_doubles_amplitude(m, n)
     l = get_random_doubles_amplitude(n, m)
 
-    return t, l, cs
+    return t, l, rs
 
 
 @pytest.fixture(scope="session")
@@ -80,19 +86,9 @@ def large_system_ccsd(_n_large):
     l = l_large * 2
     m = l - n
 
-    h = np.random.random((l // 2, l // 2)) + 1j * np.random.random(
-        (l // 2, l // 2)
-    )
-    u = np.random.random(
-        (l // 2, l // 2, l // 2, l // 2)
-    ) + 1j * np.random.random((l // 2, l // 2, l // 2, l // 2))
-    # Make u symmetric
-    u = u + u.transpose(1, 0, 3, 2)
-
-    cs = QuantumSystem(n, l)
-    cs.set_h(h, add_spin=True)
-    cs.set_u(u, add_spin=True, anti_symmetrize=True)
-    cs.f = cs.construct_fock_matrix(cs.h, cs.u)
+    rs = RandomSystem(n, l)
+    rs.setup_system(add_spin=True, anti_symmetrize=True)
+    rs.f = rs.construct_fock_matrix(rs.h, rs.u)
 
     t_1 = np.random.random((m, n)) + 1j * np.random.random((m, n))
     t_2 = get_random_doubles_amplitude(m, n)
@@ -100,7 +96,7 @@ def large_system_ccsd(_n_large):
     l_1 = np.random.random((n, m)) + 1j * np.random.random((n, m))
     l_2 = get_random_doubles_amplitude(n, m)
 
-    return t_1, t_2, l_1, l_2, cs
+    return t_1, t_2, l_1, l_2, rs
 
 
 @pytest.fixture
