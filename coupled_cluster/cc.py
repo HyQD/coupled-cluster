@@ -24,11 +24,8 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         Prints iterations for ground state computation if True
     """
 
-    def __init__(self, system, mixer=DIIS, verbose=False, np=None):
-        if np is None:
-            import numpy as np
-
-        self.np = np
+    def __init__(self, system, mixer=DIIS, verbose=False):
+        self.np = system.np
 
         self.system = system
         self.verbose = verbose
