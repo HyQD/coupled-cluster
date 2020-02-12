@@ -9,8 +9,8 @@ from coupled_cluster.ccd.energies import (
 
 
 def compute_ccsd_ground_state_energy(f, u, t_1, t_2, o, v, np):
-    
-    #energy = compute_reference_energy(f, u, o, v, np=np)
+
+    # energy = compute_reference_energy(f, u, o, v, np=np)
     """
     Reference energy missing
     """
@@ -32,13 +32,15 @@ def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
 
     """
 
-    e_corr = 2*np.einsum('ia,ai->',f[o,v],t1)
-    
-    e_corr += 2*np.einsum('abij,ijab->',t2,u[o,o,v,v])
-    e_corr -= np.einsum('abij,ijba->',t2,u[o,o,v,v])
+    e_corr = 2 * np.einsum("ia,ai->", f[o, v], t1)
 
-    e_corr += 2*np.einsum('ai,bj,ijab->',t1,t1,u[o,o,v,v],optimize=True)
-    e_corr -= np.einsum('ai,bj,ijba->',t1,t1,u[o,o,v,v],optimize=True)
+    e_corr += 2 * np.einsum("abij,ijab->", t2, u[o, o, v, v])
+    e_corr -= np.einsum("abij,ijba->", t2, u[o, o, v, v])
+
+    e_corr += 2 * np.einsum(
+        "ai,bj,ijab->", t1, t1, u[o, o, v, v], optimize=True
+    )
+    e_corr -= np.einsum("ai,bj,ijba->", t1, t1, u[o, o, v, v], optimize=True)
 
     return e_corr
 
@@ -47,8 +49,8 @@ def compute_time_dependent_energy(f, u, t_1, t_2, l_1, l_2, o, v, np):
     """
     Not implemented yet
     """
-    #energy = compute_reference_energy(f, u, o, v, np=np)
-    #energy += lagrangian_functional(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
+    # energy = compute_reference_energy(f, u, o, v, np=np)
+    # energy += lagrangian_functional(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
     energy = 0
     return energy
 

@@ -17,20 +17,12 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         Class instance defining the ground state solver
     system : QuantumSystem
         Class instance defining the system to be solved
-    np : module
-        Matrix/linear algebra library to be uses, like numpy or cupy
     integrator : Integrator
         Integrator class instance (RK4, GaussIntegrator)
     """
 
-    def __init__(self, cc, system, np=None, integrator=None, **cc_kwargs):
-        if np is None:
-            import numpy as np
-
-        self.np = np
-
-        if not "np" in cc_kwargs:
-            cc_kwargs["np"] = self.np
+    def __init__(self, cc, system, integrator=None, **cc_kwargs):
+        self.np = system.np
 
         # Initialize ground state solver
         self.cc = cc(system, **cc_kwargs)

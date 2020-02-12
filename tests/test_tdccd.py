@@ -16,7 +16,7 @@ def test_time_dependent_observables(
     time_params,
 ):
 
-    tdccd = TDCCD(zanghellini_system, np=np, mixer=AlphaMixer)
+    tdccd = TDCCD(zanghellini_system, mixer=AlphaMixer)
     tdccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
 
     assert (

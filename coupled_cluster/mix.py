@@ -1,6 +1,6 @@
 class AlphaMixer:
     """Basic mixer class
-    
+
     Parameters
     ----------
     theta : float
@@ -15,11 +15,11 @@ class AlphaMixer:
         self.theta = theta
 
     def compute_new_vector(self, trial_vector, direction_vector, error_vector):
-        """Compute new trial vector for mixing with full right hand side. 
-        
+        """Compute new trial vector for mixing with full right hand side.
+
         See T. Helgaker's book "Molecular Electron-Structure Theory" equations
         (13.4.3), (13.4.6) and (13.4.10).
-        
+
         Parameters
         ----------
         trial_vector : np.array
@@ -45,7 +45,7 @@ class AlphaMixer:
 class DIIS(AlphaMixer):
     """Direct Inversion in Iterative Subspace (DIIS)
 
-    General vector mixing class to accelerate quasi-Newton 
+    General vector mixing class to accelerate quasi-Newton
     using direct inversion of iterative space.
 
     Code inherited from Simen Kvaal.
@@ -53,7 +53,7 @@ class DIIS(AlphaMixer):
     Parameters
     ----------
     num_vecs : int
-        Number of vectors to keep in memory 
+        Number of vectors to keep in memory
     np : module
         Matrix library to be used, e.g., numpy, cupy, etc.
     """
