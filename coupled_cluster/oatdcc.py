@@ -39,7 +39,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             if "change_system_basis" not in kwargs:
                 kwargs["change_system_basis"] = True
             # Compute ground state amplitudes for time-integration
-            cc.compute_ground_state(*args, **kwargs)
+            # cc.compute_ground_state(*args, **kwargs)
             amplitudes = cc.get_amplitudes(get_t_0=True)
 
         if C is None:
@@ -192,7 +192,6 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # Solve Q-space for C and C_tilde
 
-        """
         C_new = np.dot(C, eta)
         C_tilde_new = -np.dot(eta, C_tilde)
         """
@@ -206,6 +205,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             self.u,
             self.u_prime,
             rho_pq_inv,
+            self.rho_qp,
             self.rho_qspr,
             np=np,
         )
@@ -218,9 +218,11 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             self.u,
             self.u_prime,
             rho_pq_inv,
+            self.rho_qp,
             self.rho_qspr,
             np=np,
         )
+        """
 
         self.last_timestep = current_time
 
@@ -231,38 +233,47 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
 
 def compute_q_space_ket_equations(
-    C, C_tilde, eta, h, h_tilde, u, u_tilde, rho_inv_pq, rho_qspr, np
+    C, C_tilde, eta, h, h_prime, u, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
 ):
+    # print(u.shape, u_prime.shape)
     rhs = 1j * np.dot(C, eta)
 
-    rhs += np.dot(h, C)
-    rhs -= np.dot(C, h_tilde)
+    rhs2 = np.zeros_like(rhs)
+    rhs2 += np.dot(h, C)
+    rhs2 -= np.dot(C, h_prime)
 
-    u_quart = np.einsum("rb,gq,ds,abgd->arqs", C_tilde[:], C, C, u, optimize=True)
-    u_quart -= np.tensordot(C, u_tilde, axes=((1), (0)))
+    u_quart = np.einsum("rb,gq,ds,abgd->arqs", C_tilde, C, C, u, optimize=True)
+    u_quart -= np.tensordot(C, u_prime, axes=((1), (0)))
 
-    temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
-    rhs += np.dot(temp_ap, rho_inv_pq)
+    # temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
+    temp_ap = np.einsum('arqs,qspr->ap', u_quart, rho_qspr)
+    rhs2 = np.dot(rhs2, rho_qp) 
+    rhs2 += temp_ap
+    # print(np.linalg.norm(rhs2))
+    rhs2 = np.dot(rhs2, rho_inv_pq)
 
-    return rhs
+    return rhs + rhs2
 
 
 def compute_q_space_bra_equations(
-    C, C_tilde, eta, h, h_tilde, u, u_tilde, rho_inv_pq, rho_qspr, np
+    C, C_tilde, eta, h, h_prime, u, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
 ):
     rhs = 1j * np.dot(eta, C_tilde)
 
-    rhs += np.dot(C_tilde, h)
-    rhs -= np.dot(h_tilde, C_tilde)
+    rhs2 = np.dot(C_tilde, h)
+    rhs2 -= np.dot(h_prime, C_tilde)
 
     u_quart = np.einsum(
         "pa,rg,ds,agbd->prbs", C_tilde, C_tilde, C, u, optimize=True
     )
-    u_quart -= np.tensordot(u_tilde, C_tilde, axes=((2), (0))).transpose(
+    u_quart -= np.tensordot(u_prime, C_tilde, axes=((2), (0))).transpose(
         0, 1, 3, 2
     )
 
     temp_qb = np.tensordot(rho_qspr, u_quart, axes=((1, 2, 3), (3, 0, 1)))
-    rhs += np.dot(rho_inv_pq, temp_qb)
+    rhs2 = np.dot(rho_qp, rhs2) + temp_qb
+    # print(4,np.linalg.norm(rhs2))
+
+    rhs2 = np.dot(rho_inv_pq, rhs2)
 
     return rhs
