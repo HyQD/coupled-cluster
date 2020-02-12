@@ -1,3 +1,3 @@
 from .ccd import (CCD, CoupledClusterDoubles, OACCD, TDCCD, 
-                  OATDCCD, ITDCCD, OAITDCCD)
+                  OATDCCD, ITDCCD)
 from .ccsd import CCSD, CoupledClusterSinglesDoubles, TDCCSD
