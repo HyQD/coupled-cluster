@@ -20,7 +20,7 @@ from coupled_cluster.rccsd.time_dependent_overlap import (
 )
 
 
-class RTDCCSD(TimeDependentCoupledCluster):
+class TDRCCSD(TimeDependentCoupledCluster):
     def __init__(self, *args, **kwargs):
         super().__init__(RCCSD, *args, **kwargs)
 

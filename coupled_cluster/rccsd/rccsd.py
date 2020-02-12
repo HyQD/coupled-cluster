@@ -299,9 +299,4 @@ class RCCSD(CoupledCluster):
         )
 
     def compute_two_body_density_matrix(self):
-
         pass
-
-
-# Keep alias for backwards compatibility
-RestrictedCoupledClusterSinglesDoubles = RCCSD

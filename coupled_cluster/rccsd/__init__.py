@@ -1,2 +1,2 @@
-from .rccsd import RCCSD, RestrictedCoupledClusterSinglesDoubles
-from .rtdccsd import RTDCCSD
+from .rccsd import RCCSD
+from .tdrccsd import TDRCCSD
