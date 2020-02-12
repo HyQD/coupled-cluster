@@ -159,7 +159,7 @@
 <h2>Time-dependent coupled-cluster parent class<a class="headerlink" href="#time-dependent-coupled-cluster-parent-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.tdcc.</code><code class="sig-name descname">TimeDependentCoupledCluster</code><span class="sig-paren">(</span><em class="sig-param">cc</em>, <em class="sig-param">system</em>, <em class="sig-param">np=None</em>, <em class="sig-param">integrator=None</em>, <em class="sig-param">**cc_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.tdcc.</code><code class="sig-name descname">TimeDependentCoupledCluster</code><span class="sig-paren">(</span><em class="sig-param">cc</em>, <em class="sig-param">system</em>, <em class="sig-param">integrator=None</em>, <em class="sig-param">**cc_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time Dependent Coupled Cluster Parent Class</p>
 <p>Abstract base class defining the skeleton of a time-dependent Coupled
 Cluster solver class.</p>
@@ -168,7 +168,6 @@ Cluster solver class.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cc</strong> (<a class="reference internal" href="ground_state.html#coupled_cluster.cc.CoupledCluster" title="coupled_cluster.cc.CoupledCluster"><em>CoupledCluster</em></a>) – Class instance defining the ground state solver</p></li>
 <li><p><strong>system</strong> (<em>QuantumSystem</em>) – Class instance defining the system to be solved</p></li>
-<li><p><strong>np</strong> (<em>module</em>) – Matrix/linear algebra library to be uses, like numpy or cupy</p></li>
 <li><p><strong>integrator</strong> (<a class="reference internal" href="integrators.html#coupled_cluster.integrators.Integrator" title="coupled_cluster.integrators.Integrator"><em>Integrator</em></a>) – Integrator class instance (RK4, GaussIntegrator)</p></li>
 </ul>
 </dd>
@@ -437,7 +436,7 @@ yield compute_t_2_amplitudes</p>
 <h2>Orbital-adaptive time-dependent coupled-cluster parent class<a class="headerlink" href="#orbital-adaptive-time-dependent-coupled-cluster-parent-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="coupled_cluster.oatdcc.OATDCC">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.oatdcc.</code><code class="sig-name descname">OATDCC</code><span class="sig-paren">(</span><em class="sig-param">cc</em>, <em class="sig-param">system</em>, <em class="sig-param">np=None</em>, <em class="sig-param">integrator=None</em>, <em class="sig-param">**cc_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.oatdcc.</code><code class="sig-name descname">OATDCC</code><span class="sig-paren">(</span><em class="sig-param">cc</em>, <em class="sig-param">system</em>, <em class="sig-param">integrator=None</em>, <em class="sig-param">**cc_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract base class defining the skeleton of an orbital-adaptive
 time-dependent coupled cluster solver class.</p>
 <p>Note that this solver _only_ supports a basis of orthonomal orbitals. If the
