@@ -22,11 +22,11 @@ oaccd.compute_ground_state(
     tol=1e-8,
     termination_tol=1e-8,
     tol_factor=1e-1,
-    change_system_basis=True
+    change_system_basis=True,
 )
 print("EOACCD={0}".format(oaccd.compute_energy()))
 
 dm1 = oaccd.compute_one_body_density_matrix()
 
-dip_mom_z = np.trace(np.dot(dm1,system.dipole_moment[2]))
+dip_mom_z = np.trace(np.dot(dm1, system.dipole_moment[2]))
 print(f"dip_mom_z={dip_mom_z}")
