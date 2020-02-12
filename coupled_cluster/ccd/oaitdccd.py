@@ -1,8 +1,10 @@
 from coupled_cluster import OATDCCD
 from coupled_cluster.cc_helper import OACCVector
 
+
 class OAITDCCD(OATDCCD):
     def __call__(self, prev_amp, current_time):
+        print(1)
         np = self.np
         o, v = self.o, self.v
 
@@ -17,19 +19,19 @@ class OAITDCCD(OATDCCD):
         # OATDCC procedure:
         # Do amplitude step
         t_new = [
-            - rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
+            -rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
         # Compute derivative of phase
-        t_0_new = - self.rhs_t_0_amplitude(
+        t_0_new = -self.rhs_t_0_amplitude(
             self.f, self.u, *t_old, self.o, self.v, np=self.np
         )
 
         t_new = [t_0_new, *t_new]
 
         l_new = [
-            - rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
+            -rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
             for rhs_l_func in self.rhs_l_amplitudes()
         ]
 
@@ -39,8 +41,8 @@ class OAITDCCD(OATDCCD):
 
         # Solve P-space equations for eta
         # divide by imaginary number
-        eta = -1j*self.compute_p_space_equations() 
-        # TODO: move 1j out of compute_p_space_equations 
+        eta = -1j * self.compute_p_space_equations()
+        # TODO: move 1j out of compute_p_space_equations
 
         # Compute the inverse of rho_qp needed in Q-space eqs.
         """
@@ -57,11 +59,10 @@ class OAITDCCD(OATDCCD):
         # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
-        C_new = np.dot(C, eta)
-        C_tilde_new = -np.dot(eta, C_tilde)
+        # C_new = np.dot(C, eta)
+        # C_tilde_new = -np.dot(eta, C_tilde)
 
-        """
-        C_new = -1j * compute_q_space_ket_equations(
+        C_new = -compute_q_space_ket_equations(
             C,
             C_tilde,
             eta,
@@ -73,7 +74,7 @@ class OAITDCCD(OATDCCD):
             self.rho_qspr,
             np=np,
         )
-        C_tilde_new = 1j * compute_q_space_bra_equations(
+        C_tilde_new = -compute_q_space_bra_equations(
             C,
             C_tilde,
             eta,
@@ -85,7 +86,6 @@ class OAITDCCD(OATDCCD):
             self.rho_qspr,
             np=np,
         )
-        """
 
         self.last_timestep = current_time
 
