@@ -38,15 +38,14 @@ class RCCSD(CoupledCluster):
         super().__init__(system, **kwargs)
 
         np = self.np
-        
+
         """
         Manually handle restricted properties for now before quantum systems have been 
         updated
         """
-        self.n, self.m, self.l = system.n//2, system.m//2, system.l//2
-        self.o, self.v = slice(0,self.n), slice(self.n,self.l)
-        n,m = self.n, self.m
-
+        self.n, self.m, self.l = system.n // 2, system.m // 2, system.l // 2
+        self.o, self.v = slice(0, self.n), slice(self.n, self.l)
+        n, m = self.n, self.m
 
         self.include_singles = include_singles
 
@@ -139,17 +138,28 @@ class RCCSD(CoupledCluster):
         np = self.np
         o, v = self.o, self.v
 
-        
-        e_corr = 2*np.einsum('ia,ai->',self.f[o,v],self.t_1)
-        
-        e_corr += 2*np.einsum('abij,ijab->',self.t_2,self.u[o,o,v,v])
-        e_corr -= np.einsum('abij,ijba->',self.t_2,self.u[o,o,v,v])
+        e_corr = 2 * np.einsum("ia,ai->", self.f[o, v], self.t_1)
 
-        e_corr += 2*np.einsum('ai,bj,ijab->',self.t_1,self.t_1,self.u[o,o,v,v],optimize=True)
-        e_corr -= np.einsum('ai,bj,ijba->',self.t_1,self.t_1,self.u[o,o,v,v],optimize=True)
+        e_corr += 2 * np.einsum("abij,ijab->", self.t_2, self.u[o, o, v, v])
+        e_corr -= np.einsum("abij,ijba->", self.t_2, self.u[o, o, v, v])
+
+        e_corr += 2 * np.einsum(
+            "ai,bj,ijab->",
+            self.t_1,
+            self.t_1,
+            self.u[o, o, v, v],
+            optimize=True,
+        )
+        e_corr -= np.einsum(
+            "ai,bj,ijba->",
+            self.t_1,
+            self.t_1,
+            self.u[o, o, v, v],
+            optimize=True,
+        )
 
         e_ref = 0
-        
+
         return e_corr + e_ref
 
     def compute_t_amplitudes(self):
@@ -216,7 +226,6 @@ class RCCSD(CoupledCluster):
         direction_vector = np.array([], dtype=self.u.dtype)  # Empty array
         error_vector = np.array([], dtype=self.u.dtype)  # Empty array
 
-
         """
         The transposes of l1 and l2 are just a temporary solution until 
         we switch it in the generated right hand sides.
@@ -230,7 +239,7 @@ class RCCSD(CoupledCluster):
                 self.t_1,
                 self.t_2,
                 self.l_1.T,
-                self.l_2.transpose(2,3,0,1),
+                self.l_2.transpose(2, 3, 0, 1),
                 self.o,
                 self.v,
                 out=self.rhs_l_1,
@@ -249,12 +258,12 @@ class RCCSD(CoupledCluster):
             self.t_1,
             self.t_2,
             self.l_1.T,
-            self.l_2.transpose(2,3,0,1),
+            self.l_2.transpose(2, 3, 0, 1),
             self.o,
             self.v,
             out=self.rhs_l_2,
             np=np,
-        ).transpose(2,3,0,1)
+        ).transpose(2, 3, 0, 1)
 
         trial_vector = np.concatenate((trial_vector, self.l_2.ravel()), axis=0)
         direction_vector = np.concatenate(
