@@ -4,7 +4,6 @@ from coupled_cluster.cc_helper import OACCVector
 
 class OAITDCCD(OATDCCD):
     def __call__(self, prev_amp, current_time):
-        print(1)
         np = self.np
         o, v = self.o, self.v
 
@@ -40,7 +39,7 @@ class OAITDCCD(OATDCCD):
         self.rho_qspr = self.two_body_density_matrix(t_old, l_old)
 
         # Solve P-space equations for eta
-        # divide by imaginary number
+        # as in regular td, but divided by imaginary number
         eta = -1j * self.compute_p_space_equations()
         # TODO: move 1j out of compute_p_space_equations
 
@@ -59,8 +58,10 @@ class OAITDCCD(OATDCCD):
         # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
-        # C_new = np.dot(C, eta)
-        # C_tilde_new = -np.dot(eta, C_tilde)
+        """
+        C_new = -1j*(np.dot(C, eta))
+        C_tilde_new = 1j* (-np.dot(eta, C_tilde))
+        """
 
         C_new = -compute_q_space_ket_equations(
             C,
