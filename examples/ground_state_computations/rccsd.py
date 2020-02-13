@@ -38,19 +38,18 @@ l1, l2 = l1.ravel(), l2.ravel()
 
 plt.figure()
 plt.subplot(211)
-plt.plot(np.arange(len(t1)),np.abs(t1)**2,'o',label=r'$|\tau_1|^2$')
+plt.plot(np.arange(len(t1)), np.abs(t1) ** 2, "o", label=r"$|\tau_1|^2$")
 plt.legend()
 plt.subplot(212)
-plt.plot(np.arange(len(t2)),np.abs(t2)**2,'o',label=r'$|\tau_2|^2$')
+plt.plot(np.arange(len(t2)), np.abs(t2) ** 2, "o", label=r"$|\tau_2|^2$")
 plt.legend()
 
 plt.figure()
 plt.subplot(211)
-plt.plot(np.arange(len(l1)),np.abs(l1)**2,'o',label=r'$|\lambda_1|^2$')
+plt.plot(np.arange(len(l1)), np.abs(l1) ** 2, "o", label=r"$|\lambda_1|^2$")
 plt.legend()
 plt.subplot(212)
-plt.plot(np.arange(len(l2)),np.abs(l2)**2,'o',label=r'$|\lambda_2|^2$')
+plt.plot(np.arange(len(l2)), np.abs(l2) ** 2, "o", label=r"$|\lambda_2|^2$")
 plt.legend()
 
 plt.show()
-
