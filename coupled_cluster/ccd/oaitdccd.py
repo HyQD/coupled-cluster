@@ -1,4 +1,8 @@
-from coupled_cluster import OATDCCD
+from coupled_cluster.ccd.oatdccd import OATDCCD
+from coupled_cluster.oatdcc import (
+    compute_q_space_ket_equations,
+    compute_q_space_bra_equations,
+)
 from coupled_cluster.cc_helper import OACCVector
 
 
@@ -58,9 +62,8 @@ class OAITDCCD(OATDCCD):
         # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
-        """
-        C_new = -1j*(np.dot(C, eta))
-        C_tilde_new = 1j* (-np.dot(eta, C_tilde))
+        C_new = -1j * (np.dot(C, eta))
+        C_tilde_new = 1j * (-np.dot(eta, C_tilde))
         """
 
         C_new = -compute_q_space_ket_equations(
@@ -87,6 +90,7 @@ class OAITDCCD(OATDCCD):
             self.rho_qspr,
             np=np,
         )
+        """
 
         self.last_timestep = current_time
 

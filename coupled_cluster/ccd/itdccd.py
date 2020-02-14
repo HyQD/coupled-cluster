@@ -1,4 +1,4 @@
-from coupled_cluster import TDCCD
+from coupled_cluster.ccd.tdccd import TDCCD
 from coupled_cluster.cc_helper import AmplitudeContainer
 
 
