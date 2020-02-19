@@ -32,15 +32,15 @@ def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
 
     """
 
-    e_corr = 2 * np.einsum("ia,ai->", f[o, v], t1)
+    e_corr = 2 * np.einsum("ia,ai->", f[o, v], t_1)
 
-    e_corr += 2 * np.einsum("abij,ijab->", t2, u[o, o, v, v])
-    e_corr -= np.einsum("abij,ijba->", t2, u[o, o, v, v])
+    e_corr += 2 * np.einsum("abij,ijab->", t_2, u[o, o, v, v])
+    e_corr -= np.einsum("abij,ijba->", t_2, u[o, o, v, v])
 
     e_corr += 2 * np.einsum(
-        "ai,bj,ijab->", t1, t1, u[o, o, v, v], optimize=True
+        "ai,bj,ijab->", t_1, t_1, u[o, o, v, v], optimize=True
     )
-    e_corr -= np.einsum("ai,bj,ijba->", t1, t1, u[o, o, v, v], optimize=True)
+    e_corr -= np.einsum("ai,bj,ijba->", t_1, t_1, u[o, o, v, v], optimize=True)
 
     return e_corr
 

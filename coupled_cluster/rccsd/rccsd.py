@@ -43,8 +43,9 @@ class RCCSD(CoupledCluster):
         Manually handle restricted properties for now before quantum systems have been 
         updated
         """
-        self.n, self.m, self.l = system.n // 2, system.m // 2, system.l // 2
-        self.o, self.v = slice(0, self.n), slice(self.n, self.l)
+        # self.n, self.m, self.l = system.n // 2, system.m // 2, system.l // 2
+        # self.o, self.v = slice(0, self.n), slice(self.n, self.l)
+
         n, m = self.n, self.m
 
         self.include_singles = include_singles
@@ -238,13 +239,13 @@ class RCCSD(CoupledCluster):
                 self.u,
                 self.t_1,
                 self.t_2,
-                self.l_1.T,
-                self.l_2.transpose(2, 3, 0, 1),
+                self.l_1,
+                self.l_2,
                 self.o,
                 self.v,
                 out=self.rhs_l_1,
                 np=np,
-            ).T
+            )
 
             trial_vector = self.l_1.ravel()
             direction_vector = (self.rhs_l_1 / self.d_l_1).ravel()
@@ -257,13 +258,13 @@ class RCCSD(CoupledCluster):
             self.u,
             self.t_1,
             self.t_2,
-            self.l_1.T,
-            self.l_2.transpose(2, 3, 0, 1),
+            self.l_1,
+            self.l_2,
             self.o,
             self.v,
             out=self.rhs_l_2,
             np=np,
-        ).transpose(2, 3, 0, 1)
+        )
 
         trial_vector = np.concatenate((trial_vector, self.l_2.ravel()), axis=0)
         direction_vector = np.concatenate(
