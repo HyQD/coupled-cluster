@@ -1,0 +1,128 @@
+from quantum_systems import construct_pyscf_system_rhf
+from coupled_cluster.integrators import GaussIntegrator, RungeKutta4
+import numpy as np
+from quantum_systems.time_evolution_operators import LaserField
+from coupled_cluster.rccsd import TDRCCSD
+import tqdm
+import matplotlib.pyplot as plt
+
+
+class sine_square_laser:
+    def __init__(self, F_str, omega, tprime, phase=0):
+        self.F_str = F_str
+        self.omega = omega
+        self.tprime = tprime
+        self.phase = phase
+
+    def __call__(self, t):
+        pulse = (
+            (np.sin(np.pi * t / self.tprime) ** 2)
+            * np.heaviside(t, 1.0)
+            * np.heaviside(self.tprime - t, 1.0)
+            * np.sin(self.omega * t + self.phase)
+            * self.F_str
+        )
+        return pulse
+
+
+name = "beryllium"
+atom = "be 0.0 0.0 0.0"
+# atom = "li 0.0 0.0 0.0; h 0.0 0.0 3.08"
+basis = "cc-pvdz"
+charge = 0
+system = construct_pyscf_system_rhf(
+    atom,
+    basis=basis,
+    np=np,
+    verbose=False,
+    add_spin=False,
+    anti_symmetrize=False,
+)
+
+# system.n, system.m, system.l = system.n // 2, system.m // 2, system.l // 2
+# system.o, system.v = slice(0, system.n), slice(system.n, system.l)
+
+
+F_str = 0.01
+omega = 0.3
+t_cycle = 2 * np.pi / omega
+print(f"1 optical cycle={t_cycle}")
+
+tprime = t_cycle
+phase = 0
+polarization = np.zeros(3)
+polarization_direction = 2
+polarization[polarization_direction] = 1
+
+time_after_pulse = 0
+tfinal = np.floor(tprime)
+print(f"tfinal={tfinal}")
+
+system.set_time_evolution_operator(
+    LaserField(
+        sine_square_laser(F_str=F_str, omega=omega, tprime=tprime, phase=phase),
+        polarization_vector=polarization,
+    )
+)
+
+s = 3
+eps = 1e-5
+dt = 1e-1
+integrator = GaussIntegrator(s=s, np=np, eps=eps)
+# integrator = RungeKutta4(np=np)
+
+cc_kwargs = dict(verbose=False)
+tdrccsd = TDRCCSD(system, integrator=integrator, **cc_kwargs)
+
+ground_state_tolerance = 1e-8
+tdrccsd.compute_ground_state(
+    t_kwargs=dict(tol=ground_state_tolerance),
+    l_kwargs=dict(tol=ground_state_tolerance),
+)
+print(
+    "Ground state RCCSD energy: {0}".format(
+        tdrccsd.compute_ground_state_energy().real
+        # + system.nuclear_repulsion_energy
+    )
+)
+tdrccsd.set_initial_conditions()
+
+num_steps = int(tfinal / dt) + 1
+print(f"num_steps={num_steps}")
+# Initialize arrays to hold different "observables".
+time_points = np.linspace(0, tfinal, num_steps)
+
+energy = np.zeros(num_steps, dtype=np.complex128)
+dip_z = np.zeros(num_steps, dtype=np.complex128)
+t, l = tdrccsd.amplitudes
+
+# Set initial values
+energy[0] = tdrccsd.compute_energy()
+print(f"E(0)={energy[0].real}")
+rho_qp = tdrccsd.compute_one_body_density_matrix()
+z = system.dipole_moment[polarization_direction].copy()
+dip_z[0] = np.trace(np.dot(rho_qp, z))
+print(f"dip_z(0)={dip_z[0].real}")
+
+for i, amp in tqdm.tqdm(
+    enumerate(tdrccsd.solve(time_points)), total=num_steps - 1
+):
+    t, l = amp
+    energy[i + 1] = tdrccsd.compute_energy()
+    rho_qp = tdrccsd.compute_one_body_density_matrix()
+    z = system.dipole_moment[polarization_direction].copy()
+    dip_z[i + 1] = np.trace(np.dot(rho_qp, z))
+
+
+plt.figure()
+plt.subplot(211)
+plt.plot(time_points, energy.real, label=r"$E(t)$")
+plt.legend()
+plt.subplot(212)
+plt.plot(time_points, np.abs(energy.imag), label=r"$\Im{E(t)}$")
+plt.legend()
+
+plt.figure()
+plt.plot(time_points, dip_z.real, label=r"$d_z(t)$")
+plt.legend()
+plt.show()
