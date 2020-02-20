@@ -153,7 +153,7 @@ class OACCD(CCD):
             if self.verbose:
                 print("Changing system basis...")
 
-            self.system.change_basis(c=S, c_tilde=S_inv)
+            self.system.change_basis(C=S, C_tilde=S_inv)
 
         if self.verbose:
             print(
