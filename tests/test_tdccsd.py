@@ -4,7 +4,7 @@ sys.path.append(".")
 import os
 import numpy as np
 
-from quantum_systems import construct_pyscf_system, construct_pyscf_system_rhf
+from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import LaserField
 from coupled_cluster.ccsd.energies import lagrangian_functional
 from coupled_cluster.ccsd import TDCCSD
@@ -219,7 +219,9 @@ def test_tdccsd():
     E = 0.1
     laser_duration = 5
 
-    system = construct_pyscf_system(molecule="he 0.0 0.0 0.0", basis="cc-pvdz")
+    system = construct_pyscf_system_rhf(
+        molecule="he 0.0 0.0 0.0", basis="cc-pvdz"
+    )
 
     integrator = GaussIntegrator(s=3, np=np, eps=1e-6)
     tdccsd = TDCCSD(system, integrator=integrator, verbose=True)

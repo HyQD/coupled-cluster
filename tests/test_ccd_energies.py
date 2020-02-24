@@ -105,10 +105,11 @@ def test_lagrangian_functional_zanghellini(
     ccd.iterate_t_amplitudes(**t_kwargs)
     ccd.iterate_l_amplitudes(**l_kwargs)
 
-    f = zanghellini_system.f
+    h = zanghellini_system.h
     u = zanghellini_system.u
     o = zanghellini_system.o
     v = zanghellini_system.v
+    f = zanghellini_system.construct_fock_matrix(h, u)
 
     t, l = ccd.t_2, ccd.l_2
 
