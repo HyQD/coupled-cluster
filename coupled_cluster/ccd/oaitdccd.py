@@ -1,5 +1,5 @@
-from coupled_cluster import OATDCCD
-from coupled_cluster.cc_helper import OACCVector
+from . import OATDCCD
+from ..cc_helper import OACCVector
 
 
 class OAITDCCD(OATDCCD):

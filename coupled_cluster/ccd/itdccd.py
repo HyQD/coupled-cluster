@@ -1,5 +1,5 @@
-from coupled_cluster import TDCCD
-from coupled_cluster.cc_helper import AmplitudeContainer
+from . import TDCCD
+from ..cc_helper import AmplitudeContainer
 
 
 class ITDCCD(TDCCD):
