@@ -152,13 +152,15 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         here that expm refers to the matrix exponential which I can not find in
         numpy only in scipy.
         """
-        # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
+        rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
-        C_new = np.dot(C, eta)
-        C_tilde_new = -np.dot(eta, C_tilde)
 
         """
+        C_new = np.dot(C, eta)
+        C_tilde_new = -np.dot(eta, C_tilde)
+        """
+
         C_new = -1j * compute_q_space_ket_equations(
             C,
             C_tilde,
@@ -183,7 +185,6 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             self.rho_qspr,
             np=np,
         )
-        """
 
         self.last_timestep = current_time
 
@@ -196,12 +197,13 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 def compute_q_space_ket_equations(
     C, C_tilde, eta, h, h_tilde, u, u_tilde, rho_inv_pq, rho_qspr, np
 ):
+    o = self.system.o
     rhs = 1j * np.dot(C, eta)
 
     rhs += np.dot(h, C)
     rhs -= np.dot(C, h_tilde)
 
-    u_quart = np.einsum("rb,gq,ds,abgd->arqs", C_tilde, C, C, u, optimize=True)
+    u_quart = np.einsum("rb,gq,ds,abgd->arqs", C_tilde[:], C, C, u, optimize=True)
     u_quart -= np.tensordot(C, u_tilde, axes=((1), (0)))
 
     temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))

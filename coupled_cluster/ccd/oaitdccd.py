@@ -1,9 +1,9 @@
-from coupled_cluster.ccd.oatdccd import OATDCCD
-from coupled_cluster.oatdcc import (
+from . import OATDCCD
+from ..oatdcc import (
     compute_q_space_ket_equations,
     compute_q_space_bra_equations,
 )
-from coupled_cluster.cc_helper import OACCVector
+from ..cc_helper import OACCVector
 
 
 class OAITDCCD(OATDCCD):
