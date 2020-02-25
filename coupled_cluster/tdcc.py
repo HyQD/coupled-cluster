@@ -95,6 +95,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         return self._amplitudes
 
     def solve(self, time_points, timestep_tol=1e-8):
+
         n = len(time_points)
 
         for i in range(n - 1):

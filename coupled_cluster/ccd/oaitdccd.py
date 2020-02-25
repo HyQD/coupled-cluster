@@ -7,6 +7,18 @@ from coupled_cluster.cc_helper import OACCVector
 
 
 class OAITDCCD(OATDCCD):
+    def compute_ground_state(self, *args, **kwargs):
+        if "change_system_basis" not in kwargs:
+            kwargs["change_system_basis"] = True
+
+        # self.cc.compute_ground_state(*args, **kwargs)
+        self.h_orig = self.system.h
+        self.u_orig = self.system.u
+
+        self.h = self.system.h
+        self.u = self.system.u
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
+
     def __call__(self, prev_amp, current_time):
         np = self.np
         o, v = self.o, self.v
@@ -64,8 +76,8 @@ class OAITDCCD(OATDCCD):
         # Solve Q-space for C and C_tilde
         C_new = -1j * (np.dot(C, eta))
         C_tilde_new = 1j * (-np.dot(eta, C_tilde))
-        """
 
+        """
         C_new = -compute_q_space_ket_equations(
             C,
             C_tilde,
