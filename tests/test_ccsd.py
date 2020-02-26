@@ -102,10 +102,13 @@ from coupled_cluster.ccsd.density_matrices import (
 
 
 @pytest.fixture
-def iterated_ccsd_amplitudes(helium_system, beryllium_system, neon_system):
+def iterated_ccsd_amplitudes():
     ccsd_list = []
-    for system in [helium_system, beryllium_system, neon_system]:
-        system.change_to_hf_basis(verbose=True, tolerance=1e-8)
+    for system in [
+        construct_pyscf_system_rhf("he"),
+        construct_pyscf_system_rhf("be"),
+        construct_pyscf_system_rhf("ne"),
+    ]:
         ccsd = CCSD(system, mixer=DIIS, verbose=True)
         ccsd.iterate_t_amplitudes()
         ccsd.iterate_l_amplitudes()
@@ -1405,32 +1408,32 @@ def test_one_body_density_matrix(iterated_ccsd_amplitudes):
         assert abs(np.trace(rho_qp) - ccsd.n) < 1e-8
 
 
-def test_mbpt_enegy(tdho):
-
-    cc_scheme = CCSD(tdho, verbose=True)
-    energy = cc_scheme.compute_energy()
-
-    assert True
-
-
-def test_ccsd_energy(tdho, ccsd_energy):
-    tol = 1e-4
-
-    cc_scheme = CCSD(tdho, verbose=True)
-    cc_scheme.iterate_t_amplitudes(tol=tol)
-    energy = cc_scheme.compute_energy()
-
-    assert abs(energy - ccsd_energy) < tol
+# def test_mbpt_enegy(tdho):
+#
+#     cc_scheme = CCSD(tdho, verbose=True)
+#     energy = cc_scheme.compute_energy()
+#
+#     assert True
 
 
-def test_lambda_amplitude_iterations(tdho):
-    cc_scheme = CCSD(tdho, verbose=True)
+# def test_ccsd_energy(tdho, ccsd_energy):
+#     tol = 1e-4
+#
+#     cc_scheme = CCSD(tdho, verbose=True)
+#     cc_scheme.iterate_t_amplitudes(tol=tol)
+#     energy = cc_scheme.compute_energy()
+#
+#     assert abs(energy - ccsd_energy) < tol
 
-    cc_scheme.iterate_t_amplitudes()
-    energy = cc_scheme.compute_energy()
-    cc_scheme.iterate_t_amplitudes()
 
-    assert True
+# def test_lambda_amplitude_iterations(tdho):
+#     cc_scheme = CCSD(tdho, verbose=True)
+#
+#     cc_scheme.iterate_t_amplitudes()
+#     energy = cc_scheme.compute_energy()
+#     cc_scheme.iterate_t_amplitudes()
+#
+#     assert True
 
 
 def T1_RHS(T1, T2, F, W):
