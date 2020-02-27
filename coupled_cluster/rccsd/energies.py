@@ -8,7 +8,7 @@ from coupled_cluster.ccd.energies import (
 )
 
 
-def compute_ccsd_ground_state_energy(f, u, t_1, t_2, o, v, np):
+def compute_rccsd_ground_state_energy(f, u, t_1, t_2, o, v, np):
 
     # energy = compute_reference_energy(f, u, o, v, np=np)
     """
