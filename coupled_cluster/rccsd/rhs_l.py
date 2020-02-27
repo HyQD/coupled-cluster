@@ -10,33 +10,33 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
     no = o.stop
     nv = v.stop - no
 
-    I0_l1 = np.zeros((no, no),dtype=t1.dtype)
+    I0_l1 = np.zeros((no, no), dtype=t1.dtype)
 
     I0_l1 += np.einsum("ikba,abkj->ij", l2, t2)
 
-    I22_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I22_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I22_l1 -= 2 * np.einsum("ik,aj->ijka", I0_l1, t1)
 
-    I25_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I25_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I25_l1 += np.einsum("ik,aj->ijka", I0_l1, t1)
 
-    I30_l1 = np.zeros((no, no),dtype=t1.dtype)
+    I30_l1 = np.zeros((no, no), dtype=t1.dtype)
 
     I30_l1 += np.einsum("ij->ij", I0_l1)
 
-    rhs = np.zeros((no, nv),dtype=t1.dtype)
+    rhs = np.zeros((no, nv), dtype=t1.dtype)
 
     rhs -= np.einsum("ij,ja->ia", I0_l1, f[o, v])
 
     del I0_l1
 
-    I1_l1 = np.zeros((no, no, no, no),dtype=t1.dtype)
+    I1_l1 = np.zeros((no, no, no, no), dtype=t1.dtype)
 
     I1_l1 += np.einsum("ijba,ablk->ijkl", l2, t2)
 
-    I21_l1 = np.zeros((no, no, no, no),dtype=t1.dtype)
+    I21_l1 = np.zeros((no, no, no, no), dtype=t1.dtype)
 
     I21_l1 += np.einsum("jilk->ijkl", I1_l1)
 
@@ -44,11 +44,11 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I1_l1
 
-    I2_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I2_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I2_l1 += np.einsum("bk,jiba->ijka", t1, l2)
 
-    I3_l1 = np.zeros((no, no, no, no),dtype=t1.dtype)
+    I3_l1 = np.zeros((no, no, no, no), dtype=t1.dtype)
 
     I3_l1 += np.einsum("ak,ijla->ijkl", t1, I2_l1)
 
@@ -70,25 +70,25 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I25_l1
 
-    I31_l1 = np.zeros((no, nv),dtype=t1.dtype)
+    I31_l1 = np.zeros((no, nv), dtype=t1.dtype)
 
     I31_l1 += np.einsum("kjib,bakj->ia", I2_l1, t2)
 
-    I4_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I4_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I4_l1 += np.einsum("bi,jkab->ijka", t1, u[o, o, v, v])
 
-    I5_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I5_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I5_l1 -= np.einsum("ijka->ijka", I4_l1)
 
     I5_l1 += 2 * np.einsum("ikja->ijka", I4_l1)
 
-    I6_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I6_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I6_l1 += np.einsum("ijka->ijka", I4_l1)
 
-    I12_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I12_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I12_l1 += np.einsum("kjia->ijka", I4_l1)
 
@@ -98,7 +98,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I5_l1 -= np.einsum("kjia->ijka", u[o, o, o, v])
 
-    I14_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I14_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I14_l1 -= np.einsum("kilb,balj->ijka", I5_l1, t2)
 
@@ -108,23 +108,23 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I14_l1 += np.einsum("klib,ablj->ijka", I6_l1, t2)
 
-    I24_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I24_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I24_l1 += np.einsum("ijlb,ablk->ijka", I6_l1, t2)
 
     del I6_l1
 
-    I7_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I7_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I7_l1 += 2 * np.einsum("jiab->ijab", u[o, o, v, v])
 
     I7_l1 -= np.einsum("jiba->ijab", u[o, o, v, v])
 
-    I8_l1 = np.zeros((no, nv),dtype=t1.dtype)
+    I8_l1 = np.zeros((no, nv), dtype=t1.dtype)
 
     I8_l1 += np.einsum("bj,jiab->ia", t1, I7_l1)
 
-    I9_l1 = np.zeros((no, nv),dtype=t1.dtype)
+    I9_l1 = np.zeros((no, nv), dtype=t1.dtype)
 
     I9_l1 += np.einsum("ia->ia", I8_l1)
 
@@ -134,15 +134,15 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I14_l1 -= np.einsum("ib,bakj->ijka", I9_l1, t2)
 
-    I35_l1 = np.zeros((no, no),dtype=t1.dtype)
+    I35_l1 = np.zeros((no, no), dtype=t1.dtype)
 
     I35_l1 += np.einsum("ia,aj->ij", I9_l1, t1)
 
-    I10_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I10_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I10_l1 += np.einsum("ci,jabc->ijab", t1, u[o, v, v, v])
 
-    I11_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I11_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I11_l1 += np.einsum("jiab->ijab", I10_l1)
 
@@ -158,7 +158,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I12_l1 += np.einsum("ijka->ijka", u[o, o, o, v])
 
-    I13_l1 = np.zeros((no, no, no, no),dtype=t1.dtype)
+    I13_l1 = np.zeros((no, no, no, no), dtype=t1.dtype)
 
     I13_l1 += np.einsum("al,ijka->ijkl", t1, I12_l1)
 
@@ -180,7 +180,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I14_l1
 
-    I15_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I15_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I15_l1 += np.einsum("ikac,bcjk->ijab", l2, t2)
 
@@ -190,13 +190,13 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I15_l1
 
-    I16_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I16_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I16_l1 += 2 * np.einsum("abji->ijab", t2)
 
     I16_l1 -= np.einsum("baji->ijab", t2)
 
-    I17_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I17_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I17_l1 += np.einsum("kjbc,kica->ijab", I16_l1, l2)
 
@@ -208,7 +208,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I16_l1
 
-    I18_l1 = np.zeros((no, nv, nv, nv),dtype=t1.dtype)
+    I18_l1 = np.zeros((no, nv, nv, nv), dtype=t1.dtype)
 
     I18_l1 += np.einsum("abic->iabc", u[v, v, o, v])
 
@@ -218,7 +218,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I18_l1
 
-    I19_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I19_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I19_l1 += np.einsum("ib,bakj->ijka", l1, t2)
 
@@ -228,7 +228,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I19_l1
 
-    I20_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I20_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I20_l1 -= np.einsum("abji->ijab", t2)
 
@@ -244,7 +244,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I20_l1
 
-    I23_l1 = np.zeros((no, no, no, no),dtype=t1.dtype)
+    I23_l1 = np.zeros((no, no, no, no), dtype=t1.dtype)
 
     I23_l1 += np.einsum("ai,jkla->ijkl", t1, u[o, o, o, v])
 
@@ -258,7 +258,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I24_l1
 
-    I26_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I26_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I26_l1 += np.einsum("iajb->ijab", u[o, v, o, v])
 
@@ -270,19 +270,19 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I26_l1
 
-    I27_l1 = np.zeros((nv, nv),dtype=t1.dtype)
+    I27_l1 = np.zeros((nv, nv), dtype=t1.dtype)
 
     I27_l1 += np.einsum("ia,bi->ab", l1, t1)
 
     I27_l1 += np.einsum("jica,cbji->ab", l2, t2)
 
-    I28_l1 = np.zeros((no, nv, nv, nv),dtype=t1.dtype)
+    I28_l1 = np.zeros((no, nv, nv, nv), dtype=t1.dtype)
 
     I28_l1 -= np.einsum("iabc->iabc", u[o, v, v, v])
 
     I28_l1 += 2 * np.einsum("iacb->iabc", u[o, v, v, v])
 
-    I34_l1 = np.zeros((nv, nv),dtype=t1.dtype)
+    I34_l1 = np.zeros((nv, nv), dtype=t1.dtype)
 
     I34_l1 += np.einsum("ci,iabc->ab", t1, I28_l1)
 
@@ -292,7 +292,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I28_l1
 
-    I29_l1 = np.zeros((no, no),dtype=t1.dtype)
+    I29_l1 = np.zeros((no, no), dtype=t1.dtype)
 
     I29_l1 += np.einsum("ia,aj->ij", l1, t1)
 
@@ -314,7 +314,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I7_l1
 
-    I32_l1 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I32_l1 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I32_l1 += 2 * np.einsum("iabj->ijab", u[o, v, v, o])
 
@@ -324,7 +324,7 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I32_l1
 
-    I33_l1 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I33_l1 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I33_l1 += 2 * np.einsum("ijka->ijka", u[o, o, o, v])
 
@@ -363,21 +363,21 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
     no = o.stop
     nv = v.stop - no
 
-    I0_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I0_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I0_l2 += np.einsum("ca,jicb->ijab", f[v, v], l2)
 
-    I15_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I15_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I15_l2 -= np.einsum("ijab->ijab", I0_l2)
 
     del I0_l2
 
-    I1_l2 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I1_l2 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I1_l2 += np.einsum("bk,jiba->ijka", t1, l2)
 
-    I2_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I2_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I2_l2 += np.einsum("ka,ijkb->ijab", f[o, v], I1_l2)
 
@@ -385,25 +385,25 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I2_l2
 
-    I36_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I36_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I36_l2 += np.einsum("jikc,kcab->ijab", I1_l2, u[o, v, v, v])
 
-    I52_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I52_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I52_l2 += np.einsum("ijab->ijab", I36_l2)
 
     del I36_l2
 
-    I54_l2 = np.zeros((no, no, no, no),dtype=t1.dtype)
+    I54_l2 = np.zeros((no, no, no, no), dtype=t1.dtype)
 
     I54_l2 += np.einsum("al,jika->ijkl", t1, I1_l2)
 
-    I3_l2 = np.zeros((no, no, no, no),dtype=t1.dtype)
+    I3_l2 = np.zeros((no, no, no, no), dtype=t1.dtype)
 
     I3_l2 += np.einsum("ai,jkla->ijkl", t1, u[o, o, o, v])
 
-    I4_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I4_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I4_l2 += np.einsum("kijl,lkba->ijab", I3_l2, l2)
 
@@ -413,17 +413,17 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I4_l2
 
-    I5_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I5_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I5_l2 += np.einsum("ci,jacb->ijab", t1, u[o, v, v, v])
 
-    I7_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I7_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I7_l2 += np.einsum("ijab->ijab", I5_l2)
 
     del I5_l2
 
-    I6_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I6_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I6_l2 += np.einsum("acki,jkcb->ijab", t2, u[o, o, v, v])
 
@@ -433,7 +433,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I7_l2 += np.einsum("jaib->ijab", u[o, v, o, v])
 
-    I8_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I8_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I8_l2 += np.einsum("kica,kjbc->ijab", I7_l2, l2)
 
@@ -441,7 +441,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I8_l2
 
-    I37_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I37_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I37_l2 += np.einsum("kica,kjcb->ijab", I7_l2, l2)
 
@@ -451,25 +451,25 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I37_l2
 
-    I9_l2 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I9_l2 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I9_l2 += np.einsum("bi,kjba->ijka", t1, u[o, o, v, v])
 
-    I10_l2 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I10_l2 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I10_l2 += np.einsum("ijka->ijka", I9_l2)
 
-    I17_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I17_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I17_l2 += np.einsum("ka,kijb->ijab", l1, I9_l2)
 
-    I24_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I24_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I24_l2 += np.einsum("ijab->ijab", I17_l2)
 
     del I17_l2
 
-    I53_l2 = np.zeros((no, no, no, no),dtype=t1.dtype)
+    I53_l2 = np.zeros((no, no, no, no), dtype=t1.dtype)
 
     I53_l2 += np.einsum("al,kjia->ijkl", t1, I9_l2)
 
@@ -477,7 +477,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I10_l2 += np.einsum("kjia->ijka", u[o, o, o, v])
 
-    I11_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I11_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I11_l2 += np.einsum("klia,kjlb->ijab", I10_l2, I1_l2)
 
@@ -485,17 +485,17 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I11_l2
 
-    I32_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I32_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I32_l2 += np.einsum("kila,jklb->ijab", I10_l2, I1_l2)
 
-    I35_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I35_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I35_l2 += np.einsum("jiba->ijab", I32_l2)
 
     del I32_l2
 
-    I38_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I38_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I38_l2 += np.einsum("klia,jklb->ijab", I10_l2, I1_l2)
 
@@ -505,11 +505,11 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I38_l2
 
-    I12_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I12_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I12_l2 += np.einsum("ia,aj->ij", f[o, v], t1)
 
-    I13_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I13_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I13_l2 += np.einsum("ij->ij", I12_l2)
 
@@ -517,7 +517,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I13_l2 += np.einsum("ij->ij", f[o, o])
 
-    I14_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I14_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I14_l2 += np.einsum("ik,kjab->ijab", I13_l2, l2)
 
@@ -527,7 +527,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I14_l2
 
-    rhs = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    rhs = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     rhs -= np.einsum("ijba->ijab", I15_l2)
 
@@ -535,7 +535,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I15_l2
 
-    I16_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I16_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I16_l2 += np.einsum("ic,jcab->ijab", l1, u[o, v, v, v])
 
@@ -543,11 +543,11 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I16_l2
 
-    I18_l2 = np.zeros((nv, nv),dtype=t1.dtype)
+    I18_l2 = np.zeros((nv, nv), dtype=t1.dtype)
 
     I18_l2 += np.einsum("jica,cbji->ab", l2, t2)
 
-    I19_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I19_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I19_l2 += np.einsum("ac,jicb->ijab", I18_l2, u[o, o, v, v])
 
@@ -557,17 +557,17 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I19_l2
 
-    I20_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I20_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I20_l2 += np.einsum("ia,aj->ij", l1, t1)
 
-    I22_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I22_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I22_l2 += np.einsum("ij->ij", I20_l2)
 
     del I20_l2
 
-    I21_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I21_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I21_l2 += np.einsum("ikba,abkj->ij", l2, t2)
 
@@ -575,7 +575,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I21_l2
 
-    I23_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I23_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I23_l2 += np.einsum("ik,kjab->ijab", I22_l2, u[o, o, v, v])
 
@@ -595,7 +595,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I24_l2
 
-    I25_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I25_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I25_l2 += np.einsum("ka,ijkb->ijab", l1, u[o, o, o, v])
 
@@ -603,17 +603,17 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I25_l2
 
-    I26_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I26_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I26_l2 += np.einsum("ci,jabc->ijab", t1, u[o, v, v, v])
 
-    I30_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I30_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I30_l2 += np.einsum("ijab->ijab", I26_l2)
 
     del I26_l2
 
-    I27_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I27_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I27_l2 += np.einsum("caki,jkcb->ijab", t2, u[o, o, v, v])
 
@@ -621,13 +621,13 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I27_l2
 
-    I28_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I28_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I28_l2 += 2 * np.einsum("abji->ijab", t2)
 
     I28_l2 -= np.einsum("baji->ijab", t2)
 
-    I29_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I29_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I29_l2 += np.einsum("kiac,kjcb->ijab", I28_l2, u[o, o, v, v])
 
@@ -635,13 +635,13 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I29_l2
 
-    I39_l2 = np.zeros((nv, nv),dtype=t1.dtype)
+    I39_l2 = np.zeros((nv, nv), dtype=t1.dtype)
 
     I39_l2 += np.einsum("ijac,ijcb->ab", I28_l2, u[o, o, v, v])
 
     del I28_l2
 
-    I42_l2 = np.zeros((nv, nv),dtype=t1.dtype)
+    I42_l2 = np.zeros((nv, nv), dtype=t1.dtype)
 
     I42_l2 += np.einsum("ab->ab", I39_l2)
 
@@ -649,7 +649,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I30_l2 += np.einsum("jabi->ijab", u[o, v, v, o])
 
-    I31_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I31_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I31_l2 += np.einsum("kica,kjcb->ijab", I30_l2, l2)
 
@@ -659,13 +659,13 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I31_l2
 
-    I33_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I33_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I33_l2 += 2 * np.einsum("jiab->ijab", u[o, o, v, v])
 
     I33_l2 -= np.einsum("jiba->ijab", u[o, o, v, v])
 
-    I34_l2 = np.zeros((no, nv),dtype=t1.dtype)
+    I34_l2 = np.zeros((no, nv), dtype=t1.dtype)
 
     I34_l2 += np.einsum("bj,jiab->ia", t1, I33_l2)
 
@@ -673,17 +673,17 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     I35_l2 -= np.einsum("jb,ia->ijab", I34_l2, l1)
 
-    I48_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I48_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I48_l2 += np.einsum("ia,aj->ij", I34_l2, t1)
 
-    I49_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I49_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I49_l2 += np.einsum("ij->ij", I48_l2)
 
     del I48_l2
 
-    I51_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I51_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I51_l2 += np.einsum("ka,ijkb->ijab", I34_l2, I1_l2)
 
@@ -707,13 +707,13 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I35_l2
 
-    I40_l2 = np.zeros((no, nv, nv, nv),dtype=t1.dtype)
+    I40_l2 = np.zeros((no, nv, nv, nv), dtype=t1.dtype)
 
     I40_l2 -= np.einsum("iabc->iabc", u[o, v, v, v])
 
     I40_l2 += 2 * np.einsum("iacb->iabc", u[o, v, v, v])
 
-    I41_l2 = np.zeros((nv, nv),dtype=t1.dtype)
+    I41_l2 = np.zeros((nv, nv), dtype=t1.dtype)
 
     I41_l2 += np.einsum("ci,iabc->ab", t1, I40_l2)
 
@@ -723,7 +723,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I41_l2
 
-    I43_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I43_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I43_l2 += np.einsum("ca,ijcb->ijab", I42_l2, l2)
 
@@ -733,13 +733,13 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I43_l2
 
-    I44_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I44_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I44_l2 -= np.einsum("abji->ijab", t2)
 
     I44_l2 += 2 * np.einsum("baji->ijab", t2)
 
-    I45_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I45_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I45_l2 += np.einsum("kiab,kjab->ij", I44_l2, u[o, o, v, v])
 
@@ -749,13 +749,13 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I45_l2
 
-    I46_l2 = np.zeros((no, no, no, nv),dtype=t1.dtype)
+    I46_l2 = np.zeros((no, no, no, nv), dtype=t1.dtype)
 
     I46_l2 += 2 * np.einsum("ijka->ijka", u[o, o, o, v])
 
     I46_l2 -= np.einsum("jika->ijka", u[o, o, o, v])
 
-    I47_l2 = np.zeros((no, no),dtype=t1.dtype)
+    I47_l2 = np.zeros((no, no), dtype=t1.dtype)
 
     I47_l2 += np.einsum("ak,ikja->ij", t1, I46_l2)
 
@@ -765,7 +765,7 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
     del I47_l2
 
-    I50_l2 = np.zeros((no, no, nv, nv),dtype=t1.dtype)
+    I50_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 
     I50_l2 += np.einsum("ik,kjab->ijab", I49_l2, l2)
 
