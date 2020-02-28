@@ -107,14 +107,14 @@ try:
         rho_qp = tdccsd.compute_one_body_density_matrix()
         z = system.dipole_moment[polarization_direction].copy()
         dip_z[i + 1] = np.trace(np.dot(rho_qp, z))
-        tau0[i+1] = t[0][0]
+        tau0[i + 1] = t[0][0]
 except (AssertionError, ValueError, np.linalg.LinAlgError):
     print(f"Step forward did not converge")
 
 
-np.save('dip_z_ccsd.npy',dip_z)
-np.save('energy_ccsd.npy',energy)
-np.save('tau0_ccsd.npy',tau0)
+np.save("dip_z_ccsd.npy", dip_z)
+np.save("energy_ccsd.npy", energy)
+np.save("tau0_ccsd.npy", tau0)
 
 plt.figure()
 plt.plot(time_points, dip_z.real, label=r"$d_z(t)$")
@@ -123,14 +123,14 @@ plt.grid()
 
 plt.figure()
 plt.subplot(211)
-plt.plot(time_points, energy.real,label=r'$\Re(\langle \hat{H}(t) \rangle)$')
+plt.plot(time_points, energy.real, label=r"$\Re(\langle \hat{H}(t) \rangle)$")
 plt.grid()
 plt.subplot(212)
-plt.plot(time_points, energy.imag,label=r'$\Im(\langle \hat{H}(t) \rangle)$')
+plt.plot(time_points, energy.imag, label=r"$\Im(\langle \hat{H}(t) \rangle)$")
 plt.grid()
 
 plt.figure()
-plt.plot(time_points,np.abs(np.exp(tau0))**2,label=r'$|\exp(\tau_0)|^2$')
+plt.plot(time_points, np.abs(np.exp(tau0)) ** 2, label=r"$|\exp(\tau_0)|^2$")
 plt.legend()
 plt.grid()
 
