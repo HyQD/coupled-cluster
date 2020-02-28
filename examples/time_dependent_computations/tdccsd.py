@@ -35,7 +35,7 @@ system = construct_pyscf_system_rhf(
 
 
 F_str = 0.01
-omega = 0.3
+omega = 0.2
 t_cycle = 2 * np.pi / omega
 print(f"1 optical cycle={t_cycle}")
 
@@ -60,7 +60,7 @@ s = 3
 eps = 1e-5
 dt = 1e-1
 integrator = GaussIntegrator(s=s, np=np, eps=eps)
-# integrator = RungeKutta4(np=np)
+
 
 cc_kwargs = dict(verbose=False)
 tdccsd = TDCCSD(system, integrator=integrator, **cc_kwargs)
@@ -85,15 +85,18 @@ time_points = np.linspace(0, tfinal, num_steps)
 
 energy = np.zeros(num_steps, dtype=np.complex128)
 dip_z = np.zeros(num_steps, dtype=np.complex128)
-t, l = tdccsd.amplitudes
+tau0 = np.zeros(num_steps, dtype=np.complex128)
+
 
 # Set initial values
+t, l = tdccsd.amplitudes
 energy[0] = tdccsd.compute_energy()
 print(f"E(0)={energy[0].real}")
 rho_qp = tdccsd.compute_one_body_density_matrix()
 z = system.dipole_moment[polarization_direction].copy()
 dip_z[0] = np.trace(np.dot(rho_qp, z))
 print(f"dip_z(0)={dip_z[0].real}")
+tau0[0] = t[0][0]
 
 try:
     for i, amp in tqdm.tqdm(
@@ -104,19 +107,31 @@ try:
         rho_qp = tdccsd.compute_one_body_density_matrix()
         z = system.dipole_moment[polarization_direction].copy()
         dip_z[i + 1] = np.trace(np.dot(rho_qp, z))
+        tau0[i+1] = t[0][0]
 except (AssertionError, ValueError, np.linalg.LinAlgError):
     print(f"Step forward did not converge")
 
 
-plt.figure()
-plt.subplot(211)
-plt.plot(time_points, energy.real, label=r"$E(t)$")
-plt.legend()
-plt.subplot(212)
-plt.plot(time_points, np.abs(energy.imag), label=r"$\Im{E(t)}$")
-plt.legend()
+np.save('dip_z_ccsd.npy',dip_z)
+np.save('energy_ccsd.npy',energy)
+np.save('tau0_ccsd.npy',tau0)
 
 plt.figure()
 plt.plot(time_points, dip_z.real, label=r"$d_z(t)$")
 plt.legend()
+plt.grid()
+
+plt.figure()
+plt.subplot(211)
+plt.plot(time_points, energy.real,label=r'$\Re(\langle \hat{H}(t) \rangle)$')
+plt.grid()
+plt.subplot(212)
+plt.plot(time_points, energy.imag,label=r'$\Im(\langle \hat{H}(t) \rangle)$')
+plt.grid()
+
+plt.figure()
+plt.plot(time_points,np.abs(np.exp(tau0))**2,label=r'$|\exp(\tau_0)|^2$')
+plt.legend()
+plt.grid()
+
 plt.show()
