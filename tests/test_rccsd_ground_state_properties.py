@@ -39,13 +39,13 @@ def test_rccsd():
     basis = "cc-pvdz"
     e_rccsd_dalton = -8.0147418652916809
     e_rccsd = compute_ground_state_properties(molecule, basis)
-    assert abs(e_rccsd - e_rccsd_dalton) < 1e-8
+    np.testing.assert_approx_equal(e_rccsd, e_rccsd_dalton, significant=8)
 
     molecule = "be 0.0 0.0 0.0"
     basis = "aug-cc-pvdz"
     e_rccsd_dalton = -14.617433363077
     e_rccsd = compute_ground_state_properties(molecule, basis)
-    assert abs(e_rccsd - e_rccsd_dalton) < 1e-8
+    np.testing.assert_approx_equal(e_rccsd, e_rccsd_dalton, significant=8)
 
 
 if __name__ == "__main__":
