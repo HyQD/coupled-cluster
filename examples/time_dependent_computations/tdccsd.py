@@ -143,7 +143,7 @@ plt.grid()
 plt.figure()
 plt.plot(
     time_points,
-    np.abs(auto_corr) ** 2,
+    auto_corr,
     label=r"$|\langle \langle \tilde{\Psi}(t_0) | \Psi(t_1)|^2$",
 )
 plt.legend()
