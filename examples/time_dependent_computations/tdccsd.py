@@ -87,7 +87,7 @@ energy = np.zeros(num_steps, dtype=np.complex128)
 dip_z = np.zeros(num_steps, dtype=np.complex128)
 tau0 = np.zeros(num_steps, dtype=np.complex128)
 auto_corr = np.zeros(num_steps, dtype=np.complex128)
-
+reference_weight = np.zeros(num_steps, dtype=np.complex128)
 
 # Set initial values
 t, l = tdccsd.amplitudes
@@ -99,8 +99,11 @@ dip_z[0] = np.trace(np.dot(rho_qp, z))
 print(f"dip_z(0)={dip_z[0].real}")
 tau0[0] = t[0][0]
 auto_corr[0] = tdccsd.compute_time_dependent_overlap()
-print(tau0[0], auto_corr[0])
-wat
+reference_weight[0] = (
+    0.5 * np.exp(tau0[0])
+    + 0.5 * (np.exp(-tau0[0]) * tdccsd.left_reference_overlap()).conj()
+)
+
 try:
     for i, amp in tqdm.tqdm(
         enumerate(tdccsd.solve(time_points)), total=num_steps - 1
@@ -112,6 +115,12 @@ try:
         dip_z[i + 1] = np.trace(np.dot(rho_qp, z))
         tau0[i + 1] = t[0][0]
         auto_corr[i + 1] = tdccsd.compute_time_dependent_overlap()
+        reference_weight[i + 1] = (
+            0.5 * np.exp(tau0[i + 1])
+            + 0.5
+            * (np.exp(-tau0[i + 1]) * tdccsd.left_reference_overlap()).conj()
+        )
+
 
 except (AssertionError, ValueError, np.linalg.LinAlgError):
     print(f"Step forward did not converge")
@@ -121,6 +130,7 @@ np.save("dip_z_ccsd.npy", dip_z)
 np.save("energy_ccsd.npy", energy)
 np.save("tau0_ccsd.npy", tau0)
 np.save("auto_corr_ccsd.npy", auto_corr)
+np.save("reference_weight_ccsd.npy", reference_weight)
 
 plt.figure()
 plt.plot(time_points, dip_z.real, label=r"$d_z(t)$")
@@ -145,6 +155,15 @@ plt.plot(
     time_points,
     auto_corr,
     label=r"$|\langle \langle \tilde{\Psi}(t_0) | \Psi(t_1)|^2$",
+)
+plt.legend()
+plt.grid()
+
+plt.figure()
+plt.plot(
+    time_points,
+    np.abs(reference_weight) ** 2,
+    label=r"$|\langle \langle R(t) | S(t)|^2$",
 )
 plt.legend()
 plt.grid()
