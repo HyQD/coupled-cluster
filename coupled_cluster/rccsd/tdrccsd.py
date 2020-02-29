@@ -45,16 +45,12 @@ class TDRCCSD(TimeDependentCoupledCluster):
 
         t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
 
-        temp = np.einsum("ai, bj -> abij", t_1, t_1)
-        temp -= temp.swapaxes(2, 3)
-        temp -= temp.swapaxes(0, 1)
+        val = 1
+        val -= 0.5 * np.einsum("ijab,abij->", l_2, t_2)
+        val += 0.5 * np.einsum("ai,bj,ijab->", t_1, t_1, l_2, optimize=True)
+        val -= np.einsum("ia,ai->", l_1, t_1)
 
-        return (
-            1
-            - 0.25 * np.tensordot(l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
-            - np.trace(l_1 @ t_1)
-            + 0.125 * np.tensordot(l_2, temp, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
-        )
+        return val
 
     def compute_energy(self):
         t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
