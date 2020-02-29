@@ -86,6 +86,7 @@ time_points = np.linspace(0, tfinal, num_steps)
 energy = np.zeros(num_steps, dtype=np.complex128)
 dip_z = np.zeros(num_steps, dtype=np.complex128)
 tau0 = np.zeros(num_steps, dtype=np.complex128)
+auto_corr = np.zeros(num_steps, dtype=np.complex128)
 
 
 # Set initial values
@@ -97,7 +98,9 @@ z = system.dipole_moment[polarization_direction].copy()
 dip_z[0] = np.trace(np.dot(rho_qp, z))
 print(f"dip_z(0)={dip_z[0].real}")
 tau0[0] = t[0][0]
-
+auto_corr[0] = tdccsd.compute_time_dependent_overlap()
+print(tau0[0], auto_corr[0])
+wat
 try:
     for i, amp in tqdm.tqdm(
         enumerate(tdccsd.solve(time_points)), total=num_steps - 1
@@ -108,6 +111,8 @@ try:
         z = system.dipole_moment[polarization_direction].copy()
         dip_z[i + 1] = np.trace(np.dot(rho_qp, z))
         tau0[i + 1] = t[0][0]
+        auto_corr[i + 1] = tdccsd.compute_time_dependent_overlap()
+
 except (AssertionError, ValueError, np.linalg.LinAlgError):
     print(f"Step forward did not converge")
 
@@ -115,6 +120,7 @@ except (AssertionError, ValueError, np.linalg.LinAlgError):
 np.save("dip_z_ccsd.npy", dip_z)
 np.save("energy_ccsd.npy", energy)
 np.save("tau0_ccsd.npy", tau0)
+np.save("auto_corr_ccsd.npy", auto_corr)
 
 plt.figure()
 plt.plot(time_points, dip_z.real, label=r"$d_z(t)$")
@@ -131,6 +137,15 @@ plt.grid()
 
 plt.figure()
 plt.plot(time_points, np.abs(np.exp(tau0)) ** 2, label=r"$|\exp(\tau_0)|^2$")
+plt.legend()
+plt.grid()
+
+plt.figure()
+plt.plot(
+    time_points,
+    np.abs(auto_corr) ** 2,
+    label=r"$|\langle \langle \tilde{\Psi}(t_0) | \Psi(t_1)|^2$",
+)
 plt.legend()
 plt.grid()
 
