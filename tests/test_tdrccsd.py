@@ -24,6 +24,7 @@ class sine_square_laser:
         )
         return pulse
 
+
 def test_tdrccsd_vs_tdccsd():
     name = "beryllium"
     atom = "be 0.0 0.0 0.0"
@@ -42,7 +43,6 @@ def test_tdrccsd_vs_tdccsd():
     F_str = 0.01
     omega = 0.2
     t_cycle = 2 * np.pi / omega
-    
 
     tprime = t_cycle
     phase = 0
@@ -52,11 +52,12 @@ def test_tdrccsd_vs_tdccsd():
 
     time_after_pulse = 0
     tfinal = np.floor(tprime)
-    
 
     system.set_time_evolution_operator(
         LaserField(
-            sine_square_laser(F_str=F_str, omega=omega, tprime=tprime, phase=phase),
+            sine_square_laser(
+                F_str=F_str, omega=omega, tprime=tprime, phase=phase
+            ),
             polarization_vector=polarization,
         )
     )
@@ -111,18 +112,24 @@ def test_tdrccsd_vs_tdccsd():
         auto_corr[i + 1] = tdrccsd.compute_time_dependent_overlap()
         reference_weight[i + 1] = (
             0.5 * np.exp(tau0[i + 1])
-            + 0.5 * (np.exp(-tau0[i + 1]) * tdrccsd.left_reference_overlap()).conj()
+            + 0.5
+            * (np.exp(-tau0[i + 1]) * tdrccsd.left_reference_overlap()).conj()
         )
 
-    dip_z_ccsd = np.load(f'dat/{name}/dip_z_ccsd.npy')
-    energy_ccsd = np.load(f'dat/{name}/energy_ccsd.npy')
-    auto_corr_ccsd = np.load(f'dat/{name}/auto_corr_ccsd.npy')
-    reference_weight_ccsd = np.load(f'dat/{name}/reference_weight_ccsd.npy')
+    dip_z_ccsd = np.load(f"dat/{name}/dip_z_ccsd.npy")
+    energy_ccsd = np.load(f"dat/{name}/energy_ccsd.npy")
+    auto_corr_ccsd = np.load(f"dat/{name}/auto_corr_ccsd.npy")
+    reference_weight_ccsd = np.load(f"dat/{name}/reference_weight_ccsd.npy")
 
-    np.testing.assert_allclose(dip_z,dip_z_ccsd,atol=1e-7)
-    np.testing.assert_allclose(energy,energy_ccsd,atol=1e-8)
-    np.testing.assert_allclose(np.abs(auto_corr)**2,auto_corr_ccsd,atol=1e-8)
-    np.testing.assert_allclose(reference_weight,reference_weight_ccsd,atol=1e-8)
+    np.testing.assert_allclose(dip_z, dip_z_ccsd, atol=1e-7)
+    np.testing.assert_allclose(energy, energy_ccsd, atol=1e-8)
+    np.testing.assert_allclose(
+        np.abs(auto_corr) ** 2, auto_corr_ccsd, atol=1e-8
+    )
+    np.testing.assert_allclose(
+        reference_weight, reference_weight_ccsd, atol=1e-8
+    )
+
 
 if __name__ == "__main__":
     test_tdrccsd_vs_tdccsd()
