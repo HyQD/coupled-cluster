@@ -117,13 +117,21 @@ def test_tdrccsd_vs_tdccsd():
             * (np.exp(-tau0[i + 1]) * tdrccsd.left_reference_overlap()).conj()
         )
 
-    dip_z_ccsd = np.load(os.path.join("tests", "dat",f"{name}","dip_z_ccsd.npy"), allow_pickle=True)
-    energy_ccsd = np.load(os.path.join("tests", "dat",f"{name}","energy_ccsd.npy"), allow_pickle=True)
+    dip_z_ccsd = np.load(
+        os.path.join("tests", "dat", f"{name}", "dip_z_ccsd.npy"),
+        allow_pickle=True,
+    )
+    energy_ccsd = np.load(
+        os.path.join("tests", "dat", f"{name}", "energy_ccsd.npy"),
+        allow_pickle=True,
+    )
     auto_corr_ccsd = np.load(
-        os.path.join("tests", "dat",f"{name}","auto_corr_ccsd.npy"), allow_pickle=True
+        os.path.join("tests", "dat", f"{name}", "auto_corr_ccsd.npy"),
+        allow_pickle=True,
     )
     reference_weight_ccsd = np.load(
-        os.path.join("tests", "dat",f"{name}","reference_weight_ccsd.npy"), allow_pickle=True
+        os.path.join("tests", "dat", f"{name}", "reference_weight_ccsd.npy"),
+        allow_pickle=True,
     )
 
     np.testing.assert_allclose(dip_z, dip_z_ccsd, atol=1e-7)
