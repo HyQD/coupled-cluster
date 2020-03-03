@@ -1,6 +1,9 @@
 import pytest
 import warnings
 import numpy as np
+
+from quantum_systems import construct_pyscf_system_rhf
+
 from coupled_cluster import CCD
 from coupled_cluster.ccd.rhs_t import (
     add_d1_t,
@@ -52,13 +55,14 @@ from coupled_cluster.mix import AlphaMixer, DIIS
 
 
 @pytest.fixture(scope="session")
-def iterated_ccd_amplitudes(
-    scoped_helium_system, beryllium_system, neon_system
-):
-    helium_system = scoped_helium_system
+def iterated_ccd_amplitudes():
     ccd_list = []
-    for system in [helium_system, beryllium_system, neon_system]:
-        system.change_to_hf_basis(verbose=True, tolerance=1e-8)
+
+    for system in [
+        construct_pyscf_system_rhf("he"),
+        construct_pyscf_system_rhf("be"),
+        construct_pyscf_system_rhf("ne"),
+    ]:
         ccd = CCD(system, verbose=True)
         ccd.compute_ground_state()
 
@@ -955,31 +959,31 @@ def test_A_ibaj(iterated_ccd_amplitudes):
         np.testing.assert_allclose(A_bija, -A_ibaj.transpose(1, 0, 3, 2))
 
 
-def test_reference_energy(tdho, ref_energy):
-    tol = 1e-4
-
-    cc_scheme = CCD(tdho, verbose=True, mixer=AlphaMixer)
-    e_ref = cc_scheme.compute_reference_energy()
-
-    assert abs(e_ref - ref_energy) < tol
-
-
-def test_ccd_energy(tdho, ccd_energy):
-    tol = 1e-4
-
-    cc_scheme = CCD(tdho, verbose=True, mixer=AlphaMixer)
-    cc_scheme.iterate_t_amplitudes(tol=tol)
-    energy = cc_scheme.compute_energy()
-
-    assert abs(energy - ccd_energy) < tol
+# def test_reference_energy(tdho, ref_energy):
+#     tol = 1e-4
+#
+#     cc_scheme = CCD(tdho, verbose=True, mixer=AlphaMixer)
+#     e_ref = cc_scheme.compute_reference_energy()
+#
+#     assert abs(e_ref - ref_energy) < tol
 
 
-def test_ccd_diis_energy(tdho, tdho_ccd_hf_energy, ccd_energy):
-    tol = 1e-4
+# def test_ccd_energy(tdho, ccd_energy):
+#     tol = 1e-4
+#
+#     cc_scheme = CCD(tdho, verbose=True, mixer=AlphaMixer)
+#     cc_scheme.iterate_t_amplitudes(tol=tol)
+#     energy = cc_scheme.compute_energy()
+#
+#     assert abs(energy - ccd_energy) < tol
 
-    tdho.change_to_hf_basis(verbose=True, tolerance=1e-15)
-    cc_scheme = CCD(tdho, mixer=DIIS, verbose=True)
-    cc_scheme.iterate_t_amplitudes(tol=tol, num_vecs=3)
-    energy = cc_scheme.compute_energy()
 
-    assert abs(energy - tdho_ccd_hf_energy) < tol
+# def test_ccd_diis_energy(tdho, tdho_ccd_hf_energy, ccd_energy):
+#     tol = 1e-4
+#
+#     tdho.change_to_hf_basis(verbose=True, tolerance=1e-15)
+#     cc_scheme = CCD(tdho, mixer=DIIS, verbose=True)
+#     cc_scheme.iterate_t_amplitudes(tol=tol, num_vecs=3)
+#     energy = cc_scheme.compute_energy()
+#
+#     assert abs(energy - tdho_ccd_hf_energy) < tol

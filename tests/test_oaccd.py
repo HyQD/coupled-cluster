@@ -1,5 +1,7 @@
 import pytest
 
+from quantum_systems import construct_pyscf_system_rhf
+
 from coupled_cluster.ccd.oaccd import OACCD
 from coupled_cluster.mix import DIIS
 
@@ -9,8 +11,8 @@ def he_groundstate_oaccd():
     return -2.887594831090973
 
 
-def test_he_oaccd_groundstate(helium_system, he_groundstate_oaccd):
-    helium_system.change_to_hf_basis(verbose=True, tolerance=1e-10)
+def test_he_oaccd_groundstate(he_groundstate_oaccd):
+    helium_system = construct_pyscf_system_rhf("he")
 
     energy_tol = 1e-8
 

@@ -1,27 +1,21 @@
 import pytest
 import warnings
 import numpy as np
-from coupled_cluster.mix import DIIS
+
 from quantum_systems import construct_pyscf_system_rhf
+
+from coupled_cluster.mix import DIIS
 from coupled_cluster import CCSD
-import coupled_cluster.ccd.rhs_l as ccd_l
+
 from coupled_cluster.ccsd.rhs_t import (
     compute_t_1_amplitudes,
     compute_t_2_amplitudes,
-    add_s1_t,
     add_s2a_t,
     add_s2b_t,
     add_s2c_t,
-    add_s3a_t,
-    add_s3b_t,
-    add_s3c_t,
     add_s4a_t,
     add_s4b_t,
     add_s4c_t,
-    add_s5a_t,
-    add_s5b_t,
-    add_s5c_t,
-    add_s6_t,
     add_d4a_t,
     add_d4b_t,
     add_d5a_t,
@@ -47,24 +41,13 @@ from coupled_cluster.ccsd.rhs_t import (
 from coupled_cluster.ccsd.rhs_l import (
     compute_l_1_amplitudes,
     compute_l_2_amplitudes,
-    add_s1_l,
-    add_s2a_l,
-    add_s2b_l,
-    add_s3a_l,
-    add_s3b_l,
     add_s4a_l,
     add_s4b_l,
-    add_s5a_l,
-    add_s5b_l,
-    add_s5c_l,
-    add_s5d_l,
     add_s6a_l,
     add_s6b_l,
     add_s6c_l,
     add_s6d_l,
     add_s7_l,
-    add_s8a_l,
-    add_s8b_l,
     add_s9a_l,
     add_s9b_l,
     add_s9c_l,
@@ -80,9 +63,6 @@ from coupled_cluster.ccsd.rhs_l import (
     add_s11c_l,
     add_s11d_l,
     add_s11e_l,
-    add_s11f_l,
-    add_s11g_l,
-    add_s11h_l,
     add_s11i_l,
     add_s11j_l,
     add_s11k_l,
@@ -122,10 +102,13 @@ from coupled_cluster.ccsd.density_matrices import (
 
 
 @pytest.fixture
-def iterated_ccsd_amplitudes(helium_system, beryllium_system, neon_system):
+def iterated_ccsd_amplitudes():
     ccsd_list = []
-    for system in [helium_system, beryllium_system, neon_system]:
-        system.change_to_hf_basis(verbose=True, tolerance=1e-8)
+    for system in [
+        construct_pyscf_system_rhf("he"),
+        construct_pyscf_system_rhf("be"),
+        construct_pyscf_system_rhf("ne"),
+    ]:
         ccsd = CCSD(system, mixer=DIIS, verbose=True)
         ccsd.iterate_t_amplitudes()
         ccsd.iterate_l_amplitudes()
@@ -133,18 +116,6 @@ def iterated_ccsd_amplitudes(helium_system, beryllium_system, neon_system):
         ccsd_list.append(ccsd)
 
     return ccsd_list
-
-
-def test_add_s1_t(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(t_1)
-    add_s1_t(f, o, v, out, np=np)
-
-    np.testing.assert_allclose(out, f[v, o], atol=1e-10)
 
 
 def test_add_s2a_t(large_system_ccsd):
@@ -184,45 +155,6 @@ def test_add_s2c_t(large_system_ccsd):
     out_e = -0.5 * np.einsum(
         "klic, ackl->ai", u[o, o, o, v], t_2, optimize=True
     )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s3a_t(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(t_1)
-    add_s3a_t(f, t_1, o, v, out, np=np)
-    out_e = np.einsum("ac, ci->ai", f[v, v], t_1, optimize=True)
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s3b_t(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(t_1)
-    add_s3b_t(f, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum("ki, ak->ai", f[o, o], t_1, optimize=True)
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s3c_t(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(t_1)
-    add_s3c_t(u, t_1, o, v, out, np=np)
-    out_e = np.einsum("akic, ck->ai", u[v, o, o, v], t_1, optimize=True)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
@@ -267,64 +199,6 @@ def test_add_s4c_t(large_system_ccsd):
     add_s4c_t(u, t_1, t_2, o, v, out, np=np)
     out_e = np.einsum(
         "klcd, ck, dali->ai", u[o, o, v, v], t_1, t_2, optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s5a_t(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(t_1)
-    add_s5a_t(f, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum("kc, ci, ak->ai", f[o, v], t_1, t_1, optimize=True)
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s5b_t(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(t_1)
-    add_s5b_t(u, t_1, o, v, out, np=np)
-    out_e = np.einsum(
-        "akcd, ci, dk->ai", u[v, o, v, v], t_1, t_1, optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s5c_t(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(t_1)
-    add_s5c_t(u, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum(
-        "klic, ak, cl->ai", u[o, o, o, v], t_1, t_1, optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s6_t(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(t_1)
-    add_s6_t(u, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum(
-        "klcd, ci, ak, dl->ai", u[o, o, v, v], t_1, t_1, t_1
     )
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
@@ -666,76 +540,6 @@ def test_add_d9_t(large_system_ccsd):
 # L diagrams
 
 
-def test_add_s1_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s1_l(f, o, v, out, np)
-    out_e = f[o, v]
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s2a_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s2a_l(f, l_1, o, v, out, np=np)
-    out_e = np.einsum("ba, ib->ia", f[v, v], l_1, optimize=True)
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s2b_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s2b_l(f, l_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum("ij, ja->ia", f[o, o], l_1, optimize=True)
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s3a_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s3a_l(u, l_1, o, v, out, np=np)
-    out_e = np.einsum("jb, ibaj->ia", l_1, u[o, v, v, o], optimize=True)
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s3b_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s3b_l(u, t_1, o, v, out, np=np)
-    out_e = np.einsum("bj, jiba->ia", t_1, u[o, o, v, v], optimize=True)
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
 def test_add_s4a_l(large_system_ccsd):
     t_1, t_2, l_1, l_2, cs = large_system_ccsd
 
@@ -763,70 +567,6 @@ def test_add_s4b_l(large_system_ccsd):
     add_s4b_l(u, l_2, o, v, out, np=np)
     out_e = (-0.5) * np.einsum(
         "jkab, ibjk->ia", l_2, u[o, v, o, o], optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s5a_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s5a_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = np.einsum(
-        "ib, cj, bjac->ia", l_1, t_1, u[v, o, v, v], optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s5b_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s5b_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = np.einsum(
-        "ja, bk, ikbj->ia", l_1, t_1, u[o, o, v, o], optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s5c_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s5c_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = np.einsum(
-        "jb, cj, ibac->ia", l_1, t_1, u[o, v, v, v], optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s5d_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s5d_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum(
-        "jb, bk, ikaj->ia", l_1, t_1, u[o, o, v, o], optimize=True
     )
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
@@ -908,34 +648,6 @@ def test_add_s7_l(large_system_ccsd):
     out_e = np.einsum(
         "jb, bcjk, ikac->ia", l_1, t_2, u[o, o, v, v], optimize=True
     )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s8a_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s8a_l(f, l_1, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum("ib, ja, bj->ia", f[o, v], l_1, t_1, optimize=True)
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s8b_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    f = cs.f
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s8b_l(f, l_1, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum("ja, ib, bj->ia", f[o, v], l_1, t_1, optimize=True)
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
 
@@ -1171,54 +883,6 @@ def test_add_s11e_l(large_system_ccsd):
     add_s11e_l(u, l_2, t_1, t_2, o, v, out, np=np)
     out_e = (0.5) * np.einsum(
         "jkbc, dj, bckl, ilad->ia", l_2, t_1, t_2, u[o, o, v, v], optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s11f_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s11f_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum(
-        "ib, bj, ck, jkac->ia", l_1, t_1, t_1, u[o, o, v, v], optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s11g_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s11g_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum(
-        "ja, bj, ck, ikbc->ia", l_1, t_1, t_1, u[o, o, v, v], optimize=True
-    )
-
-    np.testing.assert_allclose(out, out_e, atol=1e-10)
-
-
-def test_add_s11h_l(large_system_ccsd):
-    t_1, t_2, l_1, l_2, cs = large_system_ccsd
-
-    u = cs.u
-    o = cs.o
-    v = cs.v
-
-    out = np.zeros_like(l_1)
-    add_s11h_l(u, l_1, t_1, o, v, out, np=np)
-    out_e = (-1) * np.einsum(
-        "jb, bk, cj, ikac->ia", l_1, t_1, t_1, u[o, o, v, v], optimize=True
     )
 
     np.testing.assert_allclose(out, out_e, atol=1e-10)
@@ -1744,32 +1408,32 @@ def test_one_body_density_matrix(iterated_ccsd_amplitudes):
         assert abs(np.trace(rho_qp) - ccsd.n) < 1e-8
 
 
-def test_mbpt_enegy(tdho):
-
-    cc_scheme = CCSD(tdho, verbose=True)
-    energy = cc_scheme.compute_energy()
-
-    assert True
-
-
-def test_ccsd_energy(tdho, ccsd_energy):
-    tol = 1e-4
-
-    cc_scheme = CCSD(tdho, verbose=True)
-    cc_scheme.iterate_t_amplitudes(tol=tol)
-    energy = cc_scheme.compute_energy()
-
-    assert abs(energy - ccsd_energy) < tol
+# def test_mbpt_enegy(tdho):
+#
+#     cc_scheme = CCSD(tdho, verbose=True)
+#     energy = cc_scheme.compute_energy()
+#
+#     assert True
 
 
-def test_lambda_amplitude_iterations(tdho):
-    cc_scheme = CCSD(tdho, verbose=True)
+# def test_ccsd_energy(tdho, ccsd_energy):
+#     tol = 1e-4
+#
+#     cc_scheme = CCSD(tdho, verbose=True)
+#     cc_scheme.iterate_t_amplitudes(tol=tol)
+#     energy = cc_scheme.compute_energy()
+#
+#     assert abs(energy - ccsd_energy) < tol
 
-    cc_scheme.iterate_t_amplitudes()
-    energy = cc_scheme.compute_energy()
-    cc_scheme.iterate_t_amplitudes()
 
-    assert True
+# def test_lambda_amplitude_iterations(tdho):
+#     cc_scheme = CCSD(tdho, verbose=True)
+#
+#     cc_scheme.iterate_t_amplitudes()
+#     energy = cc_scheme.compute_energy()
+#     cc_scheme.iterate_t_amplitudes()
+#
+#     assert True
 
 
 def T1_RHS(T1, T2, F, W):

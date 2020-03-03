@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CCD lambda equation</title>
+
+    <!-- MathJAX intialization -->
+    <script type="text/x-mathjax-config">
+		MathJax.Hub.Config({
+			"HTML-CSS": { linebreaks: { automatic: true } },
+			SVG: { linebreaks: { automatic: true } }
+		});
+	</script>
+	<script type="text/javascript"
+		src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+	</script>
+
+    <!-- Boostrap initialization -->
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<div class="container-fluid">
+    <div class="jumbotron">
+        <h1>CCD lambda equation</h1>
+    </div>
+
+    <div class="row">
+        <!-- The main content -->
+        <div class="col-sm-9 col-lg-10">
+            <div class="page-header" id="sect-1">
+                <h2>l2 equation</h2>
+            </div>
+            <p>\[ - 2 u_{i,j,b,a}   + 4 u_{i,j,a,b}   + \sum_{c \in V} 2 f_{c,a}  l_{i,j,c,b}   + \sum_{c \in V} 2 f_{c,b}  l_{i,j,a,c}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{i,j,a,c}  t_{c,d,k,i_{0}}  u_{k,i_{0},b,d}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{i,j,c,b}  t_{c,d,k,i_{0}}  u_{k,i_{0},a,d}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{i,k,a,b}  t_{c,d,i_{0},k}  u_{i_{0},j,c,d}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{i,k,a,c}  t_{c,d,i_{0},k}  u_{i_{0},j,d,b}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{i,k,a,c}  t_{c,d,k,i_{0}}  u_{i_{0},j,b,d}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{i,k,b,c}  t_{c,d,k,i_{0}}  u_{i_{0},j,d,a}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{i,k,c,d}  t_{c,d,i_{0},k}  u_{i_{0},j,a,b}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{k,i_{0},a,c}  t_{c,d,i_{0},k}  u_{i,j,d,b}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{k,i_{0},b,c}  t_{c,d,i_{0},k}  u_{i,j,a,d}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{k,j,a,b}  t_{c,d,k,i_{0}}  u_{i,i_{0},c,d}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{k,j,c,a}  t_{c,d,k,i_{0}}  u_{i,i_{0},b,d}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{k,j,c,b}  t_{c,d,i_{0},k}  u_{i,i_{0},a,d}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{k,j,c,b}  t_{c,d,k,i_{0}}  u_{i,i_{0},d,a}  - \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 4 l_{k,j,c,d}  t_{c,d,k,i_{0}}  u_{i,i_{0},a,b}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,j,a,c}  t_{c,d,i_{0},k}  u_{k,i_{0},b,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,j,c,b}  t_{c,d,i_{0},k}  u_{k,i_{0},a,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,j,c,d}  t_{c,d,k,i_{0}}  u_{k,i_{0},a,b}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,k,a,b}  t_{c,d,k,i_{0}}  u_{i_{0},j,c,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,k,a,c}  t_{c,d,i_{0},k}  u_{i_{0},j,b,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,k,b,c}  t_{c,d,i_{0},k}  u_{i_{0},j,d,a}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,k,b,c}  t_{c,d,k,i_{0}}  u_{i_{0},j,a,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,k,c,b}  t_{c,d,i_{0},k}  u_{i_{0},j,a,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{i,k,c,d}  t_{c,d,i_{0},k}  u_{i_{0},j,b,a}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,i_{0},a,b}  t_{c,d,k,i_{0}}  u_{i,j,c,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,i_{0},a,c}  t_{c,d,i_{0},k}  u_{i,j,b,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,i_{0},b,c}  t_{c,d,i_{0},k}  u_{i,j,d,a}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,j,a,b}  t_{c,d,i_{0},k}  u_{i,i_{0},c,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,j,a,c}  t_{c,d,i_{0},k}  u_{i,i_{0},d,b}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,j,c,a}  t_{c,d,i_{0},k}  u_{i,i_{0},b,d}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,j,c,a}  t_{c,d,k,i_{0}}  u_{i,i_{0},d,b}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,j,c,b}  t_{c,d,i_{0},k}  u_{i,i_{0},d,a}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 2 l_{k,j,c,d}  t_{c,d,k,i_{0}}  u_{i,i_{0},b,a}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 8 l_{i,k,a,c}  t_{c,d,k,i_{0}}  u_{i_{0},j,d,b}   + \sum_{k \in O} \sum_{i_{0} \in O} \sum_{c \in V} \sum_{d \in V} 8 l_{k,j,c,b}  t_{c,d,k,i_{0}}  u_{i,i_{0},a,d}  - \sum_{k \in O} \sum_{c \in V} 2 l_{i,k,a,c}  u_{c,j,b,k}  - \sum_{k \in O} \sum_{c \in V} 2 l_{i,k,b,c}  u_{c,j,k,a}  - \sum_{k \in O} \sum_{c \in V} 2 l_{i,k,c,b}  u_{c,j,a,k}  - \sum_{k \in O} \sum_{c \in V} 2 l_{k,j,a,c}  u_{i,c,k,b}  - \sum_{k \in O} \sum_{c \in V} 2 l_{k,j,c,a}  u_{i,c,b,k}  - \sum_{k \in O} \sum_{c \in V} 2 l_{k,j,c,b}  u_{i,c,k,a}   + \sum_{k \in O} \sum_{c \in V} 4 l_{i,k,a,c}  u_{c,j,k,b}   + \sum_{k \in O} \sum_{c \in V} 4 l_{k,j,c,b}  u_{i,c,a,k}   + \sum_{c \in V} \sum_{d \in V} 2 l_{i,j,c,d}  u_{c,d,a,b}  - \sum_{k \in O} 2 f_{i,k}  l_{k,j,a,b}  - \sum_{k \in O} 2 f_{j,k}  l_{i,k,a,b}   + \sum_{k \in O} \sum_{i_{0} \in O} 2 l_{k,i_{0},a,b}  u_{i,j,k,i_{0}}  \]</p>
+        </div>
+
+        <!-- The navigation -->
+        <div class="col-sm-3 col-lg-2">
+            <ul class="nav nav-pills nav-stacked">
+                <li class="active"><a href="#sect-1">l2 equation</a></li>
+            </ul>
+        </div>
+    </div> <!-- end the main row -->
+
+    <!-- The footer -->
+    <div class="row">
+        <footer class="footer">
+            <p class="small text-center">Automatically generated by drudge symbolic algebra system.</p>
+            <p class="small text-center">By Jinmo Zhao and Gustavo E Scuseria, Rice Univ, Houston, TX, USA</p>
+        </footer>
+    </div>
+</div> <!-- end the main fluid container -->
+</body>
+</html>
