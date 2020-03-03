@@ -2,7 +2,7 @@ import os
 import pytest
 
 import numpy as np
-from quantum_systems import construct_pyscf_system
+from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import LaserField
 
 
@@ -49,7 +49,7 @@ def test_oatdccd(
 
     integrator = GaussIntegrator(np=np, eps=1e-10)
     cc_kwargs = dict(verbose=True)
-    oatdccd = OATDCCD(system, integrator=integrator, np=np, **cc_kwargs)
+    oatdccd = OATDCCD(system, integrator=integrator, **cc_kwargs)
     oatdccd.compute_ground_state()
 
     assert (
@@ -140,10 +140,12 @@ def test_oatdccd_helium():
     E = 0.1
     laser_duration = 5
 
-    system = construct_pyscf_system(molecule="he 0.0 0.0 0.0", basis="cc-pvdz")
+    system = construct_pyscf_system_rhf(
+        molecule="he 0.0 0.0 0.0", basis="cc-pvdz"
+    )
 
     integrator = GaussIntegrator(s=3, np=np, eps=1e-6)
-    oatdccd = OATDCCD(system, integrator=integrator, np=np, verbose=True)
+    oatdccd = OATDCCD(system, integrator=integrator, verbose=True)
     oatdccd.compute_ground_state()
     assert (
         abs(oatdccd.compute_ground_state_energy() - -2.887_594_831_090_936)

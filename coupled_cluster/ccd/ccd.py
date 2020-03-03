@@ -6,7 +6,6 @@ from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
-from coupled_cluster.mix import AlphaMixer
 from coupled_cluster.cc_helper import construct_d_t_2_matrix
 
 

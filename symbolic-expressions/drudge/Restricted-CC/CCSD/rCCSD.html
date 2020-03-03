@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>restricted CCSD theory</title>
+
+    <!-- MathJAX intialization -->
+    <script type="text/x-mathjax-config">
+		MathJax.Hub.Config({
+			"HTML-CSS": { linebreaks: { automatic: true } },
+			SVG: { linebreaks: { automatic: true } }
+		});
+	</script>
+	<script type="text/javascript"
+		src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+	</script>
+
+    <!-- Boostrap initialization -->
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<div class="container-fluid">
+    <div class="jumbotron">
+        <h1>restricted CCSD theory</h1>
+    </div>
+
+    <div class="row">
+        <!-- The main content -->
+        <div class="col-sm-9 col-lg-10">
+            <div class="page-header" id="sect-1">
+                <h2>Energy equation</h2>
+            </div>
+            <p>\[ \sum_{i \in O} \sum_{a \in V} 2 f_{i,a}  t_{a,i}  - \sum_{i \in O} \sum_{j \in O} \sum_{a \in V} \sum_{b \in V} t_{a,b,i,j}  u_{i,j,b,a}   + \sum_{i \in O} \sum_{j \in O} \sum_{a \in V} \sum_{b \in V} 2 t_{a,b,i,j}  u_{i,j,a,b}  - \sum_{i \in O} \sum_{j \in O} \sum_{a \in V} \sum_{b \in V} t_{a,i}  t_{b,j}  u_{i,j,b,a}   + \sum_{i \in O} \sum_{j \in O} \sum_{a \in V} \sum_{b \in V} 2 t_{a,i}  t_{b,j}  u_{i,j,a,b}  \]</p>
+            <p>t1 amplitude equation</p>
+            <p>\[ rhs_{a,i} = \sum_{b \in V} f_{a,b}  t_{b,i}   + f_{a,i}   + \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} t_{a,k}  t_{b,c,i,j}  u_{j,k,b,c}   + \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} t_{c,i}  t_{a,b,j,k}  u_{j,k,b,c}   + \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} t_{c,k}  t_{a,b,j,i}  u_{j,k,c,b}  - \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} 2 t_{a,k}  t_{b,c,i,j}  u_{j,k,c,b}  - \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} 2 t_{c,i}  t_{a,b,j,k}  u_{j,k,c,b}  - \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} 2 t_{c,k}  t_{a,b,i,j}  u_{j,k,c,b}  - \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} 2 t_{c,k}  t_{a,b,j,i}  u_{j,k,b,c}   + \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} 4 t_{c,k}  t_{a,b,i,j}  u_{j,k,b,c}   + \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} t_{a,j}  t_{b,i}  t_{c,k}  u_{j,k,c,b}  - \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} \sum_{c \in V} 2 t_{a,j}  t_{b,i}  t_{c,k}  u_{j,k,b,c}  - \sum_{j \in O} \sum_{b \in V} f_{j,b}  t_{a,b,j,i}  - \sum_{j \in O} \sum_{b \in V} t_{b,j}  u_{a,j,b,i}   + \sum_{j \in O} \sum_{b \in V} 2 f_{j,b}  t_{a,b,i,j}   + \sum_{j \in O} \sum_{b \in V} 2 t_{b,j}  u_{a,j,i,b}  - \sum_{j \in O} \sum_{b \in V} f_{j,b}  t_{a,j}  t_{b,i}  - \sum_{j \in O} \sum_{b \in V} \sum_{c \in V} t_{b,c,i,j}  u_{a,j,c,b}   + \sum_{j \in O} \sum_{b \in V} \sum_{c \in V} 2 t_{b,c,i,j}  u_{a,j,b,c}  - \sum_{j \in O} \sum_{b \in V} \sum_{c \in V} t_{b,i}  t_{c,j}  u_{a,j,c,b}   + \sum_{j \in O} \sum_{b \in V} \sum_{c \in V} 2 t_{b,i}  t_{c,j}  u_{a,j,b,c}  - \sum_{j \in O} f_{j,i}  t_{a,j}   + \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} t_{a,b,j,k}  u_{k,j,i,b}  - \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} 2 t_{a,b,j,k}  u_{j,k,i,b}   + \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} t_{a,j}  t_{b,k}  u_{k,j,i,b}  - \sum_{j \in O} \sum_{k \in O} \sum_{b \in V} 2 t_{a,j}  t_{b,k}  u_{j,k,i,b}  \]</p>
+            <p>t2 amplitude equation</p>
+            <p>\[ rhs_{a,b,i,j} = \sum_{c \in V} f_{a,c}  t_{b,c,j,i}   + \sum_{c \in V} f_{b,c}  t_{a,c,i,j}   + \sum_{c \in V} t_{c,i}  u_{a,b,c,j}   + \sum_{c \in V} t_{c,j}  u_{a,b,i,c}   + u_{a,b,i,j}   + \sum_{k \in O} \sum_{l \in O} t_{a,b,k,l}  u_{k,l,i,j}   + \sum_{k \in O} \sum_{l \in O} t_{a,k}  t_{b,l}  u_{k,l,i,j}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{a,k}  t_{c,d,i,j}  u_{b,k,d,c}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{b,k}  t_{c,d,i,j}  u_{a,k,c,d}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{d,i}  t_{a,c,k,j}  u_{b,k,c,d}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{d,i}  t_{b,c,j,k}  u_{a,k,c,d}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{d,i}  t_{b,c,k,j}  u_{a,k,d,c}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{d,j}  t_{a,c,i,k}  u_{b,k,c,d}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{d,j}  t_{a,c,k,i}  u_{b,k,d,c}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{d,j}  t_{b,c,k,i}  u_{a,k,c,d}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{d,k}  t_{a,c,i,j}  u_{b,k,d,c}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{d,k}  t_{b,c,j,i}  u_{a,k,d,c}   + \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{d,i}  t_{b,c,j,k}  u_{a,k,d,c}   + \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{d,j}  t_{a,c,i,k}  u_{b,k,d,c}   + \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{d,k}  t_{a,c,i,j}  u_{b,k,c,d}   + \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{d,k}  t_{b,c,j,i}  u_{a,k,c,d}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{a,k}  t_{c,i}  t_{d,j}  u_{b,k,d,c}  - \sum_{k \in O} \sum_{c \in V} \sum_{d \in V} t_{b,k}  t_{c,i}  t_{d,j}  u_{a,k,c,d}  - \sum_{k \in O} \sum_{c \in V} t_{a,c,i,k}  u_{b,k,c,j}  - \sum_{k \in O} \sum_{c \in V} t_{a,c,k,i}  u_{b,k,j,c}  - \sum_{k \in O} \sum_{c \in V} t_{a,c,k,j}  u_{b,k,c,i}  - \sum_{k \in O} \sum_{c \in V} t_{b,c,j,k}  u_{a,k,c,i}  - \sum_{k \in O} \sum_{c \in V} t_{b,c,k,i}  u_{a,k,c,j}  - \sum_{k \in O} \sum_{c \in V} t_{b,c,k,j}  u_{a,k,i,c}   + \sum_{k \in O} \sum_{c \in V} 2 t_{a,c,i,k}  u_{b,k,j,c}   + \sum_{k \in O} \sum_{c \in V} 2 t_{b,c,j,k}  u_{a,k,i,c}  - \sum_{k \in O} \sum_{c \in V} f_{k,c}  t_{a,k}  t_{b,c,j,i}  - \sum_{k \in O} \sum_{c \in V} f_{k,c}  t_{b,k}  t_{a,c,i,j}  - \sum_{k \in O} \sum_{c \in V} f_{k,c}  t_{c,i}  t_{a,b,k,j}  - \sum_{k \in O} \sum_{c \in V} f_{k,c}  t_{c,j}  t_{a,b,i,k}  - \sum_{k \in O} \sum_{c \in V} t_{a,k}  t_{c,i}  u_{b,k,j,c}  - \sum_{k \in O} \sum_{c \in V} t_{a,k}  t_{c,j}  u_{b,k,c,i}  - \sum_{k \in O} \sum_{c \in V} t_{b,k}  t_{c,i}  u_{a,k,c,j}  - \sum_{k \in O} \sum_{c \in V} t_{b,k}  t_{c,j}  u_{a,k,i,c}   + \sum_{c \in V} \sum_{d \in V} t_{c,d,i,j}  u_{a,b,c,d}   + \sum_{c \in V} \sum_{d \in V} t_{c,i}  t_{d,j}  u_{a,b,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{a,l}  t_{b,c,j,k}  u_{k,l,i,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{a,l}  t_{b,c,k,i}  u_{l,k,c,j}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{a,l}  t_{b,c,k,j}  u_{l,k,i,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{b,l}  t_{a,c,i,k}  u_{l,k,c,j}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{b,l}  t_{a,c,k,i}  u_{k,l,c,j}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{b,l}  t_{a,c,k,j}  u_{k,l,i,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{c,i}  t_{a,b,k,l}  u_{k,l,c,j}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{c,j}  t_{a,b,k,l}  u_{k,l,i,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{c,l}  t_{a,b,i,k}  u_{k,l,c,j}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{c,l}  t_{a,b,k,j}  u_{l,k,i,c}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} 2 t_{a,l}  t_{b,c,j,k}  u_{l,k,i,c}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} 2 t_{b,l}  t_{a,c,i,k}  u_{k,l,c,j}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} 2 t_{c,l}  t_{a,b,i,k}  u_{l,k,c,j}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} 2 t_{c,l}  t_{a,b,k,j}  u_{k,l,i,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{a,k}  t_{b,l}  t_{c,i}  u_{k,l,c,j}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} t_{a,k}  t_{b,l}  t_{c,j}  u_{k,l,i,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,b,i,k}  t_{c,d,l,j}  u_{k,l,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,b,k,j}  t_{c,d,i,l}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,b,k,l}  t_{c,d,i,j}  u_{k,l,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,c,i,j}  t_{b,d,k,l}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,c,i,k}  t_{b,d,l,j}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,c,k,i}  t_{b,d,j,l}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,c,k,i}  t_{b,d,l,j}  u_{k,l,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,c,k,j}  t_{b,d,l,i}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,c,k,l}  t_{b,d,j,i}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,b,i,k}  t_{c,d,l,j}  u_{k,l,d,c}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,b,k,j}  t_{c,d,i,l}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,c,i,j}  t_{b,d,k,l}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,c,i,k}  t_{b,d,j,l}  u_{k,l,d,c}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,c,i,k}  t_{b,d,l,j}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,c,k,i}  t_{b,d,j,l}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,c,k,l}  t_{b,d,j,i}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 4 t_{a,c,i,k}  t_{b,d,j,l}  u_{k,l,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,k}  t_{b,l}  t_{c,d,i,j}  u_{k,l,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,k}  t_{d,l}  t_{b,c,j,i}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,l}  t_{d,i}  t_{b,c,j,k}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,l}  t_{d,i}  t_{b,c,k,j}  u_{k,l,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,l}  t_{d,j}  t_{b,c,k,i}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{b,k}  t_{d,l}  t_{a,c,i,j}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{b,l}  t_{d,i}  t_{a,c,k,j}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{b,l}  t_{d,j}  t_{a,c,i,k}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{b,l}  t_{d,j}  t_{a,c,k,i}  u_{k,l,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{c,i}  t_{d,j}  t_{a,b,k,l}  u_{k,l,c,d}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{c,i}  t_{d,l}  t_{a,b,k,j}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{c,l}  t_{d,j}  t_{a,b,i,k}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,k}  t_{d,l}  t_{b,c,j,i}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{a,l}  t_{d,i}  t_{b,c,j,k}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{b,k}  t_{d,l}  t_{a,c,i,j}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{b,l}  t_{d,j}  t_{a,c,i,k}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{c,i}  t_{d,l}  t_{a,b,k,j}  u_{k,l,c,d}  - \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} 2 t_{c,l}  t_{d,j}  t_{a,b,i,k}  u_{k,l,d,c}   + \sum_{k \in O} \sum_{l \in O} \sum_{c \in V} \sum_{d \in V} t_{a,k}  t_{b,l}  t_{c,i}  t_{d,j}  u_{k,l,c,d}  - \sum_{k \in O} f_{k,i}  t_{a,b,k,j}  - \sum_{k \in O} f_{k,j}  t_{a,b,i,k}  - \sum_{k \in O} t_{a,k}  u_{b,k,j,i}  - \sum_{k \in O} t_{b,k}  u_{a,k,i,j}  \]</p>
+        </div>
+
+        <!-- The navigation -->
+        <div class="col-sm-3 col-lg-2">
+            <ul class="nav nav-pills nav-stacked">
+                <li class="active"><a href="#sect-1">Energy equation</a></li>
+            </ul>
+        </div>
+    </div> <!-- end the main row -->
+
+    <!-- The footer -->
+    <div class="row">
+        <footer class="footer">
+            <p class="small text-center">Automatically generated by drudge symbolic algebra system.</p>
+            <p class="small text-center">By Jinmo Zhao and Gustavo E Scuseria, Rice Univ, Houston, TX, USA</p>
+        </footer>
+    </div>
+</div> <!-- end the main fluid container -->
+</body>
+</html>

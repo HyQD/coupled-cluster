@@ -39,7 +39,13 @@ class OATDCCD(OATDCC):
     def compute_energy(self):
         t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
         return compute_time_dependent_energy(
-            self.f_prime, self.u_prime, t_2, l_2, self.o_prime, self.v_prime, np=self.np
+            self.f_prime,
+            self.u_prime,
+            t_2,
+            l_2,
+            self.o_prime,
+            self.v_prime,
+            np=self.np,
         )
 
     def one_body_density_matrix(self, t, l):
