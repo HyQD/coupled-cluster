@@ -22,10 +22,10 @@ class FermiFunction:
         return 1 - 1 / denom
 
 
-n = 2
-l = 6
+n = 4
+l = 8
 
-system = GeneralOrbitalSystem(n,ODQD(l, 7, 401,potential=ODQD.HOPotential(omega=1)))
+system = GeneralOrbitalSystem(n,ODQD(l, 10, 801,a=1,potential=ODQD.AtomicPotential(Za=n,c=1)))
 system.set_time_evolution_operator(AdiabaticSwitching(FermiFunction()))
 print(f"Reference energy: {system.compute_reference_energy()}")
 
@@ -33,12 +33,13 @@ integrator = GaussIntegrator(s=3, eps=1e-10, np=np)
 
 oa = OATDCCD(system, verbose=True, integrator=integrator)
 oa.compute_ground_state(change_system_basis=False)
+
 oa.set_initial_conditions(
     OACCVector.zeros_like(oa.cc.get_amplitudes(get_t_0=True))
 )
 
 dt = 1e-1
-time_points = np.arange(0, 70 + dt, dt)
+time_points = np.arange(0, 50 + dt, dt)
 
 energy = np.zeros(len(time_points), dtype=np.complex128)
 norm_res_t2 = np.zeros(len(time_points))
