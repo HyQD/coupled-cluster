@@ -19,6 +19,38 @@ class OAITDCCD(OATDCCD):
         self.u = self.system.u
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
+    def solve(self, time_points, timestep_tol=1e-8):
+
+        n = len(time_points)
+
+        for i in range(n - 1):
+            dt = time_points[i + 1] - time_points[i]
+            amp_vec = self.integrator.step(
+                self._amplitudes.asarray(), time_points[i], dt
+            )
+
+            self._amplitudes = type(self._amplitudes).from_array(
+                self._amplitudes, amp_vec
+            )
+
+            # from coupledcluster.tools import biortonormalize
+
+            # t,l,C,Ctilde = self._amplitudes
+
+            # print("AAA", self.np.linalg.norm(Ctilde @ C - self.np.eye(C.shape[0])))
+            # C, Ctilde = biortonormalize(C, Ctilde)
+            # print("BBB", self.np.linalg.norm(Ctilde @ C - self.np.eye(C.shape[0])))
+
+            # self._amplitudes = OACCVector(t, l, C ,Ctilde, np=self.np)
+
+
+            if abs(self.last_timestep - (time_points[i] + dt)) > timestep_tol:
+                self.update_hamiltonian(time_points[i] + dt, self._amplitudes)
+                self.last_timestep = time_points[i] + dt
+
+            yield self._amplitudes
+
+
     def __call__(self, prev_amp, current_time):
         np = self.np
         o, v = self.o, self.v
