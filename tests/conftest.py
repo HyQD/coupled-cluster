@@ -3,12 +3,12 @@ import numpy as np
 import os
 
 from quantum_systems import (
-    TwoDimensionalHarmonicOscillator,
-    CustomSystem,
+    # TwoDimensionalHarmonicOscillator,
+    RandomBasisSet,
+    GeneralOrbitalSystem,
     ODQD,
     construct_pyscf_system_rhf,
 )
-from quantum_systems.quantum_dots.one_dim.one_dim_potentials import HOPotential
 from quantum_systems.time_evolution_operators import LaserField
 
 l = 12  # Number of orbitals
@@ -22,16 +22,16 @@ num_grid_points = 101
 
 
 def get_random_doubles_amplitude(m, n):
-    t = np.random.random((m, m, n, n)) + 1j * np.random.random((m, m, n, n))
+    t = RandomBasisSet.get_random_elements((m, m, n, n), np)
     t = t + t.transpose(1, 0, 3, 2)
     t = t - t.transpose(0, 1, 3, 2)
 
     return t
 
 
-@pytest.fixture(params=[0.5, 1.0])
-def _omega(request):
-    return request.param
+# @pytest.fixture(params=[0.5, 1.0])
+# def _omega(request):
+#     return request.param
 
 
 @pytest.fixture(params=[n_large, n_larger], scope="session")
@@ -39,13 +39,29 @@ def _n_large(request):
     return request.param
 
 
-@pytest.fixture
-def tdho(_omega):
-    _tdho = TwoDimensionalHarmonicOscillator(
-        n, l, radius, num_grid_points, omega=_omega
-    )
-    _tdho.setup_system()
-    return _tdho
+# @pytest.fixture
+# def tdho(_omega):
+#     _tdho = TwoDimensionalHarmonicOscillator(
+#         n, l, radius, num_grid_points, omega=_omega
+#     )
+#     _tdho.setup_system()
+#     return _tdho
+
+
+@pytest.fixture(scope="session")
+def large_system_ccs(_n_large):
+    n = _n_large
+    l = l_large * 2
+    m = l - n
+    dim = 3
+
+    rs = GeneralOrbitalSystem(n, RandomBasisSet(l, dim, includes_spin=True))
+    rs.f = rs.construct_fock_matrix(rs.h, rs.u)
+
+    t_1 = RandomBasisSet.get_random_elements((m, n), np)
+    l_1 = RandomBasisSet.get_random_elements((n, m), np)
+
+    return t_1, l_1, rs
 
 
 @pytest.fixture(scope="session")
@@ -53,25 +69,15 @@ def large_system_ccd(_n_large):
     n = _n_large
     l = l_large * 2
     m = l - n
+    dim = 1
 
-    h = np.random.random((l // 2, l // 2)) + 1j * np.random.random(
-        (l // 2, l // 2)
-    )
-    u = np.random.random(
-        (l // 2, l // 2, l // 2, l // 2)
-    ) + 1j * np.random.random((l // 2, l // 2, l // 2, l // 2))
-    # Make u symmetric
-    u = u + u.transpose(1, 0, 3, 2)
-
-    cs = CustomSystem(n, l)
-    cs.set_h(h, add_spin=True)
-    cs.set_u(u, add_spin=True, anti_symmetrize=True)
-    cs.f = cs.construct_fock_matrix(cs.h, cs.u)
+    rs = GeneralOrbitalSystem(n, RandomBasisSet(l, dim, includes_spin=True))
+    rs.f = rs.construct_fock_matrix(rs.h, rs.u)
 
     t = get_random_doubles_amplitude(m, n)
     l = get_random_doubles_amplitude(n, m)
 
-    return t, l, cs
+    return t, l, rs
 
 
 @pytest.fixture(scope="session")
@@ -79,80 +85,70 @@ def large_system_ccsd(_n_large):
     n = _n_large
     l = l_large * 2
     m = l - n
+    dim = 2
 
-    h = np.random.random((l // 2, l // 2)) + 1j * np.random.random(
-        (l // 2, l // 2)
-    )
-    u = np.random.random(
-        (l // 2, l // 2, l // 2, l // 2)
-    ) + 1j * np.random.random((l // 2, l // 2, l // 2, l // 2))
-    # Make u symmetric
-    u = u + u.transpose(1, 0, 3, 2)
+    rs = GeneralOrbitalSystem(n, RandomBasisSet(l, dim, includes_spin=True))
+    rs.f = rs.construct_fock_matrix(rs.h, rs.u)
 
-    cs = CustomSystem(n, l)
-    cs.set_h(h, add_spin=True)
-    cs.set_u(u, add_spin=True, anti_symmetrize=True)
-    cs.f = cs.construct_fock_matrix(cs.h, cs.u)
-
-    t_1 = np.random.random((m, n)) + 1j * np.random.random((m, n))
+    t_1 = RandomBasisSet.get_random_elements((m, n), np)
     t_2 = get_random_doubles_amplitude(m, n)
 
-    l_1 = np.random.random((n, m)) + 1j * np.random.random((n, m))
+    l_1 = RandomBasisSet.get_random_elements((n, m), np)
     l_2 = get_random_doubles_amplitude(n, m)
 
-    return t_1, t_2, l_1, l_2, cs
+    return t_1, t_2, l_1, l_2, rs
 
 
-@pytest.fixture
-def ref_energy(_omega):
-    if _omega == 0.5:
-        return 1.8862268283560368
-    elif _omega == 1.0:
-        return 3.253314
-    else:
-        raise NotImplementedError(
-            "We do not a have a test value for omega "
-            + "= {0} yet".format(_omega)
-        )
+# @pytest.fixture
+# def ref_energy(_omega):
+#     if _omega == 0.5:
+#         return 1.8862268283560368
+#     elif _omega == 1.0:
+#         return 3.253314
+#     else:
+#         raise NotImplementedError(
+#             "We do not have a test value for omega "
+#             + "= {0} yet".format(_omega)
+#         )
 
 
-@pytest.fixture
-def ccd_energy(_omega):
-    if _omega == 0.5:
-        return 1.7788892410077777
-    elif _omega == 1.0:
-        return 3.141829931728858
-    else:
-        raise NotImplementedError(
-            "We do not a have a test value for omega "
-            + "= {0} yet".format(_omega)
-        )
+# @pytest.fixture
+# def ccd_energy(_omega):
+#     if _omega == 0.5:
+#         return 1.7788892410077777
+#     elif _omega == 1.0:
+#         return 3.141829931728858
+#     else:
+#         raise NotImplementedError(
+#             "We do not a have a test value for omega "
+#             + "= {0} yet".format(_omega)
+#         )
 
 
-@pytest.fixture
-def tdho_ccd_hf_energy(_omega):
-    if _omega == 0.5:
-        return 1.681979
-    elif _omega == 1.0:
-        return 3.039048
-    else:
-        raise NotImplementedError(
-            "We do not a have a test value for omega "
-            + "= {0} yet".format(_omega)
-        )
+# @pytest.fixture
+# def tdho_ccd_hf_energy(_omega):
+#     if _omega == 0.5:
+#         return 1.681979
+#     elif _omega == 1.0:
+#         return 3.039048
+#     else:
+#         raise NotImplementedError(
+#             "We do not a have a test value for omega "
+#             + "= {0} yet".format(_omega)
+#         )
 
 
-@pytest.fixture
-def ccsd_energy(_omega):
-    if _omega == 0.5:
-        return 1.681608
-    elif _omega == 1.0:
-        return 3.038599
-    else:
-        raise NotImplementedError(
-            "We do not a have a test value for omega "
-            + "= {0} yet".format(_omega)
-        )
+# @pytest.fixture
+# def ccsd_energy(_omega):
+#     if _omega == 0.5:
+#         return 1.681608
+#     elif _omega == 1.0:
+#         return 3.038599
+#     else:
+#         raise NotImplementedError(
+#             "We do not a have a test value for omega "
+#             + "= {0} yet".format(_omega)
+#         )
 
 
 class LaserPulse:
@@ -167,15 +163,16 @@ class LaserPulse:
 @pytest.fixture
 def zanghellini_system():
     n = 2
-    l = 6
+    l = 3
     length = 10
     num_grid_points = 400
     omega = 0.25
     laser_frequency = 8 * omega
     laser_strength = 1
 
-    odho = ODQD(n, l, length, num_grid_points)
-    odho.setup_system(potential=HOPotential(omega))
+    odho = GeneralOrbitalSystem(
+        n, ODQD(l, length, num_grid_points, potential=ODQD.HOPotential(omega),),
+    )
     laser = LaserField(
         LaserPulse(
             laser_frequency=laser_frequency, laser_strength=laser_strength
@@ -277,25 +274,5 @@ def time_params():
 
 
 @pytest.fixture
-def helium_system():
-    return construct_pyscf_system_rhf("he")
-
-
-@pytest.fixture(scope="session")
-def scoped_helium_system():
-    return construct_pyscf_system_rhf("he")
-
-
-@pytest.fixture
 def oaccd_groundstate_helium_energy():
     return -2.8875947783360814
-
-
-@pytest.fixture(scope="session")
-def beryllium_system():
-    return construct_pyscf_system_rhf("be")
-
-
-@pytest.fixture(scope="session")
-def neon_system():
-    return construct_pyscf_system_rhf("ne")

@@ -17,6 +17,27 @@ from sympy.physics.secondquant import (
 )
 
 
+def generate_ccs_amplitude_equations(verbose=False):
+    if verbose:
+        print("Generating Lagrangian")
+    ccs_lagrangian = eval_equation(
+        generate_lagrangian([get_t_1_operator], [get_l_1_operator],)
+    )
+
+    i = symbols("I", below_fermi=True)
+    a = symbols("A", above_fermi=True)
+
+    if verbose:
+        print("Computing t_1 equations")
+    t_1_equations = beautify_equation(diff(ccs_lagrangian, "l_1"))
+
+    if verbose:
+        print("Computing l_1 equations")
+    l_1_equations = beautify_equation(diff(ccs_lagrangian, "t_1"))
+
+    return [t_1_equations], [l_1_equations]
+
+
 def generate_ccd_amplitude_equations():
     ccd_lagrangian = eval_equation(
         generate_lagrangian([get_t_2_operator], [get_l_2_operator])
@@ -131,44 +152,54 @@ def generate_ccsdt_amplitude_equations(verbose=False):
 
 
 if __name__ == "__main__":
-    (t_1, t_2, t_3), (l_1, l_2, l_3) = generate_ccsdt_amplitude_equations()
-
-    f = open("amplitude_eqns.txt", "w+")
+    [t_1], [l_1] = generate_ccs_amplitude_equations()
 
     print("t_1-equations:")
-    f.write("t_1 equations\n")
     for term in t_1.args:
         print(latex(term))
-        f.write(latex(term) + "\n")
-
-    print("\n\nt_2-equations:")
-    f.write("\n\nt_2 equations\n")
-    for term in t_2.args:
-        print(latex(term))
-        f.write(latex(term) + "\n")
-
-    print("\n\nt_3-equations:")
-    f.write("\n\nt_3 equations\n")
-    for term in t_3.args:
-        print(latex(term))
-        f.write(latex(term) + "\n")
 
     print("\n\nl_1-equations:")
-    f.write("\n\nl_1 equations\n")
     for term in l_1.args:
         print(latex(term))
-        f.write(latex(term) + "\n")
 
-    print("\n\nl_2-equations:")
-    f.write("\n\nl_2 equations\n")
-    for term in l_2.args:
-        print(latex(term))
-        f.write(latex(term) + "\n")
+    # (t_1, t_2, t_3), (l_1, l_2, l_3) = generate_ccsdt_amplitude_equations()
 
-    print("\n\nl_3-equations:")
-    f.write("\n\nl_3 equations\n")
-    for term in l_3.args:
-        print(latex(term))
-        f.write(latex(term) + "\n")
+    # f = open("amplitude_eqns.txt", "w+")
 
-    f.close()
+    # print("t_1-equations:")
+    # f.write("t_1 equations\n")
+    # for term in t_1.args:
+    #    print(latex(term))
+    #    f.write(latex(term) + "\n")
+
+    # print("\n\nt_2-equations:")
+    # f.write("\n\nt_2 equations\n")
+    # for term in t_2.args:
+    #    print(latex(term))
+    #    f.write(latex(term) + "\n")
+
+    # print("\n\nt_3-equations:")
+    # f.write("\n\nt_3 equations\n")
+    # for term in t_3.args:
+    #    print(latex(term))
+    #    f.write(latex(term) + "\n")
+
+    # print("\n\nl_1-equations:")
+    # f.write("\n\nl_1 equations\n")
+    # for term in l_1.args:
+    #    print(latex(term))
+    #    f.write(latex(term) + "\n")
+
+    # print("\n\nl_2-equations:")
+    # f.write("\n\nl_2 equations\n")
+    # for term in l_2.args:
+    #    print(latex(term))
+    #    f.write(latex(term) + "\n")
+
+    # print("\n\nl_3-equations:")
+    # f.write("\n\nl_3 equations\n")
+    # for term in l_3.args:
+    #    print(latex(term))
+    #    f.write(latex(term) + "\n")
+
+    # f.close()

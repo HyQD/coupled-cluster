@@ -1,0 +1,513 @@
+    rhs = np.zeros((no, no, nv, nv))
+
+    rhs -= 2 * np.einsum(
+        "ijba->ijab", u
+    )
+
+    rhs += 4 * np.einsum(
+        "ijab->ijab", u
+    )
+
+    rhs -= np.einsum(
+        "ic,cjba->ijab", l, u
+    )
+
+    rhs -= np.einsum(
+        "jc,icba->ijab", l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ca,ijcb->ijab", f, l
+    )
+
+    rhs += 2 * np.einsum(
+        "cb,ijac->ijab", f, l
+    )
+
+    rhs += 2 * np.einsum(
+        "ic,cjab->ijab", l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "jc,icab->ijab", l, u
+    )
+
+    rhs -= np.einsum(
+        "ib,ja->ijab", f, l
+    )
+
+    rhs -= np.einsum(
+        "ja,ib->ijab", f, l
+    )
+
+    rhs += 2 * np.einsum(
+        "ia,jb->ijab", f, l
+    )
+
+    rhs += 2 * np.einsum(
+        "jb,ia->ijab", f, l
+    )
+
+    rhs -= 2 * np.einsum(
+        "ck,ijcd,kdab->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,ijac,kcbd->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,ijcb,kcad->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,ijcd,ckab->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,ikac,cjbd->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,ikbc,cjda->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,ikcb,cjad->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,kjac,icdb->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,kjca,icbd->ijab", t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "dk,kjcb,icda->ijab", t, l, u
+    )
+
+    rhs += 4 * np.einsum(
+        "dk,ijac,ckbd->ijab", t, l, u
+    )
+
+    rhs += 4 * np.einsum(
+        "dk,ijcb,ckad->ijab", t, l, u
+    )
+
+    rhs += 4 * np.einsum(
+        "dk,ikac,cjdb->ijab", t, l, u
+    )
+
+    rhs += 4 * np.einsum(
+        "dk,kjcb,icad->ijab", t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "cm,ikab,mjck->ijab", t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "cm,ikac,mjkb->ijab", t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "cm,kjab,imkc->ijab", t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "cm,kjcb,imak->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,ikab,mjkc->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,ikac,mjbk->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,ikbc,mjka->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,ikcb,mjak->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,kmab,ijkc->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,kjab,imck->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,kjac,imkb->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,kjca,imbk->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,kjcb,imka->ijab", t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ck,kmab,ijcm->ijab", t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ijac,cdkm,kmbd->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ijcb,cdkm,kmad->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ikab,cdmk,mjcd->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ikac,cdmk,mjdb->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ikac,cdkm,mjbd->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ikbc,cdkm,mjda->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ikcd,cdmk,mjab->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "kmac,cdmk,ijdb->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "kmbc,cdmk,ijad->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "kjab,cdkm,imcd->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "kjca,cdkm,imbd->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "kjcb,cdmk,imad->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "kjcb,cdkm,imda->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "kjcd,cdkm,imab->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ijac,cdmk,kmbd->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ijcb,cdmk,kmad->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ijcd,cdkm,kmab->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ikab,cdkm,mjcd->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ikac,cdmk,mjbd->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ikbc,cdmk,mjda->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ikbc,cdkm,mjad->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ikcb,cdmk,mjad->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ikcd,cdmk,mjba->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kmab,cdkm,ijcd->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kmac,cdmk,ijbd->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kmbc,cdmk,ijda->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kjab,cdmk,imcd->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kjac,cdmk,imdb->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kjca,cdmk,imbd->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kjca,cdkm,imdb->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kjcb,cdmk,imda->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kjcd,cdkm,imba->ijab", l, t, u
+    )
+
+    rhs += 8 * np.einsum(
+        "ikac,cdkm,mjdb->ijab", l, t, u
+    )
+
+    rhs += 8 * np.einsum(
+        "kjcb,cdkm,imad->ijab", l, t, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "cm,dk,ikab,mjcd->ijab", t, t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "cm,dk,ikac,mjdb->ijab", t, t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "cm,dk,kjcb,imad->ijab", t, t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ck,dm,ijac,kmbd->ijab", t, t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ck,dm,ijcb,kmad->ijab", t, t, l, u
+    )
+
+    rhs -= 4 * np.einsum(
+        "ck,dm,kjab,imcd->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,ijac,kmbd->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,ijcb,kmad->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,ikac,mjbd->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,ikbc,mjda->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,ikcb,mjad->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,kjab,imcd->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,kjac,imdb->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,kjca,imbd->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "cm,dk,kjcb,imda->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ck,dm,ijcd,kmab->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ck,dm,ikab,mjcd->ijab", t, t, l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ck,dm,kmab,ijcd->ijab", t, t, l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ikac,cjbk->ijab", l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ikbc,cjka->ijab", l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ikcb,cjak->ijab", l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "kjac,ickb->ijab", l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "kjca,icbk->ijab", l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "kjcb,icka->ijab", l, u
+    )
+
+    rhs += 4 * np.einsum(
+        "ikac,cjkb->ijab", l, u
+    )
+
+    rhs += 4 * np.einsum(
+        "kjcb,icak->ijab", l, u
+    )
+
+    rhs += np.einsum(
+        "ib,ck,kjac->ijab", l, t, u
+    )
+
+    rhs += np.einsum(
+        "ic,ck,kjba->ijab", l, t, u
+    )
+
+    rhs += np.einsum(
+        "ja,ck,ikcb->ijab", l, t, u
+    )
+
+    rhs += np.einsum(
+        "jc,ck,ikba->ijab", l, t, u
+    )
+
+    rhs += np.einsum(
+        "ka,ck,ijbc->ijab", l, t, u
+    )
+
+    rhs += np.einsum(
+        "kb,ck,ijca->ijab", l, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ic,ck,kjab->ijab", f, t, l
+    )
+
+    rhs -= 2 * np.einsum(
+        "jc,ck,ikab->ijab", f, t, l
+    )
+
+    rhs -= 2 * np.einsum(
+        "ka,ck,ijcb->ijab", f, t, l
+    )
+
+    rhs -= 2 * np.einsum(
+        "kb,ck,ijac->ijab", f, t, l
+    )
+
+    rhs -= 2 * np.einsum(
+        "ia,ck,kjbc->ijab", l, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ib,ck,kjca->ijab", l, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ic,ck,kjab->ijab", l, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ja,ck,ikbc->ijab", l, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "jb,ck,ikca->ijab", l, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "jc,ck,ikab->ijab", l, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ka,ck,ijcb->ijab", l, t, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "kb,ck,ijac->ijab", l, t, u
+    )
+
+    rhs += 4 * np.einsum(
+        "ia,ck,kjcb->ijab", l, t, u
+    )
+
+    rhs += 4 * np.einsum(
+        "jb,ck,ikac->ijab", l, t, u
+    )
+
+    rhs += 2 * np.einsum(
+        "ijcd,cdab->ijab", l, u
+    )
+
+    rhs += np.einsum(
+        "ka,ijbk->ijab", l, u
+    )
+
+    rhs += np.einsum(
+        "kb,ijka->ijab", l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "ik,kjab->ijab", f, l
+    )
+
+    rhs -= 2 * np.einsum(
+        "jk,ikab->ijab", f, l
+    )
+
+    rhs -= 2 * np.einsum(
+        "ka,ijkb->ijab", l, u
+    )
+
+    rhs -= 2 * np.einsum(
+        "kb,ijak->ijab", l, u
+    )
+
+    rhs += 2 * np.einsum(
+        "kmab,ijkm->ijab", l, u
+    )

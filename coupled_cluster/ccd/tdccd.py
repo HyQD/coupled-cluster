@@ -12,13 +12,13 @@ from coupled_cluster.ccd.density_matrices import (
 from coupled_cluster.ccd.time_dependent_overlap import (
     compute_time_dependent_overlap,
 )
-from coupled_cluster.ccd import CoupledClusterDoubles
+from coupled_cluster.ccd import CCD
 
 
 class TDCCD(TimeDependentCoupledCluster):
     """Time Dependent Coupled Cluster Doubles
 
-    Computes time development of system, employd coupled
+    Computes time development of system, employed coupled
     cluster method with double exctiations.
 
     Parameters
@@ -34,7 +34,7 @@ class TDCCD(TimeDependentCoupledCluster):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(CoupledClusterDoubles, *args, **kwargs)
+        super().__init__(CCD, *args, **kwargs)
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])

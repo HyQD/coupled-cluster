@@ -1,16 +1,15 @@
 from coupled_cluster.cc_helper import compute_reference_energy
-from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 
 
 def compute_ccd_ground_state_energy(f, u, t, o, v, np):
     energy = compute_reference_energy(f, u, o, v, np=np)
-    energy += compute_ground_state_energy_correction(u, t, o, v, np=np)
+    energy += compute_ccd_ground_state_energy_correction(u, t, o, v, np=np)
 
     return energy
 
 
-def compute_ground_state_energy_correction(u, t, o, v, np):
-    """Ground state correlation energy for the coupled cluster doubles method
+def compute_ccd_ground_state_energy_correction(u, t, o, v, np):
+    r"""Ground state correlation energy for the coupled cluster doubles method
 
         \Delta E_{CCD} = 0.25 * t^{ab}_{ij} u^{ij}_{ab}.
     """

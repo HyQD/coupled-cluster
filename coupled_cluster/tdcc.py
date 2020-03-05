@@ -1,10 +1,7 @@
 import abc
 import collections
 import warnings
-from coupled_cluster.cc_helper import (
-    AmplitudeContainer,
-    compute_particle_density,
-)
+from coupled_cluster.cc_helper import AmplitudeContainer
 from coupled_cluster.integrators import RungeKutta4
 
 
@@ -20,20 +17,12 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         Class instance defining the ground state solver
     system : QuantumSystem
         Class instance defining the system to be solved
-    np : module
-        Matrix/linear algebra library to be uses, like numpy or cupy
     integrator : Integrator
         Integrator class instance (RK4, GaussIntegrator)
     """
 
-    def __init__(self, cc, system, np=None, integrator=None, **cc_kwargs):
-        if np is None:
-            import numpy as np
-
-        self.np = np
-
-        if not "np" in cc_kwargs:
-            cc_kwargs["np"] = self.np
+    def __init__(self, cc, system, integrator=None, **cc_kwargs):
+        self.np = system.np
 
         # Initialize ground state solver
         self.cc = cc(system, **cc_kwargs)
@@ -195,6 +184,29 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return self.np.exp(-t_0) * self.left_reference_overlap()
 
+    def compute_reference_weight(self):
+        r"""Function computing the weight of the reference state in the
+        time-evolved coupled-cluster wave function. This is given by
+
+        .. math:: W(t) = \frac{1}{4}
+            \vert \langle \tilde{\Psi}(t) \rvert \Phi \rangle^{*}
+            + \langle \Phi \rvert \Psi(t) \rangle \vert^2,
+
+        where the inner-products are the left- and right-phase expressions.
+
+        Returns
+        -------
+        complex128
+            The weight of the reference state in the time-evolved wave function.
+        """
+
+        return 0.25 * (
+            self.np.abs(
+                self.compute_right_phase() + self.compute_left_phase().conj()
+            )
+            ** 2
+        )
+
     @abc.abstractmethod
     def left_reference_overlap(self):
         pass
@@ -216,11 +228,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             warn = warn.format(np.trace(rho_qp), self.system.n)
             warnings.warn(warn)
 
-        rho = compute_particle_density(
-            rho_qp, self.system.bra_spf, self.system.spf, np=np
-        )
-
-        return rho
+        return self.system.compute_particle_density(rho_qp)
 
     def update_hamiltonian(self, current_time, amplitudes):
         if self.system.has_one_body_time_evolution_operator:

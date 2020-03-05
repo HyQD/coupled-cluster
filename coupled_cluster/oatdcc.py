@@ -1,6 +1,6 @@
 import abc
 import warnings
-from coupled_cluster.cc_helper import OACCVector, compute_particle_density
+from coupled_cluster.cc_helper import OACCVector
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 from coupled_cluster.integrators import RungeKutta4
 
@@ -66,16 +66,9 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         t, l, C, C_tilde = self._amplitudes
 
-        # pa, a -> p
-        # C_tilde, spf^{*} -> spf_tilde
-        bra_spf = np.tensordot(C_tilde, self.system.bra_spf, axes=((1), (0)))
-        # ap, a -> p
-        # C, spf -> spf
-        ket_spf = np.tensordot(C, self.system.spf, axes=((0), (0)))
-
-        rho = compute_particle_density(rho_qp, bra_spf, ket_spf, np=np)
-
-        return rho
+        return self.system.compute_particle_density(
+            rho_qp, c=C, c_tilde=C_tilde
+        )
 
     @abc.abstractmethod
     def compute_p_space_equations(self):

@@ -72,6 +72,12 @@ def get_one_body_density_matrix(
     return rho
 
 
+def get_ccs_one_body_density_matrix(p=None, q=None):
+    return get_one_body_density_matrix(
+        get_t_1_operator, get_l_1_operator, 1, p=p, q=q
+    )
+
+
 def get_ccd_one_body_density_matrix(p=None, q=None):
     rho = get_one_body_density_matrix(
         get_t_2_operator, get_l_2_operator, 1, p=p, q=q
@@ -98,5 +104,7 @@ if __name__ == "__main__":
     p = symbols("p", above_fermi=True, cls=Dummy)
     q = symbols("q", above_fermi=True, cls=Dummy)
     p = q = None
+
+    print("CCS:", latex(get_ccs_one_body_density_matrix(p=p, q=q)))
     print("CCD:", latex(get_ccd_one_body_density_matrix(p=p, q=q)))
     print("CCSD:", latex(get_ccsd_one_body_density_matrix(p=p, q=q)))
