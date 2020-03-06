@@ -23,8 +23,6 @@ class TDCCD(TimeDependentCoupledCluster):
 
     Parameters
     ----------
-    cc : CoupledCluster
-        Class instance defining the ground state solver
     system : QuantumSystem
         Class instance defining the system to be solved
     np : module
@@ -34,7 +32,7 @@ class TDCCD(TimeDependentCoupledCluster):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(CCD, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
@@ -97,9 +95,14 @@ class TDCCD(TimeDependentCoupledCluster):
             t_2, l_2, self.o, self.v, np=self.np
         )
 
-    def compute_time_dependent_overlap(self):
+    def compute_time_dependent_overlap(self, a_other):
         """Computes overlap of current time-developed
-        state with the ground state.
+        state with the given amplitudes.
+
+        Parameters
+        ----------
+        a_other : AmplitudesVector
+            Amplitudes to compare with
 
         Returns
         -------
@@ -107,7 +110,8 @@ class TDCCD(TimeDependentCoupledCluster):
             Probability of ground state
         """
         t_0, t_2, l_2 = self._amplitudes.unpack()
+        t_0_other, t_2_other, l_2_other = a_other.unpack()
 
         return compute_time_dependent_overlap(
-            self.cc.t_2, self.cc.l_2, t_2, l_2, np=self.np
+            t_2_other, l_2_other, t_2, l_2, np=self.np
         )

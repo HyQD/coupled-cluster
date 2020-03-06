@@ -13,19 +13,16 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    cc : CoupledCluster
-        Class instance defining the ground state solver
     system : QuantumSystem
         Class instance defining the system to be solved
     integrator : Integrator
         Integrator class instance (RK4, GaussIntegrator)
     """
 
-    def __init__(self, cc, system, integrator=None, **cc_kwargs):
+    def __init__(self, system, integrator=None, **cc_kwargs):
         self.np = system.np
 
         # Initialize ground state solver
-        self.cc = cc(system, **cc_kwargs)
         self.system = system
 
         self.h = self.system.h
@@ -40,42 +37,17 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.integrator = integrator.set_rhs(self)
         self._amplitudes = None
 
-        # Inherit functions from ground state solver
-        self.compute_ground_state_energy = self.cc.compute_energy
-        self.compute_ground_state_reference_energy = (
-            self.cc.compute_reference_energy
-        )
-        self.compute_ground_state_particle_density = (
-            self.cc.compute_particle_density
-        )
-        self.compute_ground_state_one_body_density_matrix = (
-            self.cc.compute_one_body_density_matrix
-        )
-
-    def compute_ground_state(self, *args, **kwargs):
-        """Calls on method from CoupledCluster class to compute
-        ground state of system.
-        """
-
-        # Compute ground state amplitudes
-        self.cc.compute_ground_state(*args, **kwargs)
-
-    def set_initial_conditions(self, amplitudes=None):
+    def set_initial_conditions(self, amplitudes):
         """Set initial condition of system.
 
         Necessary to call this function befor computing
-        time development. Can be passed without arguments,
-        will revert to amplitudes of ground state solver.
+        time development. 
 
         Parameters
         ----------
         amplitudes : AmplitudeContainer
             Amplitudes for the system
         """
-
-        if amplitudes is None:
-            # Create copy of ground state amplitudes for time-integration
-            amplitudes = self.cc.get_amplitudes(get_t_0=True)
 
         self._amplitudes = amplitudes
 
