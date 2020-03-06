@@ -114,12 +114,11 @@ class AmplitudeContainer:
 
         return amp_vec
 
-    @staticmethod
-    def zeros_like(u):
-        np = u.np
+    def zeros_like(self):
+        np = self.np
 
         args = []
-        for amps in u:
+        for amps in self:
             inner = []
 
             if type(amps) == list:
@@ -129,17 +128,16 @@ class AmplitudeContainer:
 
             args.append(inner)
 
-        return type(u)(*args, np=np)
+        return type(self)(*args, np=np)
 
-    @staticmethod
-    def from_array(u, arr):
-        np = u.np
+    def from_array(self, arr):
+        np = self.np
 
         args = []
         start_index = 0
         stop_index = 0
 
-        for amps in u:
+        for amps in self:
             inner = []
 
             if type(amps) == list:
@@ -155,7 +153,7 @@ class AmplitudeContainer:
 
             args.append(inner)
 
-        return type(u)(*args, np=np)
+        return type(self)(*args, np=np)
 
 
 class OACCVector(AmplitudeContainer):
