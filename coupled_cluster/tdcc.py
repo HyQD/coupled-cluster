@@ -19,10 +19,9 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         Integrator class instance (RK4, GaussIntegrator)
     """
 
-    def __init__(self, system, integrator=None, **cc_kwargs):
+    def __init__(self, system, integrator=None):
         self.np = system.np
 
-        # Initialize ground state solver
         self.system = system
 
         self.h = self.system.h
@@ -37,17 +36,29 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.integrator = integrator.set_rhs(self)
         self._amplitudes = None
 
-    def set_initial_conditions(self, amplitudes):
+    def set_initial_conditions(self, cc=None, amplitudes=None):
         """Set initial condition of system.
 
-        Necessary to call this function befor computing
-        time development. 
+        Necessary to call this function befor computing time development. Must
+        be passed with either ground state solver or amplitudes, will revert to
+        amplitudes of ground state solver.
 
         Parameters
         ----------
-        amplitudes : AmplitudeContainer
+        cc : CoupledCluster (optional)
+            Ground state solver, must be initialized
+        amplitudes : AmplitudeContainer (optional)
             Amplitudes for the system
         """
+
+        if amplitudes is None:
+            if cc is None:
+                raise TypeError(
+                    "must specify either amplitudes or "
+                    + "initialized ground state solver"
+                )
+            # Create copy of ground state amplitudes for time-integration
+            amplitudes = cc.get_amplitudes(get_t_0=True)
 
         self._amplitudes = amplitudes
 

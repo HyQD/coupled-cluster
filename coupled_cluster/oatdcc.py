@@ -14,28 +14,63 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     transforming the ground state orbitals to the Hartree-Fock basis.
     """
 
-    def compute_ground_state(self, *args, **kwargs):
-        if "change_system_basis" not in kwargs:
-            kwargs["change_system_basis"] = True
+    def set_initial_conditions(
+        self, cc=None, amplitudes=None, C=None, C_tilde=None, *args, **kwargs
+    ):
+        """Set initial condition of system.
 
-        self.cc.compute_ground_state(*args, **kwargs)
-        self.h_orig = self.system.h
-        self.u_orig = self.system.u
+        Necessary to call this function befor computing time development. Must
+        be passed with either ground state solver or amplitudes, will revert to
+        amplitudes of ground state solver.
 
-        self.h = self.system.h
-        self.u = self.system.u
-        self.f = self.system.construct_fock_matrix(self.h, self.u)
+        args and kwargs sent to ground state solver if amplitudes is None.
 
-    def set_initial_conditions(self, amplitudes=None, C=None, C_tilde=None):
+        Parameters
+        ----------
+        cc : CoupledCluster (optional)
+            Ground state solver
+        amplitudes : AmplitudeContainer (optional)
+            Amplitudes for the system
+        """
         if amplitudes is None:
-            # Create copy of ground state amplitudes for time-integration
-            amplitudes = self.cc.get_amplitudes(get_t_0=True)
+            if cc is None:
+                raise TypeError(
+                    "must specify either amplitudes or "
+                    + "initialized ground state solver"
+                )
+            # remnant from old
+            if "change_system_basis" not in kwargs:
+                kwargs["change_system_basis"] = True
+            # Compute ground state amplitudes for time-integration
+            # cc.compute_ground_state(*args, **kwargs)
+            amplitudes = cc.get_amplitudes(get_t_0=True)
 
         if C is None:
             C = self.np.eye(self.system.l)
 
         if C_tilde is None:
             C_tilde = self.np.eye(self.system.l)
+
+        assert C.shape == C_tilde.T.shape
+        self.h = self.system.h
+        self.u = self.system.u
+
+        self.h_prime = self.system.transform_one_body_elements(
+            self.h, C, C_tilde
+        )
+        self.u_prime = self.system.transform_two_body_elements(
+            self.u, C, C_tilde
+        )
+        self.f_prime = self.system.construct_fock_matrix(
+            self.h_prime, self.u_prime
+        )
+
+        self.n_prime = self.system.n
+        self.l_prime = C.shape[1]
+        self.m_prime = self.l_prime - self.n_prime
+
+        self.o_prime = slice(0, self.n_prime)
+        self.v_prime = slice(self.n_prime, self.l_prime)
 
         self._amplitudes = OACCVector(*amplitudes, C, C_tilde, np=self.np)
 
@@ -80,24 +115,26 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # Evolve system in time
         if self.system.has_one_body_time_evolution_operator:
-            self.h_orig = self.system.h_t(current_time)
+            self.h = self.system.h_t(current_time)
 
         if self.system.has_two_body_time_evolution_operator:
-            self.u_orig = self.system.u_t(current_time)
+            self.u = self.system.u_t(current_time)
 
         # Change basis to C and C_tilde
-        self.h = self.system.transform_one_body_elements(
-            self.h_orig, C, C_tilde
+        self.h_prime = self.system.transform_one_body_elements(
+            self.h, C, C_tilde
         )
-        self.u = self.system.transform_two_body_elements(
-            self.u_orig, C, C_tilde
+        self.u_prime = self.system.transform_two_body_elements(
+            self.u, C, C_tilde
         )
 
-        self.f = self.system.construct_fock_matrix(self.h, self.u)
+        self.f_prime = self.system.construct_fock_matrix(
+            self.h_prime, self.u_prime
+        )
 
     def __call__(self, prev_amp, current_time):
         np = self.np
-        o, v = self.o, self.v
+        o_prime, v_prime = self.o_prime, self.v_prime
 
         prev_amp = OACCVector.from_array(self._amplitudes, prev_amp)
         t_old, l_old, C, C_tilde = prev_amp
@@ -110,19 +147,31 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         # OATDCC procedure:
         # Do amplitude step
         t_new = [
-            -1j * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
+            -1j
+            * rhs_t_func(
+                self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
+            )
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
         # Compute derivative of phase
         t_0_new = -1j * self.rhs_t_0_amplitude(
-            self.f, self.u, *t_old, self.o, self.v, np=self.np
+            self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
         )
 
         t_new = [t_0_new, *t_new]
 
         l_new = [
-            1j * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
+            1j
+            * rhs_l_func(
+                self.f_prime,
+                self.u_prime,
+                *t_old,
+                *l_old,
+                o_prime,
+                v_prime,
+                np=self.np
+            )
             for rhs_l_func in self.rhs_l_amplitudes()
         ]
 
@@ -145,22 +194,24 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         here that expm refers to the matrix exponential which I can not find in
         numpy only in scipy.
         """
-        # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
+        rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
+
         C_new = np.dot(C, eta)
         C_tilde_new = -np.dot(eta, C_tilde)
-
         """
+
         C_new = -1j * compute_q_space_ket_equations(
             C,
             C_tilde,
             eta,
-            self.h_orig,
             self.h,
-            self.u_orig,
+            self.h_prime,
             self.u,
+            self.u_prime,
             rho_pq_inv,
+            self.rho_qp,
             self.rho_qspr,
             np=np,
         )
@@ -168,11 +219,12 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             C,
             C_tilde,
             eta,
-            self.h_orig,
             self.h,
-            self.u_orig,
+            self.h_prime,
             self.u,
+            self.u_prime,
             rho_pq_inv,
+            self.rho_qp,
             self.rho_qspr,
             np=np,
         )
@@ -187,38 +239,47 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
 
 def compute_q_space_ket_equations(
-    C, C_tilde, eta, h, h_tilde, u, u_tilde, rho_inv_pq, rho_qspr, np
+    C, C_tilde, eta, h, h_prime, u, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
 ):
+    # print(u.shape, u_prime.shape)
     rhs = 1j * np.dot(C, eta)
 
-    rhs += np.dot(h, C)
-    rhs -= np.dot(C, h_tilde)
+    rhs2 = np.zeros_like(rhs)
+    rhs2 += np.dot(h, C)
+    rhs2 -= np.dot(C, h_prime)
 
     u_quart = np.einsum("rb,gq,ds,abgd->arqs", C_tilde, C, C, u, optimize=True)
-    u_quart -= np.tensordot(C, u_tilde, axes=((1), (0)))
+    u_quart -= np.tensordot(C, u_prime, axes=((1), (0)))
 
-    temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
-    rhs += np.dot(temp_ap, rho_inv_pq)
+    # temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
+    temp_ap = np.einsum("arqs,qspr->ap", u_quart, rho_qspr)
+    rhs2 = np.dot(rhs2, rho_qp)
+    rhs2 += temp_ap
+    # print(np.linalg.norm(rhs2))
+    rhs2 = np.dot(rhs2, rho_inv_pq)
 
-    return rhs
+    return rhs + rhs2
 
 
 def compute_q_space_bra_equations(
-    C, C_tilde, eta, h, h_tilde, u, u_tilde, rho_inv_pq, rho_qspr, np
+    C, C_tilde, eta, h, h_prime, u, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
 ):
     rhs = 1j * np.dot(eta, C_tilde)
 
-    rhs += np.dot(C_tilde, h)
-    rhs -= np.dot(h_tilde, C_tilde)
+    rhs2 = np.dot(C_tilde, h)
+    rhs2 -= np.dot(h_prime, C_tilde)
 
     u_quart = np.einsum(
         "pa,rg,ds,agbd->prbs", C_tilde, C_tilde, C, u, optimize=True
     )
-    u_quart -= np.tensordot(u_tilde, C_tilde, axes=((2), (0))).transpose(
+    u_quart -= np.tensordot(u_prime, C_tilde, axes=((2), (0))).transpose(
         0, 1, 3, 2
     )
 
     temp_qb = np.tensordot(rho_qspr, u_quart, axes=((1, 2, 3), (3, 0, 1)))
-    rhs += np.dot(rho_inv_pq, temp_qb)
+    rhs2 = np.dot(rho_qp, rhs2) + temp_qb
+    # print(4,np.linalg.norm(rhs2))
+
+    rhs2 = np.dot(rho_inv_pq, rhs2)
 
     return rhs

@@ -155,6 +155,12 @@ class AmplitudeContainer:
 
         return type(self)(*args, np=np)
 
+    def residuals(self):
+        return [
+            [np.linalg.norm(t) for t in self.t],
+            [np.linalg.norm(l) for l in self.l],
+        ]
+
 
 class OACCVector(AmplitudeContainer):
     """Container for OA amplitudes
