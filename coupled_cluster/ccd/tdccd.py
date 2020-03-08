@@ -37,7 +37,7 @@ class TDCCD(TimeDependentCoupledCluster):
 
     @property
     def truncation(self):
-        return 'CCD'
+        return "CCD"
 
     def construct_amplitude_template(self):
         n = self.system.n
