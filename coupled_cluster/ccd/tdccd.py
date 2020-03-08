@@ -13,6 +13,7 @@ from coupled_cluster.ccd.time_dependent_overlap import (
     compute_time_dependent_overlap,
 )
 from coupled_cluster.ccd import CCD
+from coupled_cluster.cc_helper import AmplitudeContainer
 
 
 class TDCCD(TimeDependentCoupledCluster):
@@ -33,6 +34,22 @@ class TDCCD(TimeDependentCoupledCluster):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    @property
+    def truncation(self):
+        return 'CCD'
+
+    def construct_amplitude_template(self):
+        n = self.system.n
+        m = self.system.m
+        return AmplitudeContainer(
+            t=[
+                self.np.array([0], dtype=self.np.complex128),
+                self.np.zeros((m, m, n, n), dtype=self.u.dtype),
+            ],
+            l=[self.np.zeros((n, n, m, m), dtype=self.u.dtype)],
+            np=self.np,
+        )
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])

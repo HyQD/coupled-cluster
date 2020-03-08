@@ -34,7 +34,28 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             integrator = RungeKutta4(np=self.np)
 
         self.integrator = integrator.set_rhs(self)
-        self._amplitudes = None
+        self._template = None
+        self._amplitude_template = self.construct_amplitude_template()
+
+    @property
+    @abc.abstractmethod
+    def truncation(self):
+        pass
+        
+    def construct_amplitude_template(self):
+        codes = {'S':1,'D':2, 'T':3,'Q':4}
+        levels = [codes[c] for c in self.truncation[2:]]
+
+        # start with t_0
+        t = [np.array([0]), dtype=self.np.complex128]
+        l = []
+
+        for l in levels:
+            shape = l*[m] + l*[n]
+            t.append(self.np.array(shape, dtype=self.np.complex128))
+            l.append(self.np.array(shape[::-1], dtype=self.np.complex128))
+        return AmplitudeContainer(t=t, l=l, np=self.np)
+
 
     def set_initial_conditions(self, cc=None, amplitudes=None):
         """Set initial condition of system.
