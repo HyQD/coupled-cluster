@@ -43,6 +43,8 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         pass
         
     def construct_amplitude_template(self):
+        """Constructs an empty AmplitudeContainer with the correct shapes, for
+        convertion between arrays and amplitudes."""
         codes = {'S':1,'D':2, 'T':3,'Q':4}
         levels = [codes[c] for c in self.truncation[2:]]
 
