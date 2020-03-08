@@ -222,7 +222,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
-    def __call__(self, prev_amp, current_time):
+    def __call__(self, current_time, prev_amp):
         o, v = self.system.o, self.system.v
 
         prev_amp = AmplitudeContainer.from_array(self._amplitudes, prev_amp)
