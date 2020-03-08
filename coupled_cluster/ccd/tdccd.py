@@ -50,7 +50,7 @@ class TDCCD(TimeDependentCoupledCluster):
             l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
         )
 
-    def compute_energy(self):
+    def compute_energy(self, t, y):
         """Computes energy at current time step.
 
         Returns
@@ -58,28 +58,28 @@ class TDCCD(TimeDependentCoupledCluster):
         float
             Energy
         """
-        t_0, t_2, l_2 = self._amplitudes.unpack()
+
+        [t_0, t_2], [l] = self._amplitudes.from_array(y)
 
         return compute_time_dependent_energy(
             self.f, self.u, t_2, l_2, self.o, self.v, np=self.np
         )
 
-    def compute_one_body_density_matrix(self):
-        """Computes one-body density matrix at
-        current time step.
+    def compute_one_body_density_matrix(self, y):
+        """Computes one-body density matrix 
 
         Returns
         -------
         np.array
             One-body density matrix
         """
-        t_0, t_2, l_2 = self._amplitudes.unpack()
+        [t_0, t_2], [l] = self._amplitudes.from_array(y)
 
         return compute_one_body_density_matrix(
             t_2, l_2, self.o, self.v, np=self.np
         )
 
-    def compute_two_body_density_matrix(self):
+    def compute_two_body_density_matrix(self, y):
         """Computes two-body density matrix at
         current time step.
 
@@ -89,13 +89,13 @@ class TDCCD(TimeDependentCoupledCluster):
             Two-body density matrix
         """
 
-        t_0, t_2, l_2 = self._amplitudes.unpack()
+        [t_0, t_2], [l] = self._amplitudes.from_array(y)
 
         return compute_two_body_density_matrix(
             t_2, l_2, self.o, self.v, np=self.np
         )
 
-    def compute_time_dependent_overlap(self, a_other):
+    def compute_time_dependent_overlap(self, y1, y2):
         """Computes overlap of current time-developed
         state with the given amplitudes.
 
@@ -109,8 +109,8 @@ class TDCCD(TimeDependentCoupledCluster):
         np.complex128
             Probability of ground state
         """
-        t_0, t_2, l_2 = self._amplitudes.unpack()
-        t_0_other, t_2_other, l_2_other = a_other.unpack()
+        [t_0, t_2], [l_2] = self._amplitudes.from_array(y1)
+        [t_0_other, t_2_other], [l_2_other] = self._amplitudes.from_array(y2)
 
         return compute_time_dependent_overlap(
             t_2_other, l_2_other, t_2, l_2, np=self.np
