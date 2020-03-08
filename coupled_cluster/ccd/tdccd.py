@@ -9,9 +9,7 @@ from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
-from coupled_cluster.ccd.time_dependent_overlap import (
-    compute_time_dependent_overlap,
-)
+from coupled_cluster.ccd.time_dependent_overlap import compute_overlap
 from coupled_cluster.ccd import CCD
 from coupled_cluster.cc_helper import AmplitudeContainer
 
@@ -112,7 +110,7 @@ class TDCCD(TimeDependentCoupledCluster):
             t_2, l_2, self.o, self.v, np=self.np
         )
 
-    def compute_time_dependent_overlap(self, y_a, y_b):
+    def compute_overlap(self, y_a, y_b):
         """Computes overlap of current two states a and b.
 
         Parameters
@@ -131,6 +129,4 @@ class TDCCD(TimeDependentCoupledCluster):
         t_0_a, t_2_a, l_2_a = self._amp_template.from_array(y_a).unpack()
         t_0_b, t_2_b, l_2_b = self._amp_template.from_array(y_b).unpack()
 
-        return compute_time_dependent_overlap(
-            t_2_a, l_2_a, t_2_b, l_2_b, np=self.np
-        )
+        return compute_overlap(t_2_a, l_2_a, t_2_b, l_2_b, np=self.np)

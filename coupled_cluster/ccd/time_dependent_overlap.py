@@ -1,27 +1,28 @@
-def compute_time_dependent_overlap(t, l, t_t, l_t, np):
-    """Compute the overlap between the time-evolved state and the ground state
-    wavefunction using the bivariational view. That is, we compute
+def compute_overlap(t_1, l_1, t_2, l_2, np):
+    """Compute the overlap between two states or wavefunctions using the
+    bivariational view. If the two states are the same state at different
+    times, then we compute
 
-        P(t, t_0) = |<~Psi(t)|Psi(0)>|^2
-                  = <~Psi(t)|Psi(0)><~Psi(0)|Psi(t)>,
+        P(t_1, t_2) = |<~Psi(t_1)|Psi(t_2)>|^2
+                  = <~Psi(t_2)|Psi(t_1)><~Psi(t_1)|Psi(t_2)>,
 
     where
         <~Psi(t)| = <~Phi|(1 + Lambda(t)) e^{-T(t)}
         |Psi(t)> = e^{T(t)}|Phi>.
 
     We label the two terms:
-        tilde_t = <~Psi(t)|Psi(0)>,
-        tilde_0 = <~Psi(0)|Psi(t)>.
+        tilde_1 = <~Psi(t_1)|Psi(t_2)>,
+        tilde_2 = <~Psi(t_2)|Psi(t_1)>.
     """
-    tilde_t = 1
-    tilde_t += 0.25 * np.tensordot(t, l_t, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
-    tilde_t -= 0.25 * np.tensordot(t_t, l_t, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+    tilde_1 = 1
+    tilde_1 += 0.25 * np.tensordot(t_1, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+    tilde_1 -= 0.25 * np.tensordot(t_2, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
 
-    tilde_0 = 1
-    tilde_0 -= 0.25 * np.tensordot(t, l, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
-    tilde_0 += 0.25 * np.tensordot(t_t, l, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+    tilde_2 = 1
+    tilde_2 -= 0.25 * np.tensordot(t_2, l_1, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+    tilde_2 += 0.25 * np.tensordot(t_1, l_1, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
 
-    return tilde_t * tilde_0
+    return tilde_2 * tilde_1
 
 
 def compute_orbital_adaptive_time_dependent_overlap(t, l, t_t, l_t, np):

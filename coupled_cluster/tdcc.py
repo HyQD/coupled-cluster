@@ -96,7 +96,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def compute_time_dependent_overlap(self, y):
+    def compute_overlap(self, y_a, y_b):
         pass
 
     def compute_right_phase(self, y):
