@@ -31,7 +31,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         if C is None:
             C = self.np.eye(system.l)
         if C_tilde is None:
-            C_tilde = C
+            C_tilde = C.T
 
         assert C.shape == C_tilde.T.shape
 
