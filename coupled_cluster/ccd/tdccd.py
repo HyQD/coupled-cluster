@@ -30,9 +30,6 @@ class TDCCD(TimeDependentCoupledCluster):
         Integrator class instance (RK4, GaussIntegrator)
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @property
     def truncation(self):
         return "CCD"

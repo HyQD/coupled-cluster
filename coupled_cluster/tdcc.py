@@ -2,7 +2,6 @@ import abc
 import collections
 import warnings
 from coupled_cluster.cc_helper import AmplitudeContainer
-from coupled_cluster.integrators import RungeKutta4
 
 
 class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
@@ -15,11 +14,9 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     ----------
     system : QuantumSystem
         Class instance defining the system to be solved
-    integrator : Integrator
-        Integrator class instance (RK4, GaussIntegrator)
     """
 
-    def __init__(self, system, integrator=None):
+    def __init__(self, system):
         self.np = system.np
 
         self.system = system
@@ -30,10 +27,6 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.o = self.system.o
         self.v = self.system.v
 
-        if integrator is None:
-            integrator = RungeKutta4(np=self.np)
-
-        self.integrator = integrator.set_rhs(self)
         self._amp_template = self.construct_amplitude_template()
 
     @property
