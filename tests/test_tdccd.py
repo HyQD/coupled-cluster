@@ -25,9 +25,7 @@ def test_time_dependent_observables(
     tdccd = TDCCD(zanghellini_system)
     r = complex_ode(tdccd).set_integrator("dopri5")  # "GaussIntegrator")
     r.set_initial_value(y0)
-    t0, t2, l2 = ccd.get_amplitudes(get_t_0=True).unpack()
-    print(t0.shape, t2.shape, l2.shape)
-    print(tdccd.system.m, tdccd.system.n)
+
     rho = tdccd.compute_particle_density(y0)
 
     np.testing.assert_allclose(
