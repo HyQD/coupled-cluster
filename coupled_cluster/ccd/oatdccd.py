@@ -9,9 +9,7 @@ from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
-from coupled_cluster.ccd.overlap import (
-    compute_orbital_adaptive_overlap,
-)
+from coupled_cluster.ccd.overlap import compute_orbital_adaptive_overlap
 from coupled_cluster.ccd.p_space_equations import compute_eta
 from coupled_cluster.ccd import OACCD
 

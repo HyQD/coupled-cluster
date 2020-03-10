@@ -23,9 +23,9 @@ def test_time_dependent_observables(
     y0 = ccd.get_amplitudes(get_t_0=True).asarray()
 
     tdccd = TDCCD(zanghellini_system)
-    r = complex_ode(tdccd).set_integrator("dopri5") # "GaussIntegrator")
+    r = complex_ode(tdccd).set_integrator("dopri5")  # "GaussIntegrator")
     r.set_initial_value(y0)
-    t0,t2,l2 = ccd.get_amplitudes(get_t_0=True).unpack()
+    t0, t2, l2 = ccd.get_amplitudes(get_t_0=True).unpack()
     print(t0.shape, t2.shape, l2.shape)
     print(tdccd.system.m, tdccd.system.n)
     rho = tdccd.compute_particle_density(y0)
@@ -39,7 +39,7 @@ def test_time_dependent_observables(
         time_params["t_start"],
         time_params["t_end"],
         time_params["num_timesteps"],
-        retstep=True
+        retstep=True,
     )
 
     psi_overlap = np.zeros(time_params["num_timesteps"])
