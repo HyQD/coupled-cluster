@@ -9,8 +9,8 @@ from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
-from coupled_cluster.ccd.time_dependent_overlap import (
-    compute_orbital_adaptive_time_dependent_overlap,
+from coupled_cluster.ccd.overlap import (
+    compute_orbital_adaptive_overlap,
 )
 from coupled_cluster.ccd.p_space_equations import compute_eta
 from coupled_cluster.ccd import OACCD
@@ -19,6 +19,10 @@ from coupled_cluster.ccd import OACCD
 class OATDCCD(OATDCC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    @property
+    def truncation(self):
+        return "OACCD"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
@@ -84,13 +88,13 @@ class OATDCCD(OATDCC):
             t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
-    def compute_time_dependent_overlap(self, cc):
+    def compute_overlap(self, cc):
         """
         Computes time dependent overlap with respect to a given cc-state
         """
         t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
 
-        return compute_orbital_adaptive_time_dependent_overlap(
+        return compute_orbital_adaptive_overlap(
             cc.t_2, cc.l_2, t_2, l_2, np=self.np
         )
 

@@ -9,7 +9,7 @@ from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
-from coupled_cluster.ccd.time_dependent_overlap import compute_overlap
+from coupled_cluster.ccd.overlap import compute_overlap
 from coupled_cluster.ccd import CCD
 from coupled_cluster.cc_helper import AmplitudeContainer
 
@@ -37,18 +37,6 @@ class TDCCD(TimeDependentCoupledCluster):
     def truncation(self):
         return "CCD"
 
-    def construct_amplitude_template(self):
-        n = self.system.n
-        m = self.system.m
-        return AmplitudeContainer(
-            t=[
-                self.np.array([0], dtype=self.np.complex128),
-                self.np.zeros((m, m, n, n), dtype=self.u.dtype),
-            ],
-            l=[self.np.zeros((n, n, m, m), dtype=self.u.dtype)],
-            np=self.np,
-        )
-
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
 
@@ -65,8 +53,8 @@ class TDCCD(TimeDependentCoupledCluster):
             l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
         )
 
-    def compute_energy(self, t, y):
-        """Computes energy at current time step.
+    def compute_energy(self, y):
+        """Computes energy of a given amplitudes array.
 
         Returns
         -------

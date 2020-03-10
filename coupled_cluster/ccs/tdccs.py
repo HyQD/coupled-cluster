@@ -36,6 +36,10 @@ class TDCCS(TimeDependentCoupledCluster):
     def __init__(self, *args, **kwargs):
         super().__init__(CCS, *args, **kwargs)
 
+    @property
+    def truncation(self):
+        return "CCS"
+
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccs_ground_state_energy(*args, **kwargs)])
 

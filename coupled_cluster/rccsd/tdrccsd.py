@@ -24,6 +24,10 @@ class TDRCCSD(TimeDependentCoupledCluster):
     def __init__(self, *args, **kwargs):
         super().__init__(RCCSD, *args, **kwargs)
 
+    @property
+    def truncation(self):
+        return "CCS"
+
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(
             [
@@ -77,7 +81,7 @@ class TDRCCSD(TimeDependentCoupledCluster):
     def compute_two_body_density_matrix(self):
         pass
 
-    def compute_time_dependent_overlap(self, use_old=False):
+    def compute_overlap(self, use_old=False):
         t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
 
         return compute_time_dependent_overlap(

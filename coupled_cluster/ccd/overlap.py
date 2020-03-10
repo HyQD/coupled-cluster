@@ -19,11 +19,11 @@ def compute_overlap(t_1, l_1, t_2, l_2, np):
     tilde_1 -= 0.25 * np.tensordot(t_2, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
 
     tilde_2 = 1
-    tilde_2 -= 0.25 * np.tensordot(t_2, l_1, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
-    tilde_2 += 0.25 * np.tensordot(t_1, l_1, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+    tilde_2 -= 0.25 * np.tensordot(t_1, l_1, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+    tilde_2 += 0.25 * np.tensordot(t_2, l_1, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
 
     return tilde_2 * tilde_1
 
 
-def compute_orbital_adaptive_time_dependent_overlap(t, l, t_t, l_t, np):
+def compute_orbital_adaptive_overlap(t_1, l_1, t_2, l_2, np):
     raise NotImplementedError("Oh, boy...")

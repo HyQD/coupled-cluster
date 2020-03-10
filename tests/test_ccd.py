@@ -34,8 +34,8 @@ from coupled_cluster.ccd.rhs_l import (
     add_d3g_l,
     compute_l_2_amplitudes,
 )
-from coupled_cluster.ccd.time_dependent_overlap import (
-    compute_time_dependent_overlap,
+from coupled_cluster.ccd.overlap import (
+    compute_overlap,
 )
 from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
@@ -630,7 +630,7 @@ def test_full_l_amplitudes(large_system_ccd):
     np.testing.assert_allclose(out, result, atol=1e-10)
 
 
-def test_compute_time_dependent_overlap():
+def test_compute_overlap():
     n = 10
     m = 20
 
@@ -639,7 +639,7 @@ def test_compute_time_dependent_overlap():
     l = np.random.random((n, n, m, m)) + 1j * np.random.random((n, n, m, m))
     l_t = np.random.random((n, n, m, m)) + 1j * np.random.random((n, n, m, m))
 
-    overlap = compute_time_dependent_overlap(t, l, t_t, l_t, np=np)
+    overlap = compute_overlap(t, l, t_t, l_t, np=np)
 
     tilde_t = 1
     tilde_t += 0.25 * np.einsum("ijab, abij ->", l_t, t)

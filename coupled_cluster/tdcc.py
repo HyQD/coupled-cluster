@@ -48,13 +48,16 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         levels = [codes[c] for c in self.truncation[2:]]
 
         # start with t_0
-        t = [np.array([0], dtype=self.np.complex128)]
+        t = [self.np.array([0], dtype=self.np.complex128)]
         l = []
 
-        for l in levels:
-            shape = l * [m] + l * [n]
-            t.append(self.np.array(shape, dtype=self.np.complex128))
-            l.append(self.np.array(shape[::-1], dtype=self.np.complex128))
+        m = self.system.m
+        n = self.system.n
+
+        for lvl in levels:
+            shape = lvl * [m] + lvl * [n]
+            t.append(self.np.zeros(shape, dtype=self.np.complex128))
+            l.append(self.np.zeros(shape[::-1], dtype=self.np.complex128))
         return AmplitudeContainer(t=t, l=l, np=self.np)
 
     @abc.abstractmethod
