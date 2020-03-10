@@ -23,7 +23,7 @@ def test_time_dependent_observables(
     y0 = ccd.get_amplitudes(get_t_0=True).asarray()
 
     tdccd = TDCCD(zanghellini_system)
-    r = complex_ode(tdccd).set_integrator("dopri5")  # "GaussIntegrator")
+    r = complex_ode(tdccd).set_integrator("dopri5")
     r.set_initial_value(y0)
 
     rho = tdccd.compute_particle_density(y0)
@@ -32,7 +32,6 @@ def test_time_dependent_observables(
         rho, tdccd_zanghellini_ground_state_particle_density, atol=1e-10
     )
 
-    # tdccd.set_initial_conditions()
     time_points, dt = np.linspace(
         time_params["t_start"],
         time_params["t_end"],
@@ -43,22 +42,22 @@ def test_time_dependent_observables(
     psi_overlap = np.zeros(time_params["num_timesteps"])
     td_energies = np.zeros(time_params["num_timesteps"])
 
-    psi_overlap[0] = tdccd.compute_overlap(y0, y0).real
-    td_energies[0] = tdccd.compute_energy(y0).real
-
-    for i, t in enumerate(time_points[:-1]):
-        r.integrate(r.t + dt)
-
+    for i, t in enumerate(time_points):
+        assert abs(time_points[i] - r.t) < 1e-4
         if not r.successful():
             break
 
-        psi_overlap[i + 1] = tdccd.compute_overlap(y0, r.y).real
-        td_energies[i + 1] = tdccd.compute_energy(r.y).real
+        psi_overlap[i] = tdccd.compute_overlap(y0, r.y).real
+        td_energies[i] = tdccd.compute_energy(r.y).real
+
+        # avoid extra integration step
+        if t != time_points[-1]:
+            r.integrate(r.t + dt)
 
     np.testing.assert_allclose(
-        psi_overlap, tdccd_zanghellini_psi_overlap, atol=1e-10
+        psi_overlap, tdccd_zanghellini_psi_overlap, atol=1e-06
     )
 
     np.testing.assert_allclose(
-        td_energies, tdccd_zanghellini_td_energies, atol=1e-10
+        td_energies, tdccd_zanghellini_td_energies, atol=1e-06
     )
