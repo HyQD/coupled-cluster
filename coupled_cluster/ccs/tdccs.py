@@ -33,9 +33,6 @@ class TDCCS(TimeDependentCoupledCluster):
         Integrator class instance (RK4, GaussIntegrator)
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(CCS, *args, **kwargs)
-
     @property
     def truncation(self):
         return "CCS"
@@ -49,12 +46,12 @@ class TDCCS(TimeDependentCoupledCluster):
     def rhs_l_amplitudes(self):
         yield compute_l_1_amplitudes
 
-    def left_reference_overlap(self):
-        t_0, t_1, l_1 = self._amplitudes.unpack()
+    def left_reference_overlap(self, y):
+        t_0, t_1, l_1 = self._amp_template.from_array(y).unpack()
 
         return 1 - self.np.trace(l_1 @ t_1)
 
-    def compute_energy(self):
+    def compute_energy(self, y):
         """Computes energy at current time step.
 
         Returns
@@ -62,13 +59,13 @@ class TDCCS(TimeDependentCoupledCluster):
         float
             Energy
         """
-        t_0, t_1, l_1 = self._amplitudes.unpack()
+        t_0, t_1, l_1 = self._amp_template.from_array(y).unpack()
 
         return compute_time_dependent_energy(
             self.f, self.u, t_1, l_1, self.o, self.v, np=self.np
         )
 
-    def compute_one_body_density_matrix(self):
+    def compute_one_body_density_matrix(self, y):
         """Computes one-body density matrix at
         current time step.
 
@@ -77,13 +74,13 @@ class TDCCS(TimeDependentCoupledCluster):
         np.array
             One-body density matrix
         """
-        t_0, t_1, l_1 = self._amplitudes.unpack()
+        t_0, t_1, l_1 = self._amp_template.from_array(y).unpack()
 
         return compute_one_body_density_matrix(
             t_1, l_1, self.o, self.v, np=self.np
         )
 
-    def compute_two_body_density_matrix(self):
+    def compute_two_body_density_matrix(self, y):
         """Computes two-body density matrix at
         current time step.
 
@@ -93,13 +90,13 @@ class TDCCS(TimeDependentCoupledCluster):
             Two-body density matrix
         """
 
-        t_0, t_1, l_1 = self._amplitudes.unpack()
+        t_0, t_1, l_1 = self._amp_template.from_array(y).unpack()
 
         return compute_two_body_density_matrix(
             t_1, l_1, self.o, self.v, np=self.np
         )
 
-    def compute_time_dependent_overlap(self):
+    def compute_overlap(self, y_a, y_b):
         """Computes overlap of current time-developed
         state with the ground state.
 
@@ -108,8 +105,9 @@ class TDCCS(TimeDependentCoupledCluster):
         np.complex128
             Probability of ground state
         """
-        t_0, t_1, l_1 = self._amplitudes.unpack()
+        t_0_a, t_1_a, l_1_a = self._amp_template.from_array(y_a).unpack()
+        t_0_b, t_1_b, l_1_b = self._amp_template.from_array(y_a).unpack()
 
         return compute_time_dependent_overlap(
-            self.cc.t_1, self.cc.l_1, t_1, l_1, np=self.np
+            t_1_a, l_1_a, t_1_b, l_1_b, np=self.np
         )

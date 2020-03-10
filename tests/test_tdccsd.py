@@ -226,14 +226,14 @@ def test_tdccsd():
 
     ccsd = CCSD(system, verbose=True)
     ccsd.compute_ground_state()
+    assert abs(ccsd.compute_energy() - -2.887_594_831_090_936) < 1e-6
+
     y0 = ccsd.get_amplitudes(get_t_0=True).asarray()
 
     tdccsd = TDCCSD(system)
 
     r = complex_ode(tdccsd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
     r.set_initial_value(y0)
-
-    assert abs(ccsd.compute_energy() - -2.887_594_831_090_936) < 1e-6
 
     polarization = np.zeros(3)
     polarization[2] = 1
