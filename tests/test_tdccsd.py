@@ -7,8 +7,9 @@ import numpy as np
 from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import LaserField
 from coupled_cluster.ccsd.energies import lagrangian_functional
-from coupled_cluster.ccsd import TDCCSD
-from coupled_cluster.integrators import GaussIntegrator
+from coupled_cluster.ccsd import CCSD, TDCCSD
+from gauss_integrator import GaussIntegrator
+from scipy.integrate import complex_ode
 
 
 class LaserPulse:
@@ -223,13 +224,16 @@ def test_tdccsd():
         molecule="he 0.0 0.0 0.0", basis="cc-pvdz"
     )
 
-    integrator = GaussIntegrator(s=3, np=np, eps=1e-6)
-    tdccsd = TDCCSD(system, integrator=integrator, verbose=True)
-    tdccsd.compute_ground_state()
-    assert (
-        abs(tdccsd.compute_ground_state_energy() - -2.887_594_831_090_936)
-        < 1e-6
-    )
+    ccsd = CCSD(system, verbose=True)
+    ccsd.compute_ground_state()
+    y0 = ccsd.get_amplitudes(get_t_0=True).asarray()
+
+    tdccsd = TDCCSD(system)
+
+    r = complex_ode(tdccsd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(y0)
+
+    assert abs(ccsd.compute_energy() - -2.887_594_831_090_936) < 1e-6
 
     polarization = np.zeros(3)
     polarization[2] = 1
@@ -240,7 +244,6 @@ def test_tdccsd():
         )
     )
 
-    tdccsd.set_initial_conditions()
     dt = 1e-3
     T = 1
     num_steps = int(T // dt) + 1
@@ -252,25 +255,29 @@ def test_tdccsd():
     dip_z = np.zeros(len(time_points))
     td_overlap = np.zeros_like(dip_z)
 
-    rho_qp = tdccsd.compute_one_body_density_matrix()
+    rho_qp = tdccsd.compute_one_body_density_matrix(r.y)
     rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
-    td_energies[0] = tdccsd.compute_energy()
+    td_energies[0] = tdccsd.compute_energy(r.y)
     dip_z[0] = np.einsum(
         "qp,pq->", rho_qp_hermitian, system.dipole_moment[2]
     ).real
-    td_overlap[0] = tdccsd.compute_time_dependent_overlap()
+    td_overlap[0] = tdccsd.compute_overlap(y0, r.y)
 
-    for i, c in enumerate(tdccsd.solve(time_points)):
-        td_energies[i + 1] = tdccsd.compute_energy()
+    for i, t in enumerate(time_points[:-1]):
+        r.integrate(r.t + dt)
 
-        rho_qp = tdccsd.compute_one_body_density_matrix()
+        if not r.successful():
+            break
+        td_energies[i + 1] = tdccsd.compute_energy(r.y)
+
+        rho_qp = tdccsd.compute_one_body_density_matrix(r.y)
         rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
         dip_z[i + 1] = np.einsum(
             "qp,pq->", rho_qp_hermitian, system.dipole_moment[2]
         ).real
-        td_overlap[i + 1] = tdccsd.compute_time_dependent_overlap()
+        td_overlap[i + 1] = tdccsd.compute_overlap(y0, r.y)
 
     np.testing.assert_allclose(
         td_energies.real,
@@ -314,22 +321,30 @@ def test_tdccsd_phase():
         )
     )
 
-    integrator = GaussIntegrator(s=3, eps=1e-6, np=np)
+    ccsd = CCSD(system, verbose=True)
+    ccsd.compute_ground_state()
+    y0 = ccsd.get_amplitudes(get_t_0=True).asarray()
 
-    tdccsd = TDCCSD(system, integrator=integrator, verbose=True)
-    tdccsd.compute_ground_state()
-    tdccsd.set_initial_conditions()
+    tdccsd = TDCCSD(system)
+
+    r = complex_ode(tdccsd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(y0)
 
     phase = np.zeros(num_timesteps, dtype=np.complex128)
-    phase[0] = tdccsd.compute_right_phase() * tdccsd.compute_left_phase()
+    phase[0] = tdccsd.compute_right_phase(r.y) * tdccsd.compute_left_phase(r.y)
 
     i = 0
 
     try:
-        for i, amp in enumerate(tdccsd.solve(time_points)):
-            phase[i + 1] = (
-                tdccsd.compute_left_phase() * tdccsd.compute_right_phase()
-            )
+        # for i, amp in enumerate(tdccsd.solve(time_points)):
+        for i, t in enumerate(time_points[:-1]):
+            r.integrate(r.t + dt)
+
+            if not r.successful():
+                break
+            phase[i + 1] = tdccsd.compute_left_phase(
+                r.y
+            ) * tdccsd.compute_right_phase(r.y)
     except AssertionError:
         phase = phase[: i + 1]
         time_points = time_points[: i + 1]
