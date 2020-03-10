@@ -335,39 +335,30 @@ def test_tdccsd_phase():
 
     i = 0
 
-    try:
-        # for i, amp in enumerate(tdccsd.solve(time_points)):
-        for i, t in enumerate(time_points[:-1]):
-            r.integrate(r.t + dt)
+    for i, t in enumerate(time_points[:-1]):
+        r.integrate(r.t + dt)
 
-            if not r.successful():
-                break
-            phase[i + 1] = tdccsd.compute_left_phase(
-                r.y
-            ) * tdccsd.compute_right_phase(r.y)
-    except AssertionError:
-        phase = phase[: i + 1]
-        time_points = time_points[: i + 1]
+        if not r.successful():
+            phase = phase[:i]
+            time_points = time_points[:i]
+            # Should break after 88 points to match data set
+            break
 
-    test_dat = np.loadtxt(
+        phase[i + 1] = tdccsd.compute_left_phase(
+            r.y
+        ) * tdccsd.compute_right_phase(r.y)
+
+    test_dat_real = np.loadtxt(
         os.path.join("tests", "dat", "he_tdccsd_phase_real.dat")
     )[:, 1]
 
-    np.testing.assert_allclose(
-        phase.real,
-        np.loadtxt(os.path.join("tests", "dat", "he_tdccsd_phase_real.dat"))[
-            :, 1
-        ],
-        atol=1e-7,
-    )
+    test_dat_imag = np.loadtxt(
+        os.path.join("tests", "dat", "he_tdccsd_phase_imag.dat")
+    )[:, 1]
+    print(phase.shape, test_dat_real.shape)
 
-    np.testing.assert_allclose(
-        phase.imag,
-        np.loadtxt(os.path.join("tests", "dat", "he_tdccsd_phase_imag.dat"))[
-            :, 1
-        ],
-        atol=1e-7,
-    )
+    np.testing.assert_allclose(phase.real, test_dat_real, atol=1e-7)
+    np.testing.assert_allclose(phase.imag, test_dat_imag, atol=1e-7)
 
 
 if __name__ == "__main__":

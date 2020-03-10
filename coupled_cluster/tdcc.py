@@ -133,7 +133,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         """
         t_0 = self._amp_template.from_array(y).t[0][0]
 
-        return self.np.exp(-t_0) * self.left_reference_overlap()
+        return self.np.exp(-t_0) * self.left_reference_overlap(y)
 
     def compute_reference_weight(self):
         r"""Function computing the weight of the reference state in the
