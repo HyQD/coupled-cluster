@@ -5,9 +5,9 @@ import numpy as np
 from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import LaserField
 
-
-from coupled_cluster.ccd import OATDCCD
-from coupled_cluster.integrators import GaussIntegrator
+from coupled_cluster.ccd import OATDCCD, OACCD
+from gauss_integrator import GaussIntegrator
+from scipy.integrate import complex_ode
 
 
 class LaserPulse:
@@ -144,13 +144,18 @@ def test_oatdccd_helium():
         molecule="he 0.0 0.0 0.0", basis="cc-pvdz"
     )
 
-    integrator = GaussIntegrator(s=3, np=np, eps=1e-6)
-    oatdccd = OATDCCD(system, integrator=integrator, verbose=True)
-    oatdccd.compute_ground_state()
-    assert (
-        abs(oatdccd.compute_ground_state_energy() - -2.887_594_831_090_936)
-        < 1e-6
-    )
+    oaccd = OACCD(system, verbose=True)
+    oaccd.compute_ground_state()
+    assert abs(oaccd.compute_energy() - -2.887_594_831_090_936) < 1e-6
+
+    amps0 = oaccd.get_amplitudes(get_t_0=True)
+    y0 = amps0.asarray()
+    print([v.shape for v in amps0.unpack()])
+
+    oatdccd = OATDCCD(system)
+
+    r = complex_ode(oatdccd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(y0)
 
     polarization = np.zeros(3)
     polarization[2] = 1
@@ -161,7 +166,6 @@ def test_oatdccd_helium():
         )
     )
 
-    oatdccd.set_initial_conditions()
     dt = 1e-3
     T = 1
     num_steps = int(T // dt) + 1
@@ -172,24 +176,28 @@ def test_oatdccd_helium():
     td_energies = np.zeros(len(time_points), dtype=np.complex128)
     dip_z = np.zeros(len(time_points))
 
-    rho_qp = oatdccd.compute_one_body_density_matrix()
+    rho_qp = oatdccd.compute_one_body_density_matrix(r.y)
     rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
-    td_energies[0] = oatdccd.compute_energy()
+    td_energies[0] = oatdccd.compute_energy(r.y)
 
-    t, l, C, C_tilde = oatdccd.amplitudes
+    t, l, C, C_tilde = oatdccd.amplitudes_from_array(r.y)
 
     z = C_tilde @ system.dipole_moment[2] @ C
 
     dip_z[0] = np.einsum("qp,pq->", rho_qp_hermitian, z).real
 
-    for i, amp in enumerate(oatdccd.solve(time_points)):
-        td_energies[i + 1] = oatdccd.compute_energy()
+    for i, t in enumerate(time_points[:-1]):
+        r.integrate(r.t + dt)
 
-        rho_qp = oatdccd.compute_one_body_density_matrix()
+        if not r.successful():
+            break
+        td_energies[i + 1] = oatdccd.compute_energy(r.y)
+
+        rho_qp = oatdccd.compute_one_body_density_matrix(r.y)
         rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
-        t, l, C, C_tilde = amp
+        t, l, C, C_tilde = oatdccd.amplitudes_from_array(r.y)
         z = C_tilde @ system.dipole_moment[2] @ C
 
         dip_z[i + 1] = np.einsum("qp,pq->", rho_qp_hermitian, z).real

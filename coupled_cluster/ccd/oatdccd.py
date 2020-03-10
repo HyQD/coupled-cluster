@@ -20,7 +20,7 @@ class OATDCCD(OATDCC):
 
     @property
     def truncation(self):
-        return "OACCD"
+        return "CCD"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
@@ -31,15 +31,15 @@ class OATDCCD(OATDCC):
     def rhs_l_amplitudes(self):
         yield compute_l_2_amplitudes
 
-    def left_reference_overlap(self):
-        t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
+    def left_reference_overlap(self, y):
+        t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
 
         return 1 - 0.25 * self.np.tensordot(
             l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
         )
 
-    def compute_energy(self):
-        t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
+    def compute_energy(self, y):
+        t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
         return compute_time_dependent_energy(
             self.f_prime,
             self.u_prime,
@@ -72,28 +72,29 @@ class OATDCCD(OATDCC):
             t_2, l_2, self.o_prime, self.v_prime, np=self.np, out=self.rho_qspr
         )
 
-    def compute_one_body_density_matrix(self):
-        t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
+    def compute_one_body_density_matrix(self, y):
+        t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
 
         return compute_one_body_density_matrix(
             t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
-    def compute_two_body_density_matrix(self):
-        t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
+    def compute_two_body_density_matrix(self, y):
+        t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
 
         return compute_two_body_density_matrix(
             t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
-    def compute_overlap(self, cc):
+    def compute_overlap(self, y_a, y_b):
         """
         Computes time dependent overlap with respect to a given cc-state
         """
-        t_0, t_2, l_2, _, _ = self._amplitudes.unpack()
+        t0a, t2a, l2a, _, _ = self._amp_template.from_array(y_a).unpack()
+        t0b, t2b, l2b, _, _ = self._amp_template.from_array(y_b).unpack()
 
         return compute_orbital_adaptive_overlap(
-            cc.t_2, cc.l_2, t_2, l_2, np=self.np
+            t2a, l2a, t2b, l2b, np=self.np
         )
 
     def compute_p_space_equations(self):

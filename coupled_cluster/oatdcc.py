@@ -14,65 +14,39 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     transforming the ground state orbitals to the Hartree-Fock basis.
     """
 
-    def set_initial_conditions(
-        self, cc=None, amplitudes=None, C=None, C_tilde=None, *args, **kwargs
-    ):
-        """Set initial condition of system.
+    def __init__(self, system, C=None, C_tilde=None):
+        self.np = system.np
 
-        Necessary to call this function befor computing time development. Must
-        be passed with either ground state solver or amplitudes, will revert to
-        amplitudes of ground state solver.
+        self.system = system
 
-        args and kwargs sent to ground state solver if amplitudes is None.
-
-        Parameters
-        ----------
-        cc : CoupledCluster (optional)
-            Ground state solver
-        amplitudes : AmplitudeContainer (optional)
-            Amplitudes for the system
-        """
-        if amplitudes is None:
-            if cc is None:
-                raise TypeError(
-                    "must specify either amplitudes or "
-                    + "initialized ground state solver"
-                )
-            # remnant from old
-            if "change_system_basis" not in kwargs:
-                kwargs["change_system_basis"] = True
-            # Compute ground state amplitudes for time-integration
-            # cc.compute_ground_state(*args, **kwargs)
-            amplitudes = cc.get_amplitudes(get_t_0=True)
-
-        if C is None:
-            C = self.np.eye(self.system.l)
-
-        if C_tilde is None:
-            C_tilde = self.np.eye(self.system.l)
-
-        assert C.shape == C_tilde.T.shape
+        # these lines is copy paste from super().__init__, and would be nice to
+        # remove.
+        # See https://github.com/Schoyen/coupled-cluster/issues/36
         self.h = self.system.h
         self.u = self.system.u
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
+        self.o = self.system.o
+        self.v = self.system.v
 
-        self.h_prime = self.system.transform_one_body_elements(
-            self.h, C, C_tilde
+        if C is None:
+            C = self.np.eye(system.l)
+        if C_tilde is None:
+            C_tilde = C
+
+        assert C.shape == C_tilde.T.shape
+
+        n_prime = self.system.n
+        l_prime = C.shape[1]
+        m_prime = l_prime - n_prime
+
+        self.o_prime = slice(0, n_prime)
+        self.v_prime = slice(n_prime, l_prime)
+
+        _amp = self.construct_amplitude_template(
+            self.truncation, n_prime, m_prime, np=self.np
         )
-        self.u_prime = self.system.transform_two_body_elements(
-            self.u, C, C_tilde
-        )
-        self.f_prime = self.system.construct_fock_matrix(
-            self.h_prime, self.u_prime
-        )
-
-        self.n_prime = self.system.n
-        self.l_prime = C.shape[1]
-        self.m_prime = self.l_prime - self.n_prime
-
-        self.o_prime = slice(0, self.n_prime)
-        self.v_prime = slice(self.n_prime, self.l_prime)
-
-        self._amplitudes = OACCVector(*amplitudes, C, C_tilde, np=self.np)
+        self._amp_template = OACCVector(*_amp, C, C_tilde, np=self.np)
+        self.update_hamiltonian(current_time=0, C=C, C_tilde=C_tilde)
 
     @abc.abstractmethod
     def one_body_density_matrix(self, t, l):
@@ -83,23 +57,23 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def compute_time_dependent_overlap(self):
+    def compute_overlap(self):
         """The time-dependent overlap for orbital-adaptive coupled cluster
         changes due to the time-dependent orbitals in the wavefunctions.
         """
         pass
 
-    def compute_particle_density(self):
+    def compute_particle_density(self, y):
         np = self.np
 
-        rho_qp = self.compute_one_body_density_matrix()
+        rho_qp = self.compute_one_body_density_matrix(y)
 
         if np.abs(np.trace(rho_qp) - self.system.n) > 1e-8:
             warn = "Trace of rho_qp = {0} != {1} = number of particles"
             warn = warn.format(np.trace(rho_qp), self.system.n)
             warnings.warn(warn)
 
-        t, l, C, C_tilde = self._amplitudes
+        t, l, C, C_tilde = self._amp_template.from_array(y)
 
         return self.system.compute_particle_density(
             rho_qp, c=C, c_tilde=C_tilde
@@ -109,9 +83,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
-    def update_hamiltonian(self, current_time, amplitudes):
-        C = amplitudes.C
-        C_tilde = amplitudes.C_tilde
+    def update_hamiltonian(self, current_time, C, C_tilde):
 
         # Evolve system in time
         if self.system.has_one_body_time_evolution_operator:
@@ -132,14 +104,14 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             self.h_prime, self.u_prime
         )
 
-    def __call__(self, prev_amp, current_time):
+    def __call__(self, current_time, prev_amp):
         np = self.np
         o_prime, v_prime = self.o_prime, self.v_prime
 
-        prev_amp = OACCVector.from_array(self._amplitudes, prev_amp)
+        prev_amp = self._amp_template.from_array(prev_amp)
         t_old, l_old, C, C_tilde = prev_amp
 
-        self.update_hamiltonian(current_time, prev_amp)
+        self.update_hamiltonian(current_time, C, C_tilde)
 
         # Remove t_0 phase as this is not used in any of the equations
         t_old = t_old[1:]
@@ -149,7 +121,12 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         t_new = [
             -1j
             * rhs_t_func(
-                self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
+                self.f_prime,
+                self.u_prime,
+                *t_old,
+                o_prime,
+                v_prime,
+                np=self.np
             )
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
