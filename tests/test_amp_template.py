@@ -36,8 +36,6 @@ def test_amp_template():
     C_trunc = l * k
 
     a = OATDCCD(gos, C=np.random.random((l, k)))
-    print(n, m, l)
-    print([v.shape for v in a._amp_template.unpack()])
     assert TDCCS(gos)._amp_template.asarray().size == t_0 + t_1 + l_1
     assert TDCCD(gos)._amp_template.asarray().size == t_0 + t_2 + l_2
     assert (
