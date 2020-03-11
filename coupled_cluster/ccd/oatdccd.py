@@ -15,9 +15,6 @@ from coupled_cluster.ccd import OACCD
 
 
 class OATDCCD(OATDCC):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @property
     def truncation(self):
         return "CCD"
