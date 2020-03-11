@@ -128,7 +128,9 @@ def test_tdrccsd_vs_tdccsd():
         reference_weight[i + 1] = (
             0.5 * np.exp(tau0[i + 1])
             + 0.5
-            * (np.exp(-tau0[i + 1]) * tdrccsd.left_reference_overlap(r.y)).conj()
+            * (
+                np.exp(-tau0[i + 1]) * tdrccsd.left_reference_overlap(r.y)
+            ).conj()
         )
 
     dip_z_ccsd = np.load(

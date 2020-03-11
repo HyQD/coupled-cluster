@@ -21,7 +21,6 @@ from coupled_cluster.rccsd.time_dependent_overlap import (
 
 
 class TDRCCSD(TimeDependentCoupledCluster):
-
     @property
     def truncation(self):
         return "CCSD"

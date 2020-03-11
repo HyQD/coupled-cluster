@@ -90,9 +90,7 @@ class OATDCCD(OATDCC):
         t0a, t2a, l2a, _, _ = self._amp_template.from_array(y_a).unpack()
         t0b, t2b, l2b, _, _ = self._amp_template.from_array(y_b).unpack()
 
-        return compute_orbital_adaptive_overlap(
-            t2a, l2a, t2b, l2b, np=self.np
-        )
+        return compute_orbital_adaptive_overlap(t2a, l2a, t2b, l2b, np=self.np)
 
     def compute_p_space_equations(self):
         eta = compute_eta(

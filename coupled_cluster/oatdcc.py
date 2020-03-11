@@ -121,12 +121,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         t_new = [
             -1j
             * rhs_t_func(
-                self.f_prime,
-                self.u_prime,
-                *t_old,
-                o_prime,
-                v_prime,
-                np=self.np
+                self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
             )
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
