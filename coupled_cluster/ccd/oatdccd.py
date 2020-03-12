@@ -31,15 +31,16 @@ class OATDCCD(OATDCC):
     def rhs_l_amplitudes(self):
         yield compute_l_2_amplitudes
 
-    def left_reference_overlap(self, y):
+    def compute_left_reference_overlap(self, current_time, y):
         t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
 
         return 1 - 0.25 * self.np.tensordot(
             l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
         )
 
-    def compute_energy(self, y):
-        t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
+    def compute_energy(self, current_time, y):
+        t_0, t_2, l_2, C, C_tilde = self._amp_template.from_array(y).unpack()
+        self.update_hamiltonian(current_time=current_time, y=y)
         return compute_time_dependent_energy(
             self.f_prime,
             self.u_prime,
@@ -72,30 +73,28 @@ class OATDCCD(OATDCC):
             t_2, l_2, self.o_prime, self.v_prime, np=self.np, out=self.rho_qspr
         )
 
-    def compute_one_body_density_matrix(self, y):
+    def compute_one_body_density_matrix(self, current_time, y):
         t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
 
         return compute_one_body_density_matrix(
             t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
-    def compute_two_body_density_matrix(self, y):
+    def compute_two_body_density_matrix(self, current_time, y):
         t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
 
         return compute_two_body_density_matrix(
             t_2, l_2, self.o_prime, self.v_prime, np=self.np
         )
 
-    def compute_overlap(self, y_a, y_b):
+    def compute_overlap(self, current_time, y_a, y_b):
         """
         Computes time dependent overlap with respect to a given cc-state
         """
         t0a, t2a, l2a, _, _ = self._amp_template.from_array(y_a).unpack()
         t0b, t2b, l2b, _, _ = self._amp_template.from_array(y_b).unpack()
 
-        return compute_orbital_adaptive_overlap(
-            t2a, l2a, t2b, l2b, np=self.np
-        )
+        return compute_orbital_adaptive_overlap(t2a, l2a, t2b, l2b, np=self.np)
 
     def compute_p_space_equations(self):
         eta = compute_eta(

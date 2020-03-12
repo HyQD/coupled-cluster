@@ -43,14 +43,14 @@ class TDCCD(TimeDependentCoupledCluster):
     def rhs_l_amplitudes(self):
         yield compute_l_2_amplitudes
 
-    def left_reference_overlap(self, y):
+    def compute_left_reference_overlap(self, current_time, y):
         t_0, t_2, l_2 = self._amp_template.from_array(y).unpack()
 
         return 1 - 0.25 * self.np.tensordot(
             l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
         )
 
-    def compute_energy(self, y):
+    def compute_energy(self, current_time, y):
         """Computes energy of a given amplitudes array.
 
         Returns
@@ -60,12 +60,13 @@ class TDCCD(TimeDependentCoupledCluster):
         """
 
         t_0, t_2, l_2 = self._amp_template.from_array(y).unpack()
+        self.update_hamiltonian(current_time, y)
 
         return compute_time_dependent_energy(
             self.f, self.u, t_2, l_2, self.o, self.v, np=self.np
         )
 
-    def compute_one_body_density_matrix(self, y):
+    def compute_one_body_density_matrix(self, current_time, y):
         """Computes one-body density matrix 
 
         Returns
@@ -79,7 +80,7 @@ class TDCCD(TimeDependentCoupledCluster):
             t_2, l_2, self.o, self.v, np=self.np
         )
 
-    def compute_two_body_density_matrix(self, y):
+    def compute_two_body_density_matrix(self, current_time, y):
         """Computes two-body density matrix at
         current time step.
 
@@ -95,7 +96,7 @@ class TDCCD(TimeDependentCoupledCluster):
             t_2, l_2, self.o, self.v, np=self.np
         )
 
-    def compute_overlap(self, y_a, y_b):
+    def compute_overlap(self, current_time, y_a, y_b):
         """Computes overlap of current two states a and b.
 
         Parameters

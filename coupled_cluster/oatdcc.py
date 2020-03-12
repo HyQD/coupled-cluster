@@ -57,16 +57,16 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def compute_overlap(self):
+    def compute_overlap(self, current_time, y_a, y_b):
         """The time-dependent overlap for orbital-adaptive coupled cluster
         changes due to the time-dependent orbitals in the wavefunctions.
         """
         pass
 
-    def compute_particle_density(self, y):
+    def compute_particle_density(self, current_time, y):
         np = self.np
 
-        rho_qp = self.compute_one_body_density_matrix(y)
+        rho_qp = self.compute_one_body_density_matrix(current_time, y)
 
         if np.abs(np.trace(rho_qp) - self.system.n) > 1e-8:
             warn = "Trace of rho_qp = {0} != {1} = number of particles"
@@ -83,7 +83,16 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
-    def update_hamiltonian(self, current_time, C, C_tilde):
+    def update_hamiltonian(self, current_time, y=None, C=None, C_tilde=None):
+        if y is not None:
+            _, _, C, C_tilde = self._amp_template.from_array(y)
+        elif C is not None and C_tilde is not None:
+            pass
+        else:
+            raise ValueError(
+                "either the amplitude-array or (C and C_tilde) has to be not "
+                + "None."
+            )
 
         # Evolve system in time
         if self.system.has_one_body_time_evolution_operator:
@@ -111,7 +120,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         prev_amp = self._amp_template.from_array(prev_amp)
         t_old, l_old, C, C_tilde = prev_amp
 
-        self.update_hamiltonian(current_time, C, C_tilde)
+        self.update_hamiltonian(current_time, C=C, C_tilde=C_tilde)
 
         # Remove t_0 phase as this is not used in any of the equations
         t_old = t_old[1:]
@@ -121,12 +130,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         t_new = [
             -1j
             * rhs_t_func(
-                self.f_prime,
-                self.u_prime,
-                *t_old,
-                o_prime,
-                v_prime,
-                np=self.np
+                self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
             )
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
@@ -171,7 +175,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         here that expm refers to the matrix exponential which I can not find in
         numpy only in scipy.
         """
-        rho_pq_inv = self.np.linalg.inv(self.rho_qp)
+        # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
 

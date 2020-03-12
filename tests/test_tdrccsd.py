@@ -98,15 +98,18 @@ def test_tdrccsd_vs_tdccsd():
 
     # Set initial values
     t, l = amps0
-    energy[0] = tdrccsd.compute_energy(r.y)
-    rho_qp = tdrccsd.compute_one_body_density_matrix(r.y)
+    energy[0] = tdrccsd.compute_energy(r.t, r.y)
+    rho_qp = tdrccsd.compute_one_body_density_matrix(r.t, r.y)
     z = system.dipole_moment[polarization_direction].copy()
     dip_z[0] = np.trace(np.dot(rho_qp, z))
     tau0[0] = t[0][0]
-    auto_corr[0] = tdrccsd.compute_overlap(y0, r.y)
+    auto_corr[0] = tdrccsd.compute_overlap(r.t, y0, r.y)
     reference_weight[0] = (
         0.5 * np.exp(tau0[0])
-        + 0.5 * (np.exp(-tau0[0]) * tdrccsd.left_reference_overlap(r.y)).conj()
+        + 0.5
+        * (
+            np.exp(-tau0[0]) * tdrccsd.compute_left_reference_overlap(r.t, r.y)
+        ).conj()
     )
 
     # for i, amp in tqdm.tqdm(
@@ -119,16 +122,19 @@ def test_tdrccsd_vs_tdccsd():
             break
         # use amps0 as template
         t, l = amps0.from_array(r.y)
-        energy[i + 1] = tdrccsd.compute_energy(r.y)
-        rho_qp = tdrccsd.compute_one_body_density_matrix(r.y)
+        energy[i + 1] = tdrccsd.compute_energy(r.t, r.y)
+        rho_qp = tdrccsd.compute_one_body_density_matrix(r.t, r.y)
         z = system.dipole_moment[polarization_direction].copy()
         dip_z[i + 1] = np.trace(np.dot(rho_qp, z))
         tau0[i + 1] = t[0][0]
-        auto_corr[i + 1] = tdrccsd.compute_overlap(y0, r.y)
+        auto_corr[i + 1] = tdrccsd.compute_overlap(r.t, y0, r.y)
         reference_weight[i + 1] = (
             0.5 * np.exp(tau0[i + 1])
             + 0.5
-            * (np.exp(-tau0[i + 1]) * tdrccsd.left_reference_overlap(r.y)).conj()
+            * (
+                np.exp(-tau0[i + 1])
+                * tdrccsd.compute_left_reference_overlap(r.t, r.y)
+            ).conj()
         )
 
     dip_z_ccsd = np.load(

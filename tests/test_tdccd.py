@@ -26,7 +26,7 @@ def test_time_dependent_observables(
     r = complex_ode(tdccd).set_integrator("dopri5")
     r.set_initial_value(y0)
 
-    rho = tdccd.compute_particle_density(y0)
+    rho = tdccd.compute_particle_density(0, y0)
 
     np.testing.assert_allclose(
         rho, tdccd_zanghellini_ground_state_particle_density, atol=1e-10
@@ -47,8 +47,8 @@ def test_time_dependent_observables(
         if not r.successful():
             break
 
-        psi_overlap[i] = tdccd.compute_overlap(y0, r.y).real
-        td_energies[i] = tdccd.compute_energy(r.y).real
+        psi_overlap[i] = tdccd.compute_overlap(r.t, y0, r.y).real
+        td_energies[i] = tdccd.compute_energy(r.t, r.y).real
 
         # avoid extra integration step
         if t != time_points[-1]:

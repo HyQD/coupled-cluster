@@ -176,10 +176,10 @@ def test_oatdccd_helium():
     td_energies = np.zeros(len(time_points), dtype=np.complex128)
     dip_z = np.zeros(len(time_points))
 
-    rho_qp = oatdccd.compute_one_body_density_matrix(r.y)
+    rho_qp = oatdccd.compute_one_body_density_matrix(r.t, r.y)
     rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
-    td_energies[0] = oatdccd.compute_energy(r.y)
+    td_energies[0] = oatdccd.compute_energy(r.t, r.y)
 
     t, l, C, C_tilde = oatdccd.amplitudes_from_array(r.y)
 
@@ -192,9 +192,9 @@ def test_oatdccd_helium():
 
         if not r.successful():
             break
-        td_energies[i + 1] = oatdccd.compute_energy(r.y)
+        td_energies[i + 1] = oatdccd.compute_energy(r.t, r.y)
 
-        rho_qp = oatdccd.compute_one_body_density_matrix(r.y)
+        rho_qp = oatdccd.compute_one_body_density_matrix(r.t, r.y)
         rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
 
         t, l, C, C_tilde = oatdccd.amplitudes_from_array(r.y)

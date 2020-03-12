@@ -21,7 +21,6 @@ from coupled_cluster.rccsd.time_dependent_overlap import (
 
 
 class TDRCCSD(TimeDependentCoupledCluster):
-
     @property
     def truncation(self):
         return "CCSD"
@@ -42,7 +41,7 @@ class TDRCCSD(TimeDependentCoupledCluster):
         yield compute_l_1_amplitudes
         yield compute_l_2_amplitudes
 
-    def left_reference_overlap(self, y):
+    def compute_left_reference_overlap(self, current_time, y):
         np = self.np
 
         t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
@@ -54,8 +53,10 @@ class TDRCCSD(TimeDependentCoupledCluster):
 
         return val
 
-    def compute_energy(self, y):
+    def compute_energy(self, current_time, y):
         t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
+
+        self.update_hamiltonian(current_time, y)
 
         return compute_time_dependent_energy(
             self.f,
@@ -69,17 +70,17 @@ class TDRCCSD(TimeDependentCoupledCluster):
             np=self.np,
         )
 
-    def compute_one_body_density_matrix(self, y):
+    def compute_one_body_density_matrix(self, current_time, y):
         t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
         return compute_one_body_density_matrix(
             t_1, t_2, l_1, l_2, self.o, self.v, np=self.np
         )
 
     # TODO: Implement this?
-    def compute_two_body_density_matrix(self):
+    def compute_two_body_density_matrix(self, current_time, y):
         pass
 
-    def compute_overlap(self, y_a, y_b, use_old=False):
+    def compute_overlap(self, current_time, y_a, y_b, use_old=False):
         t0a, t1a, t2a, l1a, l2a = self._amp_template.from_array(y_a).unpack()
         t0a, t1a, t2a, l1a, l2a = self._amp_template.from_array(y_b).unpack()
 

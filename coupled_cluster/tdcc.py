@@ -84,22 +84,22 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def compute_energy(self, y):
+    def compute_energy(self, current_time, y):
         pass
 
     @abc.abstractmethod
-    def compute_one_body_density_matrix(self, y):
+    def compute_one_body_density_matrix(self, current_time, y):
         pass
 
     @abc.abstractmethod
-    def compute_two_body_density_matrix(self, y):
+    def compute_two_body_density_matrix(self, current_time, y):
         pass
 
     @abc.abstractmethod
-    def compute_overlap(self, y_a, y_b):
+    def compute_overlap(self, current_time, y_a, y_b):
         pass
 
-    def compute_right_phase(self, y):
+    def compute_right_phase(self, current_time, y):
         r"""Function computing the inner product of the (potentially
         time-dependent) reference state and the right coupled-cluster wave
         function.
@@ -118,7 +118,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return self.np.exp(t_0)
 
-    def compute_left_phase(self, y):
+    def compute_left_phase(self, current_time, y):
         r"""Function computing the inner product of the (potentially
         time-dependent) reference state and the left coupled-cluster wave
         function.
@@ -137,7 +137,9 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         """
         t_0 = self._amp_template.from_array(y).t[0][0]
 
-        return self.np.exp(-t_0) * self.left_reference_overlap(y)
+        return self.np.exp(-t_0) * self.compute_left_reference_overlap(
+            current_time, y
+        )
 
     def compute_reference_weight(self):
         r"""Function computing the weight of the reference state in the
@@ -157,16 +159,17 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return 0.25 * (
             self.np.abs(
-                self.compute_right_phase() + self.compute_left_phase().conj()
+                self.compute_right_phase(current_time, y)
+                + self.compute_left_phase(current_time, y).conj()
             )
             ** 2
         )
 
     @abc.abstractmethod
-    def left_reference_overlap(self):
+    def compute_left_reference_overlap(self, current_time, y):
         pass
 
-    def compute_particle_density(self, y):
+    def compute_particle_density(self, current_time, y):
         """Computes current one-body density
 
         Returns
@@ -176,7 +179,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         """
         np = self.np
 
-        rho_qp = self.compute_one_body_density_matrix(y)
+        rho_qp = self.compute_one_body_density_matrix(current_time, y)
 
         if np.abs(np.trace(rho_qp) - self.system.n) > 1e-8:
             warn = "Trace of rho_qp = {0} != {1} = number of particles"
@@ -185,7 +188,8 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return self.system.compute_particle_density(rho_qp)
 
-    def update_hamiltonian(self, current_time, amplitudes):
+    def update_hamiltonian(self, current_time, y):
+
         if self.system.has_one_body_time_evolution_operator:
             self.h = self.system.h_t(current_time)
 
