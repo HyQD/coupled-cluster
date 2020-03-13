@@ -159,29 +159,24 @@
 <h2>Time-dependent coupled-cluster parent class<a class="headerlink" href="#time-dependent-coupled-cluster-parent-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.tdcc.</code><code class="sig-name descname">TimeDependentCoupledCluster</code><span class="sig-paren">(</span><em class="sig-param">cc</em>, <em class="sig-param">system</em>, <em class="sig-param">integrator=None</em>, <em class="sig-param">**cc_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.tdcc.</code><code class="sig-name descname">TimeDependentCoupledCluster</code><span class="sig-paren">(</span><em class="sig-param">system</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time Dependent Coupled Cluster Parent Class</p>
 <p>Abstract base class defining the skeleton of a time-dependent Coupled
 Cluster solver class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cc</strong> (<a class="reference internal" href="ground_state.html#coupled_cluster.cc.CoupledCluster" title="coupled_cluster.cc.CoupledCluster"><em>CoupledCluster</em></a>) – Class instance defining the ground state solver</p></li>
-<li><p><strong>system</strong> (<em>QuantumSystem</em>) – Class instance defining the system to be solved</p></li>
-<li><p><strong>integrator</strong> (<a class="reference internal" href="integrators.html#coupled_cluster.integrators.Integrator" title="coupled_cluster.integrators.Integrator"><em>Integrator</em></a>) – Integrator class instance (RK4, GaussIntegrator)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>system</strong> (<em>QuantumSystem</em>) – Class instance defining the system to be solved</p>
 </dd>
 </dl>
 <dl class="method">
-<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_ground_state">
-<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_ground_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calls on method from CoupledCluster class to compute
-ground state of system.</p>
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.amplitudes_from_array">
+<code class="sig-name descname">amplitudes_from_array</code><span class="sig-paren">(</span><em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.amplitudes_from_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct AmplitudeContainer from numpy array.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_left_phase">
-<code class="sig-name descname">compute_left_phase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_left_phase" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compute_left_phase</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_left_phase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the inner product of the (potentially
 time-dependent) reference state and the left coupled-cluster wave
 function.
@@ -203,7 +198,7 @@ That is,</p>
 
 <dl class="method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density">
-<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes current one-body density</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -237,7 +232,7 @@ time-evolved coupled-cluster wave function. This is given by</p>
 
 <dl class="method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase">
-<code class="sig-name descname">compute_right_phase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compute_right_phase</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the inner product of the (potentially
 time-dependent) reference state and the right coupled-cluster wave
 function.
@@ -253,6 +248,13 @@ That is,</p>
 <dd class="field-even"><p>complex128</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.construct_amplitude_template">
+<em class="property">static </em><code class="sig-name descname">construct_amplitude_template</code><span class="sig-paren">(</span><em class="sig-param">truncation</em>, <em class="sig-param">n</em>, <em class="sig-param">m</em>, <em class="sig-param">np</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.construct_amplitude_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs an empty AmplitudeContainer with the correct shapes, for
+convertion between arrays and amplitudes.</p>
 </dd></dl>
 
 <dl class="method">
@@ -279,20 +281,6 @@ yield compute_t_2_amplitudes</p>
 </div></blockquote>
 </dd></dl>
 
-<dl class="method">
-<dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.set_initial_conditions">
-<code class="sig-name descname">set_initial_conditions</code><span class="sig-paren">(</span><em class="sig-param">amplitudes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.set_initial_conditions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set initial condition of system.</p>
-<p>Necessary to call this function befor computing
-time development. Can be passed without arguments,
-will revert to amplitudes of ground state solver.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>amplitudes</strong> (<em>AmplitudeContainer</em>) – Amplitudes for the system</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -300,14 +288,13 @@ will revert to amplitudes of ground state solver.</p>
 <h2>TDCCD<a class="headerlink" href="#tdccd" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="coupled_cluster.ccd.TDCCD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">TDCCD</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">TDCCD</code><span class="sig-paren">(</span><em class="sig-param">system</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time Dependent Coupled Cluster Doubles</p>
 <p>Computes time development of system, employed coupled
 cluster method with double exctiations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cc</strong> (<a class="reference internal" href="ground_state.html#coupled_cluster.cc.CoupledCluster" title="coupled_cluster.cc.CoupledCluster"><em>CoupledCluster</em></a>) – Class instance defining the ground state solver</p></li>
 <li><p><strong>system</strong> (<em>QuantumSystem</em>) – Class instance defining the system to be solved</p></li>
 <li><p><strong>np</strong> (<em>module</em>) – Matrix/linear algebra library to be uses, like numpy or cupy</p></li>
 <li><p><strong>integrator</strong> (<a class="reference internal" href="integrators.html#coupled_cluster.integrators.Integrator" title="coupled_cluster.integrators.Integrator"><em>Integrator</em></a>) – Integrator class instance (RK4, GaussIntegrator)</p></li>
@@ -316,8 +303,8 @@ cluster method with double exctiations.</p>
 </dl>
 <dl class="method">
 <dt id="coupled_cluster.ccd.TDCCD.compute_energy">
-<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_energy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes energy at current time step.</p>
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes energy of a given amplitudes array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Energy</p>
@@ -330,9 +317,8 @@ cluster method with double exctiations.</p>
 
 <dl class="method">
 <dt id="coupled_cluster.ccd.TDCCD.compute_one_body_density_matrix">
-<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes one-body density matrix at
-current time step.</p>
+<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes one-body density matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>One-body density matrix</p>
@@ -344,23 +330,28 @@ current time step.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="coupled_cluster.ccd.TDCCD.compute_time_dependent_overlap">
-<code class="sig-name descname">compute_time_dependent_overlap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_time_dependent_overlap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes overlap of current time-developed
-state with the ground state.</p>
+<dt id="coupled_cluster.ccd.TDCCD.compute_overlap">
+<code class="sig-name descname">compute_overlap</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y_a</em>, <em class="sig-param">y_b</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes overlap of current two states a and b.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Probability of ground state</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_a</strong> (<em>np array</em>) – Array of amplitudes of state a</p></li>
+<li><p><strong>y_a</strong> – Array of amplitudes of state b</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.complex128</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Probability of ground state</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.complex128</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="coupled_cluster.ccd.TDCCD.compute_two_body_density_matrix">
-<code class="sig-name descname">compute_two_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_two_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compute_two_body_density_matrix</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_two_body_density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes two-body density matrix at
 current time step.</p>
 <dl class="field-list simple">
@@ -404,7 +395,7 @@ yield compute_t_2_amplitudes</p>
 <h2>TDCCSD<a class="headerlink" href="#tdccsd" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="coupled_cluster.ccsd.TDCCSD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccsd.</code><code class="sig-name descname">TDCCSD</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccsd.</code><code class="sig-name descname">TDCCSD</code><span class="sig-paren">(</span><em class="sig-param">system</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="coupled_cluster.ccsd.TDCCSD.rhs_l_amplitudes">
 <code class="sig-name descname">rhs_l_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
@@ -436,22 +427,22 @@ yield compute_t_2_amplitudes</p>
 <h2>Orbital-adaptive time-dependent coupled-cluster parent class<a class="headerlink" href="#orbital-adaptive-time-dependent-coupled-cluster-parent-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="coupled_cluster.oatdcc.OATDCC">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.oatdcc.</code><code class="sig-name descname">OATDCC</code><span class="sig-paren">(</span><em class="sig-param">cc</em>, <em class="sig-param">system</em>, <em class="sig-param">integrator=None</em>, <em class="sig-param">**cc_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.oatdcc.</code><code class="sig-name descname">OATDCC</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">C=None</em>, <em class="sig-param">C_tilde=None</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract base class defining the skeleton of an orbital-adaptive
 time-dependent coupled cluster solver class.</p>
 <p>Note that this solver _only_ supports a basis of orthonomal orbitals. If the
 original atomic orbitals are not orthonormal, this can solved done by
 transforming the ground state orbitals to the Hartree-Fock basis.</p>
 <dl class="method">
-<dt id="coupled_cluster.oatdcc.OATDCC.compute_ground_state">
-<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_ground_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calls on method from CoupledCluster class to compute
-ground state of system.</p>
+<dt id="coupled_cluster.oatdcc.OATDCC.compute_overlap">
+<em class="property">abstract </em><code class="sig-name descname">compute_overlap</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y_a</em>, <em class="sig-param">y_b</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time-dependent overlap for orbital-adaptive coupled cluster
+changes due to the time-dependent orbitals in the wavefunctions.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="coupled_cluster.oatdcc.OATDCC.compute_particle_density">
-<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_particle_density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes current one-body density</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -463,27 +454,6 @@ ground state of system.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="coupled_cluster.oatdcc.OATDCC.compute_time_dependent_overlap">
-<em class="property">abstract </em><code class="sig-name descname">compute_time_dependent_overlap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_time_dependent_overlap" title="Permalink to this definition">¶</a></dt>
-<dd><p>The time-dependent overlap for orbital-adaptive coupled cluster
-changes due to the time-dependent orbitals in the wavefunctions.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="coupled_cluster.oatdcc.OATDCC.set_initial_conditions">
-<code class="sig-name descname">set_initial_conditions</code><span class="sig-paren">(</span><em class="sig-param">amplitudes=None</em>, <em class="sig-param">C=None</em>, <em class="sig-param">C_tilde=None</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.set_initial_conditions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set initial condition of system.</p>
-<p>Necessary to call this function befor computing
-time development. Can be passed without arguments,
-will revert to amplitudes of ground state solver.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>amplitudes</strong> (<em>AmplitudeContainer</em>) – Amplitudes for the system</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -491,12 +461,11 @@ will revert to amplitudes of ground state solver.</p>
 <h2>OATDCCD<a class="headerlink" href="#oatdccd" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="coupled_cluster.ccd.OATDCCD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">OATDCCD</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">OATDCCD</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">C=None</em>, <em class="sig-param">C_tilde=None</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="coupled_cluster.ccd.OATDCCD.compute_time_dependent_overlap">
-<code class="sig-name descname">compute_time_dependent_overlap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD.compute_time_dependent_overlap" title="Permalink to this definition">¶</a></dt>
-<dd><p>The time-dependent overlap for orbital-adaptive coupled cluster
-changes due to the time-dependent orbitals in the wavefunctions.</p>
+<dt id="coupled_cluster.ccd.OATDCCD.compute_overlap">
+<code class="sig-name descname">compute_overlap</code><span class="sig-paren">(</span><em class="sig-param">current_time</em>, <em class="sig-param">y_a</em>, <em class="sig-param">y_b</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD.compute_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes time dependent overlap with respect to a given cc-state</p>
 </dd></dl>
 
 <dl class="method">
