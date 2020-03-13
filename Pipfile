@@ -20,3 +20,4 @@ Sphinx = "*"
 black = "*"
 quantum-systems = {editable = true,git = "https://github.com/Schoyen/quantum-systems.git"}
 tdhf = {editable = true,git = "ssh://git@github.com/haakoek/TDHF.git"}
+gauss-integrator = {editable = true,git = "ssh://git@github.com/Schoyen/gauss-integrator.git"}

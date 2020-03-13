@@ -1,11 +1,13 @@
-from quantum_systems import construct_pyscf_system_rhf
-from coupled_cluster.integrators import GaussIntegrator, RungeKutta4
 import numpy as np
-from quantum_systems.time_evolution_operators import LaserField
-from coupled_cluster.rccsd import TDRCCSD
 import tqdm
 import matplotlib.pyplot as plt
 import os
+
+from quantum_systems import construct_pyscf_system_rhf
+from quantum_systems.time_evolution_operators import LaserField
+from coupled_cluster.rccsd import RCCSD, TDRCCSD
+from gauss_integrator import GaussIntegrator
+from scipy.integrate import complex_ode
 
 
 class sine_square_laser:
@@ -66,17 +68,23 @@ def test_tdrccsd_vs_tdccsd():
     s = 3
     eps = 1e-5
     dt = 1e-1
-    integrator = GaussIntegrator(s=s, np=np, eps=eps)
 
     cc_kwargs = dict(verbose=False)
-    tdrccsd = TDRCCSD(system, integrator=integrator, **cc_kwargs)
+    rccsd = RCCSD(system, **cc_kwargs)
 
     ground_state_tolerance = 1e-8
-    tdrccsd.compute_ground_state(
+    rccsd.compute_ground_state(
         t_kwargs=dict(tol=ground_state_tolerance),
         l_kwargs=dict(tol=ground_state_tolerance),
     )
-    tdrccsd.set_initial_conditions()
+
+    amps0 = rccsd.get_amplitudes(get_t_0=True)
+    y0 = amps0.asarray()
+
+    tdrccsd = TDRCCSD(system)
+
+    r = complex_ode(tdrccsd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(y0)
 
     num_steps = int(tfinal / dt) + 1
     time_points = np.linspace(0, tfinal, num_steps)
@@ -89,32 +97,44 @@ def test_tdrccsd_vs_tdccsd():
     reference_weight = np.zeros(num_steps, dtype=np.complex128)
 
     # Set initial values
-    t, l = tdrccsd.amplitudes
-    energy[0] = tdrccsd.compute_energy()
-    rho_qp = tdrccsd.compute_one_body_density_matrix()
+    t, l = amps0
+    energy[0] = tdrccsd.compute_energy(r.t, r.y)
+    rho_qp = tdrccsd.compute_one_body_density_matrix(r.t, r.y)
     z = system.dipole_moment[polarization_direction].copy()
     dip_z[0] = np.trace(np.dot(rho_qp, z))
     tau0[0] = t[0][0]
-    auto_corr[0] = tdrccsd.compute_time_dependent_overlap()
+    auto_corr[0] = tdrccsd.compute_overlap(r.t, y0, r.y)
     reference_weight[0] = (
         0.5 * np.exp(tau0[0])
-        + 0.5 * (np.exp(-tau0[0]) * tdrccsd.left_reference_overlap()).conj()
+        + 0.5
+        * (
+            np.exp(-tau0[0]) * tdrccsd.compute_left_reference_overlap(r.t, r.y)
+        ).conj()
     )
 
-    for i, amp in tqdm.tqdm(
-        enumerate(tdrccsd.solve(time_points)), total=num_steps - 1
-    ):
-        t, l = amp
-        energy[i + 1] = tdrccsd.compute_energy()
-        rho_qp = tdrccsd.compute_one_body_density_matrix()
+    # for i, amp in tqdm.tqdm(
+    #     enumerate(tdrccsd.solve(time_points)), total=num_steps - 1
+    # ):
+    for i, _t in enumerate(time_points[:-1]):
+        r.integrate(r.t + dt)
+
+        if not r.successful():
+            break
+        # use amps0 as template
+        t, l = amps0.from_array(r.y)
+        energy[i + 1] = tdrccsd.compute_energy(r.t, r.y)
+        rho_qp = tdrccsd.compute_one_body_density_matrix(r.t, r.y)
         z = system.dipole_moment[polarization_direction].copy()
         dip_z[i + 1] = np.trace(np.dot(rho_qp, z))
         tau0[i + 1] = t[0][0]
-        auto_corr[i + 1] = tdrccsd.compute_time_dependent_overlap()
+        auto_corr[i + 1] = tdrccsd.compute_overlap(r.t, y0, r.y)
         reference_weight[i + 1] = (
             0.5 * np.exp(tau0[i + 1])
             + 0.5
-            * (np.exp(-tau0[i + 1]) * tdrccsd.left_reference_overlap()).conj()
+            * (
+                np.exp(-tau0[i + 1])
+                * tdrccsd.compute_left_reference_overlap(r.t, r.y)
+            ).conj()
         )
 
     dip_z_ccsd = np.load(

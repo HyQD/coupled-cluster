@@ -21,8 +21,9 @@ from coupled_cluster.rccsd.time_dependent_overlap import (
 
 
 class TDRCCSD(TimeDependentCoupledCluster):
-    def __init__(self, *args, **kwargs):
-        super().__init__(RCCSD, *args, **kwargs)
+    @property
+    def truncation(self):
+        return "CCSD"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(
@@ -40,10 +41,10 @@ class TDRCCSD(TimeDependentCoupledCluster):
         yield compute_l_1_amplitudes
         yield compute_l_2_amplitudes
 
-    def left_reference_overlap(self):
+    def compute_left_reference_overlap(self, current_time, y):
         np = self.np
 
-        t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
+        t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
 
         val = 1
         val -= 0.5 * np.einsum("ijab,abij->", l_2, t_2)
@@ -52,8 +53,10 @@ class TDRCCSD(TimeDependentCoupledCluster):
 
         return val
 
-    def compute_energy(self):
-        t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
+    def compute_energy(self, current_time, y):
+        t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
+
+        self.update_hamiltonian(current_time, y)
 
         return compute_time_dependent_energy(
             self.f,
@@ -67,29 +70,30 @@ class TDRCCSD(TimeDependentCoupledCluster):
             np=self.np,
         )
 
-    def compute_one_body_density_matrix(self):
-        t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
+    def compute_one_body_density_matrix(self, current_time, y):
+        t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
         return compute_one_body_density_matrix(
             t_1, t_2, l_1, l_2, self.o, self.v, np=self.np
         )
 
     # TODO: Implement this?
-    def compute_two_body_density_matrix(self):
+    def compute_two_body_density_matrix(self, current_time, y):
         pass
 
-    def compute_time_dependent_overlap(self, use_old=False):
-        t_0, t_1, t_2, l_1, l_2 = self._amplitudes.unpack()
+    def compute_overlap(self, current_time, y_a, y_b, use_old=False):
+        t0a, t1a, t2a, l1a, l2a = self._amp_template.from_array(y_a).unpack()
+        t0b, t1b, t2b, l1b, l2b = self._amp_template.from_array(y_b).unpack()
 
         return compute_time_dependent_overlap(
-            self.cc.t_1,
-            self.cc.t_2,
-            self.cc.l_1,
-            self.cc.l_2,
-            t_0,
-            t_1,
-            t_2,
-            l_1,
-            l_2,
+            t1a,
+            t2a,
+            l1a,
+            l2a,
+            t0b,
+            t1b,
+            t2b,
+            l1b,
+            l2b,
             np=self.np,
             use_old=use_old,
         )

@@ -4,6 +4,7 @@ from coupled_cluster.ccd.ccd import CCD
 from coupled_cluster.cc_helper import (
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
+    OACCVector,
 )
 
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
@@ -42,6 +43,24 @@ class OACCD(CCD):
 
         self.kappa_up = np.zeros((m, n), dtype=self.t_2.dtype)
         self.kappa_down = np.zeros((n, m), dtype=self.t_2.dtype)
+
+    def get_amplitudes(self, get_t_0=False):
+        """Getter for amplitudes, overwrites CC.get_amplitudes to also include
+        coefficients.
+
+        Parameters
+        ----------
+        get_t_0 : bool
+            Returns amplitude at t=0 if True
+
+        Returns
+        -------
+        OACCVector
+            Amplitudes and coefficients in OACCVector object
+        """
+
+        amps = super().get_amplitudes(get_t_0=get_t_0)
+        return OACCVector(*amps, C=self.C, C_tilde=self.C_tilde, np=self.np)
 
     def setup_kappa_mixer(self, **kwargs):
         self.kappa_up_mixer = self.mixer(**kwargs)
@@ -140,12 +159,14 @@ class OACCD(CCD):
 
         S = expm(self.kappa)
         S_inv = expm(-self.kappa)
+        self.C = S
+        self.C_tilde = S_inv
 
         self.h = self.system.transform_one_body_elements(
-            self.system.h, S, S_inv
+            self.system.h, self.C, self.C_tilde
         )
         self.u = self.system.transform_two_body_elements(
-            self.system.u, S, S_inv
+            self.system.u, self.C, self.C_tilde
         )
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
@@ -153,7 +174,9 @@ class OACCD(CCD):
             if self.verbose:
                 print("Changing system basis...")
 
-            self.system.change_basis(C=S, C_tilde=S_inv)
+            self.system.change_basis(C=self.C, C_tilde=self.C_tilde)
+            self.C = np.eye(self.system.l)
+            self.C_tilde = np.eye(self.system.l)
 
         if self.verbose:
             print(
