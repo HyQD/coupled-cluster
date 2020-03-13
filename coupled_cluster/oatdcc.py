@@ -222,24 +222,18 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 def compute_q_space_ket_equations(
     C, C_tilde, eta, h, h_prime, u, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
 ):
-    # print(u.shape, u_prime.shape)
     rhs = 1j * np.dot(C, eta)
 
-    rhs2 = np.zeros_like(rhs)
-    rhs2 += np.dot(h, C)
-    rhs2 -= np.dot(C, h_prime)
+    rhs += np.dot(h, C)
+    rhs -= np.dot(C, h_prime)
 
     u_quart = np.einsum("rb,gq,ds,abgd->arqs", C_tilde, C, C, u, optimize=True)
     u_quart -= np.tensordot(C, u_prime, axes=((1), (0)))
 
-    # temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
-    temp_ap = np.einsum("arqs,qspr->ap", u_quart, rho_qspr)
-    rhs2 = np.dot(rhs2, rho_qp)
-    rhs2 += temp_ap
-    # print(np.linalg.norm(rhs2))
-    rhs2 = np.dot(rhs2, rho_inv_pq)
+    temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
+    rhs += np.dot(temp_ap, rho_inv_pq)
 
-    return rhs + rhs2
+    return rhs
 
 
 def compute_q_space_bra_equations(
@@ -247,8 +241,8 @@ def compute_q_space_bra_equations(
 ):
     rhs = 1j * np.dot(eta, C_tilde)
 
-    rhs2 = np.dot(C_tilde, h)
-    rhs2 -= np.dot(h_prime, C_tilde)
+    rhs += np.dot(C_tilde, h)
+    rhs -= np.dot(h_prime, C_tilde)
 
     u_quart = np.einsum(
         "pa,rg,ds,agbd->prbs", C_tilde, C_tilde, C, u, optimize=True
@@ -258,9 +252,6 @@ def compute_q_space_bra_equations(
     )
 
     temp_qb = np.tensordot(rho_qspr, u_quart, axes=((1, 2, 3), (3, 0, 1)))
-    rhs2 = np.dot(rho_qp, rhs2) + temp_qb
-    # print(4,np.linalg.norm(rhs2))
-
-    rhs2 = np.dot(rho_inv_pq, rhs2)
+    rhs += np.dot(rho_inv_pq, temp_qb)
 
     return rhs
