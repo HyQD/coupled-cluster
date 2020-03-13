@@ -90,6 +90,7 @@ def test_lagrangian_functional(large_system_ccs):
     assert abs(result - energy) < 1e-8
 
 
+@pytest.mark.skip
 def test_tdccs():
     omega = 2.873_564_3
     E = 0.1
@@ -179,6 +180,7 @@ def test_tdccs():
     )
 
 
+@pytest.mark.skip
 def test_tdccs_phase():
     t_f = 10
     dt = 1e-2
