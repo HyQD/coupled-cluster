@@ -1,7 +1,5 @@
-import sys
-
-sys.path.append(".")
 import os
+import pytest
 import numpy as np
 
 from quantum_systems import construct_pyscf_system_rhf
