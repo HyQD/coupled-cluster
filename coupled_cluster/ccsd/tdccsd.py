@@ -82,18 +82,18 @@ class TDCCSD(TimeDependentCoupledCluster):
 
     def compute_overlap(self, current_time, y_a, y_b, use_old=False):
         t0a, t1a, t2a, l1a, l2a = self._amp_template.from_array(y_a).unpack()
-        t0a, t1a, t2a, l1a, l2a = self._amp_template.from_array(y_b).unpack()
+        t0b, t1b, t2b, l1b, l2b = self._amp_template.from_array(y_b).unpack()
 
         return compute_time_dependent_overlap(
             t1a,
             t2a,
             l1a,
             l2a,
-            t0a,
-            t1a,
-            t2a,
-            l1a,
-            l2a,
+            t0b,
+            t1b,
+            t2b,
+            l1b,
+            l2b,
             np=self.np,
             use_old=use_old,
         )
