@@ -76,7 +76,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         t, l, C, C_tilde = self._amp_template.from_array(y)
 
         return self.system.compute_particle_density(
-            rho_qp, c=C, c_tilde=C_tilde
+            rho_qp, C=C, C_tilde=C_tilde
         )
 
     @abc.abstractmethod
