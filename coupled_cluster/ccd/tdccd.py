@@ -30,9 +30,7 @@ class TDCCD(TimeDependentCoupledCluster):
         Integrator class instance (RK4, GaussIntegrator)
     """
 
-    @property
-    def truncation(self):
-        return "CCD"
+    truncation = "CCD"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
