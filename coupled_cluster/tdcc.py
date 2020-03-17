@@ -57,6 +57,11 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         """Construct AmplitudeContainer from numpy array."""
         return self._amp_template.from_array(y)
 
+    @property
+    def amp_template(self):
+        """Returns static _amp_template, for setting initial conditions etc"""
+        return self._amp_template
+
     @abc.abstractmethod
     def rhs_t_0_amplitude(self, *args, **kwargs):
         pass
