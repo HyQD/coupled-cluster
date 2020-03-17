@@ -7,17 +7,12 @@ verify_ssl = true
 
 [packages]
 tqdm = "*"
-numpy = "*"
-scipy = "*"
-pandas = "*"
 pytest = "*"
-numba = "*"
 sympy = "*"
 matplotlib = "*"
 sphinx-rtd-theme = "*"
 pyscf = "*"
 Sphinx = "*"
 black = "*"
-quantum-systems = {editable = true,git = "https://github.com/Schoyen/quantum-systems.git"}
 tdhf = {editable = true,git = "ssh://git@github.com/haakoek/TDHF.git"}
 gauss-integrator = {editable = true,git = "ssh://git@github.com/Schoyen/gauss-integrator.git"}
