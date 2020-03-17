@@ -56,7 +56,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     def amplitudes_from_array(self, y):
         """Construct AmplitudeContainer from numpy array."""
         return self._amp_template.from_array(y)
-   
+
     @property
     def amp_template(self):
         """Returns static _amp_template, for setting initial conditions etc"""
