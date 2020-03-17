@@ -31,6 +31,8 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             self.truncation, self.system.n, self.system.m, np=self.np
         )
 
+        self.last_timestep = None
+
     @property
     @abc.abstractmethod
     def truncation(self):
@@ -194,6 +196,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         return self.system.compute_particle_density(rho_qp)
 
     def update_hamiltonian(self, current_time, y):
+        if self.last_timestep == current_time:
+            return
+
+        self.last_timestep = current_time
 
         if self.system.has_one_body_time_evolution_operator:
             self.h = self.system.h_t(current_time)

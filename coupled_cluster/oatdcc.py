@@ -46,7 +46,8 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             self.truncation, n_prime, m_prime, np=self.np
         )
         self._amp_template = OACCVector(*_amp, C, C_tilde, np=self.np)
-        self.update_hamiltonian(current_time=0, C=C, C_tilde=C_tilde)
+
+        self.last_timestep = None
 
     @abc.abstractmethod
     def one_body_density_matrix(self, t, l):
@@ -84,6 +85,11 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         pass
 
     def update_hamiltonian(self, current_time, y=None, C=None, C_tilde=None):
+        if self.last_timestep == current_time:
+            return
+
+        self.last_timestep = current_time
+
         if y is not None:
             _, _, C, C_tilde = self._amp_template.from_array(y)
         elif C is not None and C_tilde is not None:
