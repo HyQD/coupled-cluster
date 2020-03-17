@@ -1,23 +1,8 @@
 # Install progress bar
 tqdm
 
-# Install numpy
-numpy
-
-# Install scipy
-scipy
-
-# Install pandas
-pandas
-
 # Install pytest
 pytest
-
-# Install numba
-numba
-
-# Install quantum-systems
-git+https://github.com/Schoyen/quantum-systems.git
 
 # Install tdhf
 # This is currently not supported as tdhf is a private repo
@@ -38,3 +23,6 @@ sphinx_rtd_theme
 
 # Install PySCF
 pyscf
+
+# Install the Gauss-integrator
+git+ssh://git@github.com/Schoyen/gauss-integrator.git
