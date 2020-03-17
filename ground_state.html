@@ -262,7 +262,7 @@ Rolf H. Myhre and Simen Kvaal.</p>
 </dl>
 <dl class="method">
 <dt id="coupled_cluster.ccd.OACCD.compute_ground_state">
-<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param">max_iterations=100</em>, <em class="sig-param">tol=0.0001</em>, <em class="sig-param">termination_tol=0.0001</em>, <em class="sig-param">tol_factor=0.1</em>, <em class="sig-param">change_system_basis=False</em>, <em class="sig-param">**mixer_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.compute_ground_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param">max_iterations=100</em>, <em class="sig-param">tol=0.0001</em>, <em class="sig-param">termination_tol=0.0001</em>, <em class="sig-param">tol_factor=0.1</em>, <em class="sig-param">change_system_basis=True</em>, <em class="sig-param">**mixer_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.compute_ground_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute ground state</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -270,7 +270,8 @@ Rolf H. Myhre and Simen Kvaal.</p>
 <li><p><strong>max_iterations</strong> (<em>int</em>) – Maximum number of iterations</p></li>
 <li><p><strong>tol</strong> (<em>float</em>) – Tolerance parameter, e.g. 1e-4</p></li>
 <li><p><strong>tol_factor</strong> (<em>float</em>) – Tolerance factor</p></li>
-<li><p><strong>change_system_basis</strong> (<em>bool</em>) – Changes basis when ground state is reached</p></li>
+<li><p><strong>change_system_basis</strong> (<em>bool</em>) – Whether or not to change the basis when the ground state is
+reached. Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
