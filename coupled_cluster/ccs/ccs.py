@@ -56,14 +56,10 @@ class CCS(CoupledCluster):
         return [self.l_1.copy()]
 
     def compute_l_residuals(self):
-        return [
-            self.np.linalg.norm(self.rhs_l_1),
-        ]
+        return [self.np.linalg.norm(self.rhs_l_1)]
 
     def compute_t_residuals(self):
-        return [
-            self.np.linalg.norm(self.rhs_t_1),
-        ]
+        return [self.np.linalg.norm(self.rhs_t_1)]
 
     def setup_l_mixer(self, **kwargs):
         if self.l_mixer is None:
@@ -94,7 +90,7 @@ class CCS(CoupledCluster):
 
         self.rhs_t_1.fill(0)
         compute_t_1_amplitudes(
-            self.f, self.u, self.t_1, self.o, self.v, out=self.rhs_t_1, np=np,
+            self.f, self.u, self.t_1, self.o, self.v, out=self.rhs_t_1, np=np
         )
 
         trial_vector = self.t_1

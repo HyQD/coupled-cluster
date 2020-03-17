@@ -2,7 +2,6 @@ import abc
 import collections
 import warnings
 from coupled_cluster.cc_helper import AmplitudeContainer
-from coupled_cluster.integrators import RungeKutta4
 
 
 class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
@@ -13,19 +12,13 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    cc : CoupledCluster
-        Class instance defining the ground state solver
     system : QuantumSystem
         Class instance defining the system to be solved
-    integrator : Integrator
-        Integrator class instance (RK4, GaussIntegrator)
     """
 
-    def __init__(self, cc, system, integrator=None, **cc_kwargs):
+    def __init__(self, system):
         self.np = system.np
 
-        # Initialize ground state solver
-        self.cc = cc(system, **cc_kwargs)
         self.system = system
 
         self.h = self.system.h
@@ -34,73 +27,35 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.o = self.system.o
         self.v = self.system.v
 
-        if integrator is None:
-            integrator = RungeKutta4(np=self.np)
-
-        self.integrator = integrator.set_rhs(self)
-        self._amplitudes = None
-
-        # Inherit functions from ground state solver
-        self.compute_ground_state_energy = self.cc.compute_energy
-        self.compute_ground_state_reference_energy = (
-            self.cc.compute_reference_energy
+        self._amp_template = self.construct_amplitude_template(
+            self.truncation, self.system.n, self.system.m, np=self.np
         )
-        self.compute_ground_state_particle_density = (
-            self.cc.compute_particle_density
-        )
-        self.compute_ground_state_one_body_density_matrix = (
-            self.cc.compute_one_body_density_matrix
-        )
-
-    def compute_ground_state(self, *args, **kwargs):
-        """Calls on method from CoupledCluster class to compute
-        ground state of system.
-        """
-
-        # Compute ground state amplitudes
-        self.cc.compute_ground_state(*args, **kwargs)
-
-    def set_initial_conditions(self, amplitudes=None):
-        """Set initial condition of system.
-
-        Necessary to call this function befor computing
-        time development. Can be passed without arguments,
-        will revert to amplitudes of ground state solver.
-
-        Parameters
-        ----------
-        amplitudes : AmplitudeContainer
-            Amplitudes for the system
-        """
-
-        if amplitudes is None:
-            # Create copy of ground state amplitudes for time-integration
-            amplitudes = self.cc.get_amplitudes(get_t_0=True)
-
-        self._amplitudes = amplitudes
 
     @property
-    def amplitudes(self):
-        return self._amplitudes
+    @abc.abstractmethod
+    def truncation(self):
+        pass
 
-    def solve(self, time_points, timestep_tol=1e-8):
-        n = len(time_points)
+    @staticmethod
+    def construct_amplitude_template(truncation, n, m, np):
+        """Constructs an empty AmplitudeContainer with the correct shapes, for
+        convertion between arrays and amplitudes."""
+        codes = {"S": 1, "D": 2, "T": 3, "Q": 4}
+        levels = [codes[c] for c in truncation[2:]]
 
-        for i in range(n - 1):
-            dt = time_points[i + 1] - time_points[i]
-            amp_vec = self.integrator.step(
-                self._amplitudes.asarray(), time_points[i], dt
-            )
+        # start with t_0
+        t = [np.array([0], dtype=np.complex128)]
+        l = []
 
-            self._amplitudes = type(self._amplitudes).from_array(
-                self._amplitudes, amp_vec
-            )
+        for lvl in levels:
+            shape = lvl * [m] + lvl * [n]
+            t.append(np.zeros(shape, dtype=np.complex128))
+            l.append(np.zeros(shape[::-1], dtype=np.complex128))
+        return AmplitudeContainer(t=t, l=l, np=np)
 
-            if abs(self.last_timestep - (time_points[i] + dt)) > timestep_tol:
-                self.update_hamiltonian(time_points[i] + dt, self._amplitudes)
-                self.last_timestep = time_points[i] + dt
-
-            yield self._amplitudes
+    def amplitudes_from_array(self, y):
+        """Construct AmplitudeContainer from numpy array."""
+        return self._amp_template.from_array(y)
 
     @abc.abstractmethod
     def rhs_t_0_amplitude(self, *args, **kwargs):
@@ -129,22 +84,22 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def compute_energy(self):
+    def compute_energy(self, current_time, y):
         pass
 
     @abc.abstractmethod
-    def compute_one_body_density_matrix(self):
+    def compute_one_body_density_matrix(self, current_time, y):
         pass
 
     @abc.abstractmethod
-    def compute_two_body_density_matrix(self):
+    def compute_two_body_density_matrix(self, current_time, y):
         pass
 
     @abc.abstractmethod
-    def compute_time_dependent_overlap(self):
+    def compute_overlap(self, current_time, y_a, y_b):
         pass
 
-    def compute_right_phase(self):
+    def compute_right_phase(self, current_time, y):
         r"""Function computing the inner product of the (potentially
         time-dependent) reference state and the right coupled-cluster wave
         function.
@@ -159,11 +114,11 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         complex128
             The right-phase describing the weight of the reference determinant.
         """
-        t_0 = self._amplitudes.t[0][0]
+        t_0 = self._amp_template.from_array(y).t[0][0]
 
         return self.np.exp(t_0)
 
-    def compute_left_phase(self):
+    def compute_left_phase(self, current_time, y):
         r"""Function computing the inner product of the (potentially
         time-dependent) reference state and the left coupled-cluster wave
         function.
@@ -180,9 +135,11 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         complex128
             The left-phase describing the weight of the reference determinant.
         """
-        t_0 = self._amplitudes.t[0][0]
+        t_0 = self._amp_template.from_array(y).t[0][0]
 
-        return self.np.exp(-t_0) * self.left_reference_overlap()
+        return self.np.exp(-t_0) * self.compute_left_reference_overlap(
+            current_time, y
+        )
 
     def compute_reference_weight(self):
         r"""Function computing the weight of the reference state in the
@@ -202,16 +159,17 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return 0.25 * (
             self.np.abs(
-                self.compute_right_phase() + self.compute_left_phase().conj()
+                self.compute_right_phase(current_time, y)
+                + self.compute_left_phase(current_time, y).conj()
             )
             ** 2
         )
 
     @abc.abstractmethod
-    def left_reference_overlap(self):
+    def compute_left_reference_overlap(self, current_time, y):
         pass
 
-    def compute_particle_density(self):
+    def compute_particle_density(self, current_time, y):
         """Computes current one-body density
 
         Returns
@@ -221,7 +179,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         """
         np = self.np
 
-        rho_qp = self.compute_one_body_density_matrix()
+        rho_qp = self.compute_one_body_density_matrix(current_time, y)
 
         if np.abs(np.trace(rho_qp) - self.system.n) > 1e-8:
             warn = "Trace of rho_qp = {0} != {1} = number of particles"
@@ -230,7 +188,8 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return self.system.compute_particle_density(rho_qp)
 
-    def update_hamiltonian(self, current_time, amplitudes):
+    def update_hamiltonian(self, current_time, y):
+
         if self.system.has_one_body_time_evolution_operator:
             self.h = self.system.h_t(current_time)
 
@@ -239,10 +198,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         self.f = self.system.construct_fock_matrix(self.h, self.u)
 
-    def __call__(self, prev_amp, current_time):
+    def __call__(self, current_time, prev_amp):
         o, v = self.system.o, self.system.v
 
-        prev_amp = AmplitudeContainer.from_array(self._amplitudes, prev_amp)
+        prev_amp = self._amp_template.from_array(prev_amp)
         t_old, l_old = prev_amp
 
         self.update_hamiltonian(current_time, prev_amp)

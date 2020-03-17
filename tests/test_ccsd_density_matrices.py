@@ -1,25 +1,23 @@
 import numpy as np
-from coupled_cluster.ccsd.tdccsd import TDCCSD
+from coupled_cluster.ccsd.ccsd import CCSD
 from coupled_cluster.mix import AlphaMixer, DIIS
 
 
 def test_one_body_density(zanghellini_system):
 
-    zang_tdccsd = TDCCSD(zanghellini_system, verbose=True, mixer=AlphaMixer)
+    zang_ccsd = CCSD(zanghellini_system, verbose=True, mixer=AlphaMixer)
 
     t_kwargs = dict(theta=0.8)
-    zang_tdccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
+    zang_ccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
 
-    zang_tdccsd.set_initial_conditions()
-
-    rho_est = zang_tdccsd.compute_one_body_density_matrix()
+    rho_est = zang_ccsd.compute_one_body_density_matrix()
 
     h = zanghellini_system.h
     o = zanghellini_system.o
     v = zanghellini_system.v
     n = zanghellini_system.n
 
-    t_0, t_1, t_2, l_1, l_2, = zang_tdccsd.amplitudes.unpack()
+    t_0, t_1, t_2, l_1, l_2, = zang_ccsd.get_amplitudes(get_t_0=True).unpack()
 
     rho_qp = np.zeros_like(h)
 
@@ -58,14 +56,12 @@ def test_one_body_density(zanghellini_system):
 
 def test_v_o_term(zanghellini_system):
 
-    zang_tdccsd = TDCCSD(zanghellini_system, verbose=True, mixer=AlphaMixer)
+    zang_ccsd = CCSD(zanghellini_system, verbose=True, mixer=AlphaMixer)
 
     t_kwargs = dict(theta=0.8)
-    zang_tdccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
+    zang_ccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
 
-    zang_tdccsd.set_initial_conditions()
-
-    t_0, t_1, t_2, l_1, l_2, = zang_tdccsd.amplitudes.unpack()
+    t_0, t_1, t_2, l_1, l_2, = zang_ccsd.get_amplitudes(get_t_0=True).unpack()
 
     term_1 = np.tensordot(
         l_1, t_2 - np.einsum("bi, aj -> abij", t_1, t_1), axes=((0, 1), (3, 1))

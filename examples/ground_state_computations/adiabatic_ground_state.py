@@ -22,10 +22,12 @@ class FermiFunction:
         return 1 - 1 / denom
 
 
-n = 4
+n = 6
 l = 8
 
-system = GeneralOrbitalSystem(n,ODQD(l, 10, 801,a=1,potential=ODQD.AtomicPotential(Za=n,c=1)))
+system = GeneralOrbitalSystem(
+    n, ODQD(l, 10, 801, a=1, potential=ODQD.AtomicPotential(Za=n, c=1))
+)
 system.set_time_evolution_operator(AdiabaticSwitching(FermiFunction()))
 print(f"Reference energy: {system.compute_reference_energy()}")
 
