@@ -77,7 +77,7 @@ class OACCD(CCD):
         tol=1e-4,
         termination_tol=1e-4,
         tol_factor=0.1,
-        change_system_basis=False,
+        change_system_basis=True,
         **mixer_kwargs,
     ):
         """Compute ground state
@@ -91,7 +91,8 @@ class OACCD(CCD):
         tol_factor : float
             Tolerance factor
         change_system_basis : bool
-            Changes basis when ground state is reached
+            Whether or not to change the basis when the ground state is
+            reached. Default is ``True``.
         """
         np = self.np
 
