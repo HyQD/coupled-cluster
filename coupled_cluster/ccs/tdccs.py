@@ -33,9 +33,7 @@ class TDCCS(TimeDependentCoupledCluster):
         Integrator class instance (RK4, GaussIntegrator)
     """
 
-    @property
-    def truncation(self):
-        return "CCS"
+    truncation = "CCS"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array([compute_ccs_ground_state_energy(*args, **kwargs)])
