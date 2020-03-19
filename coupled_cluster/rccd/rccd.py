@@ -1,6 +1,6 @@
 from coupled_cluster.cc import CoupledCluster
 from coupled_cluster.rccd.rhs_t import compute_t_2_amplitudes
-from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
+from coupled_cluster.rccd.rhs_l import compute_l_2_amplitudes
 from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
