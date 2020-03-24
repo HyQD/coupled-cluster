@@ -37,7 +37,6 @@
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Integrators" href="integrators.html" />
     <link rel="prev" title="Ground State Computations" href="ground_state.html" /> 
 </head>
 
@@ -88,7 +87,6 @@
 <li class="toctree-l1"><a class="reference internal" href="get_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ground_state.html">Ground State Computations</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Time Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="integrators.html">Integrators</a></li>
 </ul>
 
             
@@ -303,7 +301,7 @@ cluster method with double exctiations.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>system</strong> (<em>QuantumSystem</em>) – Class instance defining the system to be solved</p></li>
 <li><p><strong>np</strong> (<em>module</em>) – Matrix/linear algebra library to be uses, like numpy or cupy</p></li>
-<li><p><strong>integrator</strong> (<a class="reference internal" href="integrators.html#coupled_cluster.integrators.Integrator" title="coupled_cluster.integrators.Integrator"><em>Integrator</em></a>) – Integrator class instance (RK4, GaussIntegrator)</p></li>
+<li><p><strong>integrator</strong> (<em>Integrator</em>) – Integrator class instance (RK4, GaussIntegrator)</p></li>
 </ul>
 </dd>
 </dl>
@@ -510,8 +508,6 @@ yield compute_t_2_amplitudes</p>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="integrators.html" class="btn btn-neutral float-right" title="Integrators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="ground_state.html" class="btn btn-neutral float-left" title="Ground State Computations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
