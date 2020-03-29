@@ -16,7 +16,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         Class instance defining the system to be solved
     """
 
-    def __init__(self, system):
+    def __init__(self, system, time_direction="real"):
         self.np = system.np
 
         self.system = system
@@ -32,6 +32,25 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         )
 
         self.last_timestep = None
+
+        assert time_direction in [
+            "real",
+            "imaginary",
+        ], "time direction must be either real or imaginary"
+        self._time_direction = time_direction
+        self.forward_time_factor = 1
+        self.backward_time_factor = -1
+
+    def set_imaginary_time(self):
+        self._time_direction = "imaginary"
+        self.forward_time_factor = 1j
+        self.backward_time_factor = 1j # something like this?
+
+    def set_real_time(self):
+        self._time_direction = "real"
+        self.forward_time_factor = 1
+        self.backward_time_factor = -1
+
 
     @property
     @abc.abstractmethod
