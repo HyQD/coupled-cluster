@@ -33,24 +33,24 @@ def compute_lagrangian_functional(f, u, t_1, l_1, o, v, np):
 
     # L <- -f^{i}_{a} l^{j}_{b} t^{a}_{j} t^{b}_{i}
     energy -= np.trace(
-        np.dot(np.dot(f[o, v], t_1), np.dot(l_1, t_1))  # ij  # ji
-    )
+        np.dot(np.dot(f[o, v], t_1), np.dot(l_1, t_1))
+    )  # ij  # ji
 
     # L <- f^{i}_{a} t^{a}_{i}
     energy += np.trace(np.dot(f[o, v], t_1))
 
     # L <- -f^{j}_{i} l^{i}_{a} t^{a}_{j}
     energy -= np.tensordot(
-        f[o, o], np.dot(l_1, t_1), axes=((0, 1), (1, 0))  # ji  # ij
-    )
+        f[o, o], np.dot(l_1, t_1), axes=((0, 1), (1, 0))
+    )  # ji  # ij
 
     # L <- l^{i}_{a} t^{a}_{j} t^{b}_{k} u^{jk}_{bi}
     energy += np.trace(
         np.dot(
             np.tensordot(
-                u[o, o, v, o],  # jkbi
-                np.dot(l_1, t_1),  # ij
-                axes=((0, 3), (1, 0)),
+                u[o, o, v, o],
+                np.dot(l_1, t_1),
+                axes=((0, 3), (1, 0)),  # jkbi  # ij
             ),  # kb
             t_1,  # bk
         )
@@ -86,8 +86,8 @@ def compute_lagrangian_functional(f, u, t_1, l_1, o, v, np):
     energy -= np.trace(
         np.dot(
             np.tensordot(
-                l_1, u[v, o, v, o], axes=((0, 1), (3, 0))  # ia  # ajbi
-            ),  # jb
+                l_1, u[v, o, v, o], axes=((0, 1), (3, 0))
+            ),  # ia  # ajbi  # jb
             t_1,  # bj
         )
     )
@@ -96,8 +96,8 @@ def compute_lagrangian_functional(f, u, t_1, l_1, o, v, np):
     energy -= 0.5 * np.trace(
         np.dot(
             np.tensordot(
-                t_1, u[o, o, v, v], axes=((0, 1), (3, 0))  # bi  # ijab
-            ),  # ja
+                t_1, u[o, o, v, v], axes=((0, 1), (3, 0))
+            ),  # bi  # ijab  # ja
             t_1,  # aj
         )
     )
