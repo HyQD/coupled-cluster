@@ -32,25 +32,22 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         )
 
         self.last_timestep = None
+        self.set_time_direction(time_direction)
 
+    @property
+    def forward_time_factor(self):
+        return -1 if self._has_imaginary_time else -1j
+
+    @property
+    def backward_time_factor(self):
+        return -1 if self._has_imaginary_time else 1j
+
+    def set_time_direction(self, time_direction):
         assert time_direction in [
             "real",
             "imaginary",
         ], "time direction must be either real or imaginary"
-        self._time_direction = time_direction
-        self.forward_time_factor = 1
-        self.backward_time_factor = -1
-
-    def set_imaginary_time(self):
-        self._time_direction = "imaginary"
-        self.forward_time_factor = 1j
-        self.backward_time_factor = 1j # something like this?
-
-    def set_real_time(self):
-        self._time_direction = "real"
-        self.forward_time_factor = 1
-        self.backward_time_factor = -1
-
+        self._has_imaginary_time = time_direction == "imaginary"
 
     @property
     @abc.abstractmethod
@@ -234,24 +231,29 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         prev_amp = self._amp_template.from_array(prev_amp)
         t_old, l_old = prev_amp
 
-        self.update_hamiltonian(current_time, prev_amp)
+        if self._has_imaginary_time:
+            self.update_hamiltonian(0, prev_amp)
+        else:
+            self.update_hamiltonian(current_time, prev_amp)
 
         # Remove phase from t-amplitude list
         t_old = t_old[1:]
 
         t_new = [
-            -1j * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
+            self.forward_time_factor
+            * rhs_t_func(self.f, self.u, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
         # Compute derivative of phase
-        t_0_new = -1j * self.rhs_t_0_amplitude(
+        t_0_new = self.forward_time_factor * self.rhs_t_0_amplitude(
             self.f, self.u, *t_old, self.o, self.v, np=self.np
         )
         t_new = [t_0_new, *t_new]
 
         l_new = [
-            1j * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
+            self.backward_time_factor
+            * rhs_l_func(self.f, self.u, *t_old, *l_old, o, v, np=self.np)
             for rhs_l_func in self.rhs_l_amplitudes()
         ]
 

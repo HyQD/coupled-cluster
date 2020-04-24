@@ -13,7 +13,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     transforming the ground state orbitals to the Hartree-Fock basis.
     """
 
-    def __init__(self, system, C=None, C_tilde=None):
+    def __init__(self, system, C=None, C_tilde=None, time_direction="real"):
         self.np = system.np
 
         self.system = system
@@ -47,6 +47,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self._amp_template = OACCVector(*_amp, C, C_tilde, np=self.np)
 
         self.last_timestep = None
+        self.set_time_direction(time_direction)
 
     @abc.abstractmethod
     def one_body_density_matrix(self, t, l):
@@ -122,10 +123,12 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         np = self.np
         o_prime, v_prime = self.o_prime, self.v_prime
 
-        prev_amp = self._amp_template.from_array(prev_amp)
-        t_old, l_old, C, C_tilde = prev_amp
+        t_old, l_old, C, C_tilde = self._amp_template.from_array(prev_amp)
 
-        self.update_hamiltonian(current_time, C=C, C_tilde=C_tilde)
+        if self._has_imaginary_time:
+            self.update_hamiltonian(current_time=0, y=prev_amp)
+        else:
+            self.update_hamiltonian(current_time=current_time, y=prev_amp)
 
         # Remove t_0 phase as this is not used in any of the equations
         t_old = t_old[1:]
@@ -133,7 +136,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         # OATDCC procedure:
         # Do amplitude step
         t_new = [
-            -1j
+            self.forward_time_factor
             * rhs_t_func(
                 self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
             )
@@ -141,14 +144,14 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         ]
 
         # Compute derivative of phase
-        t_0_new = -1j * self.rhs_t_0_amplitude(
+        t_0_new = self.forward_time_factor * self.rhs_t_0_amplitude(
             self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
         )
 
         t_new = [t_0_new, *t_new]
 
         l_new = [
-            1j
+            self.backward_time_factor
             * rhs_l_func(
                 self.f_prime,
                 self.u_prime,
@@ -166,7 +169,8 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self.rho_qspr = self.two_body_density_matrix(t_old, l_old)
 
         # Solve P-space equations for eta
-        eta = self.compute_p_space_equations()
+        eta = self.forward_time_factor * 1j * self.compute_p_space_equations()
+        # TODO: move 1j out of compute_p_space_equations
 
         # Compute the inverse of rho_qp needed in Q-space eqs.
         """
@@ -183,6 +187,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         from scipy.linalg import expm
 
+        """
         eps = 1e-6
         rho_qp_reg = self.rho_qp + eps * expm(-(1.0 / eps) * self.rho_qp)
         rho_qp_reg[np.isnan(rho_qp_reg)] = 0
@@ -191,11 +196,11 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         # Solve Q-space for C and C_tilde
 
         """
-        C_new = np.dot(C, eta)
-        C_tilde_new = -np.dot(eta, C_tilde)
-        """
+        C_new = self.forward_time_factor * (1j * np.dot(C, eta))
+        C_tilde_new = self.backward_time_factor * (1j * np.dot(eta, C_tilde))
 
-        C_new = -1j * compute_q_space_ket_equations(
+        """
+        C_new = self.forward_time_factor * compute_q_space_ket_equations(
             C,
             C_tilde,
             eta,
@@ -208,7 +213,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             self.rho_qspr,
             np=np,
         )
-        C_tilde_new = 1j * compute_q_space_bra_equations(
+        C_tilde_new = self.backward_time_factor * compute_q_space_bra_equations(
             C,
             C_tilde,
             eta,
@@ -221,6 +226,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             self.rho_qspr,
             np=np,
         )
+        """
 
         self.last_timestep = current_time
 
