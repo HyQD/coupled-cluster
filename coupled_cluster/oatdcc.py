@@ -169,7 +169,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self.rho_qspr = self.two_body_density_matrix(t_old, l_old)
 
         # Solve P-space equations for eta
-        eta = self.forward_time_factor * 1j * self.compute_p_space_equations()
+        eta = self.compute_p_space_equations()
         # TODO: move 1j out of compute_p_space_equations
 
         # Compute the inverse of rho_qp needed in Q-space eqs.
@@ -196,8 +196,10 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         # Solve Q-space for C and C_tilde
 
         """
-        C_new = self.forward_time_factor * (1j * np.dot(C, eta))
-        C_tilde_new = self.backward_time_factor * (1j * np.dot(eta, C_tilde))
+        # real -> +1, imag -> -i
+        C_new = self.forward_time_factor * (1j * np.dot(C, eta)) 
+        # real -> -1, imag -> -i
+        C_tilde_new = self.backward_time_factor * (1j * np.dot(eta, C_tilde)) 
 
         """
         C_new = self.forward_time_factor * compute_q_space_ket_equations(
