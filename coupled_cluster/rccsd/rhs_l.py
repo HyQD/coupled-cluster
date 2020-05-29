@@ -7,8 +7,8 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(l_1)
     """
-    no = o.stop
-    nv = v.stop - no
+    no = t1.shape[1]
+    nv = t1.shape[0]
 
     I0_l1 = np.zeros((no, no), dtype=t1.dtype)
 
@@ -360,8 +360,8 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(l_2)
     """
-    no = o.stop
-    nv = v.stop - no
+    no = t1.shape[1]
+    nv = t1.shape[0]
 
     I0_l2 = np.zeros((no, no, nv, nv), dtype=t1.dtype)
 

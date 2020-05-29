@@ -15,8 +15,8 @@ def compute_t_1_amplitudes(F, W, t1, t2, o, v, np, out=None):
         out = np.zeros_like(t_1)
     """
 
-    nocc = o.stop
-    nvirt = v.stop - nocc
+    nocc = t1.shape[1]
+    nvirt = t1.shape[0]
     tau0 = np.zeros((nocc, nvirt, nvirt, nvirt), dtype=t1.dtype)
     tau0 += 2 * np.einsum("iabc->iabc", W[o, v, v, v], optimize=True)
     tau0 -= np.einsum("iacb->iabc", W[o, v, v, v], optimize=True)
@@ -79,8 +79,8 @@ def compute_t_2_amplitudes(F, W, t1, t2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(t_2)
     """
-    nocc = o.stop
-    nvirt = v.stop - nocc
+    nocc = t1.shape[1]
+    nvirt = t1.shape[0]
     tau0 = np.zeros((nocc, nvirt, nvirt, nvirt), dtype=t1.dtype)
     tau0 += np.einsum("di,badc->iabc", t1, W[v, v, v, v], optimize=True)
     Omegb = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t1.dtype)
