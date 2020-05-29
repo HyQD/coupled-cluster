@@ -5,7 +5,7 @@ def compute_one_body_density_matrix(t1, t2, l1, l2, o, v, np, out=None):
 
     rho = np.zeros((nocc + nvirt, nocc + nvirt), dtype=t1.dtype)
 
-    rho[o, o] += 2 * np.eye(nocc)
+    rho[: o.stop, : o.stop] += 2 * np.eye(o.stop)
     rho[o, o] -= np.einsum("kjab,baik->ij", l2, t2)
     rho[o, o] -= np.einsum("ja,ai->ij", l1, t1)
 
