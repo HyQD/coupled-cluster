@@ -28,7 +28,10 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.v = self.system.v
 
         self._amp_template = self.construct_amplitude_template(
-            self.truncation, self.system.n, self.system.m, np=self.np
+            self.truncation,
+            self.o.stop - self.o.start,
+            self.system.m,
+            np=self.np,
         )
 
         self.last_timestep = None
