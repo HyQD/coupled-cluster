@@ -46,19 +46,14 @@ def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
 
 
 def compute_time_dependent_energy(f, u, t_1, t_2, l_1, l_2, o, v, np):
-    energy = (
-        2 * np.trace(f[o, o])
-        - 2 * np.trace(np.trace(u[o, o, o, o], axis1=1, axis2=3))
-        + np.trace(np.trace(u[o, o, o, o], axis1=1, axis2=2))
-    )
-    energy += lagrangian_functional(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
+    energy = lagrangian_functional(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
     return energy
 
 
 def lagrangian_functional(f, u, t1, t2, l1, l2, o, v, np, test=False):
 
-    no = o.stop
-    nv = v.stop - no
+    no = t1.shape[1]
+    nv = t1.shape[0]
 
     I0_l1 = np.zeros((no, no), dtype=t1.dtype)
 
