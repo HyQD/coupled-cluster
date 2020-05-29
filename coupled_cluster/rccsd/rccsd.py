@@ -19,6 +19,10 @@ from coupled_cluster.rccsd.density_matrices import (
     compute_one_body_density_matrix,
 )
 
+from coupled_cluster.rccsd.energies import (
+    compute_ground_state_energy_correction,
+)
+
 
 class RCCSD(CoupledCluster):
     """Coupled Cluster Singels Doubles
@@ -46,8 +50,7 @@ class RCCSD(CoupledCluster):
         # self.n, self.m, self.l = system.n // 2, system.m // 2, system.l // 2
         # self.o, self.v = slice(0, self.n), slice(self.n, self.l)
 
-        n, m = self.n, self.m
-
+        n, m = self.o.stop - self.o.start, self.m
         self.include_singles = include_singles
 
         # Singles
@@ -139,27 +142,10 @@ class RCCSD(CoupledCluster):
         np = self.np
         o, v = self.o, self.v
 
-        e_corr = 2 * np.einsum("ia,ai->", self.f[o, v], self.t_1)
-
-        e_corr += 2 * np.einsum("abij,ijab->", self.t_2, self.u[o, o, v, v])
-        e_corr -= np.einsum("abij,ijba->", self.t_2, self.u[o, o, v, v])
-
-        e_corr += 2 * np.einsum(
-            "ai,bj,ijab->",
-            self.t_1,
-            self.t_1,
-            self.u[o, o, v, v],
-            optimize=True,
+        e_corr = compute_ground_state_energy_correction(
+            self.f, self.u, self.t_1, self.t_2, self.o, self.v, self.np
         )
-        e_corr -= np.einsum(
-            "ai,bj,ijba->",
-            self.t_1,
-            self.t_1,
-            self.u[o, o, v, v],
-            optimize=True,
-        )
-
-        e_ref = 0
+        e_ref = self.system.compute_reference_energy()
 
         return e_corr + e_ref
 
@@ -215,7 +201,7 @@ class RCCSD(CoupledCluster):
         n_t1 = 0
 
         if self.include_singles:
-            n_t1 = self.m * self.n
+            n_t1 = self.m * (self.o.stop - self.o.start)
             self.t_1 = np.reshape(new_vectors[:n_t1], self.t_1.shape)
 
         self.t_2 = np.reshape(new_vectors[n_t1:], self.t_2.shape)
@@ -281,7 +267,7 @@ class RCCSD(CoupledCluster):
         n_l1 = 0
 
         if self.include_singles:
-            n_l1 = self.m * self.n
+            n_l1 = self.m * (self.o.stop - self.o.start)
             self.l_1 = np.reshape(new_vectors[:n_l1], self.l_1.shape)
 
         self.l_2 = np.reshape(new_vectors[n_l1:], self.l_2.shape)
