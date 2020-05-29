@@ -56,16 +56,19 @@ class TDRCCSD(TimeDependentCoupledCluster):
 
         self.update_hamiltonian(current_time, y)
 
-        return compute_time_dependent_energy(
-            self.f,
-            self.u,
-            t_1,
-            t_2,
-            l_1,
-            l_2,
-            self.system.o,
-            self.system.v,
-            np=self.np,
+        return (
+            compute_time_dependent_energy(
+                self.f,
+                self.u,
+                t_1,
+                t_2,
+                l_1,
+                l_2,
+                self.system.o,
+                self.system.v,
+                np=self.np,
+            )
+            + self.system.compute_reference_energy()
         )
 
     def compute_one_body_density_matrix(self, current_time, y):
