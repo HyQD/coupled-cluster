@@ -11,6 +11,13 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     Note that this solver _only_ supports a basis of orthonomal orbitals. If the
     original atomic orbitals are not orthonormal, this can solved done by
     transforming the ground state orbitals to the Hartree-Fock basis.
+
+    Note also that this solver (should) support both spin dependent and spin-independent
+    basis sets.
+
+    Parameters
+    ==========
+    system : SpatialOrbitalSystem, or GeneralOrbitalSystem for spin-dependent bases
     """
 
     def __init__(self, system, C=None, C_tilde=None):
@@ -27,14 +34,23 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self.o = self.system.o
         self.v = self.system.v
 
+        assert type(self.system) is GeneralOrbitalSystem
+        assert not self.system._basis_set.anti_symmetrized_u # TODO: remove _basis_set 
+        
         if C is None:
-            C = self.np.eye(system.l)
+            C = self.np.kron(self.np.eye(system.l))
+
         if C_tilde is None:
-            C_tilde = C.T
+            C_tilde = C.T.conj()
 
         assert C.shape == C_tilde.T.shape
+        assert C.shape[0] >= C.shape[1]
+        if not np.isclose(np.sum(C_tilde @ C), l_prime):
+            import warnings
+            warnings.warn("C_tilde @ C does not add up to basis size")
 
-        n_prime = self.system.n
+        # OA system sizes
+        n_prime = self.spin_factor * self.system.n
         l_prime = C.shape[1]
         m_prime = l_prime - n_prime
 
@@ -44,9 +60,16 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         _amp = self.construct_amplitude_template(
             self.truncation, n_prime, m_prime, np=self.np
         )
-        self._amp_template = OACCVector(*_amp, C, C_tilde, np=self.np)
+        self._amp_template = self.construct_oaccvector_template(self.truncation,
+                n_prime, m_prime, C.shape, self.np)
 
         self.last_timestep = None
+
+    @staticmethod # TODO why does this not become static?
+    def construct_oaccvector_template(self, amp, C_shape, np):
+        C = np.eye(C_shape[0])[:, :C_shape[1]]
+        _amp_template = OACCVector(*amp, C, C.T.conj(), np=self.np)
+        return _amp_template
 
     @abc.abstractmethod
     def one_body_density_matrix(self, t, l):
@@ -83,12 +106,21 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
-    def update_hamiltonian(self, current_time, y=None, C=None, C_tilde=None):
+    def evolve_system(self, current_time, y=None, C=None, C_tilde=None):
         if self.last_timestep == current_time:
             return
 
         self.last_timestep = current_time
 
+        # Evolve system in time
+        if self.system.has_one_body_time_evolution_operator:
+            self.h = self.system.h_t(current_time)
+
+        if self.system.has_two_body_time_evolution_operator:
+            self.u = self.system.u_t(current_time)
+
+
+    def transform_matrix_elements(self, current_time, y=None, C=None, C_tilde=None):
         if y is not None:
             _, _, C, C_tilde = self._amp_template.from_array(y)
         elif C is not None and C_tilde is not None:
@@ -98,21 +130,14 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
                 "either the amplitude-array or (C and C_tilde) has to be not "
                 + "None."
             )
-
-        # Evolve system in time
-        if self.system.has_one_body_time_evolution_operator:
-            self.h = self.system.h_t(current_time)
-
-        if self.system.has_two_body_time_evolution_operator:
-            self.u = self.system.u_t(current_time)
-
         # Change basis to C and C_tilde
         self.h_prime = self.system.transform_one_body_elements(
             self.h, C, C_tilde
         )
-        self.u_prime = self.system.transform_two_body_elements(
+        _u_prime_spatial = self.system.transform_two_body_elements(
             self.u, C, C_tilde
         )
+        self.u_prime = self.system._basis_set.anti_symmetrize_u(_u_prime_spatial)
 
         self.f_prime = self.system.construct_fock_matrix(
             self.h_prime, self.u_prime
