@@ -125,10 +125,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         t_old, l_old, C, C_tilde = self._amp_template.from_array(prev_amp)
 
-        if self._has_imaginary_time:
-            self.update_hamiltonian(current_time=0, y=prev_amp)
-        else:
-            self.update_hamiltonian(current_time=current_time, y=prev_amp)
+        self.update_hamiltonian(current_time=current_time, y=prev_amp)
 
         # Remove t_0 phase as this is not used in any of the equations
         t_old = t_old[1:]
