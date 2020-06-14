@@ -2,6 +2,7 @@ import abc
 import warnings
 from coupled_cluster.cc_helper import OACCVector
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
+from quantum_systems import GeneralOrbitalSystem
 
 
 class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
@@ -17,7 +18,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
     Parameters
     ==========
-    system : SpatialOrbitalSystem, or GeneralOrbitalSystem for spin-dependent bases
+    system : GeneralOrbitalSystem
     """
 
     def __init__(self, system, C=None, C_tilde=None):
@@ -38,37 +39,38 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         assert not self.system._basis_set.anti_symmetrized_u # TODO: remove _basis_set 
         
         if C is None:
-            C = self.np.kron(self.np.eye(system.l))
+            C = self.np.eye(system.l)
 
         if C_tilde is None:
             C_tilde = C.T.conj()
 
         assert C.shape == C_tilde.T.shape
         assert C.shape[0] >= C.shape[1]
-        if not np.isclose(np.sum(C_tilde @ C), l_prime):
-            import warnings
-            warnings.warn("C_tilde @ C does not add up to basis size")
 
         # OA system sizes
-        n_prime = self.spin_factor * self.system.n
+        n_prime = self.system.n
         l_prime = C.shape[1]
         m_prime = l_prime - n_prime
 
         self.o_prime = slice(0, n_prime)
         self.v_prime = slice(n_prime, l_prime)
 
-        _amp = self.construct_amplitude_template(
-            self.truncation, n_prime, m_prime, np=self.np
-        )
+        if not self.np.isclose(self.np.sum(C_tilde @ C), l_prime):
+            import warnings
+            warnings.warn("C_tilde @ C does not add up to basis size")
+
         self._amp_template = self.construct_oaccvector_template(self.truncation,
                 n_prime, m_prime, C.shape, self.np)
 
         self.last_timestep = None
 
-    @staticmethod # TODO why does this not become static?
-    def construct_oaccvector_template(self, amp, C_shape, np):
+    @staticmethod
+    def construct_oaccvector_template(truncation, n_prime, m_prime, C_shape, np):
+        _amp = super(OATDCC, OATDCC).construct_amplitude_template(
+            truncation, n_prime, m_prime, np=np
+        )
         C = np.eye(C_shape[0])[:, :C_shape[1]]
-        _amp_template = OACCVector(*amp, C, C.T.conj(), np=self.np)
+        _amp_template = OACCVector(*_amp, C, C.T.conj(), np=np)
         return _amp_template
 
     @abc.abstractmethod
@@ -106,42 +108,20 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
-    def evolve_system(self, current_time, y=None, C=None, C_tilde=None):
-        if self.last_timestep == current_time:
-            return
 
-        self.last_timestep = current_time
-
-        # Evolve system in time
-        if self.system.has_one_body_time_evolution_operator:
-            self.h = self.system.h_t(current_time)
-
-        if self.system.has_two_body_time_evolution_operator:
-            self.u = self.system.u_t(current_time)
+    def compute_mean_field_operator(self, u, C, C_tilde):
+        W_arbs = np.einsum("rg,ds,agbd->arbs", C_tilde, C, self.u, optimize=True)
+        return W_arbs
 
 
-    def transform_matrix_elements(self, current_time, y=None, C=None, C_tilde=None):
-        if y is not None:
-            _, _, C, C_tilde = self._amp_template.from_array(y)
-        elif C is not None and C_tilde is not None:
-            pass
-        else:
-            raise ValueError(
-                "either the amplitude-array or (C and C_tilde) has to be not "
-                + "None."
-            )
-        # Change basis to C and C_tilde
-        self.h_prime = self.system.transform_one_body_elements(
-            self.h, C, C_tilde
-        )
-        _u_prime_spatial = self.system.transform_two_body_elements(
-            self.u, C, C_tilde
-        )
-        self.u_prime = self.system._basis_set.anti_symmetrize_u(_u_prime_spatial)
+    def compute_u_quarts(self, W_arbs, C, C_tilde):
+        u_quart_ket = np.einsum("bq,arbs->arqs", C, W_arbs)
+        u_quart_bra = np.einsum("pa,arbs->prbs", C_tilde, W_arbs)
+        return u_quart_ket, u_quart_bra
 
-        self.f_prime = self.system.construct_fock_matrix(
-            self.h_prime, self.u_prime
-        )
+    def convert_mean_field_to_u_prime(self, W_arbs, C, C_tilde):
+        u_prime = np.einsum("pa,bq,arbs->prqs", C_tilde, C, W_arbs)
+        return u_prime
 
     def __call__(self, current_time, prev_amp):
         np = self.np
@@ -150,7 +130,22 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         prev_amp = self._amp_template.from_array(prev_amp)
         t_old, l_old, C, C_tilde = prev_amp
 
-        self.update_hamiltonian(current_time, C=C, C_tilde=C_tilde)
+        self.update_hamiltonian(current_time, prev_amp)
+
+        W = self.compute_mean_field_operator(self.u, C, C_tilde)
+        #for dvr : np.einsum("rg,gs,ag->ars", C_tilde, C, self.u, optimize=True)
+        if self.has_non_zero_Q_space:
+            # For use later in Q-space equations
+            u_quart_ket, u_quart_bra = self.compute_u_quarts(W, C, C_tilde)
+            del(W)
+            u_prime = np.einsum("ap,arqs->prqs", C, u_quart_ket)
+        else:
+            u_prime = self.convert_mean_field_to_u_prime(self, W, C, C_tilde)
+            del(W)
+
+        self.u_prime = self.system._basis_set.anti_symmetrize_u(u_prime)
+        del(u_prime)
+        
 
         # Remove t_0 phase as this is not used in any of the equations
         t_old = t_old[1:]
@@ -193,53 +188,57 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         # Solve P-space equations for eta
         eta = self.compute_p_space_equations()
 
-        # Compute the inverse of rho_qp needed in Q-space eqs.
-        """
-        If rho_qp is singular we can regularize it as,
-
-        rho_qp_reg = rho_qp + eps*expm( -(1.0/eps) * rho_qp) Eq [3.14]
-        Multidimensional Quantum Dynamics, Meyer
-
-        with eps = 1e-8 (or some small number). It seems like it is standard in
-        the MCTDHF literature to always work with the regularized rho_qp. Note
-        here that expm refers to the matrix exponential which I can not find in
-        numpy only in scipy.
-        """
-        # rho_pq_inv = self.np.linalg.inv(self.rho_qp)
 
         # Solve Q-space for C and C_tilde
+        if self.has_non_zero_Q_space:
+            # Compute the inverse of rho_qp needed in Q-space eqs.
+            """
+            If rho_qp is singular we can regularize it as,
 
-        C_new = np.dot(C, eta)
-        C_tilde_new = -np.dot(eta, C_tilde)
-        """
+            rho_qp_reg = rho_qp + eps*expm( -(1.0/eps) * rho_qp) Eq [3.14]
+            Multidimensional Quantum Dynamics, Meyer
 
-        C_new = -1j * compute_q_space_ket_equations(
-            C,
-            C_tilde,
-            eta,
-            self.h,
-            self.h_prime,
-            self.u,
-            self.u_prime,
-            rho_pq_inv,
-            self.rho_qp,
-            self.rho_qspr,
-            np=np,
-        )
-        C_tilde_new = 1j * compute_q_space_bra_equations(
-            C,
-            C_tilde,
-            eta,
-            self.h,
-            self.h_prime,
-            self.u,
-            self.u_prime,
-            rho_pq_inv,
-            self.rho_qp,
-            self.rho_qspr,
-            np=np,
-        )
-        """
+            with eps = 1e-8 (or some small number). It seems like it is standard in
+            the MCTDHF literature to always work with the regularized rho_qp. Note
+            here that expm refers to the matrix exponential which I can not find in
+            numpy only in scipy.
+            """
+            from scipy.linalg import expm
+
+            rho_qp_reg = self.rho_qp + self.eps * expm(-(1.0 / self.eps) * self.rho_qp)
+            # small numbers in expm gives nan instead of 0
+            rho_qp_reg[np.isnan(rho_qp_reg)] = 0
+            rho_pq_inv = self.np.linalg.inv(rho_qp_reg)
+
+            C_new = -1j * compute_q_space_ket_equations(
+                C,
+                C_tilde,
+                eta,
+                self.h,
+                self.h_prime,
+                u_quart_ket,
+                self.u_prime,
+                rho_pq_inv,
+                self.rho_qp,
+                self.rho_qspr,
+                np=np,
+            )
+            C_tilde_new = 1j * compute_q_space_bra_equations(
+                C,
+                C_tilde,
+                eta,
+                self.h,
+                self.h_prime,
+                u_quart_bra,
+                self.u_prime,
+                rho_pq_inv,
+                self.rho_qp,
+                self.rho_qspr,
+                np=np,
+            )
+        else:
+            C_new = np.dot(C, eta)
+            C_tilde_new = -np.dot(eta, C_tilde)
 
         self.last_timestep = current_time
 
@@ -250,34 +249,30 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
 
 def compute_q_space_ket_equations(
-    C, C_tilde, eta, h, h_prime, u, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
+    C, C_tilde, eta, h, h_prime, u_quart_ket, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
 ):
     rhs = 1j * np.dot(C, eta)
 
     rhs += np.dot(h, C)
     rhs -= np.dot(C, h_prime)
 
-    u_quart = np.einsum("rb,gq,ds,abgd->arqs", C_tilde, C, C, u, optimize=True)
-    u_quart -= np.tensordot(C, u_prime, axes=((1), (0)))
+    u_quart_ket -= np.tensordot(C, u_prime, axes=((1), (0)))
 
-    temp_ap = np.tensordot(u_quart, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
+    temp_ap = np.tensordot(u_quart_ket, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
     rhs += np.dot(temp_ap, rho_inv_pq)
 
     return rhs
 
 
 def compute_q_space_bra_equations(
-    C, C_tilde, eta, h, h_prime, u, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
+    C, C_tilde, eta, h, h_prime, u_quart_bra, u_prime, rho_inv_pq, rho_qp, rho_qspr, np
 ):
     rhs = 1j * np.dot(eta, C_tilde)
 
     rhs += np.dot(C_tilde, h)
     rhs -= np.dot(h_prime, C_tilde)
 
-    u_quart = np.einsum(
-        "pa,rg,ds,agbd->prbs", C_tilde, C_tilde, C, u, optimize=True
-    )
-    u_quart -= np.tensordot(u_prime, C_tilde, axes=((2), (0))).transpose(
+    u_quart_bra -= np.tensordot(u_prime, C_tilde, axes=((2), (0))).transpose(
         0, 1, 3, 2
     )
 
