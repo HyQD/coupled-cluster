@@ -26,18 +26,13 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         self.system = system
 
-        # these lines is copy paste from super().__init__, and would be nice to
-        # remove.
-        # See https://github.com/Schoyen/coupled-cluster/issues/36
+        # references to the matrix elements in the original basis
         self.h = self.system.h
         self.u = self.system.u
-        # self.f = self.system.construct_fock_matrix(self.h, self.u)
-        # self.o = self.system.o
-        # self.v = self.system.v
 
         assert type(self.system) is GeneralOrbitalSystem
-        assert not self.system._basis_set.anti_symmetrized_u # TODO: remove _basis_set 
-        
+        assert not self.system._basis_set.anti_symmetrized_u
+
         if C is None:
             C = self.np.eye(system.l)
 
@@ -59,26 +54,28 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self.o_prime = slice(0, n_prime)
         self.v_prime = slice(n_prime, l_prime)
 
-
         if not self.np.isclose(self.np.sum(C_tilde @ C), l_prime):
             import warnings
+
             warnings.warn("C_tilde @ C does not add up to basis size")
 
-        self._amp_template = self.construct_oaccvector_template(self.truncation,
-                n_prime, m_prime, C.shape, self.np)
+        self._amp_template = self.construct_oaccvector_template(
+            self.truncation, n_prime, m_prime, C.shape, self.np
+        )
 
         self.initialize_arrays(self.system.l, l_prime)
         self.update_oa_hamiltonian(C=C, C_tilde=C_tilde)
 
         self.last_timestep = None
 
-
     @staticmethod
-    def construct_oaccvector_template(truncation, n_prime, m_prime, C_shape, np):
+    def construct_oaccvector_template(
+        truncation, n_prime, m_prime, C_shape, np
+    ):
         _amp = super(OATDCC, OATDCC).construct_amplitude_template(
             truncation, n_prime, m_prime, np=np
         )
-        C = np.eye(C_shape[0])[:, :C_shape[1]]
+        C = np.eye(C_shape[0])[:, : C_shape[1]]
         _amp_template = OACCVector(*_amp, C, C.T.conj(), np=np)
         return _amp_template
 
@@ -117,43 +114,91 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
     def compute_p_space_equations(self):
         pass
 
+    @staticmethod
+    def construct_mean_field_operator(u, C, C_tilde, np, **kwargs):
+        """Constructs the mean field operator W from the (non-antisymmetric) coloumb
+        integrals by converting two of the indices to the new basis given by C &
+        C_tilde:
+            W^{ar}_{bs} r= \sum_{ab} u^{ag}_{bd} \tilde C^r_g C^d_s.
+        Here a, g, b and d are indices in the original basis, while r and s are indicies
+        in the new basis
+        """
+        print(123, u.shape, C.shape, C_tilde.shape)
+        return np.einsum(
+            "rg,ds,agbd->arbs", C_tilde, C, u, optimize=True, **kwargs
+        )
 
-    def compute_mean_field_operator(self, u, C, C_tilde):
-        np = self.np
+    @staticmethod
+    def construct_u_quart_ket(W_arbs, C, C_tilde, np, **kwargs):
+        """Constructs an intermediate coloumb integral matrices with one unconverted
+        index in the ket. For use in both the construction of the fully converted
+        integrals and in the Q-space ket equations
 
-        W_arbs = np.einsum("rg,ds,agbd->arbs", C_tilde, C, u, optimize=True)
-        return W_arbs
+        Parameters:
+        W_arbs : numpy array
+            shape (l, l_prime, l, l_prime)
+        C : numpy array
+            shape (l, l_prime)
+        C_tilde : numpy array
+            shape (l_prime, l)
+        out_values : numpy array
+            shapes (l, l_prime, l_prime, l_prime)
+        **kwargs : supports out (see np.einsum)
+        """
+        return np.einsum("bq,arbs->arqs", C, W_arbs, **kwargs)
 
+    @staticmethod
+    def construct_u_quart_bra(W_arbs, C, C_tilde, np, **kwargs):
+        """Constructs an intermediate coloumb integral matrices with one unconverted
+        index in the bra. For use in the Q-space bra equations
 
-    def compute_u_quarts(self, W_arbs, C, C_tilde):
-        np = self.np
-
-        u_quart_ket = np.einsum("bq,arbs->arqs", C, W_arbs)
-        u_quart_bra = np.einsum("pa,arbs->prbs", C_tilde, W_arbs)
-        return u_quart_ket, u_quart_bra
-
-    def convert_mean_field_to_u_prime(self, W_arbs, C, C_tilde):
-        np = self.np
-
-        u_prime = np.einsum("pa,bq,arbs->prqs", C_tilde, C, W_arbs)
-        return u_prime
+        Parameters:
+        W_arbs : numpy array
+            shape (l, l_prime, l, l_prime)
+        C : numpy array
+            shape (l, l_prime)
+        C_tilde : numpy array
+            shape (l_prime, l)
+        out_values : numpy array
+            shapes (l_prime, l_prime, l, l_prime)
+        **kwargs : supports out (see np.einsum)
+        """
+        return np.einsum("pa,arbs->prbs", C_tilde, W_arbs, **kwargs)
 
     def initialize_arrays(self, l, l_prime):
         np = self.np
 
-        self.W = np.zeros((l, l_prime, l, l_prime))
-
         if self.has_non_zero_Q_space:
-            self.u_quart_ket = np.zeros((l, l_prime, l_prime, l_prime), dtype=np.complex128)
-            self.u_quart_bra = np.zeros((l_prime, l, l_prime, l_prime), dtype=np.complex128)
+            self.W = np.zeros((l, l_prime, l, l_prime), dtype=np.complex128)
+            self.u_quart_ket = np.zeros(
+                (l, l_prime, l_prime, l_prime), dtype=np.complex128
+            )
+            self.u_quart_bra = np.zeros(
+                (l_prime, l_prime, l, l_prime), dtype=np.complex128
+            )
         else:
+            self.W = None
             self.u_quart_ket = None
             self.u_quart_bra = None
 
         self.h_prime = np.zeros((l_prime, l_prime), dtype=np.complex128)
-        self.u_prime = np.zeros((l_prime, l_prime, l_prime, l_prime), dtype=np.complex128)
+        self.u_prime = np.zeros(
+            (l_prime, l_prime, l_prime, l_prime), dtype=np.complex128
+        )
         self.f_prime = np.zeros((l_prime, l_prime), dtype=np.complex128)
 
+    def update_hamiltonian(self, current_time, y):
+        """Overwrite tdcc method as fock matrix in the original basis is not needed"""
+        if self.last_timestep == current_time:
+            return
+
+        self.last_timestep = current_time
+
+        if self.system.has_one_body_time_evolution_operator:
+            self.h = self.system.h_t(current_time)
+
+        if self.system.has_two_body_time_evolution_operator:
+            self.u = self.system.u_t(current_time)
 
     def update_oa_hamiltonian(self, C, C_tilde=None):
         np = self.np
@@ -164,25 +209,42 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         if C_tilde is None:
             C_tilde = C.T.conj()
 
-        W = self.compute_mean_field_operator(u, C, C_tilde)
-
         if self.has_non_zero_Q_space:
-            self.u_quart_ket, self.u_quart_bra = self.compute_u_quarts(W, C, C_tilde)
+            self.construct_mean_field_operator(
+                u, C, C_tilde, np=self.np, out=self.W
+            )
+
+            self.construct_u_quart_ket(
+                self.W, C, C_tilde, np=self.np, out=self.u_quart_ket
+            )
+            self.construct_u_quart_bra(
+                self.W, C, C_tilde, np=self.np, out=self.u_quart_bra
+            )
 
             # non-antisymmetrized
-            self.u_prime = np.einsum("ap,arqs->prqs", C, self.u_quart_ket)
+            np.einsum(
+                "bq,prbs->prqs",
+                C,
+                self.u_quart_bra,
+                optimize=True,
+                out=self.u_prime,
+            )
 
             self.u_quart_ket -= np.tensordot(C, self.u_prime, axes=((1), (0)))
-            self.u_quart_bra -= np.tensordot(self.u_prime, C_tilde, axes=((2), (0))).transpose(
-                0, 1, 3, 2
-            )
+            self.u_quart_bra -= np.tensordot(
+                self.u_prime, C_tilde, axes=((2), (0))
+            ).transpose(0, 1, 3, 2)
         else:
             # non-antisymmetrized
-            self.u_prime = self.convert_mean_field_to_u_prime(W, C, C_tilde)
+            self.u_prime = self.system.transform_two_body_elements(
+                self.u, C=C, C_tilde=C_tilde, anti_symmetrize=False
+            )
 
         self.h_prime = self.system.transform_one_body_elements(h, C, C_tilde)
         self.u_prime = self.system._basis_set.anti_symmetrize_u(self.u_prime)
-        self.f_prime = self.system.construct_fock_matrix(self.h_prime, self.u_prime)
+        self.f_prime = self.system.construct_fock_matrix(
+            self.h_prime, self.u_prime
+        )
 
     def __call__(self, current_time, y):
         np = self.np
@@ -192,7 +254,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         self.update_hamiltonian(current_time, y)
         self.update_oa_hamiltonian(C=C, C_tilde=C_tilde)
-        
+
         # Remove t_0 phase as this is not used in any of the equations
         t_old = t_old[1:]
 
@@ -254,16 +316,35 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             numpy only in scipy.
 
             NOTE! scipy.linalg.expm gives nan instead of zero for large-norm negative
-            values in version < 1.5, 
+            values in version < 1.5,
             """
             from scipy.linalg import expm
-            rho_qp_reg = self.rho_qp + self.eps * expm(-(1.0 / self.eps) * self.rho_qp)
+
+            rho_qp_reg = self.rho_qp + self.eps_reg * expm(
+                -(1.0 / self.eps_reg) * self.rho_qp
+            )
             # small numbers in expm gives nan instead of 0
             rho_qp_reg[np.isnan(rho_qp_reg)] = 0
             rho_inv_pq = self.np.linalg.inv(rho_qp_reg)
 
-            C_new += -1j * compute_q_space_ket_equations(C, C_tilde)
-            C_tilde_new += 1j * compute_q_space_bra_equations(C, C_tilde)
+            C_new += -1j * self.compute_q_space_ket_equations(
+                C,
+                C_tilde,
+                self.h,
+                self.h_prime,
+                self.u_quart_ket,
+                self.rho_qspr,
+                rho_inv_pq,
+            )
+            C_tilde_new += 1j * self.compute_q_space_bra_equations(
+                C,
+                C_tilde,
+                self.h,
+                self.h_prime,
+                self.u_quart_bra,
+                self.rho_qspr,
+                rho_inv_pq,
+            )
 
         self.last_timestep = current_time
 
@@ -272,28 +353,32 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             t=t_new, l=l_new, C=C_new, C_tilde=C_tilde_new, np=self.np
         ).asarray()
 
-
-    def compute_q_space_ket_equations(self, C, C_tilde, h, h_prime, u_quart_ket,
-            rho_qspr, rho_inv_pq):
-        np = self.np 
+    def compute_q_space_ket_equations(
+        self, C, C_tilde, h, h_prime, u_quart_ket, rho_qspr, rho_inv_pq
+    ):
+        np = self.np
 
         rhs = np.dot(h, C)
         rhs -= np.dot(C, h_prime)
 
-        temp_ap = np.tensordot(u_quart_ket, rho_qspr, axes=((1, 2, 3), (3, 0, 1)))
+        temp_ap = np.tensordot(
+            u_quart_ket, rho_qspr, axes=((1, 2, 3), (3, 0, 1))
+        )
         rhs += np.dot(temp_ap, rho_inv_pq)
 
         return rhs
 
-
-    def compute_q_space_bra_equations(self, C, C_tilde, h, h_prime, u_quart_bra,
-            rho_qspr, rho_inv_pq):
+    def compute_q_space_bra_equations(
+        self, C, C_tilde, h, h_prime, u_quart_bra, rho_qspr, rho_inv_pq
+    ):
         np = self.np
 
         rhs = np.dot(C_tilde, h)
         rhs -= np.dot(h_prime, C_tilde)
 
-        temp_qb = np.tensordot(rho_qspr, u_quart_bra, axes=((1, 2, 3), (3, 0, 1)))
+        temp_qb = np.tensordot(
+            rho_qspr, u_quart_bra, axes=((1, 2, 3), (3, 0, 1))
+        )
         rhs += np.dot(rho_inv_pq, temp_qb)
 
         return rhs
