@@ -123,7 +123,6 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         Here a, g, b and d are indices in the original basis, while r and s are indicies
         in the new basis
         """
-        print(123, u.shape, C.shape, C_tilde.shape)
         return np.einsum(
             "rg,ds,agbd->arbs", C_tilde, C, u, optimize=True, **kwargs
         )
