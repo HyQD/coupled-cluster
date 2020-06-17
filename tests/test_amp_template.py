@@ -3,7 +3,6 @@ import numpy as np
 from coupled_cluster import TDCCS, TDCCD, TDCCSD, TDRCCSD, OATDCCD
 from quantum_systems import (
     RandomBasisSet,
-    GeneralOrbitalSystem,
     SpatialOrbitalSystem,
 )
 
@@ -20,7 +19,7 @@ def test_amp_template():
     rbs = RandomBasisSet(l_spat, dim, includes_spin=False)
 
     sos = SpatialOrbitalSystem(n, rbs)
-    gos = sos.construct_general_orbital_system()
+    gos = sos.construct_general_orbital_system(anti_symmetrize=False)
 
     C_mat = np.eye(l)
 

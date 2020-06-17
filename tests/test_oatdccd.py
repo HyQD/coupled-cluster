@@ -141,7 +141,7 @@ def test_oatdccd_helium():
     laser_duration = 5
 
     system = construct_pyscf_system_rhf(
-        molecule="he 0.0 0.0 0.0", basis="cc-pvdz"
+        molecule="he 0.0 0.0 0.0", basis="cc-pvdz", anti_symmetrize=False
     )
 
     oaccd = OACCD(system, verbose=True)

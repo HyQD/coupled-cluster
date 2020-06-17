@@ -237,7 +237,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         else:
             # non-antisymmetrized
             self.u_prime = self.system.transform_two_body_elements(
-                self.u, C=C, C_tilde=C_tilde, anti_symmetrize=False
+                self.u, C=C, C_tilde=C_tilde,
             )
 
         self.h_prime = self.system.transform_one_body_elements(h, C, C_tilde)
