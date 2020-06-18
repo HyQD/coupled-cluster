@@ -1,9 +1,9 @@
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
-from coupled_cluster.rccsd.rhs_t import (
+from coupled_cluster.rccsd.rhs_t_psi4 import (
     compute_t_1_amplitudes,
     compute_t_2_amplitudes,
 )
-from coupled_cluster.rccsd.rhs_l import (
+from coupled_cluster.rccsd.rhs_l_psi4 import (
     compute_l_1_amplitudes,
     compute_l_2_amplitudes,
 )
@@ -12,7 +12,7 @@ from coupled_cluster.rccsd.energies import (
     compute_time_dependent_energy,
     compute_ground_state_energy_correction,
 )
-from coupled_cluster.rccsd.density_matrices import (
+from coupled_cluster.rccsd.density_matrices_psi4 import (
     compute_one_body_density_matrix,
 )
 from coupled_cluster.rccsd.time_dependent_overlap import (
