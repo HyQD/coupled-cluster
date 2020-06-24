@@ -1,20 +1,35 @@
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
+
+from coupled_cluster.rccsd.rhs_t import (
+    compute_t_1_amplitudes as compute_t1_gristmill,
+    compute_t_2_amplitudes as compute_t2_gristmill,
+)
+
+from coupled_cluster.rccsd.rhs_l import (
+    compute_l_1_amplitudes as compute_l1_gristmill,
+    compute_l_2_amplitudes as compute_l2_gristmill,
+)
+
 from coupled_cluster.rccsd.rhs_t_psi4 import (
-    compute_t_1_amplitudes,
-    compute_t_2_amplitudes,
+    compute_t_1_amplitudes as compute_t1_psi4,
+    compute_t_2_amplitudes as compute_t2_psi4,
 )
+
 from coupled_cluster.rccsd.rhs_l_psi4 import (
-    compute_l_1_amplitudes,
-    compute_l_2_amplitudes,
+    compute_l_1_amplitudes as compute_l1_psi4,
+    compute_l_2_amplitudes as compute_l2_psi4,
 )
+
 from coupled_cluster.rccsd import RCCSD
 from coupled_cluster.rccsd.energies import (
     compute_time_dependent_energy,
     compute_ground_state_energy_correction,
 )
-from coupled_cluster.rccsd.density_matrices_psi4 import (
+
+from coupled_cluster.rccsd.density_matrices import (
     compute_one_body_density_matrix,
 )
+
 from coupled_cluster.rccsd.time_dependent_overlap import (
     compute_time_dependent_overlap,
 )
@@ -22,6 +37,10 @@ from coupled_cluster.rccsd.time_dependent_overlap import (
 
 class TDRCCSD(TimeDependentCoupledCluster):
     truncation = "CCSD"
+
+    def __init__(self, system, rhs="gristmill"):
+        super().__init__(system)
+        self.rhs = rhs
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(
@@ -32,12 +51,20 @@ class TDRCCSD(TimeDependentCoupledCluster):
         )
 
     def rhs_t_amplitudes(self):
-        yield compute_t_1_amplitudes
-        yield compute_t_2_amplitudes
+        if self.rhs == "gristmill":
+            yield compute_t1_gristmill
+            yield compute_t2_gristmill
+        elif self.rhs == "psi4":
+            yield compute_t1_psi4
+            yield compute_t2_psi4
 
     def rhs_l_amplitudes(self):
-        yield compute_l_1_amplitudes
-        yield compute_l_2_amplitudes
+        if self.rhs == "gristmill":
+            yield compute_l1_gristmill
+            yield compute_l2_gristmill
+        elif self.rhs == "psi4":
+            yield compute_l1_psi4
+            yield compute_l2_psi4
 
     def compute_left_reference_overlap(self, current_time, y):
         np = self.np

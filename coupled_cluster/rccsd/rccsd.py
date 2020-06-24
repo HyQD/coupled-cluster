@@ -1,13 +1,23 @@
 from coupled_cluster.cc import CoupledCluster
 
+from coupled_cluster.rccsd.rhs_t import (
+    compute_t_1_amplitudes as compute_t1_gristmill,
+    compute_t_2_amplitudes as compute_t2_gristmill,
+)
+
+from coupled_cluster.rccsd.rhs_l import (
+    compute_l_1_amplitudes as compute_l1_gristmill,
+    compute_l_2_amplitudes as compute_l2_gristmill,
+)
+
 from coupled_cluster.rccsd.rhs_t_psi4 import (
-    compute_t_1_amplitudes,
-    compute_t_2_amplitudes,
+    compute_t_1_amplitudes as compute_t1_psi4,
+    compute_t_2_amplitudes as compute_t2_psi4,
 )
 
 from coupled_cluster.rccsd.rhs_l_psi4 import (
-    compute_l_1_amplitudes,
-    compute_l_2_amplitudes,
+    compute_l_1_amplitudes as compute_l1_psi4,
+    compute_l_2_amplitudes as compute_l2_psi4,
 )
 
 from coupled_cluster.cc_helper import (
@@ -15,8 +25,8 @@ from coupled_cluster.cc_helper import (
     construct_d_t_2_matrix,
 )
 
-from coupled_cluster.rccsd.density_matrices_psi4 import (
-    compute_one_body_density_matrix,
+from coupled_cluster.rccsd.density_matrices import (
+    compute_one_body_density_matrix as compute_one_body_density_gristmill,
 )
 
 from coupled_cluster.rccsd.energies import (
@@ -38,11 +48,11 @@ class RCCSD(CoupledCluster):
         Include singles
     """
 
-    def __init__(self, system, include_singles=True, **kwargs):
+    def __init__(self, system, rhs="gristmill", include_singles=True, **kwargs):
         super().__init__(system, **kwargs)
 
         np = self.np
-
+        self.rhs = rhs
         """
         Manually handle restricted properties for now before quantum systems have been 
         updated
@@ -149,6 +159,28 @@ class RCCSD(CoupledCluster):
 
         return e_corr + e_ref
 
+    def compute_t_1_amplitudes(self, f, u, t_1, t_2, o, v, out, np):
+        if self.rhs == "gristmill":
+            return compute_t1_gristmill(f, u, t_1, t_2, o, v, np)
+        elif self.rhs == "psi4":
+            return compute_t1_psi4(f, u, t_1, t_2, o, v, np)
+        else:
+            print("Undefined right hand sides")
+            import sys
+
+            sys.exit(1)
+
+    def compute_t_2_amplitudes(self, f, u, t_1, t_2, o, v, out, np):
+        if self.rhs == "gristmill":
+            return compute_t2_gristmill(f, u, t_1, t_2, o, v, np)
+        elif self.rhs == "psi4":
+            return compute_t2_psi4(f, u, t_1, t_2, o, v, np)
+        else:
+            print("Undefined right hand sides")
+            import sys
+
+            sys.exit(1)
+
     def compute_t_amplitudes(self):
         np = self.np
 
@@ -159,7 +191,7 @@ class RCCSD(CoupledCluster):
         # Singles
         if self.include_singles:
             self.rhs_t_1.fill(0)
-            self.rhs_t_1 = compute_t_1_amplitudes(
+            self.rhs_t_1 = self.compute_t_1_amplitudes(
                 self.f,
                 self.u,
                 self.t_1,
@@ -175,7 +207,7 @@ class RCCSD(CoupledCluster):
 
         # Doubles
         self.rhs_t_2.fill(0)
-        self.rhs_t_2 = compute_t_2_amplitudes(
+        self.rhs_t_2 = self.compute_t_2_amplitudes(
             self.f,
             self.u,
             self.t_1,
@@ -206,6 +238,28 @@ class RCCSD(CoupledCluster):
 
         self.t_2 = np.reshape(new_vectors[n_t1:], self.t_2.shape)
 
+    def compute_l_1_amplitudes(self, f, u, t_1, t_2, l_1, l_2, o, v, out, np):
+        if self.rhs == "gristmill":
+            return compute_l1_gristmill(f, u, t_1, t_2, l_1, l_2, o, v, np)
+        elif self.rhs == "psi4":
+            return compute_l1_psi4(f, u, t_1, t_2, l_1, l_2, o, v, np)
+        else:
+            print("Undefined right hand sides")
+            import sys
+
+            sys.exit(1)
+
+    def compute_l_2_amplitudes(self, f, u, t_1, t_2, l_1, l_2, o, v, out, np):
+        if self.rhs == "gristmill":
+            return compute_l2_gristmill(f, u, t_1, t_2, l_1, l_2, o, v, np)
+        elif self.rhs == "psi4":
+            return compute_l2_psi4(f, u, t_1, t_2, l_1, l_2, o, v, np)
+        else:
+            print("Undefined right hand sides")
+            import sys
+
+            sys.exit(1)
+
     def compute_l_amplitudes(self):
         np = self.np
 
@@ -220,7 +274,7 @@ class RCCSD(CoupledCluster):
         # Singles
         if self.include_singles:
             self.rhs_l_1.fill(0)
-            self.rhs_l_1 = compute_l_1_amplitudes(
+            self.rhs_l_1 = self.compute_l_1_amplitudes(
                 self.f,
                 self.u,
                 self.t_1,
@@ -239,7 +293,7 @@ class RCCSD(CoupledCluster):
 
         # Doubles
         self.rhs_l_2.fill(0)
-        self.rhs_l_2 = compute_l_2_amplitudes(
+        self.rhs_l_2 = self.compute_l_2_amplitudes(
             self.f,
             self.u,
             self.t_1,
