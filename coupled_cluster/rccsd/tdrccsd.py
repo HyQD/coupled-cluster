@@ -34,6 +34,10 @@ from coupled_cluster.rccsd.time_dependent_overlap import (
     compute_time_dependent_overlap,
 )
 
+from coupled_cluster.cc_helper import AmplitudeContainer
+
+from coupled_cluster.rccsd.rccsd_intermediates import RCCSDIntermediates
+
 
 class TDRCCSD(TimeDependentCoupledCluster):
     truncation = "CCSD"
@@ -41,6 +45,63 @@ class TDRCCSD(TimeDependentCoupledCluster):
     def __init__(self, system, rhs="gristmill"):
         super().__init__(system)
         self.rhs = rhs
+        if rhs == "psi4":
+            self.intermediates = RCCSDIntermediates(system)
+        else:
+            self.intermediates = None
+
+    def __call__(self, current_time, prev_amp):
+        o, v = self.system.o, self.system.v
+
+        prev_amp = self._amp_template.from_array(prev_amp)
+        t_old, l_old = prev_amp
+
+        self.update_hamiltonian(current_time, prev_amp)
+
+        # Remove phase from t-amplitude list
+        t_old = t_old[1:]
+
+        if self.rhs == "psi4":
+            self.intermediates.update_intermediates(self.f, self.u, *t_old)
+
+        t_new = [
+            -1j
+            * rhs_t_func(
+                self.f,
+                self.u,
+                *t_old,
+                o,
+                v,
+                np=self.np,
+                intermediates=self.intermediates
+            )
+            for rhs_t_func in self.rhs_t_amplitudes()
+        ]
+
+        # Compute derivative of phase
+        t_0_new = -1j * self.rhs_t_0_amplitude(
+            self.f, self.u, *t_old, self.o, self.v, np=self.np
+        )
+        t_new = [t_0_new, *t_new]
+
+        l_new = [
+            1j
+            * rhs_l_func(
+                self.f,
+                self.u,
+                *t_old,
+                *l_old,
+                o,
+                v,
+                np=self.np,
+                intermediates=self.intermediates
+            )
+            for rhs_l_func in self.rhs_l_amplitudes()
+        ]
+
+        self.last_timestep = current_time
+
+        return AmplitudeContainer(t=t_new, l=l_new, np=self.np).asarray()
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(

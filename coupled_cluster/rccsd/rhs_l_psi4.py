@@ -36,21 +36,38 @@ respectively as opposed to Hov_ia and <ij|ab> in PSI4.
 """
 
 
-def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
+def compute_l_1_amplitudes(
+    f, u, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
+):
 
-    Loovv = build_Loovv(u, o, v)
-    Lvovv = build_Lvovv(u, o, v)
-    Looov = build_Looov(u, o, v)
+    if intermediates == None:
+        Loovv = build_Loovv(u, o, v)
+        Lvovv = build_Lvovv(u, o, v)
+        Looov = build_Looov(u, o, v)
 
-    Hoo = build_Hoo(f, Looov, Loovv, t1, t2, o, v)
-    Hov = build_Hov(f, Loovv, t1, o, v)
-    Hvv = build_Hvv(f, Lvovv, Loovv, t1, t2, o, v)
-    Hovvo = build_Hovvo(u, Loovv, t1, t2, o, v)
-    Hovov = build_Hovov(u, t1, t2, o, v)
-    Hvvvo = build_Hvvvo(f, u, Loovv, Lvovv, t1, t2, o, v)
-    Hovoo = build_Hovoo(f, u, Loovv, Looov, t1, t2, o, v)
-    Hvovv = build_Hvovv(u, t1, o, v)
-    Hooov = build_Hooov(u, t1, o, v)
+        Hoo = build_Hoo(f, Looov, Loovv, t1, t2, o, v)
+        Hov = build_Hov(f, Loovv, t1, o, v)
+        Hvv = build_Hvv(f, Lvovv, Loovv, t1, t2, o, v)
+        Hovvo = build_Hovvo(u, Loovv, t1, t2, o, v)
+        Hovov = build_Hovov(u, t1, t2, o, v)
+        Hvvvo = build_Hvvvo(f, u, Loovv, Lvovv, t1, t2, o, v)
+        Hovoo = build_Hovoo(f, u, Loovv, Looov, t1, t2, o, v)
+        Hvovv = build_Hvovv(u, t1, o, v)
+        Hooov = build_Hooov(u, t1, o, v)
+    else:
+        Loovv = intermediates.Loovv
+        Lvovv = intermediates.Lvovv
+        Looov = intermediates.Looov
+
+        Hoo = intermediates.Hoo
+        Hov = intermediates.Hov
+        Hvv = intermediates.Hvv
+        Hovvo = intermediates.Hovvo
+        Hovov = intermediates.Hovov
+        Hvvvo = intermediates.Hvvvo
+        Hovoo = intermediates.Hovoo
+        Hvovv = intermediates.Hvovv
+        Hooov = intermediates.Hooov
 
     # l1 equations
     r_l1 = 2.0 * Hov
@@ -68,25 +85,45 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
     return r_l1
 
 
-def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
-    ################################################
-    # These intermediates are common with those used in
-    # compute_l1_amplitudes
-    Loovv = build_Loovv(u, o, v)
-    Lvovv = build_Lvovv(u, o, v)
-    Looov = build_Looov(u, o, v)
+def compute_l_2_amplitudes(
+    f, u, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
+):
 
-    Hoo = build_Hoo(f, Looov, Loovv, t1, t2, o, v)
-    Hov = build_Hov(f, Loovv, t1, o, v)
-    Hvv = build_Hvv(f, Lvovv, Loovv, t1, t2, o, v)
+    if intermediates == None:
+        ################################################
+        # These intermediates are common with those used in
+        # compute_l1_amplitudes
+        Loovv = build_Loovv(u, o, v)
+        Lvovv = build_Lvovv(u, o, v)
+        Looov = build_Looov(u, o, v)
 
-    Hvovv = build_Hvovv(u, t1, o, v)
-    Hooov = build_Hooov(u, t1, o, v)
-    Hovvo = build_Hovvo(u, Loovv, t1, t2, o, v)
-    Hovov = build_Hovov(u, t1, t2, o, v)
-    ################################################
-    Hoooo = build_Hoooo(u, t1, t2, o, v)
-    Hvvvv = build_Hvvvv(u, t1, t2, o, v)
+        Hoo = build_Hoo(f, Looov, Loovv, t1, t2, o, v)
+        Hov = build_Hov(f, Loovv, t1, o, v)
+        Hvv = build_Hvv(f, Lvovv, Loovv, t1, t2, o, v)
+
+        Hvovv = build_Hvovv(u, t1, o, v)
+        Hooov = build_Hooov(u, t1, o, v)
+        Hovvo = build_Hovvo(u, Loovv, t1, t2, o, v)
+        Hovov = build_Hovov(u, t1, t2, o, v)
+        ################################################
+        Hoooo = build_Hoooo(u, t1, t2, o, v)
+        Hvvvv = build_Hvvvv(u, t1, t2, o, v)
+    else:
+        Loovv = intermediates.Loovv
+        Lvovv = intermediates.Lvovv
+        Looov = intermediates.Looov
+
+        Hoo = intermediates.Hoo
+        Hov = intermediates.Hov
+        Hvv = intermediates.Hvv
+
+        Hvovv = intermediates.Hvovv
+        Hooov = intermediates.Hooov
+        Hovvo = intermediates.Hovvo
+        Hovov = intermediates.Hovov
+
+        Hoooo = intermediates.Hoooo
+        Hvvvv = intermediates.Hvvvv
 
     # l2 equations
     nocc = t1.shape[1]

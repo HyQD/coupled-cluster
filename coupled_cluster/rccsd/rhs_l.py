@@ -2,7 +2,9 @@ import coupled_cluster.ccs.rhs_l as ccs_l
 import coupled_cluster.ccd.rhs_l as ccd_l
 
 
-def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
+def compute_l_1_amplitudes(
+    f, u, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
+):
     """
     if out is None:
         out = np.zeros_like(l_1)
@@ -355,7 +357,9 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
     return rhs
 
 
-def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
+def compute_l_2_amplitudes(
+    f, u, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
+):
     """
     if out is None:
         out = np.zeros_like(l_2)

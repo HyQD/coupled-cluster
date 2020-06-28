@@ -8,7 +8,9 @@ import coupled_cluster.ccs.rhs_t as ccs_t
 import coupled_cluster.ccd.rhs_t as ccd_t
 
 
-def compute_t_1_amplitudes(F, W, t1, t2, o, v, np, out=None):
+def compute_t_1_amplitudes(
+    F, W, t1, t2, o, v, np, intermediates=None, out=None
+):
 
     """
     if out is None:
@@ -74,7 +76,9 @@ def compute_t_1_amplitudes(F, W, t1, t2, o, v, np, out=None):
     return Omega
 
 
-def compute_t_2_amplitudes(F, W, t1, t2, o, v, np, out=None):
+def compute_t_2_amplitudes(
+    F, W, t1, t2, o, v, np, intermediates=None, out=None
+):
     """
     if out is None:
         out = np.zeros_like(t_2)
