@@ -328,7 +328,6 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
             C_new += -1j * self.compute_q_space_ket_equations(
                 C,
-                C_tilde,
                 self.h,
                 self.h_prime,
                 self.u_quart_ket,
@@ -336,7 +335,6 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
                 rho_inv_pq,
             )
             C_tilde_new += 1j * self.compute_q_space_bra_equations(
-                C,
                 C_tilde,
                 self.h,
                 self.h_prime,
@@ -353,7 +351,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         ).asarray()
 
     def compute_q_space_ket_equations(
-        self, C, C_tilde, h, h_prime, u_quart_ket, rho_qspr, rho_inv_pq
+        self, C, h, h_prime, u_quart_ket, rho_qspr, rho_inv_pq
     ):
         np = self.np
 
@@ -368,7 +366,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         return rhs
 
     def compute_q_space_bra_equations(
-        self, C, C_tilde, h, h_prime, u_quart_bra, rho_qspr, rho_inv_pq
+        self, C_tilde, h, h_prime, u_quart_bra, rho_qspr, rho_inv_pq
     ):
         np = self.np
 
