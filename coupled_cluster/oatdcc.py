@@ -128,7 +128,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         )
 
     @staticmethod
-    def construct_u_quart_ket(W_arbs, C, C_tilde, np, **kwargs):
+    def contract_W_partially_ket(W_arbs, C, C_tilde, np, **kwargs):
         """Constructs an intermediate coloumb integral matrices with one unconverted
         index in the ket. For use in both the construction of the fully converted
         integrals and in the Q-space ket equations
@@ -147,7 +147,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         return np.einsum("bq,arbs->arqs", C, W_arbs, **kwargs)
 
     @staticmethod
-    def construct_u_quart_bra(W_arbs, C, C_tilde, np, **kwargs):
+    def contract_W_partially_bra(W_arbs, C, C_tilde, np, **kwargs):
         """Constructs an intermediate coloumb integral matrices with one unconverted
         index in the bra. For use in the Q-space bra equations
 
@@ -213,10 +213,10 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
                 u, C, C_tilde, np=self.np, out=self.W
             )
 
-            self.construct_u_quart_ket(
+            self.contract_W_partially_ket(
                 self.W, C, C_tilde, np=self.np, out=self.u_quart_ket
             )
-            self.construct_u_quart_bra(
+            self.contract_W_partially_bra(
                 self.W, C, C_tilde, np=self.np, out=self.u_quart_bra
             )
 

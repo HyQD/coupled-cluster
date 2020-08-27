@@ -47,7 +47,7 @@ class OATDCCD_dvr(OATDCCD):
         return np.einsum("rg,gs,ag->ars", C_tilde, C, u, optimize=True, **kwargs)
 
     @staticmethod
-    def construct_u_quart_ket(W_ars, C, C_tilde, np, **kwargs):
+    def contract_W_partially_ket(W_ars, C, C_tilde, np, **kwargs):
         """Constructs an intermediate coloumb integral matrices with one unconverted
         index in the ket. For use in both the construction of the fully converted
         integrals and in the Q-space ket equations
@@ -66,7 +66,7 @@ class OATDCCD_dvr(OATDCCD):
         return np.einsum("aq,ars->arqs", C, W_ars, **kwargs)
 
     @staticmethod
-    def construct_u_quart_bra(W_ars, C, C_tilde, np, **kwargs):
+    def contract_W_partially_bra(W_ars, C, C_tilde, np, **kwargs):
         """Constructs an intermediate coloumb integral matrices with one unconverted
         index in the bra. For use in the Q-space bra equations
 
