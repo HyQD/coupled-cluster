@@ -109,14 +109,14 @@ class OACCD(CCD):
         amp_tol = 0.1
 
         for k_it in range(max_iterations):
-            S = expm(self.kappa)
-            S_inv = expm(-self.kappa)
+            self.C = expm(self.kappa)
+            self.C_tilde = expm(-self.kappa)
 
             self.h = self.system.transform_one_body_elements(
-                self.system.h, S, S_inv
+                self.system.h, self.C, self.C_tilde
             )
             self.u = self.system.transform_two_body_elements(
-                self.system.u, S, S_inv
+                self.system.u, self.C, self.C_tilde
             )
             self.f = self.system.construct_fock_matrix(self.h, self.u)
 
@@ -163,10 +163,8 @@ class OACCD(CCD):
                 print(f"\nResidual norms: rd = {residual_down}")
                 print(f"Residual norms: ru = {residual_up}")
 
-        S = expm(self.kappa)
-        S_inv = expm(-self.kappa)
-        self.C = S
-        self.C_tilde = S_inv
+        self.C = expm(self.kappa)
+        self.C_tilde = expm(-self.kappa)
 
         self.h = self.system.transform_one_body_elements(
             self.system.h, self.C, self.C_tilde
