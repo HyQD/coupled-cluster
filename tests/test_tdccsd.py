@@ -261,22 +261,18 @@ def test_tdccsd():
         assert abs(time_points[i] - r.t) < dt * 0.1
 
         td_energies[i] = tdccsd.compute_energy(r.t, r.y)
-
-        rho_qp = tdccsd.compute_one_body_density_matrix(r.t, r.y)
-        rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
-        dip_z[i] = np.trace(rho_qp_hermitian @ system.dipole_moment[2]).real
+        dip_z[i] = tdccsd.compute_one_body_expectation_value(
+            r.t, r.y, system.dipole_moment[2]
+        ).real
         td_overlap[i] = tdccsd.compute_overlap(r.t, y0, r.y)
 
         i += 1
         r.integrate(time_points[i])
 
     td_energies[i] = tdccsd.compute_energy(r.t, r.y)
-
-    rho_qp = tdccsd.compute_one_body_density_matrix(r.t, r.y)
-    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
-    dip_z[i] = np.trace(rho_qp_hermitian @ system.dipole_moment[2]).real
+    dip_z[i] = tdccsd.compute_one_body_expectation_value(
+        r.t, r.y, system.dipole_moment[2]
+    ).real
     td_overlap[i] = tdccsd.compute_overlap(r.t, y0, r.y)
 
     np.testing.assert_allclose(

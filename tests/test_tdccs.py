@@ -129,12 +129,9 @@ def test_tdccs():
     dip_z = np.zeros(len(time_points))
     td_overlap = np.zeros_like(dip_z)
 
-    rho_qp = tdccs.compute_one_body_density_matrix(r.t, r.y)
-    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
     td_energies[0] = tdccs.compute_energy(r.t, r.y)
-    dip_z[0] = np.einsum(
-        "qp,pq->", rho_qp_hermitian, system.dipole_moment[2]
+    dip_z[0] = tdccs.compute_one_body_expectation_value(
+        r.t, r.y, system.dipole_moment[2]
     ).real
     td_overlap[0] = tdccs.compute_overlap(r.t, y0, r.y)
 
@@ -144,12 +141,8 @@ def test_tdccs():
         if not r.successful():
             break
         td_energies[i + 1] = tdccs.compute_energy(r.t, r.y)
-
-        rho_qp = tdccs.compute_one_body_density_matrix(r.t, r.y)
-        rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
-        dip_z[i + 1] = np.einsum(
-            "qp,pq->", rho_qp_hermitian, system.dipole_moment[2]
+        dip_z[i + 1] = tdccs.compute_one_body_expectation_value(
+            r.t, r.y, system.dipole_moment[2]
         ).real
         td_overlap[i + 1] = tdccs.compute_overlap(r.t, y0, r.y)
 

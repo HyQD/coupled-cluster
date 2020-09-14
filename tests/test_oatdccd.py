@@ -72,25 +72,17 @@ def test_oatdccd_helium():
         assert abs(time_points[i] - r.t) < dt * 1e-1
 
         td_energies[i] = oatdccd.compute_energy(r.t, r.y)
-        rho_qp = oatdccd.compute_one_body_density_matrix(r.t, r.y)
-        rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
-        t, l, C, C_tilde = oatdccd.amplitudes_from_array(r.y)
-        z = C_tilde @ system.dipole_moment[2] @ C
-
-        dip_z[i] = np.trace(rho_qp_hermitian @ z).real
+        dip_z[i] = oatdccd.compute_one_body_expectation_value(
+            r.t, r.y, system.dipole_moment[2]
+        )
 
         i += 1
         r.integrate(time_points[i])
 
     td_energies[i] = oatdccd.compute_energy(r.t, r.y)
-    rho_qp = oatdccd.compute_one_body_density_matrix(r.t, r.y)
-    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
-    t, l, C, C_tilde = oatdccd.amplitudes_from_array(r.y)
-    z = C_tilde @ system.dipole_moment[2] @ C
-
-    dip_z[i] = np.trace(rho_qp_hermitian @ z).real
+    dip_z[i] = oatdccd.compute_one_body_expectation_value(
+        r.t, r.y, system.dipole_moment[2]
+    )
 
     np.testing.assert_allclose(
         td_energies.real,

@@ -71,6 +71,11 @@ class OACCD(CCD):
             self.f, self.u, self.t_2, self.l_2, self.o, self.v, np=self.np
         )
 
+    def compute_one_body_expectation_value(self, mat, make_hermitian=True):
+        return super().compute_one_body_expectation_value(
+            self.C_tilde @ mat @ self.C, make_hermitian=make_hermitian
+        )
+
     def compute_ground_state(
         self,
         max_iterations=100,
