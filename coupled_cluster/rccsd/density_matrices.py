@@ -27,7 +27,7 @@ def compute_one_body_density_matrix(t1, t2, l1, l2, o, v, np, out=None):
 def add_rho_ba(t_1, t_2, l_1, l_2, o, v, out, np):
     """Function for adding v-v part of the one-body density matrix
 
-        rho^{b}_{a} = l^{i}_{a} t^{b}_{i} - (0.5) l^{ij}_{ab} t^{bc}_{ij}
+    rho^{b}_{a} = l^{i}_{a} t^{b}_{i} - (0.5) l^{ij}_{ab} t^{bc}_{ij}
 
     """
 
@@ -40,7 +40,7 @@ def add_rho_ba(t_1, t_2, l_1, l_2, o, v, out, np):
 def add_rho_ia(l_1, o, v, out, np):
     """Function for adding the o-v part of the one-body density matrix
 
-        rho^{i}_{a} = l^{i}_{a}
+    rho^{i}_{a} = l^{i}_{a}
 
     """
 
@@ -50,13 +50,13 @@ def add_rho_ia(l_1, o, v, out, np):
 def add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np):
     """Function for adding the v-o part of the one-body density matrix
 
-        rho^{a}_{i} = (-1) l^{i}_{a} t^{a}_{j} t^{b}_{i} + l^{i}_{a} t^{ab}_{ij}
-            + (0.5) l^{ij}_{ab} t^{a}_{k} t^{bc}_{ij}
-            + (0.5) l^{ij}_{ab} t^{c}_{i} t^{ab}_{jk} + t^{a}_{i}
+    rho^{a}_{i} = (-1) l^{i}_{a} t^{a}_{j} t^{b}_{i} + l^{i}_{a} t^{ab}_{ij}
+        + (0.5) l^{ij}_{ab} t^{a}_{k} t^{bc}_{ij}
+        + (0.5) l^{ij}_{ab} t^{c}_{i} t^{ab}_{jk} + t^{a}_{i}
 
-        alternative first line:
-        l^{i}_{a} ( t^{ab}_{ij} - t^{b}_{i} t^{a}_{j} )
-    
+    alternative first line:
+    l^{i}_{a} ( t^{ab}_{ij} - t^{b}_{i} t^{a}_{j} )
+
     """
 
     out[v, o] += t_1
@@ -76,8 +76,8 @@ def add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np):
 def add_rho_ji(t_1, t_2, l_1, l_2, o, v, out, np):
     """Function for adding the o-o part of the one-body density matrix
 
-        rho^{j}_{i} = delta^{i}_{j} - l^{i}_{a} t^{a}_{j}
-            + (0.5) l^{ij}_{ab} t^{ab}_{jk}
+    rho^{j}_{i} = delta^{i}_{j} - l^{i}_{a} t^{a}_{j}
+        + (0.5) l^{ij}_{ab} t^{ab}_{jk}
 
     """
 

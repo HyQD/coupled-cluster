@@ -13,7 +13,7 @@ def compute_time_dependent_overlap(
 ):
 
     """
-    t_1_t1 refer to the t_1 amplitude at time t1  
+    t_1_t1 refer to the t_1 amplitude at time t1
     t_1_t1 refer to the t_1 amplitude at time t2
     and so on.
     """

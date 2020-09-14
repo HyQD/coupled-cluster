@@ -21,7 +21,10 @@ def generate_ccs_amplitude_equations(verbose=False):
     if verbose:
         print("Generating Lagrangian")
     ccs_lagrangian = eval_equation(
-        generate_lagrangian([get_t_1_operator], [get_l_1_operator],)
+        generate_lagrangian(
+            [get_t_1_operator],
+            [get_l_1_operator],
+        )
     )
 
     i = symbols("I", below_fermi=True)

@@ -176,6 +176,53 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     def compute_left_reference_overlap(self, current_time, y):
         pass
 
+    def compute_one_body_expectation_value(
+        self, current_time, y, mat, make_hermitian=True
+    ):
+        r"""Function computing the expectation value of a one-body operator
+        :math:`\hat{A}`.  This is done by evaluating
+
+        .. math:: \langle A \rangle = \rho^{q}_{p} A^{p}_{q},
+
+        where :math:`p, q` are general single-particle indices and
+        :math:`\rho^{q}_{p}` is the one-body density matrix.
+
+        Parameters
+        ----------
+        current_time : float
+            The current time step.
+        y : np.ndarray
+            The amplitudes at the current time step.
+        mat : np.ndarray
+            The one-body operator to evaluate (:math:`\hat{A}`), as a matrix.
+            The dimensionality of the matrix must be the same as the one-body
+            density matrix, i.e., :math:`\mathbb{C}^{l \times l}`, where ``l``
+            is the number of basis functions.
+        make_hermitian : bool
+            Whether or not to make the one-body density matrix Hermitian. This
+            is done by :math:`\tilde{\boldsymbol{\rho}} =
+            \frac{1}{2}(\boldsymbol{\rho}^{\dagger} + \boldsymbol{\rho}), where
+            :math:`\tilde{\boldsymbol{\rho}}` is the Hermitian one-body density
+            matrix. Default is ``make_hermitian=True``.
+
+        Returns
+        -------
+        complex
+            The expectation value of the one-body operator.
+
+        See Also
+        --------
+        TimeDependentCoupledCluster.compute_one_body_density_matrix
+        CoupledCluster.compute_one_body_expectation_value
+
+        """
+        rho_qp = self.compute_one_body_density_matrix(current_time, y)
+
+        if make_hermitian:
+            rho_qp = 0.5 * (rho_qp.conj().T + rho_qp)
+
+        return self.np.trace(self.np.dot(rho_qp, mat))
+
     def compute_particle_density(self, current_time, y):
         """Computes current one-body density
 
