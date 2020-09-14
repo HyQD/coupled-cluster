@@ -825,8 +825,8 @@ def test_full_two_body_density_matrix_2(large_system_ccd):
 
 def rho_ijkl(l2, t2, np):
     """
-   Compute rho_{ij}^{kl}
-   """
+    Compute rho_{ij}^{kl}
+    """
     delta_ij = np.eye(l2.shape[0], dtype=l2.dtype)
     rho_ijkl = np.einsum("ik,jl->ijkl", delta_ij, delta_ij, optimize=True)
     rho_ijkl -= rho_ijkl.swapaxes(0, 1)
@@ -843,16 +843,16 @@ def rho_ijkl(l2, t2, np):
 
 def rho_abcd(l2, t2, np):
     """
-   Compute rho_{ab}^{cd}
-   """
+    Compute rho_{ab}^{cd}
+    """
     rho_abcd = 0.5 * np.einsum("ijab,ijcd->abcd", l2, t2, optimize=True)
     return rho_abcd
 
 
 def rho_iajb(l2, t2, np):
     """
-   Compute rho_{ia}^{jb}
-   """
+    Compute rho_{ia}^{jb}
+    """
     rho_iajb = 0.5 * np.einsum(
         "ij,klac,klbc->iajb", np.eye(l2.shape[0]), l2, t2, optimize=True
     )
@@ -862,15 +862,15 @@ def rho_iajb(l2, t2, np):
 
 def rho_abij(l2, t2, np):
     """
-   Compute rho_{ab}^{ij}
-   """
+    Compute rho_{ab}^{ij}
+    """
     return l2.transpose(2, 3, 0, 1).copy()
 
 
 def rho_ijab(l2, t2, np):
     """
-   Compute rho_{ij}^{ab}
-   """
+    Compute rho_{ij}^{ab}
+    """
     rho_ijab = -0.5 * np.einsum(
         "klcd,ijac,klbd->ijab", l2, t2, t2, optimize=True
     )

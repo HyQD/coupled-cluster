@@ -171,7 +171,13 @@ def zanghellini_system():
     laser_strength = 1
 
     odho = GeneralOrbitalSystem(
-        n, ODQD(l, length, num_grid_points, potential=ODQD.HOPotential(omega),),
+        n,
+        ODQD(
+            l,
+            length,
+            num_grid_points,
+            potential=ODQD.HOPotential(omega),
+        ),
     )
     laser = LaserField(
         LaserPulse(

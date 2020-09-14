@@ -65,7 +65,7 @@ class TDCCD(TimeDependentCoupledCluster):
         )
 
     def compute_one_body_density_matrix(self, current_time, y):
-        """Computes one-body density matrix 
+        """Computes one-body density matrix
 
         Returns
         -------
