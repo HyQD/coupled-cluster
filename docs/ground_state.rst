@@ -7,16 +7,28 @@ Coupled Cluster parent class
 .. autoclass:: coupled_cluster.cc.CoupledCluster
     :members:
 
+CCS
+---
+
+.. autoclass:: coupled_cluster.ccs.CCS
+    :members:
+
 CCD
 ---
 
-.. autoclass:: coupled_cluster.ccd.CoupledClusterDoubles
+.. autoclass:: coupled_cluster.ccd.CCD
     :members:
 
 CCSD
 ----
 
-.. autoclass:: coupled_cluster.ccsd.CoupledClusterSinglesDoubles
+.. autoclass:: coupled_cluster.ccsd.CCSD
+    :members:
+
+RCCSD
+-----
+
+.. autoclass:: coupled_cluster.rccsd.RCCSD
     :members:
 
 OACCD
