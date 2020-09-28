@@ -21,17 +21,35 @@ from coupled_cluster.rccsd.density_matrices import (
 
 
 class RCCSD(CoupledCluster):
-    """Coupled Cluster Singels Doubles
+    r"""Restricted Coupled Cluster Singels Doubles
 
-    Coupled Cluster solver with single-, and double
-    excitations.
+    Restricted coupled-cluster solver with single-, and double
+    excitations. The excitation and de-exciation operators are parametrized according to chapter 13.7.5 in [1]_,
 
+    .. math:: \hat{T}_1 &= \sum_{ai} \tau^a_i E_{ai} \\
+              \hat{T}_2 &= \frac{1}{2}\sum_{abij} \tau^{ab}_{ij} E_{ai} E_{bj} \\
+              \hat{\Lambda}_1 &= \frac{1}{2} \sum_{ai} \lambda^i_a E_{ia} \\
+              \hat{\Lambda}_2 &= \frac{1}{2} \sum_{abij} \lambda^{ij}_{ab} \left(\frac{1}{3} E_{ia} E_{jb} + \frac{1}{6} E_{ja} E_{ib} \right)
+    
     Parameters
     ----------
     system : QuantumSystems
         QuantumSystems class instance describing the system to be solved
     include_singles : bool
         Include singles
+
+    Attributes
+    ----------
+    t_1, t_2 : np.ndarray
+        :math:`\hat{T}`-amplitudes :math:`\tau^a_i, \tau^{ab}_{ij}`
+    l_1, l_2 : np.ndarray
+        :math:`\hat{\Lambda}`-amplitudes :math:`\lambda^i_a, \lambda^{ij}_{ab}` 
+
+    References
+    ----------
+    .. [1] T. Helgaker, P. Jorgensen, J. Olsen "Molecular electronic-structure theory",
+           John Wiley & Sons, 2014.
+
     """
 
     def __init__(self, system, include_singles=True, **kwargs):
@@ -78,19 +96,21 @@ class RCCSD(CoupledCluster):
         self.compute_initial_guess()
 
     def compute_initial_guess(self):
+        
+        r"""compute_initial_guess
+
+        Compute the initial guess for the coupled-cluster amplitudes. 
+        Currently the only option is the MP2 initial guess,
+        
+        .. math:: \tau^a_i &= \lambda^i_a = 0, \, \forall a,i \\
+                  \tau^{ab}_{ij} &= \frac{u^{ab}_{ij}}{\epsilon_i+\epsilon_j - \epsilon_a - \epsilon_b} \\ 
+                  \lambda^{ij}_{ab} &= \frac{u^{ij}_{ab}}{\epsilon_i+\epsilon_j - \epsilon_a - \epsilon_b}.
+
+        """
+
         np = self.np
         o, v = self.o, self.v
 
-        """
-        Removing this corresponds to MP2 initial guess
-        # Singles
-        if self.include_singles:
-            np.copyto(self.rhs_t_1, self.f[v, o])
-            np.divide(self.rhs_t_1, self.d_t_1, out=self.t_1)
-
-            np.copyto(self.rhs_l_1, self.f[o, v])
-            np.divide(self.rhs_l_1, self.d_l_1, out=self.l_1)
-        """
         # Doubles
         np.copyto(self.rhs_t_2, self.u[v, v, o, o])
         np.divide(self.rhs_t_2, self.d_t_2, out=self.t_2)
@@ -129,12 +149,16 @@ class RCCSD(CoupledCluster):
         self.t_mixer.clear_vectors()
 
     def compute_energy(self):
-        """Compute Energy
+        r"""compute_energy
+
+        Compute the total restricted coupled-cluster energy
+
+        .. math:: E_{\text{RCCSD}} = E_{\text{ref}} + 2 f^i_a \tau^a_i + (2 \tau^{ab}_{ij} - \tau^{a}_i \tau^b_j) (u^{ij}_{ab} - u^{ij}_{ba} ) 
 
         Returns
         -------
         float
-            Energy of current state
+            The total coupled-cluster energy of the current state. 
         """
         np = self.np
         o, v = self.o, self.v
@@ -287,12 +311,22 @@ class RCCSD(CoupledCluster):
         self.l_2 = np.reshape(new_vectors[n_l1:], self.l_2.shape)
 
     def compute_one_body_density_matrix(self):
-        """Computes one-body density matrix
+        r"""compute_one_body_density_matrix
+
+        Computes the coupled-cluster one-body density matrix [2]_,
+
+        .. math:: \rho^q_p \equiv \langle \tilde{\Psi} | a_p^\dagger a_q | \Psi \rangle.
 
         Returns
         -------
         np.array
             One-body density matrix
+
+        References
+        ----------
+        .. [2] I. Shavitt, R. Bartlett "Many-body methods in chemistry and physics: MBPT and coupled-cluster theory",
+           Cambridge university press, 2009.
+
         """
 
         return compute_one_body_density_matrix(
