@@ -96,7 +96,7 @@ class RCCSD(CoupledCluster):
         self.compute_initial_guess()
 
     def compute_initial_guess(self):
-        
+
         r"""compute_initial_guess
 
         Compute the initial guess for the coupled-cluster amplitudes. 
