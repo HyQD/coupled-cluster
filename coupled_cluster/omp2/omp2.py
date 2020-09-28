@@ -177,9 +177,10 @@ class OMP2(CCD):
                 + self.system.nuclear_repulsion_energy
             )
 
-            print(f"\nIteration: {i}")
-            print(f"Residual norms: |w_ai| = {residual_w_ai}")
-            print(f"Energy: {energy}")
+            if self.verbose:
+                print(f"\nIteration: {i}")
+                print(f"Residual norms: |w_ai| = {residual_w_ai}")
+                print(f"Energy: {energy}")
 
             if np.abs(energy - e_old) < tol:
                 break
