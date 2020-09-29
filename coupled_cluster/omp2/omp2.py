@@ -137,19 +137,28 @@ class OMP2(CCD):
 
         for i in range(max_iterations):
 
-            rhs_t2 = compute_t_2_amplitudes(
-                self.f, self.u, self.t_2, self.o, self.v, np
+            self.f = self.system.construct_fock_matrix(self.h, self.u)
+
+            self.d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
+            self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
+
+            self.t_2 += (
+                compute_t_2_amplitudes(
+                    self.f, self.u, self.t_2, self.o, self.v, np
+                )
+                / self.d_t_2
             )
 
-            self.t_2 += rhs_t2 / self.d_t_2
+            # self.iterate_t_amplitudes(
+            #    max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
+            # )
 
             opdm = self.compute_one_body_density_matrix()
             tpdm = self.compute_two_body_density_matrix()
 
-            F_generalized = np.einsum("pr,rq->pq", self.h, opdm, optimize=True)
-            F_generalized += 0.5 * np.einsum(
-                "prst,stqr->pq", self.u, tpdm, optimize=True
-            )
+            F_generalized = np.einsum(
+                "pr,rq->pq", self.h, opdm, optimize=True
+            ) + 0.5 * np.einsum("prst,stqr->pq", self.u, tpdm, optimize=True)
 
             w_ai = (F_generalized - F_generalized.T)[self.v, self.o]
             residual_w_ai = np.linalg.norm(w_ai)
@@ -162,13 +171,10 @@ class OMP2(CCD):
             self.h = self.system.transform_one_body_elements(
                 self.system.h, C, Ctilde
             )
+
             self.u = self.system.transform_two_body_elements(
                 self.system.u, C, Ctilde
             )
-            self.f = self.system.construct_fock_matrix(self.h, self.u)
-
-            self.d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
-            self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
 
             energy = (
                 self.np.einsum("pq,pq->", self.h, opdm, optimize=True)
