@@ -264,21 +264,198 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 </dd></dl>
 
 </div>
+<div class="section" id="ccs">
+<h2>CCS<a class="headerlink" href="#ccs" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="coupled_cluster.ccs.CCS">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccs.</code><code class="sig-name descname">CCS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccs.CCS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coupled cluster singles</p>
+<p>Class for coupled cluster solver with singles excitations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>system</strong> (<em>QuantumSystem</em>) – QuantumSystem class describing the system</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="coupled_cluster.ccs.CCS.compute_energy">
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccs.CCS.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute ground state CCS energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>CCS ground state energy</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="ccd">
 <h2>CCD<a class="headerlink" href="#ccd" title="Permalink to this headline">¶</a></h2>
-<dl class="py attribute">
-<dt id="coupled_cluster.ccd.CoupledClusterDoubles">
-<code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">CoupledClusterDoubles</code><a class="headerlink" href="#coupled_cluster.ccd.CoupledClusterDoubles" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">coupled_cluster.ccd.ccd.CCD</span></code></p>
+<dl class="py class">
+<dt id="coupled_cluster.ccd.CCD">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">CCD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.CCD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coupled Cluster Doubles</p>
+<p>Class for Coupled Cluster solver, including
+double excitations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>system</strong> (<em>QuantumSystem</em>) – QuantumSystem class describing the system</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="ccsd">
 <h2>CCSD<a class="headerlink" href="#ccsd" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="coupled_cluster.ccsd.CCSD">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccsd.</code><code class="sig-name descname">CCSD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="n">include_singles</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coupled Cluster Singels Doubles</p>
+<p>Coupled Cluster solver with single-, and double
+excitations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> (<em>QuantumSystems</em>) – QuantumSystems class instance describing the system to be solved</p></li>
+<li><p><strong>include_singles</strong> (<em>bool</em>) – Include singles</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="coupled_cluster.ccsd.CCSD.compute_energy">
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute Energy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Energy of current state</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="coupled_cluster.ccsd.CCSD.compute_one_body_density_matrix">
+<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes one-body density matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>One-body density matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="rccsd">
+<h2>RCCSD<a class="headerlink" href="#rccsd" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="coupled_cluster.rccsd.RCCSD">
+<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.rccsd.</code><code class="sig-name descname">RCCSD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="n">include_singles</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restricted Coupled Cluster Singels Doubles</p>
+<p>Restricted coupled-cluster solver with single-, and double
+excitations. The excitation and de-exciation operators are parametrized according to chapter 13.7.5 in <a class="footnote-reference brackets" href="#id2" id="id1">1</a>,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\hat{T}_1 &amp;= \sum_{ai} \tau^a_i E_{ai} \\
+\hat{T}_2 &amp;= \frac{1}{2}\sum_{abij} \tau^{ab}_{ij} E_{ai} E_{bj} \\
+\hat{\Lambda}_1 &amp;= \frac{1}{2} \sum_{ai} \lambda^i_a E_{ia} \\
+\hat{\Lambda}_2 &amp;= \frac{1}{2} \sum_{abij} \lambda^{ij}_{ab} \left(\frac{1}{3} E_{ia} E_{jb} + \frac{1}{6} E_{ja} E_{ib} \right)\end{split}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> (<em>QuantumSystems</em>) – QuantumSystems class instance describing the system to be solved</p></li>
+<li><p><strong>include_singles</strong> (<em>bool</em>) – Include singles</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py attribute">
-<dt id="coupled_cluster.ccsd.CoupledClusterSinglesDoubles">
-<code class="sig-prename descclassname">coupled_cluster.ccsd.</code><code class="sig-name descname">CoupledClusterSinglesDoubles</code><a class="headerlink" href="#coupled_cluster.ccsd.CoupledClusterSinglesDoubles" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">coupled_cluster.ccsd.ccsd.CCSD</span></code></p>
+<dt>
+<code class="sig-name descname">t_1, t_2</code></dt>
+<dd><p><span class="math notranslate nohighlight">\(\hat{T}\)</span>-amplitudes <span class="math notranslate nohighlight">\(\tau^a_i, \tau^{ab}_{ij}\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname">l_1, l_2</code></dt>
+<dd><p><span class="math notranslate nohighlight">\(\hat{\Lambda}\)</span>-amplitudes <span class="math notranslate nohighlight">\(\lambda^i_a, \lambda^{ij}_{ab}\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>T. Helgaker, P. Jorgensen, J. Olsen “Molecular electronic-structure theory”,
+John Wiley &amp; Sons, 2014.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="coupled_cluster.rccsd.RCCSD.compute_energy">
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the total restricted coupled-cluster energy</p>
+<div class="math notranslate nohighlight">
+\[E_{\text{RCCSD}} = E_{\text{ref}} + 2 f^i_a \tau^a_i + (2 \tau^{ab}_{ij} - \tau^{a}_i \tau^b_j) (u^{ij}_{ab} - u^{ij}_{ba} )\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The total coupled-cluster energy of the current state.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="coupled_cluster.rccsd.RCCSD.compute_initial_guess">
+<code class="sig-name descname">compute_initial_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_initial_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the initial guess for the coupled-cluster amplitudes.
+Currently the only option is the MP2 initial guess,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tau^a_i &amp;= \lambda^i_a = 0, \, \forall a,i \\
+\tau^{ab}_{ij} &amp;= \frac{u^{ab}_{ij}}{\epsilon_i+\epsilon_j - \epsilon_a - \epsilon_b} \\
+\lambda^{ij}_{ab} &amp;= \frac{u^{ij}_{ab}}{\epsilon_i+\epsilon_j - \epsilon_a - \epsilon_b}.\end{split}\]</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="coupled_cluster.rccsd.RCCSD.compute_one_body_density_matrix">
+<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the coupled-cluster one-body density matrix <a class="footnote-reference brackets" href="#id4" id="id3">2</a>,</p>
+<div class="math notranslate nohighlight">
+\[\rho^q_p \equiv \langle \tilde{\Psi} | a_p^\dagger a_q | \Psi \rangle.\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>One-body density matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
+<dd><p>I. Shavitt, R. Bartlett “Many-body methods in chemistry and physics: MBPT and coupled-cluster theory”,
+Cambridge university press, 2009.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
