@@ -7,13 +7,21 @@ from coupled_cluster.cc_helper import AmplitudeContainer
 class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     """Time Dependent Coupled Cluster Parent Class
 
-    Abstract base class defining the skeleton of a time-dependent Coupled
-    Cluster solver class.
+    Abstract base class defining the skeleton of a time-dependent coupled-cluster (TDCC) solver class.
+    All TDCC methods are derived from the bivariational principle [1]_.
 
     Parameters
     ----------
     system : QuantumSystem
         Class instance defining the system to be solved
+
+    References
+    ----------
+    .. [1] S. Kvaal "Ab initio quantum dynamics using coupled-cluster",
+           J. Chem. Phys. 136, 194109, 2012.
+    .. [2] T. Pedersen, S. Kvaal "Symplectic integration and physical interpretation of time-dependent coupled-cluster theory",
+    	   J. Chem. Phys. 150, 144106, 2019.
+	
     """
 
     def __init__(self, system):
@@ -114,12 +122,17 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         .. math:: \langle \Phi \rvert \Psi(t) \rangle = \exp(\tau_0),
 
-        where :math:`\tau_0` is the zeroth cluster amplitude.
+        where :math:`\tau_0` is the zeroth cluster amplitude [2]_.
 
         Returns
         -------
         complex128
             The right-phase describing the weight of the reference determinant.
+
+        References
+    	----------
+    	
+
         """
         t_0 = self._amp_template.from_array(y).t[0][0]
 
@@ -135,7 +148,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
             = \exp(-\tau_0)[1 - \langle \Phi \rvert \hat{\Lambda}(t) \hat{T}(t)
             \lvert \Phi \rangle],
 
-        where :math:`\tau_0` is the zeroth cluster amplitude.
+        where :math:`\tau_0` is the zeroth cluster amplitude [2]_.
 
         Returns
         -------
