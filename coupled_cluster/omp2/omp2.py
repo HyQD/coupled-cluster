@@ -8,7 +8,6 @@ from coupled_cluster.cc_helper import (
 )
 
 from coupled_cluster.omp2.rhs_t import compute_t_2_amplitudes
-from coupled_cluster.omp2.energies import compute_time_dependent_energy
 from coupled_cluster.mix import DIIS
 
 from coupled_cluster.omp2.density_matrices import (
@@ -66,10 +65,11 @@ class OMP2(CCD):
         rho_qp = self.compute_one_body_density_matrix()
         rho_qspr = self.compute_two_body_density_matrix()
 
-        return self.np.einsum(
-            "pq,pq->", self.h, rho_qp, optimize=True
-        ) + 0.25 * self.np.einsum(
-            "pqrs,pqrs->", self.u, rho_qspr, optimize=True
+        return (
+            self.np.einsum("pq,pq->", self.h, rho_qp, optimize=True)
+            + 0.25
+            * self.np.einsum("pqrs,pqrs->", self.u, rho_qspr, optimize=True)
+            + self.system.nuclear_repulsion_energy
         )
 
     def compute_t_amplitudes(self):
@@ -128,11 +128,6 @@ class OMP2(CCD):
 
         self.setup_kappa_mixer(**mixer_kwargs)
 
-        amp_tol = 0.1
-
-        self.d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)
-        self.d_t_2 = construct_d_t_2_matrix(self.f, self.o, self.v, np)
-
         e_old = self.compute_energy() + self.system.nuclear_repulsion_energy
 
         for i in range(max_iterations):
@@ -148,10 +143,6 @@ class OMP2(CCD):
                 )
                 / self.d_t_2
             )
-
-            # self.iterate_t_amplitudes(
-            #    max_iterations=max_iterations, tol=amp_tol, **mixer_kwargs
-            # )
 
             opdm = self.compute_one_body_density_matrix()
             tpdm = self.compute_two_body_density_matrix()
@@ -176,12 +167,7 @@ class OMP2(CCD):
                 self.system.u, C, Ctilde
             )
 
-            energy = (
-                self.np.einsum("pq,pq->", self.h, opdm, optimize=True)
-                + 0.25
-                * self.np.einsum("pqrs,pqrs->", self.u, tpdm, optimize=True)
-                + self.system.nuclear_repulsion_energy
-            )
+            energy = self.compute_energy()
 
             if self.verbose:
                 print(f"\nIteration: {i}")
