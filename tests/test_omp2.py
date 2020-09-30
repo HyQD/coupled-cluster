@@ -18,7 +18,7 @@ def test_omp2_groundstate_pyscf(bh_groundstate_omp2):
 
     system = construct_pyscf_system_rhf(molecule, basis=basis)
 
-    omp2 = OMP2(system, mixer=DIIS, verbose=False)
+    omp2 = OMP2(system, mixer=DIIS, verbose=True)
     omp2.compute_ground_state(
         max_iterations=100,
         num_vecs=10,
@@ -29,10 +29,4 @@ def test_omp2_groundstate_pyscf(bh_groundstate_omp2):
 
     energy_tol = 1e-10
 
-    assert (
-        abs(
-            (omp2.compute_energy().real + system.nuclear_repulsion_energy)
-            - bh_groundstate_omp2
-        )
-        < energy_tol
-    )
+    assert abs((omp2.compute_energy().real) - bh_groundstate_omp2) < energy_tol
