@@ -13,8 +13,6 @@ from coupled_cluster.cc_helper import OACCVector
 
 
 class TDOMP2(TDOCC):
-    truncation = "CCD"
-
     def __call__(self, current_time, prev_amp):
         np = self.np
         o_prime, v_prime = self.o_prime, self.v_prime
@@ -53,9 +51,8 @@ class TDOMP2(TDOCC):
         opdm = 0.5 * (self.rho_qp + self.rho_qp.T.conj())
         tpdm = 0.5 * (self.rho_qspr + self.rho_qspr.T.conj())
 
-        """
-        Eq. (23) in: https://aip.scitation.org/doi/10.1063/1.5020633
-        """
+        # Eq. (23) in: https://aip.scitation.org/doi/10.1063/1.5020633
+
         R_ai = np.einsum("aj,ji->ai", self.h_prime[v, o], opdm[o, o])
         R_ai += 0.5 * np.einsum(
             "arqs,qsir->ai", self.u_prime[v, :, :, :], tpdm[:, :, o, :]
