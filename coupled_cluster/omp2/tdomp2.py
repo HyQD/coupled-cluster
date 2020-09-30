@@ -1,4 +1,3 @@
-from coupled_cluster.tdocc import TDOCC
 from coupled_cluster.omp2.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.omp2.energies import (
     compute_time_dependent_energy,
@@ -10,9 +9,104 @@ from coupled_cluster.omp2.density_matrices import (
 )
 
 from coupled_cluster.cc_helper import OACCVector
+from coupled_cluster.cc_helper import AmplitudeContainer
 
 
-class TDOMP2(TDOCC):
+class TDOMP2:
+
+    truncation = "CCD"
+
+    def __init__(self, system, C=None, C_tilde=None):
+        self.np = system.np
+
+        self.system = system
+
+        # these lines is copy paste from super().__init__, and would be nice to
+        # remove.
+        # See https://github.com/Schoyen/coupled-cluster/issues/36
+        self.h = self.system.h
+        self.u = self.system.u
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
+        self.o = self.system.o
+        self.v = self.system.v
+
+        # self.h_prime = self.h.copy()
+        # self.u_prime = self.u.copy()
+        # self.f_prime = self.f.copy()
+
+        if C is None:
+            C = self.np.eye(system.l)
+        if C_tilde is None:
+            C_tilde = C.T
+
+        assert C.shape == C_tilde.T.shape
+
+        n_prime = self.system.n
+        l_prime = C.shape[1]
+        m_prime = l_prime - n_prime
+
+        self.o_prime = slice(0, n_prime)
+        self.v_prime = slice(n_prime, l_prime)
+
+        _amp = self.construct_amplitude_template(
+            self.truncation, n_prime, m_prime, np=self.np
+        )
+        self._amp_template = OACCVector(*_amp, C, C_tilde, np=self.np)
+
+        self.last_timestep = None
+
+    @staticmethod
+    def construct_amplitude_template(truncation, n, m, np):
+        """Constructs an empty AmplitudeContainer with the correct shapes, for
+        convertion between arrays and amplitudes."""
+        codes = {"S": 1, "D": 2, "T": 3, "Q": 4}
+        levels = [codes[c] for c in truncation[2:]]
+
+        # start with t_0
+        t = [np.array([0], dtype=np.complex128)]
+        l = []
+
+        for lvl in levels:
+            shape = lvl * [m] + lvl * [n]
+            t.append(np.zeros(shape, dtype=np.complex128))
+            l.append(np.zeros(shape[::-1], dtype=np.complex128))
+        return AmplitudeContainer(t=t, l=l, np=np)
+
+    def update_hamiltonian(self, current_time, y=None, C=None, C_tilde=None):
+        if self.last_timestep == current_time:
+            return
+
+        self.last_timestep = current_time
+
+        if y is not None:
+            _, _, C, C_tilde = self._amp_template.from_array(y)
+        elif C is not None and C_tilde is not None:
+            pass
+        else:
+            raise ValueError(
+                "either the amplitude-array or (C and C_tilde) has to be not "
+                + "None."
+            )
+
+        # Evolve system in time
+        if self.system.has_one_body_time_evolution_operator:
+            self.h = self.system.h_t(current_time)
+
+        if self.system.has_two_body_time_evolution_operator:
+            self.u = self.system.u_t(current_time)
+
+        # Change basis to C and C_tilde
+        self.h_prime = self.system.transform_one_body_elements(
+            self.h, C, C_tilde
+        )
+        self.u_prime = self.system.transform_two_body_elements(
+            self.u, C, C_tilde
+        )
+
+        self.f_prime = self.system.construct_fock_matrix(
+            self.h_prime, self.u_prime
+        )
+
     def __call__(self, current_time, prev_amp):
         np = self.np
         o_prime, v_prime = self.o_prime, self.v_prime
@@ -109,10 +203,13 @@ class TDOMP2(TDOCC):
         rho_qp = self.compute_one_body_density_matrix(current_time, y)
         rho_qspr = self.compute_two_body_density_matrix(current_time, y)
 
-        return self.np.einsum(
-            "pq,pq->", self.h_prime, rho_qp, optimize=True
-        ) + 0.25 * self.np.einsum(
-            "pqrs,pqrs->", self.u_prime, rho_qspr, optimize=True
+        return (
+            self.np.einsum("pq,pq->", self.h_prime, rho_qp, optimize=True)
+            + 0.25
+            * self.np.einsum(
+                "pqrs,pqrs->", self.u_prime, rho_qspr, optimize=True
+            )
+            + self.system.nuclear_repulsion_energy
         )
 
     def one_body_density_matrix(self, t, l):
