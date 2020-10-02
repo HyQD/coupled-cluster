@@ -142,18 +142,42 @@ class TDOMP2:
         self.rho_qp = self.one_body_density_matrix(t_old, l_old)
         self.rho_qspr = self.two_body_density_matrix(t_old, l_old)
 
-        opdm = 0.5 * (self.rho_qp + self.rho_qp.T.conj())
-        tpdm = 0.5 * (self.rho_qspr + self.rho_qspr.T.conj())
+        opdm = self.rho_qp
+        tpdm = self.rho_qspr
 
         # Eq. (23) in: https://aip.scitation.org/doi/10.1063/1.5020633
-
+        """
         R_ai = np.einsum("aj,ji->ai", self.h_prime[v, o], opdm[o, o])
         R_ai += 0.5 * np.einsum(
             "arqs,qsir->ai", self.u_prime[v, :, :, :], tpdm[:, :, o, :]
         )
+        
         R_ai -= np.einsum("bi,ab->ai", self.h_prime[v, o], opdm[v, v])
         R_ai -= 0.5 * np.einsum(
             "arqs, qsir->ai", tpdm[v, :, :, :], self.u_prime[:, :, o, :]
+        )
+        """
+
+        # F_generalized = np.einsum(
+        #    "pr,rq->pq", self.h_prime, opdm, optimize=True
+        # ) + 0.5 * np.einsum("prst,stqr->pq", self.u_prime, tpdm, optimize=True)
+
+        # R_ai = (F_generalized - F_generalized.T)[v_prime, o_prime]
+
+        R_ai = np.einsum("aj,ji->ai", self.h_prime[v, o], opdm[o, o])
+        R_ai += 0.5 * np.einsum(
+            "arqs,qsir->ai",
+            self.u_prime[v, :, :, :],
+            tpdm[:, :, o, :],
+            optimize=True,
+        )
+
+        R_ai -= np.einsum("ab, bi->ai", opdm[v, v], self.h_prime[v, o])
+        R_ai -= 0.5 * np.einsum(
+            "qsir,arqs->ai",
+            self.u_prime[:, :, o, :],
+            tpdm[v, :, :, :],
+            optimize=True,
         )
 
         # Solve P-space equations for X^b_j
@@ -204,10 +228,10 @@ class TDOMP2:
         rho_qspr = self.compute_two_body_density_matrix(current_time, y)
 
         return (
-            self.np.einsum("pq,pq->", self.h_prime, rho_qp, optimize=True)
+            self.np.einsum("pq,qp->", self.h_prime, rho_qp, optimize=True)
             + 0.25
             * self.np.einsum(
-                "pqrs,pqrs->", self.u_prime, rho_qspr, optimize=True
+                "pqrs,rspq->", self.u_prime, rho_qspr, optimize=True
             )
             + self.system.nuclear_repulsion_energy
         )
