@@ -14,8 +14,8 @@ class TDOMP2:
     truncation = "CCD"
 
     def __init__(self, system, C=None, C_tilde=None):
-        self.np = system.np
 
+        self.np = system.np
         self.system = system
 
         # these lines is copy paste from super().__init__, and would be nice to
@@ -27,10 +27,6 @@ class TDOMP2:
         self.o = self.system.o
         self.v = self.system.v
 
-        # self.h_prime = self.h.copy()
-        # self.u_prime = self.u.copy()
-        # self.f_prime = self.f.copy()
-
         if C is None:
             C = self.np.eye(system.l)
         if C_tilde is None:
@@ -38,15 +34,8 @@ class TDOMP2:
 
         assert C.shape == C_tilde.T.shape
 
-        n_prime = self.system.n
-        l_prime = C.shape[1]
-        m_prime = l_prime - n_prime
-
-        self.o_prime = slice(0, n_prime)
-        self.v_prime = slice(n_prime, l_prime)
-
         _amp = self.construct_amplitude_template(
-            self.truncation, n_prime, m_prime, np=self.np
+            self.truncation, self.system.n, self.system.m, np=self.np
         )
         self._amp_template = OACCVector(*_amp, C, C_tilde, np=self.np)
 
@@ -106,7 +95,7 @@ class TDOMP2:
 
     def __call__(self, current_time, prev_amp):
         np = self.np
-        o_prime, v_prime = self.o_prime, self.v_prime
+        o, v = self.o, self.v
 
         prev_amp = self._amp_template.from_array(prev_amp)
         t_old, l_old, C, C_tilde = prev_amp
@@ -120,22 +109,18 @@ class TDOMP2:
         # Do amplitude step
         t_new = [
             -1j
-            * rhs_t_func(
-                self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
-            )
+            * rhs_t_func(self.f_prime, self.u_prime, *t_old, o, v, np=self.np)
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
         # Compute derivative of phase
         t_0_new = -1j * self.rhs_t_0_amplitude(
-            self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
+            self.f_prime, self.u_prime, *t_old, o, v, np=self.np
         )
 
         t_new = [t_0_new, *t_new]
 
         # Compute density matrices
-        o, v = self.o, self.v
-
         self.rho_qp = self.one_body_density_matrix(t_old, l_old)
         self.rho_qspr = self.two_body_density_matrix(t_old, l_old)
 
@@ -143,24 +128,6 @@ class TDOMP2:
         tpdm = self.rho_qspr
 
         # Eq. (23) in: https://aip.scitation.org/doi/10.1063/1.5020633
-        """
-        R_ai = np.einsum("aj,ji->ai", self.h_prime[v, o], opdm[o, o])
-        R_ai += 0.5 * np.einsum(
-            "arqs,qsir->ai", self.u_prime[v, :, :, :], tpdm[:, :, o, :]
-        )
-        
-        R_ai -= np.einsum("bi,ab->ai", self.h_prime[v, o], opdm[v, v])
-        R_ai -= 0.5 * np.einsum(
-            "arqs, qsir->ai", tpdm[v, :, :, :], self.u_prime[:, :, o, :]
-        )
-        """
-
-        # F_generalized = np.einsum(
-        #    "pr,rq->pq", self.h_prime, opdm, optimize=True
-        # ) + 0.5 * np.einsum("prst,stqr->pq", self.u_prime, tpdm, optimize=True)
-
-        # R_ai = (F_generalized - F_generalized.T)[v_prime, o_prime]
-
         R_ai = np.einsum("aj,ji->ai", self.h_prime[v, o], opdm[o, o])
         R_ai += 0.5 * np.einsum(
             "arqs,qsir->ai",
@@ -238,7 +205,7 @@ class TDOMP2:
         l_2 = l[0]
 
         return compute_one_body_density_matrix(
-            t_2, l_2, self.o_prime, self.v_prime, np=self.np
+            t_2, l_2, self.o, self.v, np=self.np
         )
 
     def two_body_density_matrix(self, t, l):
@@ -252,21 +219,21 @@ class TDOMP2:
             self.rho_qspr.fill(0)
 
         return compute_two_body_density_matrix(
-            t_2, l_2, self.o_prime, self.v_prime, np=self.np, out=self.rho_qspr
+            t_2, l_2, self.o, self.v, np=self.np, out=self.rho_qspr
         )
 
     def compute_one_body_density_matrix(self, current_time, y):
         t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
 
         return compute_one_body_density_matrix(
-            t_2, l_2, self.o_prime, self.v_prime, np=self.np
+            t_2, l_2, self.o, self.v, np=self.np
         )
 
     def compute_two_body_density_matrix(self, current_time, y):
         t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
 
         return compute_two_body_density_matrix(
-            t_2, l_2, self.o_prime, self.v_prime, np=self.np
+            t_2, l_2, self.o, self.v, np=self.np
         )
 
     def compute_overlap(self, current_time, y_a, y_b):
