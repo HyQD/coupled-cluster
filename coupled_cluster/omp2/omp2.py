@@ -147,11 +147,23 @@ class OMP2(CCD):
             opdm = self.compute_one_body_density_matrix()
             tpdm = self.compute_two_body_density_matrix()
 
-            F_generalized = np.einsum(
-                "pr,rq->pq", self.h, opdm, optimize=True
-            ) + 0.5 * np.einsum("prst,stqr->pq", self.u, tpdm, optimize=True)
+            v, o = self.v, self.o
+            w_ai = np.einsum("aj,ji->ai", self.h[v, o], opdm[o, o])
+            w_ai += 0.5 * np.einsum(
+                "arqs,qsir->ai",
+                self.u[v, :, :, :],
+                tpdm[:, :, o, :],
+                optimize=True,
+            )
 
-            w_ai = (F_generalized - F_generalized.T)[self.v, self.o]
+            w_ai -= np.einsum("ab, bi->ai", opdm[v, v], self.h[v, o])
+            w_ai -= 0.5 * np.einsum(
+                "qsir,arqs->ai",
+                self.u[:, :, o, :],
+                tpdm[v, :, :, :],
+                optimize=True,
+            )
+
             residual_w_ai = np.linalg.norm(w_ai)
 
             self.kappa[self.v, self.o] += w_ai / self.d_t_1
@@ -174,7 +186,7 @@ class OMP2(CCD):
                 print(f"Residual norms: |w_ai| = {residual_w_ai}")
                 print(f"Energy: {energy}")
 
-            if np.abs(energy - e_old) < tol:
+            if np.abs(residual_w_ai) < tol:
                 break
 
             e_old = energy
