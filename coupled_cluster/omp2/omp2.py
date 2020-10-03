@@ -73,9 +73,9 @@ class OMP2(CCD):
         rho_qspr = self.compute_two_body_density_matrix()
 
         return (
-            self.np.einsum("pq,pq->", self.h, rho_qp, optimize=True)
+            self.np.einsum("pq,qp->", self.h, rho_qp, optimize=True)
             + 0.25
-            * self.np.einsum("pqrs,pqrs->", self.u, rho_qspr, optimize=True)
+            * self.np.einsum("pqrs,rspq->", self.u, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
         )
 
