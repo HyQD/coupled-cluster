@@ -153,12 +153,12 @@ class RCCSD(CoupledCluster):
 
         Compute the total restricted coupled-cluster energy
 
-        .. math:: E_{\text{RCCSD}} = E_{\text{ref}} + 2 f^i_a \tau^a_i + (2 \tau^{ab}_{ij} - \tau^{a}_i \tau^b_j) (u^{ij}_{ab} - u^{ij}_{ba} ) 
+        .. math:: E_{\text{RCCSD}} = E_{\text{ref}} + 2 f^i_a \tau^a_i + (2 \tau^{ab}_{ij} - \tau^{a}_i \tau^b_j) (u^{ij}_{ab} - u^{ij}_{ba} )
 
         Returns
         -------
         float
-            The total coupled-cluster energy of the current state. 
+            The total coupled-cluster energy of the current state.
         """
         np = self.np
         o, v = self.o, self.v
