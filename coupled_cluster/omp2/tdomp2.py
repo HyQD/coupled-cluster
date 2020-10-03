@@ -10,6 +10,20 @@ from coupled_cluster.cc_helper import AmplitudeContainer
 
 
 class TDOMP2:
+    """Time-dependent orbital-optimized second-order Møller-Plesset perturbation theory (TDOMP2)
+
+    Parameters
+    ----------
+    system : QuantumSystem
+        QuantumSystem class instance description of system
+
+    References
+    ----------
+    .. [1] H. Pathak, T. Sato, K. Ishikawa
+          "Time-dependent optimized coupled-cluster method for multielectron dynamics. III.
+          A second-order many-body perturbation approximation", J. Chem. Phys. 153, 034110, 2020.
+
+    """
 
     truncation = "CCD"
 

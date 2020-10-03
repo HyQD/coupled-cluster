@@ -17,12 +17,19 @@ from coupled_cluster.omp2.density_matrices import (
 
 
 class OMP2(CCD):
-    """Orbital optimized MP2
+    """Orbital-optimized second-order Møller-Plesset perturbation theory (OMP2)
 
     Parameters
     ----------
     system : QuantumSystem
         QuantumSystem class instance description of system
+
+    References
+    ----------
+    .. [1] U. Bozkaya, J. M. Turney, Y. Yamaguchi, H. F. Schaefer, C. D. Sherrill
+          "Quadratically convergent algorithm for orbital optimization in the orbital-optimized coupled-cluster doubles method
+          and in orbital-optimized second-order Møller-Plesset perturbation theory", J. Chem. Phys. 135, 104103, 2011.
+
     """
 
     def __init__(self, system, **kwargs):
@@ -147,6 +154,9 @@ class OMP2(CCD):
             opdm = self.compute_one_body_density_matrix()
             tpdm = self.compute_two_body_density_matrix()
 
+            ############################################################
+            # This part of the code is common to most (if not all)
+            # orbital-optimized methods.
             v, o = self.v, self.o
             w_ai = np.einsum("aj,ji->ai", self.h[v, o], opdm[o, o])
             w_ai += 0.5 * np.einsum(
@@ -163,7 +173,6 @@ class OMP2(CCD):
                 tpdm[v, :, :, :],
                 optimize=True,
             )
-
             residual_w_ai = np.linalg.norm(w_ai)
 
             self.kappa[self.v, self.o] += w_ai / self.d_t_1
@@ -178,7 +187,7 @@ class OMP2(CCD):
             self.u = self.system.transform_two_body_elements(
                 self.system.u, C, Ctilde
             )
-
+            ############################################################
             energy = self.compute_energy()
 
             if self.verbose:
