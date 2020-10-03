@@ -1,5 +1,3 @@
-# Labelling of the different terms comes from the book "Many-Body Methods in
-# Chemistry and Physics" by I. Shavitt and R. J. Bartlett.
 from coupled_cluster.utils import ndot
 
 
