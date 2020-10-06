@@ -18,3 +18,7 @@ def compute_t_2_amplitudes(f, u, t, o, v, np, out=None):
     r_T2 -= Pab.swapaxes(0, 1)
 
     return r_T2
+
+
+def compute_l_2_amplitudes(f, u, t, l, o, v, np, out=None):
+    return t.T.conj()
