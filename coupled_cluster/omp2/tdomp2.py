@@ -4,7 +4,7 @@ from coupled_cluster.omp2.rhs_t import (
 )
 
 
-from coupled_cluster.omp2.energies import compute_ccd_ground_state_energy
+from coupled_cluster.ccd.energies import compute_ccd_ground_state_energy
 
 from coupled_cluster.omp2.density_matrices import (
     compute_one_body_density_matrix,
