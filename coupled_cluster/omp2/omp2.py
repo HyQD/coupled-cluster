@@ -227,7 +227,7 @@ class OMP2(CCD):
             e_old = energy
 
         self.C = C
-        self.C_tilde = C_tilde
+        self.C_tilde = C.T.conj()
 
         if change_system_basis:
             if self.verbose:
