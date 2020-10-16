@@ -7,7 +7,10 @@ from coupled_cluster.cc_helper import (
     OACCVector,
 )
 
-from coupled_cluster.omp2.rhs_t import compute_t_2_amplitudes
+from coupled_cluster.omp2.rhs_t import (
+    compute_t_2_amplitudes,
+    compute_l_2_amplitudes,
+)
 from coupled_cluster.mix import DIIS
 
 from coupled_cluster.omp2.density_matrices import (
@@ -92,6 +95,29 @@ class OMP2(CCD):
         error_vector = self.rhs_t_2.copy()
 
         self.t_2 = self.t_2_mixer.compute_new_vector(
+            trial_vector, direction_vector, error_vector
+        )
+
+    def compute_l_amplitudes(self):
+        np = self.np
+
+        self.rhs_l_2.fill(0)
+        compute_l_2_amplitudes(
+            self.f,
+            self.u,
+            self.t_2,
+            self.l_2,
+            self.o,
+            self.v,
+            out=self.rhs_l_2,
+            np=np,
+        )
+
+        trial_vector = self.l_2
+        direction_vector = np.divide(self.rhs_l_2, self.d_l_2)
+        error_vector = self.rhs_l_2.copy()
+
+        self.l_2 = self.l_2_mixer.compute_new_vector(
             trial_vector, direction_vector, error_vector
         )
 
@@ -200,10 +226,8 @@ class OMP2(CCD):
 
             e_old = energy
 
-        S = C
-        S_inv = Ctilde
-        self.C = S
-        self.C_tilde = S_inv
+        self.C = C
+        self.C_tilde = C_tilde
 
         if change_system_basis:
             if self.verbose:
