@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 
 from quantum_systems import construct_pyscf_system_rhf
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from coupled_cluster.rccsd import RCCSD, TDRCCSD
 from gauss_integrator import GaussIntegrator
 from scipy.integrate import complex_ode
@@ -57,7 +57,7 @@ def test_tdrccsd_vs_tdccsd():
     tfinal = np.floor(tprime)
 
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             sine_square_laser(
                 F_str=F_str, omega=omega, tprime=tprime, phase=phase
             ),

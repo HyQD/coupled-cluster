@@ -3,7 +3,7 @@ import pytest
 
 import numpy as np
 from quantum_systems import construct_pyscf_system_rhf
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 
 from coupled_cluster.omp2 import OMP2, TDOMP2
 from gauss_integrator import GaussIntegrator
@@ -50,7 +50,7 @@ def test_tdomp2_helium():
     polarization = np.zeros(3)
     polarization[2] = 1
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             LaserPulse(td=laser_duration, omega=omega, E=E),
             polarization_vector=polarization,
         )

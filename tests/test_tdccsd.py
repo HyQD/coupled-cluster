@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 from quantum_systems import construct_pyscf_system_rhf
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from coupled_cluster.ccsd.energies import lagrangian_functional
 from coupled_cluster.ccsd import CCSD, TDCCSD
 from gauss_integrator import GaussIntegrator
@@ -238,7 +238,7 @@ def test_tdccsd():
     polarization = np.zeros(3)
     polarization[2] = 1
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             LaserPulse(td=laser_duration, omega=omega, E=E),
             polarization_vector=polarization,
         )
@@ -311,7 +311,7 @@ def test_tdccsd_phase():
 
     system = construct_pyscf_system_rhf("he", "cc-pvdz")
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             LaserPulse(E=100, omega=2.8735643, td=5, t0=0),
             polarization_vector=polarization_vector,
         )
