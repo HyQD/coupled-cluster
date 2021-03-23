@@ -81,15 +81,16 @@ def test_tdomp2_helium():
 
     td_energies[i] = tdomp2.compute_energy(r.t, r.y)
 
-    from matplotlib import pyplot as plt
 
-    plt.figure()
-    plt.subplot(211)
-    plt.plot(time_points, td_energies.real)
-    plt.subplot(212)
-    plt.semilogy(time_points, np.abs(td_energies.imag))
-    plt.show()
-
-
-if __name__ == "__main__":
-    test_tdomp2_helium()
+#     from matplotlib import pyplot as plt
+#
+#     plt.figure()
+#     plt.subplot(211)
+#     plt.plot(time_points, td_energies.real)
+#     plt.subplot(212)
+#     plt.semilogy(time_points, np.abs(td_energies.imag))
+#     plt.show()
+#
+#
+# if __name__ == "__main__":
+#     test_tdomp2_helium()
