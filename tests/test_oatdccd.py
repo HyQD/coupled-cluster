@@ -73,7 +73,7 @@ def test_oatdccd_helium():
 
         td_energies[i] = oatdccd.compute_energy(r.t, r.y)
         dip_z[i] = oatdccd.compute_one_body_expectation_value(
-            r.t, r.y, system.dipole_moment[2]
+            r.t, r.y, system.position[2]
         )
 
         i += 1
@@ -81,7 +81,7 @@ def test_oatdccd_helium():
 
     td_energies[i] = oatdccd.compute_energy(r.t, r.y)
     dip_z[i] = oatdccd.compute_one_body_expectation_value(
-        r.t, r.y, system.dipole_moment[2]
+        r.t, r.y, system.position[2]
     )
 
     np.testing.assert_allclose(

@@ -102,7 +102,7 @@ def test_tdrccsd_vs_tdccsd():
     dip_z[0] = tdrccsd.compute_one_body_expectation_value(
         r.t,
         r.y,
-        system.dipole_moment[polarization_direction],
+        system.position[polarization_direction],
         make_hermitian=False,
     )
     tau0[0] = t[0][0]
@@ -129,7 +129,7 @@ def test_tdrccsd_vs_tdccsd():
         dip_z[i + 1] = tdrccsd.compute_one_body_expectation_value(
             r.t,
             r.y,
-            system.dipole_moment[polarization_direction],
+            system.position[polarization_direction],
             make_hermitian=False,
         )
         tau0[i + 1] = t[0][0]
