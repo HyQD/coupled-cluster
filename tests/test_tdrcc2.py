@@ -1,14 +1,19 @@
 import numpy as np
-import tqdm
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+import tqdm
 import os
 
 from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import LaserField
-from coupled_cluster.rccsd import RCCSD, TDRCCSD
+from coupled_cluster.rcc2 import RCC2, TDRCC2
 from gauss_integrator import GaussIntegrator
+from tdhf import HartreeFock, TimeDependentHartreeFock
 from scipy.integrate import complex_ode
 
+from coupled_cluster.mix import DIIS, AlphaMixer
+np.set_printoptions(edgeitems=3,infstr='inf', linewidth=75, nanstr='nan', precision=8, suppress=False, threshold=1000, formatter=None)
 
 class sine_square_laser:
     def __init__(self, F_str, omega, tprime, phase=0):
@@ -27,15 +32,13 @@ class sine_square_laser:
         )
         return pulse
 
+def  test_tdrcc2():
 
-def test_tdrccsd_vs_tdccsd():
-    name = "beryllium"
-    atom = "be 0.0 0.0 0.0"
-    basis = "cc-pvdz"
-    charge = 0
+    molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
 
+    basis = "6-31G"
     system = construct_pyscf_system_rhf(
-        atom,
+        molecule,
         basis=basis,
         np=np,
         verbose=False,
@@ -43,9 +46,12 @@ def test_tdrccsd_vs_tdccsd():
         anti_symmetrize=False,
     )
 
-    F_str = 0.01
+    F_str = 0.10
     omega = 0.2
     t_cycle = 2 * np.pi / omega
+
+    energy_100_iterations = -8.961178829713507
+    print(energy_100_iterations)
 
     tprime = t_cycle
     phase = 0
@@ -53,8 +59,8 @@ def test_tdrccsd_vs_tdccsd():
     polarization_direction = 2
     polarization[polarization_direction] = 1
 
-    time_after_pulse = 0
-    tfinal = np.floor(tprime)
+    time_after_pulse = 1000
+    tfinal = np.floor(tprime) + time_after_pulse
 
     system.set_time_evolution_operator(
         LaserField(
@@ -65,14 +71,12 @@ def test_tdrccsd_vs_tdccsd():
         )
     )
 
-    s = 3
-    eps = 1e-5
     dt = 1e-1
 
     cc_kwargs = dict(verbose=False)
-    rccsd = RCCSD(system, **cc_kwargs)
+    rccsd = RCC2(system, verbose=True)
 
-    ground_state_tolerance = 1e-8
+    ground_state_tolerance = 1e-12
     rccsd.compute_ground_state(
         t_kwargs=dict(tol=ground_state_tolerance),
         l_kwargs=dict(tol=ground_state_tolerance),
@@ -81,13 +85,15 @@ def test_tdrccsd_vs_tdccsd():
     amps0 = rccsd.get_amplitudes(get_t_0=True)
     y0 = amps0.asarray()
 
-    tdrccsd = TDRCCSD(system)
+    tdrccsd = TDRCC2(system)
 
     r = complex_ode(tdrccsd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+
     r.set_initial_value(y0)
 
     num_steps = int(tfinal / dt) + 1
     time_points = np.linspace(0, tfinal, num_steps)
+    timestep_stop_laser = int(tprime/dt)
 
     # Initialize arrays to hold different "observables".
     energy = np.zeros(num_steps, dtype=np.complex128)
@@ -98,6 +104,8 @@ def test_tdrccsd_vs_tdccsd():
 
     # Set initial values
     t, l = amps0
+
+
     energy[0] = tdrccsd.compute_energy(r.t, r.y)
     dip_z[0] = tdrccsd.compute_one_body_expectation_value(
         r.t,
@@ -105,6 +113,7 @@ def test_tdrccsd_vs_tdccsd():
         system.dipole_moment[polarization_direction],
         make_hermitian=False,
     )
+
     tau0[0] = t[0][0]
     auto_corr[0] = tdrccsd.compute_overlap(r.t, y0, r.y)
     reference_weight[0] = (
@@ -113,14 +122,11 @@ def test_tdrccsd_vs_tdccsd():
         * (
             np.exp(-tau0[0]) * tdrccsd.compute_left_reference_overlap(r.t, r.y)
         ).conj()
-    )
+    ) 
 
-    # for i, amp in tqdm.tqdm(
-    #     enumerate(tdrccsd.solve(time_points)), total=num_steps - 1
-    # ):
-    for i, _t in enumerate(time_points[:-1]):
+    for i, _t in tqdm.tqdm(enumerate(time_points[0:100])
+    ): 
         r.integrate(r.t + dt)
-
         if not r.successful():
             break
         # use amps0 as template
@@ -143,32 +149,9 @@ def test_tdrccsd_vs_tdccsd():
             ).conj()
         )
 
-    dip_z_ccsd = np.load(
-        os.path.join("tests", "dat", f"{name}", "dip_z_ccsd.npy"),
-        allow_pickle=True,
-    )
-    energy_ccsd = np.load(
-        os.path.join("tests", "dat", f"{name}", "energy_ccsd.npy"),
-        allow_pickle=True,
-    )
-    auto_corr_ccsd = np.load(
-        os.path.join("tests", "dat", f"{name}", "auto_corr_ccsd.npy"),
-        allow_pickle=True,
-    )
-    reference_weight_ccsd = np.load(
-        os.path.join("tests", "dat", f"{name}", "reference_weight_ccsd.npy"),
-        allow_pickle=True,
-    )
+    energy_101_real = energy[100].real
 
-    np.testing.assert_allclose(dip_z, dip_z_ccsd, atol=1e-7)
-    np.testing.assert_allclose(energy, energy_ccsd, atol=1e-8)
-    np.testing.assert_allclose(
-        np.abs(auto_corr) ** 2, auto_corr_ccsd, atol=1e-8
-    )
-    np.testing.assert_allclose(
-        reference_weight, reference_weight_ccsd, atol=1e-8
-    )
-
+    np.testing.assert_approx_equal(energy_101_real, energy_100_iterations, significant=8)
 
 if __name__ == "__main__":
-    test_tdrccsd_vs_tdccsd()
+    test_tdrcc2()

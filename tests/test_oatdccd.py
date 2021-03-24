@@ -3,7 +3,7 @@ import pytest
 
 import numpy as np
 from quantum_systems import construct_pyscf_system_rhf
-from quantum_systems.time_evolution_operators import DipoleFieldInteraction
+from quantum_systems.time_evolution_operators import LaserField
 
 from coupled_cluster.ccd import OATDCCD, OACCD
 from gauss_integrator import GaussIntegrator
@@ -50,7 +50,7 @@ def test_oatdccd_helium():
     polarization = np.zeros(3)
     polarization[2] = 1
     system.set_time_evolution_operator(
-        DipoleFieldInteraction(
+        LaserField(
             LaserPulse(td=laser_duration, omega=omega, E=E),
             polarization_vector=polarization,
         )
