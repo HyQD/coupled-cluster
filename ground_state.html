@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Ground State Computations &mdash; Coupled-cluster  documentation</title>
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -53,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Coupled-cluster
+            <a href="index.html" class="icon icon-home"> Coupled-cluster
           
 
           
@@ -130,6 +132,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -141,7 +145,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/ground_state.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -161,7 +165,7 @@
 <h2>Coupled Cluster parent class<a class="headerlink" href="#coupled-cluster-parent-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.cc.CoupledCluster">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.cc.</code><code class="sig-name descname">CoupledCluster</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">mixer=&lt;class 'coupled_cluster.mix.DIIS'&gt;</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.cc.</span></code><code class="sig-name descname"><span class="pre">CoupledCluster</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">system</span></em>, <em class="sig-param"><span class="pre">mixer=&lt;class</span> <span class="pre">'coupled_cluster.mix.DIIS'&gt;</span></em>, <em class="sig-param"><span class="pre">verbose=False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coupled Cluster Abstract class</p>
 <p>Abstract base class defining the skeleton of a
 Coupled Cluster ground state solver class.</p>
@@ -176,13 +180,13 @@ Coupled Cluster ground state solver class.</p>
 </dl>
 <dl class="py method">
 <dt id="coupled_cluster.cc.CoupledCluster.compute_ground_state">
-<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t_args</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">t_kwargs</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">l_args</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">l_kwargs</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_ground_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_ground_state</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_ground_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute ground state energy</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.cc.CoupledCluster.compute_one_body_expectation_value">
-<code class="sig-name descname">compute_one_body_expectation_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mat</span></em>, <em class="sig-param"><span class="n">make_hermitian</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_one_body_expectation_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_one_body_expectation_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_hermitian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_one_body_expectation_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the expectation value of a one-body operator
 <span class="math notranslate nohighlight">\(\hat{A}\)</span>.  This is done by evaluating</p>
 <div class="math notranslate nohighlight">
@@ -212,13 +216,13 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">CoupledCluster.compute_one_body_density_matrix()</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoupledCluster.compute_one_body_density_matrix</span></code></p>
 </div>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.cc.CoupledCluster.compute_particle_density">
-<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_particle_density</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes one-particle density</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -232,7 +236,7 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py method">
 <dt id="coupled_cluster.cc.CoupledCluster.compute_reference_energy">
-<code class="sig-name descname">compute_reference_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_reference_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_reference_energy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.compute_reference_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes reference energy</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -246,7 +250,7 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py method">
 <dt id="coupled_cluster.cc.CoupledCluster.get_amplitudes">
-<code class="sig-name descname">get_amplitudes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">get_t_0</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.get_amplitudes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_amplitudes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">get_t_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.cc.CoupledCluster.get_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Getter for amplitudes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -268,7 +272,7 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 <h2>CCS<a class="headerlink" href="#ccs" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.ccs.CCS">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccs.</code><code class="sig-name descname">CCS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccs.CCS" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.ccs.</span></code><code class="sig-name descname"><span class="pre">CCS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccs.CCS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coupled cluster singles</p>
 <p>Class for coupled cluster solver with singles excitations.</p>
 <dl class="field-list simple">
@@ -278,7 +282,7 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 </dl>
 <dl class="py method">
 <dt id="coupled_cluster.ccs.CCS.compute_energy">
-<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccs.CCS.compute_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_energy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccs.CCS.compute_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute ground state CCS energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -297,7 +301,7 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 <h2>CCD<a class="headerlink" href="#ccd" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.ccd.CCD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">CCD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.CCD" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.ccd.</span></code><code class="sig-name descname"><span class="pre">CCD</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.CCD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coupled Cluster Doubles</p>
 <p>Class for Coupled Cluster solver, including
 double excitations.</p>
@@ -313,7 +317,7 @@ double excitations.</p>
 <h2>CCSD<a class="headerlink" href="#ccsd" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.ccsd.CCSD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccsd.</code><code class="sig-name descname">CCSD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="n">include_singles</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.ccsd.</span></code><code class="sig-name descname"><span class="pre">CCSD</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_singles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coupled Cluster Singels Doubles</p>
 <p>Coupled Cluster solver with single-, and double
 excitations.</p>
@@ -327,7 +331,7 @@ excitations.</p>
 </dl>
 <dl class="py method">
 <dt id="coupled_cluster.ccsd.CCSD.compute_energy">
-<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD.compute_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_energy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD.compute_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute Energy</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -341,7 +345,7 @@ excitations.</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccsd.CCSD.compute_one_body_density_matrix">
-<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_one_body_density_matrix</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.CCSD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes one-body density matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -360,7 +364,7 @@ excitations.</p>
 <h2>RCCSD<a class="headerlink" href="#rccsd" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.rccsd.RCCSD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.rccsd.</code><code class="sig-name descname">RCCSD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="n">include_singles</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.rccsd.</span></code><code class="sig-name descname"><span class="pre">RCCSD</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_singles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restricted Coupled Cluster Singels Doubles</p>
 <p>Restricted coupled-cluster solver with single-, and double
 excitations. The excitation and de-exciation operators are parametrized according to chapter 13.7.5 in <a class="footnote-reference brackets" href="#id2" id="id1">1</a>,</p>
@@ -379,7 +383,7 @@ excitations. The excitation and de-exciation operators are parametrized accordin
 </dl>
 <dl class="py attribute">
 <dt>
-<code class="sig-name descname">t_1, t_2</code></dt>
+<code class="sig-name descname"><span class="pre">t_1,</span> <span class="pre">t_2</span></code></dt>
 <dd><p><span class="math notranslate nohighlight">\(\hat{T}\)</span>-amplitudes <span class="math notranslate nohighlight">\(\tau^a_i, \tau^{ab}_{ij}\)</span></p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -390,7 +394,7 @@ excitations. The excitation and de-exciation operators are parametrized accordin
 
 <dl class="py attribute">
 <dt>
-<code class="sig-name descname">l_1, l_2</code></dt>
+<code class="sig-name descname"><span class="pre">l_1,</span> <span class="pre">l_2</span></code></dt>
 <dd><p><span class="math notranslate nohighlight">\(\hat{\Lambda}\)</span>-amplitudes <span class="math notranslate nohighlight">\(\lambda^i_a, \lambda^{ij}_{ab}\)</span></p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -408,7 +412,7 @@ John Wiley &amp; Sons, 2014.</p>
 </dl>
 <dl class="py method">
 <dt id="coupled_cluster.rccsd.RCCSD.compute_energy">
-<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_energy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the total restricted coupled-cluster energy</p>
 <div class="math notranslate nohighlight">
 \[E_{\text{RCCSD}} = E_{\text{ref}} + 2 f^i_a \tau^a_i + (2 \tau^{ab}_{ij} - \tau^{a}_i \tau^b_j) (u^{ij}_{ab} - u^{ij}_{ba} )\]</div>
@@ -424,7 +428,7 @@ John Wiley &amp; Sons, 2014.</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.rccsd.RCCSD.compute_initial_guess">
-<code class="sig-name descname">compute_initial_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_initial_guess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_initial_guess</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_initial_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the initial guess for the coupled-cluster amplitudes.
 Currently the only option is the MP2 initial guess,</p>
 <div class="math notranslate nohighlight">
@@ -435,7 +439,7 @@ Currently the only option is the MP2 initial guess,</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.rccsd.RCCSD.compute_one_body_density_matrix">
-<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_one_body_density_matrix</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.rccsd.RCCSD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the coupled-cluster one-body density matrix <a class="footnote-reference brackets" href="#id4" id="id3">2</a>,</p>
 <div class="math notranslate nohighlight">
 \[\rho^q_p \equiv \langle \tilde{\Psi} | a_p^\dagger a_q | \Psi \rangle.\]</div>
@@ -463,7 +467,7 @@ Cambridge university press, 2009.</p>
 <h2>OACCD<a class="headerlink" href="#oaccd" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.ccd.OACCD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">OACCD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.ccd.</span></code><code class="sig-name descname"><span class="pre">OACCD</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Orbital Adaptive Coupled Cluster Doubles</p>
 <p>Implementation of the non-orthogonal coupled cluster method with
 double excitations. The code is based on a script written by
@@ -477,7 +481,7 @@ Rolf H. Myhre and Simen Kvaal.</p>
 </dl>
 <dl class="py method">
 <dt id="coupled_cluster.ccd.OACCD.compute_ground_state">
-<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">max_iterations</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">0.0001</span></em>, <em class="sig-param"><span class="n">termination_tol</span><span class="o">=</span><span class="default_value">0.0001</span></em>, <em class="sig-param"><span class="n">tol_factor</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">change_system_basis</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">mixer_kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.compute_ground_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_ground_state</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">termination_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">change_system_basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mixer_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.compute_ground_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute ground state</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -494,7 +498,7 @@ reached. Default is <code class="docutils literal notranslate"><span class="pre"
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.OACCD.compute_one_body_expectation_value">
-<code class="sig-name descname">compute_one_body_expectation_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mat</span></em>, <em class="sig-param"><span class="n">make_hermitian</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.compute_one_body_expectation_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_one_body_expectation_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_hermitian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.compute_one_body_expectation_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the expectation value of a one-body operator
 <span class="math notranslate nohighlight">\(\hat{A}\)</span>.  This is done by evaluating</p>
 <div class="math notranslate nohighlight">
@@ -524,13 +528,13 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">CoupledCluster.compute_one_body_density_matrix()</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoupledCluster.compute_one_body_density_matrix</span></code></p>
 </div>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.OACCD.get_amplitudes">
-<code class="sig-name descname">get_amplitudes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">get_t_0</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.get_amplitudes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_amplitudes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">get_t_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OACCD.get_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Getter for amplitudes, overwrites CC.get_amplitudes to also include
 coefficients.</p>
 <dl class="field-list simple">
@@ -556,37 +560,29 @@ coefficients.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="time_development.html" class="btn btn-neutral float-right" title="Time Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="get_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="time_development.html" class="btn btn-neutral float-right" title="Time Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="get_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019, Schoyen, gregwinther
+        &#169; Copyright 2019, Schoyen, gregwinther.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

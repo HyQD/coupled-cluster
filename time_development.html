@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Time Development &mdash; Coupled-cluster  documentation</title>
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -52,7 +54,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Coupled-cluster
+            <a href="index.html" class="icon icon-home"> Coupled-cluster
           
 
           
@@ -129,6 +131,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -140,7 +144,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/time_development.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -160,7 +164,7 @@
 <h2>Time-dependent coupled-cluster parent class<a class="headerlink" href="#time-dependent-coupled-cluster-parent-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.tdcc.</code><code class="sig-name descname">TimeDependentCoupledCluster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.tdcc.</span></code><code class="sig-name descname"><span class="pre">TimeDependentCoupledCluster</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time Dependent Coupled Cluster Parent Class</p>
 <p>Abstract base class defining the skeleton of a time-dependent Coupled
 Cluster solver class.</p>
@@ -171,19 +175,19 @@ Cluster solver class.</p>
 </dl>
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.amp_template">
-<em class="property">property </em><code class="sig-name descname">amp_template</code><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.amp_template" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">amp_template</span></code><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.amp_template" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns static _amp_template, for setting initial conditions etc</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.amplitudes_from_array">
-<code class="sig-name descname">amplitudes_from_array</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.amplitudes_from_array" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">amplitudes_from_array</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.amplitudes_from_array" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct AmplitudeContainer from numpy array.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_left_phase">
-<code class="sig-name descname">compute_left_phase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_left_phase" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_left_phase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_left_phase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the inner product of the (potentially
 time-dependent) reference state and the left coupled-cluster wave
 function.
@@ -205,7 +209,7 @@ That is,</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_one_body_expectation_value">
-<code class="sig-name descname">compute_one_body_expectation_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">mat</span></em>, <em class="sig-param"><span class="n">make_hermitian</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_one_body_expectation_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_one_body_expectation_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_hermitian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_one_body_expectation_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the expectation value of a one-body operator
 <span class="math notranslate nohighlight">\(\hat{A}\)</span>.  This is done by evaluating</p>
 <div class="math notranslate nohighlight">
@@ -237,13 +241,13 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">TimeDependentCoupledCluster.compute_one_body_density_matrix()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">CoupledCluster.compute_one_body_expectation_value()</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDependentCoupledCluster.compute_one_body_density_matrix</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">CoupledCluster.compute_one_body_expectation_value</span></code></p>
 </div>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density">
-<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_particle_density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_particle_density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes current one-body density</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -257,7 +261,7 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_reference_weight">
-<code class="sig-name descname">compute_reference_weight</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_reference_weight" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_reference_weight</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_reference_weight" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the weight of the reference state in the
 time-evolved coupled-cluster wave function. This is given by</p>
 <div class="math notranslate nohighlight">
@@ -277,7 +281,7 @@ time-evolved coupled-cluster wave function. This is given by</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase">
-<code class="sig-name descname">compute_right_phase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_right_phase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.compute_right_phase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the inner product of the (potentially
 time-dependent) reference state and the right coupled-cluster wave
 function.
@@ -297,14 +301,14 @@ That is,</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.construct_amplitude_template">
-<em class="property">static </em><code class="sig-name descname">construct_amplitude_template</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">truncation</span></em>, <em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">m</span></em>, <em class="sig-param"><span class="n">np</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.construct_amplitude_template" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">construct_amplitude_template</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">truncation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">np</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.construct_amplitude_template" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs an empty AmplitudeContainer with the correct shapes, for
 convertion between arrays and amplitudes.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_l_amplitudes">
-<em class="property">abstract </em><code class="sig-name descname">rhs_l_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">rhs_l_amplitudes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that needs to be implemented as a generator. The generator
 should return the l-amplitudes right hand sides, in order of increasing
 excitation. For example, for ccsd, this function should contain:</p>
@@ -316,7 +320,7 @@ yield compute_l_2_amplitudes</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_t_amplitudes">
-<em class="property">abstract </em><code class="sig-name descname">rhs_t_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">rhs_t_amplitudes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.tdcc.TimeDependentCoupledCluster.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that needs to be implemented as a generator. The generator
 should return the t-amplitudes right hand sides, in order of increasing
 excitation. For example, for ccsd, this function should contain:</p>
@@ -333,7 +337,7 @@ yield compute_t_2_amplitudes</p>
 <h2>TDCCD<a class="headerlink" href="#tdccd" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.ccd.TDCCD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">TDCCD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.ccd.</span></code><code class="sig-name descname"><span class="pre">TDCCD</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time Dependent Coupled Cluster Doubles</p>
 <p>Computes time development of system, employed coupled
 cluster method with double exctiations.</p>
@@ -348,7 +352,7 @@ cluster method with double exctiations.</p>
 </dl>
 <dl class="py method">
 <dt id="coupled_cluster.ccd.TDCCD.compute_energy">
-<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes energy of a given amplitudes array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -362,7 +366,7 @@ cluster method with double exctiations.</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.TDCCD.compute_one_body_density_matrix">
-<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_one_body_density_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes one-body density matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -376,7 +380,7 @@ cluster method with double exctiations.</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.TDCCD.compute_overlap">
-<code class="sig-name descname">compute_overlap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y_a</span></em>, <em class="sig-param"><span class="n">y_b</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_overlap" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_overlap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_overlap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes overlap of current two states a and b.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -396,7 +400,7 @@ cluster method with double exctiations.</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.TDCCD.compute_two_body_density_matrix">
-<code class="sig-name descname">compute_two_body_density_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_two_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_two_body_density_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.compute_two_body_density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes two-body density matrix at
 current time step.</p>
 <dl class="field-list simple">
@@ -411,7 +415,7 @@ current time step.</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.TDCCD.rhs_l_amplitudes">
-<code class="sig-name descname">rhs_l_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rhs_l_amplitudes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that needs to be implemented as a generator. The generator
 should return the l-amplitudes right hand sides, in order of increasing
 excitation. For example, for ccsd, this function should contain:</p>
@@ -423,7 +427,7 @@ yield compute_l_2_amplitudes</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.TDCCD.rhs_t_amplitudes">
-<code class="sig-name descname">rhs_t_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rhs_t_amplitudes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.TDCCD.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that needs to be implemented as a generator. The generator
 should return the t-amplitudes right hand sides, in order of increasing
 excitation. For example, for ccsd, this function should contain:</p>
@@ -440,10 +444,10 @@ yield compute_t_2_amplitudes</p>
 <h2>TDCCSD<a class="headerlink" href="#tdccsd" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.ccsd.TDCCSD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccsd.</code><code class="sig-name descname">TDCCSD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.ccsd.</span></code><code class="sig-name descname"><span class="pre">TDCCSD</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt id="coupled_cluster.ccsd.TDCCSD.rhs_l_amplitudes">
-<code class="sig-name descname">rhs_l_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rhs_l_amplitudes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that needs to be implemented as a generator. The generator
 should return the l-amplitudes right hand sides, in order of increasing
 excitation. For example, for ccsd, this function should contain:</p>
@@ -455,7 +459,7 @@ yield compute_l_2_amplitudes</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccsd.TDCCSD.rhs_t_amplitudes">
-<code class="sig-name descname">rhs_t_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rhs_t_amplitudes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccsd.TDCCSD.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that needs to be implemented as a generator. The generator
 should return the t-amplitudes right hand sides, in order of increasing
 excitation. For example, for ccsd, this function should contain:</p>
@@ -472,7 +476,7 @@ yield compute_t_2_amplitudes</p>
 <h2>Orbital-adaptive time-dependent coupled-cluster parent class<a class="headerlink" href="#orbital-adaptive-time-dependent-coupled-cluster-parent-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.oatdcc.OATDCC">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.oatdcc.</code><code class="sig-name descname">OATDCC</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="n">C</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">C_tilde</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.oatdcc.</span></code><code class="sig-name descname"><span class="pre">OATDCC</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_tilde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract base class defining the skeleton of an orbital-adaptive
 time-dependent coupled cluster solver class.</p>
 <p>Note that this solver _only_ supports a basis of orthonomal orbitals. If the
@@ -480,7 +484,7 @@ original atomic orbitals are not orthonormal, this can solved done by
 transforming the ground state orbitals to the Hartree-Fock basis.</p>
 <dl class="py method">
 <dt id="coupled_cluster.oatdcc.OATDCC.compute_one_body_expectation_value">
-<code class="sig-name descname">compute_one_body_expectation_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">mat</span></em>, <em class="sig-param"><span class="n">make_hermitian</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_one_body_expectation_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_one_body_expectation_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_hermitian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_one_body_expectation_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function computing the expectation value of a one-body operator
 <span class="math notranslate nohighlight">\(\hat{A}\)</span>.  This is done by evaluating</p>
 <div class="math notranslate nohighlight">
@@ -512,20 +516,20 @@ matrix. Default is <code class="docutils literal notranslate"><span class="pre">
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">OATDCC.compute_one_body_density_matrix()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">TimeDependentCoupledCluster.compute_one_body_expectation_value()</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OATDCC.compute_one_body_density_matrix</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDependentCoupledCluster.compute_one_body_expectation_value</span></code></p>
 </div>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.oatdcc.OATDCC.compute_overlap">
-<em class="property">abstract </em><code class="sig-name descname">compute_overlap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y_a</span></em>, <em class="sig-param"><span class="n">y_b</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_overlap" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">compute_overlap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_overlap" title="Permalink to this definition">¶</a></dt>
 <dd><p>The time-dependent overlap for orbital-adaptive coupled cluster
 changes due to the time-dependent orbitals in the wavefunctions.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.oatdcc.OATDCC.compute_particle_density">
-<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_particle_density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.oatdcc.OATDCC.compute_particle_density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes current one-body density</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -544,16 +548,16 @@ changes due to the time-dependent orbitals in the wavefunctions.</p>
 <h2>OATDCCD<a class="headerlink" href="#oatdccd" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="coupled_cluster.ccd.OATDCCD">
-<em class="property">class </em><code class="sig-prename descclassname">coupled_cluster.ccd.</code><code class="sig-name descname">OATDCCD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="n">C</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">C_tilde</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">coupled_cluster.ccd.</span></code><code class="sig-name descname"><span class="pre">OATDCCD</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_tilde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt id="coupled_cluster.ccd.OATDCCD.compute_overlap">
-<code class="sig-name descname">compute_overlap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current_time</span></em>, <em class="sig-param"><span class="n">y_a</span></em>, <em class="sig-param"><span class="n">y_b</span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD.compute_overlap" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">compute_overlap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD.compute_overlap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes time dependent overlap with respect to a given cc-state</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.OATDCCD.rhs_l_amplitudes">
-<code class="sig-name descname">rhs_l_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rhs_l_amplitudes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD.rhs_l_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that needs to be implemented as a generator. The generator
 should return the l-amplitudes right hand sides, in order of increasing
 excitation. For example, for ccsd, this function should contain:</p>
@@ -565,7 +569,7 @@ yield compute_l_2_amplitudes</p>
 
 <dl class="py method">
 <dt id="coupled_cluster.ccd.OATDCCD.rhs_t_amplitudes">
-<code class="sig-name descname">rhs_t_amplitudes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rhs_t_amplitudes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coupled_cluster.ccd.OATDCCD.rhs_t_amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that needs to be implemented as a generator. The generator
 should return the t-amplitudes right hand sides, in order of increasing
 excitation. For example, for ccsd, this function should contain:</p>
@@ -585,35 +589,28 @@ yield compute_t_2_amplitudes</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="ground_state.html" class="btn btn-neutral float-left" title="Ground State Computations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="ground_state.html" class="btn btn-neutral float-left" title="Ground State Computations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019, Schoyen, gregwinther
+        &#169; Copyright 2019, Schoyen, gregwinther.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
