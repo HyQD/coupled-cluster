@@ -1,13 +1,13 @@
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 
 from coupled_cluster.rcc2.rhs_t import (
-    compute_t_1_amplitudes as compute_t1_gristmill,
-    compute_t_2_amplitudes as compute_t2_gristmill,
+    compute_t_1_amplitudes,
+    compute_t_2_amplitudes,
 )
 
 from coupled_cluster.rcc2.rhs_l import (
-    compute_l_1_amplitudes as compute_l1_gristmill,
-    compute_l_2_amplitudes as compute_l2_gristmill,
+    compute_l_1_amplitudes,
+    compute_l_2_amplitudes,
 )
 
 from coupled_cluster.rcc2 import RCC2
@@ -31,10 +31,8 @@ from coupled_cluster.cc_helper import AmplitudeContainer
 class TDRCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
 
-    def __init__(self, system, rhs="gristmill"):
+    def __init__(self, system):
         super().__init__(system)
-        self.rhs = rhs
-        self.intermediates = None
         self.rcc2 = RCC2(system)
 
     def __call__(self, current_time, prev_amp):
@@ -66,7 +64,6 @@ class TDRCC2(TimeDependentCoupledCluster):
                 o,
                 v,
                 np=self.np,
-                intermediates=self.intermediates
             )
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
@@ -88,7 +85,6 @@ class TDRCC2(TimeDependentCoupledCluster):
                 o,
                 v,
                 np=self.np,
-                intermediates=self.intermediates
             )
             for rhs_l_func in self.rhs_l_amplitudes()
         ]
@@ -106,14 +102,12 @@ class TDRCC2(TimeDependentCoupledCluster):
         )
 
     def rhs_t_amplitudes(self):
-        if self.rhs == "gristmill":
-            yield compute_t1_gristmill
-            yield compute_t2_gristmill
+        yield compute_t_1_amplitudes
+        yield compute_t_2_amplitudes
 
     def rhs_l_amplitudes(self):
-        if self.rhs == "gristmill":
-            yield compute_l1_gristmill
-            yield compute_l2_gristmill
+        yield compute_l_1_amplitudes
+        yield compute_l_2_amplitudes
 
     def compute_left_reference_overlap(self, current_time, y):
         np = self.np
