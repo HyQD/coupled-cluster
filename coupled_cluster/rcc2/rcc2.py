@@ -1,13 +1,13 @@
 from coupled_cluster.cc import CoupledCluster
 
 from coupled_cluster.rcc2.rhs_t import (
-    compute_t_1_amplitudes as compute_t1_gristmill,
-    compute_t_2_amplitudes as compute_t2_gristmill,
+    compute_t_1_amplitudes,
+    compute_t_2_amplitudes,
 )
 
 from coupled_cluster.rcc2.rhs_l import (
-    compute_l_1_amplitudes as compute_l1_gristmill,
-    compute_l_2_amplitudes as compute_l2_gristmill,
+    compute_l_1_amplitudes,
+    compute_l_2_amplitudes,
 )
 
 from coupled_cluster.cc_helper import (
@@ -16,7 +16,7 @@ from coupled_cluster.cc_helper import (
 )
 
 from coupled_cluster.rcc2.density_matrices import (
-    compute_one_body_density_matrix as compute_one_body_density_gristmill,
+    compute_one_body_density_matrix,
 )
 
 from coupled_cluster.rcc2.energies import (
@@ -40,22 +40,14 @@ class RCC2(CoupledCluster):
         Include singles
     """
 
-    def __init__(self, system, rhs="gristmill", include_singles=True, **kwargs):
+    def __init__(self, system, include_singles=True, **kwargs):
 
         super().__init__(system, **kwargs)
 
         np = self.np
-        self.rhs = rhs
 
         n, m = self.o.stop - self.o.start, self.m
         self.include_singles = include_singles
-
-        self.f_0 = self.f.copy()
-        self.h_0 = self.h.copy()
-        self.u_0 = self.u.copy()
-        self.dipole_moment = system.dipole_moment
-
-        self.lagrangian = 0
 
         # Singles
         self.rhs_t_1 = np.zeros((m, n), dtype=self.u.dtype)  # ai
@@ -88,16 +80,6 @@ class RCC2(CoupledCluster):
         np = self.np
         o, v = self.o, self.v
 
-        """
-        Removing this corresponds to MP2 initial guess
-        # Singles
-        if self.include_singles:
-            np.copyto(self.rhs_t_1, self.f[v, o])
-            np.divide(self.rhs_t_1, self.d_t_1, out=self.t_1)
-
-            np.copyto(self.rhs_l_1, self.f[o, v])
-            np.divide(self.rhs_l_1, self.d_l_1, out=self.l_1)
-        """
         if self.include_singles:
             np.copyto(self.rhs_t_1, self.f[v, o])
             np.divide(self.rhs_t_1, self.d_t_1, out=self.t_1)
@@ -159,11 +141,7 @@ class RCC2(CoupledCluster):
         )
         e_ref = self.system.compute_reference_energy()
 
-        e_ref_alternative = self.compute_reference_energy(
-            self.h_transform, self.u_transform, self.o, self.v, self.np
-        )
-
-        return e_corr 
+        return e_corr + e_ref
 
     def compute_reference_energy(self, h, u, o, v, np):
         """
@@ -191,32 +169,6 @@ class RCC2(CoupledCluster):
             - self.np.trace(self.np.trace(u[o, o, o, o], axis1=1, axis2=2))
         )
 
-    def compute_t_1_amplitudes(
-        self, f, f_transform, u_transform, t_1, t_2, o, v, out, np
-    ):
-        if self.rhs == "gristmill":
-            return compute_t1_gristmill(f, f_transform, u_transform, t_1, t_2, o, v, np)
-        elif self.rhs == "psi4":
-            return compute_t1_psi4(f, u, t_1, t_2, o, v, np)
-        else:
-            print("Undefined right hand sides")
-            import sys
-
-            sys.exit(1)
-
-    def compute_t_2_amplitudes(
-        self, f, f_transform, u_transform, t_1, t_2, o, v, out, np
-    ):
-        if self.rhs == "gristmill":
-            return compute_t2_gristmill(f, f_transform, u_transform, t_1, t_2, o, v, np)
-        elif self.rhs == "psi4":
-            return compute_t2_psi4(f, u, t_1, t_2, o, v, np)
-        else:
-            print("Undefined right hand sides")
-            import sys
-
-            sys.exit(1)
-
     def compute_t_amplitudes(self):
         np = self.np
 
@@ -228,12 +180,12 @@ class RCC2(CoupledCluster):
             self.h_transform,
             self.f_transform,
             self.u_transform,
-        ) = self.t1_transform_integrals(self.t_1, self.h_0, self.u_0)
+        ) = self.t1_transform_integrals(self.t_1, self.system.h, self.system.u)
 
         # Singles
         if self.include_singles:
             self.rhs_t_1.fill(0)
-            self.rhs_t_1 = self.compute_t_1_amplitudes(
+            self.rhs_t_1 = compute_t_1_amplitudes(
                 self.f,
                 self.f_transform,
                 self.u_transform,
@@ -250,7 +202,7 @@ class RCC2(CoupledCluster):
 
         # Doubles
         self.rhs_t_2.fill(0)
-        self.rhs_t_2 = self.compute_t_2_amplitudes(
+        self.rhs_t_2 = compute_t_2_amplitudes(
             self.f,
             self.f_transform,
             self.u_transform,
@@ -280,36 +232,6 @@ class RCC2(CoupledCluster):
 
         self.t_2 = np.reshape(new_vectors[n_t1:], self.t_2.shape)
 
-    def compute_l_1_amplitudes(
-        self, f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, out, np
-    ):
-        if self.rhs == "gristmill":
-            return compute_l1_gristmill(
-                f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np
-            )
-        elif self.rhs == "psi4":
-            return compute_l1_psi4(f, u, t_1, t_2, l_1, l_2, o, v, np)
-        else:
-            print("Undefined right hand sides")
-            import sys
-
-            sys.exit(1)
-
-    def compute_l_2_amplitudes(
-        self, f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, out, np
-    ):
-        if self.rhs == "gristmill":
-            return compute_l2_gristmill(
-                f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np
-            )
-        elif self.rhs == "psi4":
-            return compute_l2_test(f, u, t_1, t_2, l_1, l_2, o, v, np)
-        else:
-            print("Undefined right hand sides")
-            import sys
-
-            sys.exit(1)
-
     def compute_l_amplitudes(self):
         np = self.np
 
@@ -325,7 +247,7 @@ class RCC2(CoupledCluster):
         # Singles
         if self.include_singles:
             self.rhs_l_1.fill(0)
-            self.rhs_l_1 = self.compute_l_1_amplitudes(
+            self.rhs_l_1 = compute_l_1_amplitudes(
                 self.f,
                 self.f_transform,
                 self.u_transform,
@@ -345,7 +267,7 @@ class RCC2(CoupledCluster):
 
         # Doubles
         self.rhs_l_2.fill(0)
-        self.rhs_l_2 = self.compute_l_2_amplitudes(
+        self.rhs_l_2 = compute_l_2_amplitudes(
             self.f,
             self.f_transform,
             self.u_transform,
@@ -377,19 +299,6 @@ class RCC2(CoupledCluster):
 
         self.l_2 = np.reshape(new_vectors[n_l1:], self.l_2.shape)
 
-        self.lagrangian = lagrangian_functional(
-            self.f,
-            self.f_transform,
-            self.u_transform,
-            self.t_1,
-            self.t_2,
-            self.l_1,
-            self.l_2,
-            self.o,
-            self.v,
-            self.np,
-        )
-
     def compute_one_body_density_matrix(self):
         """Computes one-body density matrix
 
@@ -399,7 +308,7 @@ class RCC2(CoupledCluster):
             One-body density matrix
         """
 
-        return compute_one_body_density_gristmill(
+        return compute_one_body_density_matrix(
             self.t_1, self.t_2, self.l_1, self.l_2, self.o, self.v, np=self.np
         )
 
@@ -414,7 +323,7 @@ class RCC2(CoupledCluster):
         np = self.np
         o, v = (self.o, self.v)
         
-        dipole_moment_array = self.dipole_moment
+        dipole_moment_array = self.system.dipole_moment
         cc2_dipole_moment = np.zeros(3)
         
         for i in range(3):
@@ -436,24 +345,7 @@ class RCC2(CoupledCluster):
 
             cc2_dipole_moment[i] = cc2_dipole_moment[i] + 2 * np.trace(dipole_moment_t1_transformed[o, o])
 
-        return cc2_dipole_moment
-
-    def construct_fock_matrix_new(self, h, u):
-        """
-        Construct fock matrix for restricted Hartree-Fock
-        """
-        np = self.np
-        o, v = (self.o, self.v)
-
-        f = np.zeros_like(h)
-
-        f += h
-        f += 2 * np.einsum("piqi -> pq", u[:, o, :, o])
-        f -= np.einsum("piiq -> pq", u[:, o, o, :])
-
-        return f
-
-    def t1_transform_integrals(self, t_1, h_0, u_0):
+    def t1_transform_integrals(self, t_1, h, u):
 
         np = self.np
 
@@ -464,20 +356,14 @@ class RCC2(CoupledCluster):
 
         x_transform = np.eye(tot) - t1_t
         y_transform = np.eye(tot) + t1_t.T
+        C_tilde = x_transform
+        C = y_transform.T
 
-        h_transform = np.einsum("pr,qs,rs -> pq", x_transform, y_transform, h_0)
-        u_transform = np.einsum(
-            "pt,qu,rm,sn,tumn->pqrs",
-            x_transform,
-            x_transform,
-            y_transform,
-            y_transform,
-            u_0,
-            optimize="greedy",
-        )
+        h_transform = self.system.transform_one_body_elements(h, C, C_tilde)
+        u_transform = self.system.transform_two_body_elements(u, C, C_tilde)
 
         f_transform = self.f.copy()
-        f_transform = self.construct_fock_matrix_new(h_transform, u_transform)
+        f_transform = self.system.construct_fock_matrix(h_transform, u_transform)
 
         return h_transform, f_transform, u_transform
 
@@ -493,7 +379,9 @@ class RCC2(CoupledCluster):
 
         x_transform = np.eye(tot) - t1_t
         y_transform = np.eye(tot) + t1_t.T
+        C_tilde = x_transform
+        C = y_transform.T
 
-        d_transform = np.einsum("pr,qs,rs -> pq", x_transform, y_transform, dipole)
-
+        d_transform = self.system.transform_one_body_elements(dipole, C, C_tilde)
+        
         return d_transform
