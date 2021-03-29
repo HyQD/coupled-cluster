@@ -4,10 +4,6 @@
 
 # Diagrams for CC2 amplitude equations
 
-import coupled_cluster.ccs.rhs_t as ccs_t
-import coupled_cluster.ccd.rhs_t as ccd_t
-
-
 def compute_t_1_amplitudes(F, F_t, W_t, t1, t2, o, v, np, intermediates=None, out=None):
 
     """

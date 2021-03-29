@@ -1,25 +1,3 @@
-from coupled_cluster.cc_helper import compute_reference_energy
-from coupled_cluster.rcc2.rhs_t import (
-    compute_t_1_amplitudes,
-    compute_t_2_amplitudes,
-)
-from coupled_cluster.ccd.energies import (
-    compute_lagrangian_functional as ccd_functional,
-)
-
-
-def compute_rcc2_ground_state_energy(f, u, t_1, t_2, o, v, np):
-
-    # energy = compute_reference_energy(f, u, o, v, np=np)
-    """
-    Reference energy missing
-    """
-    energy = 0
-
-    energy += compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np=np)
-
-    return energy
-
 
 def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
     """

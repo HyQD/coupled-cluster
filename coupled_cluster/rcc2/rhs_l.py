@@ -1,6 +1,3 @@
-import coupled_cluster.ccs.rhs_l as ccs_l
-import coupled_cluster.ccd.rhs_l as ccd_l
-
 
 def compute_l_1_amplitudes(
     f, f_t, u_t, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
