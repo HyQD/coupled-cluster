@@ -3,7 +3,7 @@ import pytest
 
 import numpy as np
 from quantum_systems import construct_pyscf_system_rhf
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 
 from coupled_cluster.omp2 import OMP2, TDOMP2
 from gauss_integrator import GaussIntegrator
@@ -50,7 +50,7 @@ def test_tdomp2_helium():
     polarization = np.zeros(3)
     polarization[2] = 1
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             LaserPulse(td=laser_duration, omega=omega, E=E),
             polarization_vector=polarization,
         )
@@ -81,15 +81,16 @@ def test_tdomp2_helium():
 
     td_energies[i] = tdomp2.compute_energy(r.t, r.y)
 
-    from matplotlib import pyplot as plt
 
-    plt.figure()
-    plt.subplot(211)
-    plt.plot(time_points, td_energies.real)
-    plt.subplot(212)
-    plt.semilogy(time_points, np.abs(td_energies.imag))
-    plt.show()
-
-
-if __name__ == "__main__":
-    test_tdomp2_helium()
+#     from matplotlib import pyplot as plt
+#
+#     plt.figure()
+#     plt.subplot(211)
+#     plt.plot(time_points, td_energies.real)
+#     plt.subplot(212)
+#     plt.semilogy(time_points, np.abs(td_energies.imag))
+#     plt.show()
+#
+#
+# if __name__ == "__main__":
+#     test_tdomp2_helium()

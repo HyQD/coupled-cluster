@@ -9,7 +9,7 @@ from quantum_systems import (
     ODQD,
     construct_pyscf_system_rhf,
 )
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 
 l = 12  # Number of orbitals
 n = 2  # Number of particles
@@ -179,7 +179,7 @@ def zanghellini_system():
             potential=ODQD.HOPotential(omega),
         ),
     )
-    laser = LaserField(
+    laser = DipoleFieldInteraction(
         LaserPulse(
             laser_frequency=laser_frequency, laser_strength=laser_strength
         )
