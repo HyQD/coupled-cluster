@@ -27,7 +27,6 @@ from coupled_cluster.rcc2.time_dependent_overlap import (
 from coupled_cluster.cc_helper import AmplitudeContainer
 
 
-
 class TDRCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
 

@@ -1,19 +1,13 @@
 import numpy as np
-import matplotlib
-matplotlib.use("TkAgg")
-import matplotlib.pyplot as plt
 import tqdm
 import os
 
 from quantum_systems import construct_pyscf_system_rhf
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from coupled_cluster.rcc2 import RCC2, TDRCC2
 from gauss_integrator import GaussIntegrator
 from tdhf import HartreeFock, TimeDependentHartreeFock
 from scipy.integrate import complex_ode
-
-from coupled_cluster.mix import DIIS, AlphaMixer
-np.set_printoptions(edgeitems=3,infstr='inf', linewidth=75, nanstr='nan', precision=8, suppress=False, threshold=1000, formatter=None)
 
 class sine_square_laser:
     def __init__(self, F_str, omega, tprime, phase=0):
@@ -32,7 +26,8 @@ class sine_square_laser:
         )
         return pulse
 
-def  test_tdrcc2():
+
+def test_tdrcc2():
 
     molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
 
@@ -93,7 +88,7 @@ def  test_tdrcc2():
 
     num_steps = int(tfinal / dt) + 1
     time_points = np.linspace(0, tfinal, num_steps)
-    timestep_stop_laser = int(tprime/dt)
+    timestep_stop_laser = int(tprime / dt)
 
     # Initialize arrays to hold different "observables".
     energy = np.zeros(num_steps, dtype=np.complex128)
@@ -104,7 +99,6 @@ def  test_tdrcc2():
 
     # Set initial values
     t, l = amps0
-
 
     energy[0] = tdrccsd.compute_energy(r.t, r.y)
     dip_z[0] = tdrccsd.compute_one_body_expectation_value(
@@ -122,10 +116,9 @@ def  test_tdrcc2():
         * (
             np.exp(-tau0[0]) * tdrccsd.compute_left_reference_overlap(r.t, r.y)
         ).conj()
-    ) 
+    )
 
-    for i, _t in tqdm.tqdm(enumerate(time_points[0:100])
-    ): 
+    for i, _t in tqdm.tqdm(enumerate(time_points[0:100])):
         r.integrate(r.t + dt)
         if not r.successful():
             break
@@ -151,7 +144,10 @@ def  test_tdrcc2():
 
     energy_101_real = energy[100].real
 
-    np.testing.assert_approx_equal(energy_101_real, energy_100_iterations, significant=8)
+    np.testing.assert_approx_equal(
+        energy_101_real, energy_100_iterations, significant=8
+    )
+
 
 if __name__ == "__main__":
     test_tdrcc2()

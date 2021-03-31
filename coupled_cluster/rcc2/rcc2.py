@@ -21,8 +21,6 @@ from coupled_cluster.rcc2.density_matrices import (
 
 from coupled_cluster.rcc2.energies import (
     compute_ground_state_energy_correction,
-    lagrangian_functional,
-    lagrangian_functional_one_body,
 )
 
 
@@ -322,16 +320,16 @@ class RCC2(CoupledCluster):
 
         np = self.np
         o, v = (self.o, self.v)
-        
+
         dipole_moment_array = self.system.dipole_moment
         cc2_dipole_moment = np.zeros(3)
-        
+
         for i in range(3):
 
             dipole_moment_t1_transformed = self.t1_transform_integrals_one_body(
                 dipole_moment_array[i]
             )
-        
+
             cc2_dipole_moment[i] = lagrangian_functional_one_body(
                 dipole_moment_t1_transformed,
                 self.t_1,
@@ -343,7 +341,9 @@ class RCC2(CoupledCluster):
                 self.np,
             ).real
 
-            cc2_dipole_moment[i] = cc2_dipole_moment[i] + 2 * np.trace(dipole_moment_t1_transformed[o, o])
+            cc2_dipole_moment[i] = cc2_dipole_moment[i] + 2 * np.trace(
+                dipole_moment_t1_transformed[o, o]
+            )
 
     def t1_transform_integrals(self, t_1, h, u):
 
@@ -362,8 +362,9 @@ class RCC2(CoupledCluster):
         h_transform = self.system.transform_one_body_elements(h, C, C_tilde)
         u_transform = self.system.transform_two_body_elements(u, C, C_tilde)
 
-        f_transform = self.f.copy()
-        f_transform = self.system.construct_fock_matrix(h_transform, u_transform)
+        f_transform = self.system.construct_fock_matrix(
+            h_transform, u_transform
+        )
 
         return h_transform, f_transform, u_transform
 
@@ -382,6 +383,8 @@ class RCC2(CoupledCluster):
         C_tilde = x_transform
         C = y_transform.T
 
-        d_transform = self.system.transform_one_body_elements(dipole, C, C_tilde)
-        
+        d_transform = self.system.transform_one_body_elements(
+            dipole, C, C_tilde
+        )
+
         return d_transform

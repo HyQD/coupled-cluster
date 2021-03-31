@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib
+
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import tqdm
@@ -13,7 +14,18 @@ from tdhf import HartreeFock, TimeDependentHartreeFock
 from scipy.integrate import complex_ode
 
 from coupled_cluster.mix import DIIS, AlphaMixer
-np.set_printoptions(edgeitems=3,infstr='inf', linewidth=75, nanstr='nan', precision=8, suppress=False, threshold=1000, formatter=None)
+
+np.set_printoptions(
+    edgeitems=3,
+    infstr="inf",
+    linewidth=75,
+    nanstr="nan",
+    precision=8,
+    suppress=False,
+    threshold=1000,
+    formatter=None,
+)
+
 
 class sine_square_laser:
     def __init__(self, F_str, omega, tprime, phase=0):
@@ -30,7 +42,7 @@ class sine_square_laser:
             * np.sin(self.omega * t + self.phase)
             * self.F_str
         )
-#        print("pulse ", pulse)
+        #        print("pulse ", pulse)
         return pulse
 
 
@@ -44,7 +56,6 @@ system = construct_pyscf_system_rhf(
     verbose=False,
     add_spin=False,
     anti_symmetrize=False,
-
 )
 F_str = 0.10
 omega = 0.2
@@ -61,9 +72,7 @@ tfinal = np.floor(tprime) + time_after_pulse
 
 system.set_time_evolution_operator(
     LaserField(
-        sine_square_laser(
-            F_str=F_str, omega=omega, tprime=tprime, phase=phase
-        ),
+        sine_square_laser(F_str=F_str, omega=omega, tprime=tprime, phase=phase),
         polarization_vector=polarization,
     )
 )
@@ -93,7 +102,7 @@ r.set_initial_value(y0)
 
 num_steps = int(tfinal / dt) + 1
 time_points = np.linspace(0, tfinal, num_steps)
-timestep_stop_laser = int(tprime/dt)
+timestep_stop_laser = int(tprime / dt)
 
 # Initialize arrays to hold different "observables".
 energy = np.zeros(num_steps, dtype=np.complex128)
@@ -126,13 +135,12 @@ reference_weight[0] = (
     ).conj()
 )
 
-#for i, amp in tqdm.tqdm(
+# for i, amp in tqdm.tqdm(
 #    enumerate(tdrccsd.solve(time_points)), total=num_steps - 1
-#):
-for i, _t in tqdm.tqdm(enumerate(time_points[:-1])
-): 
-#for i, _t in tqdm.tqdm(enumerate(time_points[0:1])
-#):
+# ):
+for i, _t in tqdm.tqdm(enumerate(time_points[:-1])):
+    # for i, _t in tqdm.tqdm(enumerate(time_points[0:1])
+    # ):
     r.integrate(r.t + dt)
     if not r.successful():
         break
@@ -157,7 +165,7 @@ for i, _t in tqdm.tqdm(enumerate(time_points[:-1])
     )
 
 from scipy.fftpack import fft, ifft, fftshift, fftfreq
- 
+
 """
 Fourier transform of dip_z after pulse.
 """
@@ -168,14 +176,14 @@ freq = fftshift(fftfreq(len(time_points[timestep_stop_laser:]))) * (
 a = np.abs(fftshift(fft(dip_z[timestep_stop_laser:])))
 amax = a.max()
 a = a / amax
- 
-np.save('a_oatdccd',a)
-np.save('freq_oatdccd',freq)
- 
+
+np.save("a_oatdccd", a)
+np.save("freq_oatdccd", freq)
+
 plt.figure()
 plt.plot(freq, a, label=r"$\vert \tilde{d_z} \vert$")
 plt.title(r"Fourier transform of $\langle z(t)\rangle$")
 plt.legend()
 plt.xlim(0, 6)
 plt.xlabel("frequency/au")
-plt.show() 
+plt.show()

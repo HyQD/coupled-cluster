@@ -4,7 +4,10 @@
 
 # Diagrams for CC2 amplitude equations
 
-def compute_t_1_amplitudes(F, F_t, W_t, t1, t2, o, v, np, intermediates=None, out=None):
+
+def compute_t_1_amplitudes(
+    F, F_t, W_t, t1, t2, o, v, np, intermediates=None, out=None
+):
 
     """
     if out is None:
@@ -37,7 +40,9 @@ def compute_t_1_amplitudes(F, F_t, W_t, t1, t2, o, v, np, intermediates=None, ou
     return Omega
 
 
-def compute_t_2_amplitudes(F, F_t, W_t, t1, t2, o, v, np, intermediates=None, out=None):
+def compute_t_2_amplitudes(
+    F, F_t, W_t, t1, t2, o, v, np, intermediates=None, out=None
+):
     """
     if out is None:
         out = np.zeros_like(t_2)

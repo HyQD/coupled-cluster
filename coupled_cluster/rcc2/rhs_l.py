@@ -1,4 +1,3 @@
-
 def compute_l_1_amplitudes(
     f, f_t, u_t, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
 ):
@@ -44,7 +43,9 @@ def compute_l_1_amplitudes(
     I31_l1 -= np.einsum("jb,jiab->ia", l1, I16_l1)
     I7_l1 += 2 * np.einsum("jiab->ijab", u_t[o, o, v, v])
     I7_l1 -= np.einsum("jiba->ijab", u_t[o, o, v, v])
-    rhs -= np.einsum("jb,jiab->ia", I31_l1, I7_l1)  # (l1*t2)*(u_t[o, o, v, v])  = s7
+    rhs -= np.einsum(
+        "jb,jiab->ia", I31_l1, I7_l1
+    )  # (l1*t2)*(u_t[o, o, v, v])  = s7
 
     I32_l1 += 2 * np.einsum("iabj->ijab", u_t[o, v, v, o])
     I32_l1 -= np.einsum("iajb->ijab", u_t[o, v, o, v])
@@ -62,7 +63,9 @@ def compute_l_1_amplitudes(
     I36_l1 += np.einsum(
         "kjab,kiab->ij", I20_l1, u_t[o, o, v, v]
     )  # = s10d  Handmade, not generated
-    rhs -= np.einsum("ij,ja->ia", I36_l1, l1)  # l1*u_t*t2) # Handmade, not generatet
+    rhs -= np.einsum(
+        "ij,ja->ia", I36_l1, l1
+    )  # l1*u_t*t2) # Handmade, not generatet
 
     rhs += 2 * np.einsum("ia->ia", f_t[o, v])  # f_t[o, v]
 
