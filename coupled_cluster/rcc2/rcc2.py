@@ -78,6 +78,7 @@ class RCC2(CoupledCluster):
         np = self.np
         o, v = self.o, self.v
 
+        # Singles
         if self.include_singles:
             np.copyto(self.rhs_t_1, self.f[v, o])
             np.divide(self.rhs_t_1, self.d_t_1, out=self.t_1)
@@ -312,38 +313,6 @@ class RCC2(CoupledCluster):
 
     def compute_two_body_density_matrix(self):
         pass
-
-    def compute_dipole_moment(self):
-        """
-        Computes the dipole moment using the one-body lagrangian functional
-        """
-
-        np = self.np
-        o, v = (self.o, self.v)
-
-        dipole_moment_array = self.system.dipole_moment
-        cc2_dipole_moment = np.zeros(3)
-
-        for i in range(3):
-
-            dipole_moment_t1_transformed = self.t1_transform_integrals_one_body(
-                dipole_moment_array[i]
-            )
-
-            cc2_dipole_moment[i] = lagrangian_functional_one_body(
-                dipole_moment_t1_transformed,
-                self.t_1,
-                self.t_2,
-                self.l_1,
-                self.l_2,
-                self.o,
-                self.v,
-                self.np,
-            ).real
-
-            cc2_dipole_moment[i] = cc2_dipole_moment[i] + 2 * np.trace(
-                dipole_moment_t1_transformed[o, o]
-            )
 
     def t1_transform_integrals(self, t_1, h, u):
 

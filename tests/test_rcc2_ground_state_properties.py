@@ -68,7 +68,7 @@ def test_rcc2():
     molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
     basis = "6-31G"
     e_rcc2_psi4 = -7.992515440819747
-    dipole_z_rcc2_psi4 = 2.2634
+    dipole_z_rcc2_psi4 = -2.26335
     e_rcc2, dipole_rcc2 = compute_ground_state_properties(molecule, basis)
 
     np.testing.assert_approx_equal(e_rcc2, e_rcc2_psi4, significant=8)
