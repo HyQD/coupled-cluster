@@ -8,6 +8,7 @@ from coupled_cluster.rcc2 import RCC2, TDRCC2
 from gauss_integrator import GaussIntegrator
 from scipy.integrate import complex_ode
 
+
 class sine_square_laser:
     def __init__(self, F_str, omega, tprime, phase=0):
         self.F_str = F_str
