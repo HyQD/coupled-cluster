@@ -21,7 +21,7 @@ def compute_two_body_density_matrix(t, l, o, v, np, out=None):
 def add_rho_ba(t_1, l_1, o, v, out, np):
     """Function for adding v-v part of the CCS one-body density matrix
 
-        rho^{b}_{a} = l^{i}_{a} t^{b}_{i}
+    rho^{b}_{a} = l^{i}_{a} t^{b}_{i}
     """
 
     out[v, v] += np.dot(t_1, l_1)
@@ -30,7 +30,7 @@ def add_rho_ba(t_1, l_1, o, v, out, np):
 def add_rho_ia(l_1, o, v, out, np):
     """Function for adding the o-v part of the CCS one-body density matrix
 
-        rho^{i}_{a} = l^{i}_{a}
+    rho^{i}_{a} = l^{i}_{a}
     """
 
     out[o, v] += l_1
@@ -39,7 +39,7 @@ def add_rho_ia(l_1, o, v, out, np):
 def add_rho_ai(t_1, l_1, o, v, out, np):
     """Function for adding the v-o part of the CCS one-body density matrix
 
-        rho^{a}_{i} = t^{a}_{i}
+    rho^{a}_{i} = t^{a}_{i}
     """
 
     out[v, o] += t_1
@@ -48,8 +48,8 @@ def add_rho_ai(t_1, l_1, o, v, out, np):
 def add_rho_ji(t_1, l_1, o, v, out, np):
     """Function for adding the o-o part of the CCS one-body density matrix
 
-        rho^{j}_{i} = delta^{i}_{j} - l^{i}_{a} t^{a}_{j}
-            + (0.5) l^{ij}_{ab} t^{ab}_{jk}
+    rho^{j}_{i} = delta^{i}_{j} - l^{i}_{a} t^{a}_{j}
+        + (0.5) l^{ij}_{ab} t^{ab}_{jk}
 
     """
 

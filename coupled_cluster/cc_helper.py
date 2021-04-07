@@ -164,7 +164,7 @@ class AmplitudeContainer:
 
 class OACCVector(AmplitudeContainer):
     """Container for OA amplitudes
-    
+
     This is a container for the amplitudes, t and l, and the orbital
     transformation coefficients C and C_tilde.
 

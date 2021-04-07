@@ -5,7 +5,7 @@ import numpy as np
 from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 
-from coupled_cluster.ccd import OATDCCD, OACCD
+from coupled_cluster.omp2 import OMP2, TDOMP2
 from gauss_integrator import GaussIntegrator
 from scipy.integrate import complex_ode
 
@@ -29,23 +29,23 @@ class LaserPulse:
         )
 
 
-def test_oatdccd_helium():
+def test_tdomp2_helium():
     omega = 2.873_564_3
-    E = 0.1
+    E = 1
     laser_duration = 5
 
     system = construct_pyscf_system_rhf(
-        molecule="he 0.0 0.0 0.0", basis="cc-pvdz", anti_symmetrize=False
+        molecule="he 0.0 0.0 0.0", basis="cc-pvdz"
     )
 
-    oaccd = OACCD(system, verbose=True)
-    oaccd.compute_ground_state()
-    assert abs(oaccd.compute_energy() - -2.887_594_831_090_936) < 1e-6
+    omp2 = OMP2(system, verbose=True)
+    omp2.compute_ground_state()
+    print(f"EOMP2: {omp2.compute_energy().real}")
 
-    oatdccd = OATDCCD(system)
+    tdomp2 = TDOMP2(system)
 
-    r = complex_ode(oatdccd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
-    r.set_initial_value(oaccd.get_amplitudes(get_t_0=True).asarray())
+    r = complex_ode(tdomp2).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(omp2.get_amplitudes(get_t_0=True).asarray())
 
     polarization = np.zeros(3)
     polarization[2] = 1
@@ -56,8 +56,8 @@ def test_oatdccd_helium():
         )
     )
 
-    dt = 1e-3
-    T = 1
+    dt = 1e-2
+    T = 10
     num_steps = int(T // dt) + 1
     t_stop_laser = int(laser_duration // dt) + 1
 
@@ -71,31 +71,26 @@ def test_oatdccd_helium():
     while r.successful() and r.t < T:
         assert abs(time_points[i] - r.t) < dt * 1e-1
 
-        td_energies[i] = oatdccd.compute_energy(r.t, r.y)
-        dip_z[i] = oatdccd.compute_one_body_expectation_value(
-            r.t, r.y, system.position[2]
-        )
+        td_energies[i] = tdomp2.compute_energy(r.t, r.y)
+        # dip_z[i] = oatdccd.compute_one_body_expectation_value(
+        #    r.t, r.y, system.dipole_moment[2]
+        # )
 
         i += 1
         r.integrate(time_points[i])
 
-    td_energies[i] = oatdccd.compute_energy(r.t, r.y)
-    dip_z[i] = oatdccd.compute_one_body_expectation_value(
-        r.t, r.y, system.position[2]
-    )
+    td_energies[i] = tdomp2.compute_energy(r.t, r.y)
 
-    np.testing.assert_allclose(
-        td_energies.real,
-        np.loadtxt(
-            os.path.join("tests", "dat", "tdcisd_helium_energies_real_0.1.dat")
-        ),
-        atol=1e-5,
-    )
 
-    np.testing.assert_allclose(
-        dip_z,
-        np.loadtxt(
-            os.path.join("tests", "dat", "tdcisd_helium_dipole_z_0.1.dat")
-        ),
-        atol=1e-5,
-    )
+#     from matplotlib import pyplot as plt
+#
+#     plt.figure()
+#     plt.subplot(211)
+#     plt.plot(time_points, td_energies.real)
+#     plt.subplot(212)
+#     plt.semilogy(time_points, np.abs(td_energies.imag))
+#     plt.show()
+#
+#
+# if __name__ == "__main__":
+#     test_tdomp2_helium()

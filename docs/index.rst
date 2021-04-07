@@ -17,7 +17,6 @@ many-body quantum mechanical problems, with an emphasis on time-development.
     get_started
     ground_state
     time_development
-    integrators
 
 
 

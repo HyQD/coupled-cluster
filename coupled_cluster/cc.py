@@ -113,6 +113,46 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def compute_t_residuals(self):
         pass
 
+    def compute_one_body_expectation_value(self, mat, make_hermitian=True):
+        r"""Function computing the expectation value of a one-body operator
+        :math:`\hat{A}`.  This is done by evaluating
+
+        .. math:: \langle A \rangle = \rho^{q}_{p} A^{p}_{q},
+
+        where :math:`p, q` are general single-particle indices and
+        :math:`\rho^{q}_{p}` is the one-body density matrix.
+
+        Parameters
+        ----------
+        mat : np.ndarray
+            The one-body operator to evaluate (:math:`\hat{A}`), as a matrix.
+            The dimensionality of the matrix must be the same as the one-body
+            density matrix, i.e., :math:`\mathbb{C}^{l \times l}`, where ``l``
+            is the number of basis functions.
+        make_hermitian : bool
+            Whether or not to make the one-body density matrix Hermitian. This
+            is done by :math:`\tilde{\boldsymbol{\rho}} =
+            \frac{1}{2}(\boldsymbol{\rho}^{\dagger} + \boldsymbol{\rho}), where
+            :math:`\tilde{\boldsymbol{\rho}}` is the Hermitian one-body density
+            matrix. Default is ``make_hermitian=True``.
+
+        Returns
+        -------
+        complex
+            The expectation value of the one-body operator.
+
+        See Also
+        --------
+        CoupledCluster.compute_one_body_density_matrix
+
+        """
+        rho_qp = self.compute_one_body_density_matrix()
+
+        if make_hermitian:
+            rho_qp = 0.5 * (rho_qp.conj().T + rho_qp)
+
+        return self.np.trace(self.np.dot(rho_qp, mat))
+
     def compute_particle_density(self):
         """Computes one-particle density
 
@@ -148,8 +188,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
     def compute_ground_state(
         self, t_args=[], t_kwargs={}, l_args=[], l_kwargs={}
     ):
-        """Compute ground state energy
-        """
+        """Compute ground state energy"""
         self.iterate_t_amplitudes(*t_args, **t_kwargs)
         self.iterate_l_amplitudes(*l_args, **l_kwargs)
 

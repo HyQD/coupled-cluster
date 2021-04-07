@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 from quantum_systems import construct_pyscf_system_rhf
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from coupled_cluster.ccsd.energies import lagrangian_functional
 from coupled_cluster.ccsd import CCSD, TDCCSD
 from gauss_integrator import GaussIntegrator
@@ -238,7 +238,7 @@ def test_tdccsd():
     polarization = np.zeros(3)
     polarization[2] = 1
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             LaserPulse(td=laser_duration, omega=omega, E=E),
             polarization_vector=polarization,
         )
@@ -261,22 +261,18 @@ def test_tdccsd():
         assert abs(time_points[i] - r.t) < dt * 0.1
 
         td_energies[i] = tdccsd.compute_energy(r.t, r.y)
-
-        rho_qp = tdccsd.compute_one_body_density_matrix(r.t, r.y)
-        rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
-        dip_z[i] = np.trace(rho_qp_hermitian @ system.dipole_moment[2]).real
+        dip_z[i] = tdccsd.compute_one_body_expectation_value(
+            r.t, r.y, system.position[2]
+        ).real
         td_overlap[i] = tdccsd.compute_overlap(r.t, y0, r.y)
 
         i += 1
         r.integrate(time_points[i])
 
     td_energies[i] = tdccsd.compute_energy(r.t, r.y)
-
-    rho_qp = tdccsd.compute_one_body_density_matrix(r.t, r.y)
-    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
-    dip_z[i] = np.trace(rho_qp_hermitian @ system.dipole_moment[2]).real
+    dip_z[i] = tdccsd.compute_one_body_expectation_value(
+        r.t, r.y, system.position[2]
+    ).real
     td_overlap[i] = tdccsd.compute_overlap(r.t, y0, r.y)
 
     np.testing.assert_allclose(
@@ -315,7 +311,7 @@ def test_tdccsd_phase():
 
     system = construct_pyscf_system_rhf("he", "cc-pvdz")
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             LaserPulse(E=100, omega=2.8735643, td=5, t0=0),
             polarization_vector=polarization_vector,
         )

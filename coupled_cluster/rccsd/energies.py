@@ -26,9 +26,9 @@ def compute_rccsd_ground_state_energy(f, u, t_1, t_2, o, v, np):
 def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
     """
 
-        f^{i}_{a} t^{a}_{i} 
-        + (0.25) u^{ij}_{ab} t^{ab}_{ij}
-        + (0.5) t^{ij}_{ab} t^{a}_{i} t^{b}_{j}
+    f^{i}_{a} t^{a}_{i}
+    + (0.25) u^{ij}_{ab} t^{ab}_{ij}
+    + (0.5) t^{ij}_{ab} t^{a}_{i} t^{b}_{j}
 
     """
 

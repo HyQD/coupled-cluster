@@ -8,7 +8,7 @@ class OATDCCD_dvr(OATDCCD):
     def __init__(self, system, C=None, C_tilde=None, eps_reg=1e-6):
         """Assumes a system with dvr basis functions, with u saved in a
         sparse.COO-format, and converts it to an internal hacked version with
-        u saved in a 2d numpy array. 
+        u saved in a 2d numpy array.
         """
         assert system._basis_set.u_repr == "2d"
         super().__init__(system, C=C, C_tilde=C_tilde, eps_reg=eps_reg)
@@ -44,7 +44,9 @@ class OATDCCD_dvr(OATDCCD):
         Here a and g are indices in the original basis, while r and s are indicies
         in the new basis
         """
-        return np.einsum("rg,gs,ag->ars", C_tilde, C, u, optimize=True, **kwargs)
+        return np.einsum(
+            "rg,gs,ag->ars", C_tilde, C, u, optimize=True, **kwargs
+        )
 
     @staticmethod
     def contract_W_partially_ket(W_ars, C, C_tilde, np, **kwargs):
@@ -53,11 +55,11 @@ class OATDCCD_dvr(OATDCCD):
         integrals and in the Q-space ket equations
 
         Parameters:
-        W_ars : numpy array 
+        W_ars : numpy array
             shape (l, l_prime, l_prime)
-        C : numpy array 
+        C : numpy array
             shape (l, l_prime)
-        C_tilde : numpy array 
+        C_tilde : numpy array
             shape (l_prime, l)
         out_values : numpy array
             shapes (l, l_prime, l_prime, l_prime)
@@ -71,14 +73,14 @@ class OATDCCD_dvr(OATDCCD):
         index in the bra. For use in the Q-space bra equations
 
         Parameters:
-        W_ars : numpy array 
+        W_ars : numpy array
             shape (l, l_prime, l_prime)
-        C : numpy array 
+        C : numpy array
             shape (l, l_prime)
-        C_tilde : numpy array 
+        C_tilde : numpy array
             shape (l_prime, l)
         out_values : numpy array
-            shapes (l_prime, l_prime, l, l_prime) 
+            shapes (l_prime, l_prime, l, l_prime)
         **kwargs : supports out (see np.einsum)
         """
         return np.einsum("pa,ars->pras", C_tilde, W_ars, **kwargs)

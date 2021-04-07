@@ -17,7 +17,13 @@ def test_one_body_density(zanghellini_system):
     v = zanghellini_system.v
     n = zanghellini_system.n
 
-    t_0, t_1, t_2, l_1, l_2, = zang_ccsd.get_amplitudes(get_t_0=True).unpack()
+    (
+        t_0,
+        t_1,
+        t_2,
+        l_1,
+        l_2,
+    ) = zang_ccsd.get_amplitudes(get_t_0=True).unpack()
 
     rho_qp = np.zeros_like(h)
 
@@ -61,7 +67,13 @@ def test_v_o_term(zanghellini_system):
     t_kwargs = dict(theta=0.8)
     zang_ccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=t_kwargs)
 
-    t_0, t_1, t_2, l_1, l_2, = zang_ccsd.get_amplitudes(get_t_0=True).unpack()
+    (
+        t_0,
+        t_1,
+        t_2,
+        l_1,
+        l_2,
+    ) = zang_ccsd.get_amplitudes(get_t_0=True).unpack()
 
     term_1 = np.tensordot(
         l_1, t_2 - np.einsum("bi, aj -> abij", t_1, t_1), axes=((0, 1), (3, 1))

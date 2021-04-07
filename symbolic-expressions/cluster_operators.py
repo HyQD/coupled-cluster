@@ -14,8 +14,7 @@ import operator
 
 
 def eval_derivative(self, s):
-    """Code created by Simen Kvaal.
-    """
+    """Code created by Simen Kvaal."""
     # For use with Sympy diff()
     if s != self.symbol:
         return S.zero

@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from quantum_systems import construct_pyscf_system_rhf
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from coupled_cluster.ccs.energies import compute_lagrangian_functional
 from coupled_cluster.ccs import CCS, TDCCS
 from gauss_integrator import GaussIntegrator
@@ -112,7 +112,7 @@ def test_tdccs():
     polarization = np.zeros(3)
     polarization[2] = 1
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             LaserPulse(td=laser_duration, omega=omega, E=E),
             polarization_vector=polarization,
         )
@@ -129,12 +129,9 @@ def test_tdccs():
     dip_z = np.zeros(len(time_points))
     td_overlap = np.zeros_like(dip_z)
 
-    rho_qp = tdccs.compute_one_body_density_matrix(r.t, r.y)
-    rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
     td_energies[0] = tdccs.compute_energy(r.t, r.y)
-    dip_z[0] = np.einsum(
-        "qp,pq->", rho_qp_hermitian, system.dipole_moment[2]
+    dip_z[0] = tdccs.compute_one_body_expectation_value(
+        r.t, r.y, system.dipole_moment[2]
     ).real
     td_overlap[0] = tdccs.compute_overlap(r.t, y0, r.y)
 
@@ -144,12 +141,8 @@ def test_tdccs():
         if not r.successful():
             break
         td_energies[i + 1] = tdccs.compute_energy(r.t, r.y)
-
-        rho_qp = tdccs.compute_one_body_density_matrix(r.t, r.y)
-        rho_qp_hermitian = 0.5 * (rho_qp.conj().T + rho_qp)
-
-        dip_z[i + 1] = np.einsum(
-            "qp,pq->", rho_qp_hermitian, system.dipole_moment[2]
+        dip_z[i + 1] = tdccs.compute_one_body_expectation_value(
+            r.t, r.y, system.dipole_moment[2]
         ).real
         td_overlap[i + 1] = tdccs.compute_overlap(r.t, y0, r.y)
 
@@ -190,7 +183,7 @@ def test_tdccs_phase():
 
     system = construct_pyscf_system_rhf("he", "cc-pvdz")
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             LaserPulse(E=100, omega=2.8735643, td=5, t0=0),
             polarization_vector=polarization_vector,
         )

@@ -14,5 +14,4 @@ sphinx-rtd-theme = "*"
 pyscf = "*"
 Sphinx = "*"
 black = "*"
-tdhf = {editable = true,git = "ssh://git@github.com/haakoek/TDHF.git"}
 gauss-integrator = {editable = true,git = "ssh://git@github.com/Schoyen/gauss-integrator.git"}

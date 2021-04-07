@@ -4,10 +4,6 @@ tqdm
 # Install pytest
 pytest
 
-# Install tdhf
-# This is currently not supported as tdhf is a private repo
-git+ssh://git@github.com/haakoek/tdhf.git
-
 # Install sympy for symbolic expressions
 sympy
 
