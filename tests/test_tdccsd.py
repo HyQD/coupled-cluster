@@ -262,7 +262,7 @@ def test_tdccsd():
 
         td_energies[i] = tdccsd.compute_energy(r.t, r.y)
         dip_z[i] = tdccsd.compute_one_body_expectation_value(
-            r.t, r.y, system.dipole_moment[2]
+            r.t, r.y, system.position[2]
         ).real
         td_overlap[i] = tdccsd.compute_overlap(r.t, y0, r.y)
 
@@ -271,7 +271,7 @@ def test_tdccsd():
 
     td_energies[i] = tdccsd.compute_energy(r.t, r.y)
     dip_z[i] = tdccsd.compute_one_body_expectation_value(
-        r.t, r.y, system.dipole_moment[2]
+        r.t, r.y, system.position[2]
     ).real
     td_overlap[i] = tdccsd.compute_overlap(r.t, y0, r.y)
 
