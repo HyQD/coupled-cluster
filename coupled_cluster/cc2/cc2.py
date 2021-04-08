@@ -136,9 +136,31 @@ class CC2(CoupledCluster):
         energy += 0.5 * np.einsum(
             "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
         )
+        
+        
 
         
         return energy + self.compute_reference_energy()
+
+    def compute_reference_energy(self, h, u, o, v, np):
+        r"""Function computing the reference energy in a general spin-orbital
+        system.  This is given by
+
+        .. math:: E_0 = \langle \Phi_0 \rvert \hat{H} \lvert \Phi_0 \rangle
+            = h^{i}_{i} + \frac{1}{2} u^{ij}_{ij},
+
+        where :math:`\lvert \Phi_0 \rangle` is the reference determinant, and
+        :math:`i, j` are occupied indices.
+
+        Returns
+        -------
+        complex
+            The reference energy.
+        """
+
+        return self.np.trace(h[o, o]) + 0.5 * self.np.trace(
+            self.np.trace(u[o, o, o, o], axis1=1, axis2=3)
+        )
 
     def compute_t_amplitudes(self):
         np = self.np
@@ -201,7 +223,6 @@ class CC2(CoupledCluster):
 
         self.t_2 = np.reshape(new_vectors[n_t1:], self.t_2.shape)
         
-
     def compute_l_amplitudes(self):
         np = self.np
 

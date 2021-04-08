@@ -37,282 +37,83 @@ def compute_time_dependent_energy(f, u, t_1, t_2, l_1, l_2, o, v, np):
 
 
 def lagrangian_functional(f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np):
-
-    energy = np.tensordot(f[v, o], l_1, axes=((0, 1), (1, 0))) 
-    #energy += np.tensordot(f[o, v], t_1, axes=((0, 1), (1, 0))) 
-
-    #term = 0
-    #term = np.tensordot(f[v, v], l_1, axes=((0), (1)))  
-    #energy += np.tensordot(term, t_1, axes=((0, 1), (0, 1))) 
    
-    term = 0
-    term = np.tensordot(l_1, t_2, axes=((0, 1), (3, 1)))  
-    energy += np.tensordot(f[o, v], term, axes=((0, 1), (1, 0))) 
+    energy = np.tensordot(f_transform[v, o], l_1, axes=((0, 1), (1, 0)))         #Stays the same
 
-    term = 0
+    term = np.tensordot(l_1, t_2, axes=((0, 1), (3, 1)))  # ai
+    energy += np.tensordot(f_transform[o, v], term, axes=((0, 1), (1, 0)))       #Stays the same
+
     term = (0.5) * np.tensordot(
-        t_2, u[o, o, v, o], axes=((1, 2, 3), (2, 0, 1))
+        t_2, u_transform[o, o, v, o], axes=((1, 2, 3), (2, 0, 1))
     )  # ai
-    energy += np.tensordot(l_1, term, axes=((0, 1), (1, 0))) 
-    
-    term = 0
+    energy += np.tensordot(l_1, term, axes=((0, 1), (1, 0)))                     #Stays the same
+ 
     term = (0.5) * np.tensordot(l_1, t_2, axes=((0), (2)))  # abcj
     energy += np.tensordot(
-        term, u[v, o, v, v], axes=((0, 1, 2, 3), (0, 2, 3, 1)) 
-    )
-    #term = 0
-    #term = (0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijbk
-    #energy += np.tensordot(
-    #    term, u[v, o, o, o], axes=((0, 1, 2, 3), (2, 3, 0, 1)) 
-    #)
-    #term = 0
-    #term = (0.5) * np.tensordot(l_2, t_1, axes=((0), (1)))  # jabc
-    #energy += np.tensordot(
-    #    term, u[v, v, v, o], axes=((0, 1, 2, 3), (3, 0, 1, 2)) 
-    #)
- 
-    #term = 0
-    #term = (-1) * np.tensordot(f[o, o], l_1, axes=((1), (0)))  # ja
-    #energy += np.tensordot(term, t_1, axes=((0, 1), (1, 0))) 
-    
-    #term = (-1) * np.tensordot(t_1, u[v, o, v, o], axes=((0, 1), (2, 1)))  # ai
-    #energy += np.tensordot(l_1, term, axes=((0, 1), (1, 0))) 
-
-    #term = 0
-    #term = (-0.5) * np.tensordot(
-    #    t_1, u[o, o, v, v], axes=((0, 1), (3, 0))
-    #)  # ja
-    #energy += np.tensordot(t_1, term, axes=((0, 1), (1, 0))) 
-
-    #term = 0
-    #term = np.tensordot(t_1, u[o, o, v, o], axes=((0, 1), (2, 1)))  # ji 
-    #term = np.tensordot(t_1, term, axes=((1), (0)))  # ai
-    #energy += np.tensordot(l_1, term, axes=((0, 1), (1, 0))) 
-   
-    #term = 0
-    #term = np.tensordot(t_1, u[v, o, v, v], axes=((0, 1), (3, 1)))  # ab
-    #term = np.tensordot(t_1, term, axes=((0), (1)))  # ia
-    #energy += np.tensordot(l_1, term, axes=((0, 1), (0, 1)))
-   
-    #term = 0
-    term = np.tensordot(t_2, u[o, o, v, v], axes=((1, 3), (3, 1)))  # aijb
-    #term = np.tensordot(t_1, term, axes=((0, 1), (3, 2)))  # ai
-    energy += np.tensordot(l_1, term, axes=((0, 1), (1, 0))) 
-   
-    #term = 0 
-    #term = np.tensordot(l_2, t_1, axes=((2), (0)))  # ijbk
-    #term = np.tensordot(term, t_1, axes=((0), (1)))  # jbkc
-    #energy += np.tensordot(
-    #    term, u[v, o, v, o], axes=((0, 1, 2, 3), (3, 0, 1, 2)) 
-    #)
-
-   # term = 0
-    #term = (-1) * np.tensordot(l_1, t_1, axes=((0), (1)))  # ba 
-    #term = np.tensordot(f[o, v], term, axes=((1), (1)))  # ib
-    #energy += np.tensordot(term, t_1, axes=((0, 1), (1, 0))) 
-    
-    #term = 0
-    #term = (-1) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijbk
-    #term = np.tensordot(term, t_2, axes=((0, 2), (2, 0)))  # jkcl
-    #energy += np.tensordot(
-    #    term, u[o, o, v, o], axes=((0, 1, 2, 3), (3, 0, 2, 1))
-    #)
-    #term = 0
-    #term = (-1) * np.tensordot(l_2, t_1, axes=((0), (1)))  # jabc
-    #term = np.tensordot(term, t_2, axes=((0, 1), (2, 0)))  # bcdk
-    #energy += np.tensordot(
-    #    term, u[v, o, v, v], axes=((0, 1, 2, 3), (0, 2, 3, 1))
-    #)
-
-    #term = 0
-    #term = (-0.5) * np.tensordot(l_2, t_1, axes=((0), (1)))  # kbca
-    #term = np.tensordot(f[o, v], term, axes=((1), (3)))  # ikbc
-    #energy += np.tensordot(term, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))) 
-    
-    #term = 0
-    #term = (-0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # jkci
-    #term = np.tensordot(f[o, v], term, axes=((0), (3)))  # ajkc
-    #energy += np.tensordot(term, t_2, axes=((0, 1, 2, 3), (0, 2, 3, 1)))
-    
-    #term = 0
-    #term = (-0.5) * np.tensordot(l_1, t_1, axes=((1), (0)))  # ij
-    #term = np.tensordot(term, t_2, axes=((0), (2)))  # jbck
-    #energy += np.tensordot(
-    #    term, u[o, o, v, v], axes=((0, 1, 2, 3), (0, 2, 3, 1)) 
-    #)
+        term, u_transform[v, o, v, v], axes=((0, 1, 2, 3), (0, 2, 3, 1))         #Stays the same
   
-    #term = 0 
-    #term = (-0.5) * np.tensordot(l_1, t_1, axes=((0), (1)))  # ab
-    #term = np.tensordot(term, t_2, axes=((0), (0)))  # bcjk
-    #energy += np.tensordot(
-    #    term, u[o, o, v, v], axes=((0, 1, 2, 3), (2, 3, 0, 1)) 
-    #)
-  
-    #term = 0
-    #term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 2, 3), (2, 0, 1)))  # jl
-    #term = np.tensordot(term, u[o, o, v, o], axes=((0, 1), (3, 1)))  # kc
-    #energy += np.tensordot(t_1, term, axes=((0, 1), (1, 0)))
-    
-    #term = 0
-    #term = (-0.5) * np.tensordot(l_2, t_2, axes=((0, 1, 2), (2, 3, 0)))  # bd
-    #term = np.tensordot(term, u[v, o, v, v], axes=((0, 1), (0, 3)))  # kc
-    #energy += np.tensordot(t_1, term, axes=((0, 1), (1, 0)))
- 
-    #term = 0
-    #term = (-0.25) * np.tensordot(t_1, u[o, o, o, o], axes=((1), (0)))  # blij
-    #term = np.tensordot(t_1, term, axes=((1), (1)))  # abij
-    #energy += np.tensordot(l_2, term, axes=((0, 1, 2, 3), (2, 3, 0, 1))) 
-   
-    #term = 0
-    #term = (-0.25) * np.tensordot(t_1, u[v, v, v, v], axes=((0), (3)))  # iabc
-    #term = np.tensordot(t_1, term, axes=((0), (3)))  # jiab
-    #energy += np.tensordot(l_2, term, axes=((0, 1, 2, 3), (1, 0, 2, 3))) 
-   
-    #term = 0
-    term = (0.25) * np.tensordot(
-        t_2, u[v, o, v, v], axes=((0, 1), (2, 3))
-    )  # ijbk
-    #term = np.tensordot(t_1, term, axes=((1), (3)))  # aijb
-    energy += np.tensordot(l_2, term, axes=((0, 1, 2, 3), (1, 2, 0, 3)))
-   
-    #term = 0
-    term = (0.25) * np.tensordot(
-        t_2, u[o, o, v, o], axes=((2, 3), (0, 1))
-    )  # abcj
-    #term = np.tensordot(t_1, term, axes=((0), (2)))  # iabj
-    energy += np.tensordot(l_2, term, axes=((0, 1, 2, 3), (0, 3, 1, 2)))
 
-    #term = 0
-    #term = (-1) * np.tensordot(t_1, u[o, o, v, v], axes=((0), (3)))  # ijkb
-    #term = np.tensordot(t_1, term, axes=((0, 1), (3, 1)))  # ik
-    #term = np.tensordot(t_1, term, axes=((1), (1)))  # ai
-    #energy += np.tensordot(l_1, term, axes=((0, 1), (1, 0))) 
-   
-    term = 0
-    term = (-1) * np.tensordot(
-        t_2, u[o, o, v, v], axes=((1, 3), (3, 1))
-    )  # bjkc
-    #term = np.tensordot(t_1, term, axes=((0), (3)))  # ibjk
-    #term = np.tensordot(t_1, term, axes=((1), (3)))  # aibj
-    energy += np.tensordot(l_2, term, axes=((0, 1, 2, 3), (1, 3, 0, 2)))
-    
-    term = 0
-    #term = (-0.5) * np.tensordot(t_1, u[v, o, v, v], axes=((0), (3)))  # ibkc
-    #term = np.tensordot(t_1, term, axes=((0), (3)))  # jibk
-    #term = np.tensordot(t_1, term, axes=((1), (3)))  # ajib
-    energy += np.tensordot(l_2, term, axes=((0, 1, 2, 3), (2, 1, 0, 3))) 
-   
-    term = 0
-    #term = (-0.5) * np.tensordot(
-    #    t_1, u[o, o, v, v], axes=((0, 1), (2, 1))
-    #)  # kd
-    #term = np.tensordot(t_1, term, axes=((1), (0)))  # ad
-    term = np.tensordot(l_2, term, axes=((2), (0)))  # ijbd
-    energy += np.tensordot(term, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
-   
-    #term = 0
-    #term = (-0.5) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijbl
-    #term = np.tensordot(term, t_1, axes=((2), (0)))  # ijlk
-    #term = np.tensordot(term, t_1, axes=((0), (1)))  # jlkc
-    #energy += np.tensordot(
-    #    term, u[o, o, v, o], axes=((0, 1, 2, 3), (3, 1, 0, 2)) 
-    #)
-    #term = 0
-    #term = (-0.5) * np.tensordot(l_2, t_1, axes=((0), (1)))  # jabc
-    #term = np.tensordot(term, t_2, axes=((0, 1, 2), (2, 0, 1)))  # cl
-    #term = np.tensordot(term, u[o, o, v, v], axes=((0, 1), (2, 1)))  # kd
-    #energy += np.tensordot(t_1, term, axes=((0, 1), (1, 0)))
-   
-    # term = 0
-    #term = (-0.125) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijbl
-    #term = np.tensordot(term, t_1, axes=((2), (0)))  # ijlk
-    #term = np.tensordot(term, t_2, axes=((0, 1), (2, 3)))  # lkcd
-    #energy += np.tensordot(
-    #    term, u[o, o, v, v], axes=((0, 1, 2, 3), (1, 0, 2, 3))
-    #)
-    #term = 0
-    #term = (-0.125) * np.tensordot(l_2, t_1, axes=((1), (1)))  # iabc
-    #term = np.tensordot(term, t_1, axes=((0), (1)))  # abcd
-    #term = np.tensordot(term, t_2, axes=((0, 1), (0, 1)))  # cdkl
-    #energy += np.tensordot(
-    #    term, u[o, o, v, v], axes=((0, 1, 2, 3), (2, 3, 0, 1))
-    #)
-    
-    #term = 0
-    #term = (0.25) * np.tensordot(l_2, t_1, axes=((2), (0)))  # ijbl
-    #term = np.tensordot(term, t_1, axes=((2), (0)))  # ijlk
-    #term = np.tensordot(term, t_1, axes=((1), (1)))  # ilkc
-    #term = np.tensordot(term, t_1, axes=((0), (1)))  # lkcd
-    #energy += np.tensordot(
-    #    term, u[o, o, v, v], axes=((0, 1, 2, 3), (1, 0, 2, 3))
-    #)
-
-    ##############################################################################
-    ##############################################################################
     ##########################         CCD        ################################
-    ##############################################################################
-    ##############################################################################
 
     energy += 0.25 * np.tensordot(
-        l_2, u[v, v, o, o], axes=((0, 1, 2, 3), (2, 3, 0, 1)) 
+        l_2, u_transform[v, v, o, o], axes=((0, 1, 2, 3), (2, 3, 0, 1)) #l2*u
     )
 
     energy += 0.25 * np.tensordot(
-        t_2, u[o, o, v, v], axes=((0, 1, 2, 3), (2, 3, 0, 1)) 
+        t_2, u_transform[o, o, v, v], axes=((0, 1, 2, 3), (2, 3, 0, 1)) #l2*u 
     )
 
     temp_ldem = np.tensordot(l_2, t_2, axes=((1, 3), (2, 1)))
     energy += np.tensordot(
-        temp_ldem, u[v, o, v, o], axes=((0, 1, 2, 3), (3, 0, 2, 1))
+        temp_ldem, u[v, o, v, o], axes=((0, 1, 2, 3), (3, 0, 2, 1))   #u*t2*l2
     )
 
     temp_dckl = 0.5 * np.tensordot(t_2, f[o, o], axes=((3), (0)))
-    energy += np.tensordot(l_2, temp_dckl, axes=((0, 1, 2, 3), (3, 2, 0, 1))) 
+    energy += np.tensordot(l_2, temp_dckl, axes=((0, 1, 2, 3), (3, 2, 0, 1))) #f*t2*l2 Stays
 
 
     temp_dclk = 0.5 * np.tensordot(f[v, v], t_2, axes=((1), (0)))
     
-    energy += np.tensordot(temp_dclk, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))) 
-    energy += np.tensordot(temp_dclk, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))) 
+    energy += np.tensordot(temp_dclk, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))) #f*t2*l2 Stays
+    energy += np.tensordot(temp_dclk, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))) #f*t2*l2 Stays
 
-    temp_dclk = 0.125 * np.tensordot(u[v, v, v, v], t_2, axes=((2, 3), (0, 1)))
-    energy += np.tensordot(temp_dclk, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+    temp_dclk = 0.125 * np.tensordot(u[v, v, v, v], t_2, axes=((2, 3), (0, 1))) 
+  #  energy += np.tensordot(temp_dclk, l_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))) #u*t2*l2
 
     temp_clnf = 0.5 * np.tensordot(t_2, u[o, o, v, v], axes=((0, 3), (2, 0)))
     temp_kdnf = np.tensordot(l_2, temp_clnf, axes=((0, 3), (1, 0)))
-    energy += np.tensordot(t_2, temp_kdnf, axes=((0, 1, 2, 3), (1, 3, 0, 2)))
+  #  energy += np.tensordot(t_2, temp_kdnf, axes=((0, 1, 2, 3), (1, 3, 0, 2))) #u*t2*l2*t2  Maybe
 
 
     temp_cf = -0.25 * np.tensordot(
         t_2, u[o, o, v, v], axes=((0, 2, 3), (2, 0, 1))
     )
     temp_lkdf = np.tensordot(l_2, temp_cf, axes=((3), (0)))
-    energy += np.tensordot(temp_lkdf, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
-     np.testing.assert_allclose(result, energy)
+  #  energy += np.tensordot(temp_lkdf, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))) #t2*u*l2*t2 Maybe
 
     temp_ln = -0.125 * np.tensordot(
         t_2, u[o, o, v, v], axes=((0, 1, 3), (2, 3, 0))
     )
     temp_dckl = np.tensordot(t_2, temp_ln, axes=((3), (1)))
-    energy += np.tensordot(l_2, temp_dckl, axes=((0, 1, 2, 3), (3, 2, 0, 1)))
+  #  energy += np.tensordot(l_2, temp_dckl, axes=((0, 1, 2, 3), (3, 2, 0, 1))) #t2*u*t2*l2 Maybe
 
-    temp_km = -0.125 * np.tensordot(l_2, t_2, axes=((0, 2, 3), (2, 0, 1)))
+    temp_km = -0.125 * np.tensordot(l_2, t_2, axes=((0, 2, 3), (2, 0, 1))) 
     temp_knef = np.tensordot(temp_km, u[o, o, v, v], axes=((1), (0)))
-    energy += np.tensordot(temp_knef, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1)))
+  #  energy += np.tensordot(temp_knef, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))) #l2*t2*u*t2 Maybe
 
     if o.stop >= v.stop // 2:
         temp_dcef = 0.0625 * np.tensordot(
             t_2, u[o, o, v, v], axes=((2, 3), (0, 1))
         )
         temp_efdc = np.tensordot(t_2, l_2, axes=((2, 3), (0, 1)))
-        energy += np.tensordot(
-            temp_efdc, temp_dcef, axes=((0, 1, 2, 3), (2, 3, 0, 1))
-        )
+  #      energy += np.tensordot(
+  #          temp_efdc, temp_dcef, axes=((0, 1, 2, 3), (2, 3, 0, 1)) #l2*t2*u
+  #      )
     else:
         temp_lkmn = 0.0625 * np.tensordot(l_2, t_2, axes=((2, 3), (0, 1)))
         temp_mnlk = np.tensordot(u[o, o, v, v], t_2, axes=((2, 3), (0, 1)))
-        energy += np.tensordot(
-            temp_lkmn, temp_mnlk, axes=((0, 1, 2, 3), (2, 3, 0, 1))
-        )
+ #       energy += np.tensordot(
+ #           temp_lkmn, temp_mnlk, axes=((0, 1, 2, 3), (2, 3, 0, 1)) #l2*t2*u
+ #       )
 
     return energy
