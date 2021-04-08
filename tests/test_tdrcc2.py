@@ -6,8 +6,8 @@ from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from coupled_cluster.rcc2 import RCC2, TDRCC2
 from gauss_integrator import GaussIntegrator
-from tdhf import HartreeFock, TimeDependentHartreeFock
 from scipy.integrate import complex_ode
+
 
 class sine_square_laser:
     def __init__(self, F_str, omega, tprime, phase=0):
@@ -58,7 +58,7 @@ def test_tdrcc2():
     tfinal = np.floor(tprime) + time_after_pulse
 
     system.set_time_evolution_operator(
-        LaserField(
+        DipoleFieldInteraction(
             sine_square_laser(
                 F_str=F_str, omega=omega, tprime=tprime, phase=phase
             ),

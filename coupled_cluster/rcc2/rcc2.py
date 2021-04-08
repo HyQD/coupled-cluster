@@ -344,7 +344,7 @@ class RCC2(CoupledCluster):
         tot = self.m + self.n
 
         t_1 = self.t_1
-        t1_t = self.np.zeros((tot, tot))
+        t1_t = self.np.zeros((tot, tot), dtype=t_1.dtype)
         t1_t[self.n : self.n + t_1.shape[0], 0 : t_1.shape[1]] = t_1
 
         x_transform = np.eye(tot) - t1_t
