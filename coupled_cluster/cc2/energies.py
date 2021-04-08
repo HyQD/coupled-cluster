@@ -50,7 +50,7 @@ def lagrangian_functional(f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v,
  
     term = (0.5) * np.tensordot(l_1, t_2, axes=((0), (2)))  # abcj
     energy += np.tensordot(
-        term, u_transform[v, o, v, v], axes=((0, 1, 2, 3), (0, 2, 3, 1))         #Stays the same
+        term, u_transform[v, o, v, v], axes=((0, 1, 2, 3), (0, 2, 3, 1)))         #Stays the same
   
 
     ##########################         CCD        ################################
