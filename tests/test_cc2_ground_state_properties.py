@@ -20,7 +20,7 @@ def compute_ground_state_properties(molecule, basis):
     e_nuc = system.nuclear_repulsion_energy
 
     cc2 = CC2(system, mixer=DIIS, verbose=False)
-    
+
     conv_tol = 1e-14
     t_kwargs = dict(tol=conv_tol)
     l_kwargs = dict(tol=conv_tol)
@@ -31,23 +31,27 @@ def compute_ground_state_properties(molecule, basis):
     """
     Tests the lagrangian functional by calculating the ground state energy
     """
-    h_transform, f_transform, u_transform = cc2.t1_transform_integrals(cc2.t_1, cc2.h, cc2.u)
+    h_transform, f_transform, u_transform = cc2.t1_transform_integrals(
+        cc2.t_1, cc2.h, cc2.u
+    )
 
     e_ref_lagrangian = cc2.compute_reference_energy(
-            h_transform, u_transform, cc2.o, cc2.v, cc2.np
-        )
-   
-    energy_lagrangian = lagrangian_functional(cc2.f, 
+        h_transform, u_transform, cc2.o, cc2.v, cc2.np
+    )
+
+    energy_lagrangian = lagrangian_functional(
+        cc2.f,
         f_transform,
-        u_transform, 
-        cc2.t_1, 
-        cc2.t_2, 
+        u_transform,
+        cc2.t_1,
+        cc2.t_2,
         cc2.l_1,
-        cc2.l_2, 
-        cc2.o, 
-        cc2.v, 
-        np,).real
-   
+        cc2.l_2,
+        cc2.o,
+        cc2.v,
+        np,
+    ).real
+
     e_lagrangian_test = e_ref_lagrangian + energy_lagrangian + e_nuc
 
     """
@@ -91,14 +95,17 @@ def test_cc2():
     basis = "6-31G"
     e_cc2_psi4 = -7.992515440819747
     dipole_z_cc2_psi4 = -2.26335
-  
-    e_cc2, dipole_cc2, e_lagrangian_test = compute_ground_state_properties(molecule, basis)
+
+    e_cc2, dipole_cc2, e_lagrangian_test = compute_ground_state_properties(
+        molecule, basis
+    )
 
     np.testing.assert_approx_equal(e_cc2, e_cc2_psi4, significant=8)
     np.testing.assert_approx_equal(
         dipole_cc2[2], dipole_z_cc2_psi4, significant=4
     )
     np.testing.assert_approx_equal(e_lagrangian_test, e_cc2_psi4, significant=8)
+
 
 if __name__ == "__main__":
     test_cc2()

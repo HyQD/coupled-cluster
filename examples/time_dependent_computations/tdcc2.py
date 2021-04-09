@@ -15,6 +15,7 @@ from scipy.integrate import complex_ode
 
 from coupled_cluster.mix import DIIS, AlphaMixer
 
+
 class sine_square_laser:
     def __init__(self, F_str, omega, tprime, phase=0):
         self.F_str = F_str
@@ -33,6 +34,7 @@ class sine_square_laser:
         #        print("pulse ", pulse)
         return pulse
 
+
 molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
 basis = "6-31G"
 system = construct_pyscf_system_rhf(
@@ -48,11 +50,9 @@ conv_tol = 1e-14
 cc2 = CC2(system, mixer=AlphaMixer, verbose=False)
 t_kwargs = dict(tol=conv_tol, theta=0)
 l_kwargs = dict(tol=conv_tol, theta=0)
- 
-cc2.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
-print("Ground state energy: {0}".format(cc2.compute_energy())
 
-)
+cc2.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
+print("Ground state energy: {0}".format(cc2.compute_energy()))
 F_str = 0.10
 omega = 0.2
 t_cycle = 2 * np.pi / omega
@@ -117,12 +117,10 @@ auto_corr[0] = tdcc2.compute_overlap(r.t, y0, r.y)
 reference_weight[0] = (
     0.5 * np.exp(tau0[0])
     + 0.5
-    * (
-        np.exp(-tau0[0]) * tdcc2.compute_left_reference_overlap(r.t, r.y)
-    ).conj()
+    * (np.exp(-tau0[0]) * tdcc2.compute_left_reference_overlap(r.t, r.y)).conj()
 )
 
-for i, _t in tqdm.tqdm(enumerate(time_points[:-1])):     
+for i, _t in tqdm.tqdm(enumerate(time_points[:-1])):
     r.integrate(r.t + dt)
     if not r.successful():
         break

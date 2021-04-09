@@ -13,12 +13,12 @@ system = construct_pyscf_system_rhf(
     add_spin=True,
     anti_symmetrize=True,
 )
- 
+
 conv_tol = 1e-14
 cc2 = CC2(system, mixer=DIIS, verbose=False)
 t_kwargs = dict(tol=conv_tol)
 l_kwargs = dict(tol=conv_tol)
- 
+
 cc2.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
 print("Ground state energy: {0}".format(cc2.compute_energy()))
 dm1 = cc2.compute_one_body_density_matrix()

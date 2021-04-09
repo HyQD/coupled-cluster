@@ -36,12 +36,12 @@ class CC2(CoupledCluster):
 
     def __init__(self, system, include_singles=True, **kwargs):
         super().__init__(system, **kwargs)
- 
-        np = self.np  
+
+        np = self.np
         n, m = self.n, self.m
-       
+
         self.include_singles = include_singles
-        
+
         # Singles
         self.rhs_t_1 = np.zeros((m, n), dtype=self.u.dtype)  # ai
         self.rhs_l_1 = np.zeros((n, m), dtype=self.u.dtype)  # ia
@@ -136,7 +136,7 @@ class CC2(CoupledCluster):
         energy += 0.5 * np.einsum(
             "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
         )
-        
+
         return energy + self.system.compute_reference_energy()
 
     def compute_reference_energy(self, h, u, o, v, np):
@@ -166,7 +166,11 @@ class CC2(CoupledCluster):
         direction_vector = np.array([], dtype=self.u.dtype)
         error_vector = np.array([], dtype=self.u.dtype)
 
-        self.h_transform, self.f_transform, self.u_transform = self.t1_transform_integrals(self.t_1, self.system.h, self.system.u)
+        (
+            self.h_transform,
+            self.f_transform,
+            self.u_transform,
+        ) = self.t1_transform_integrals(self.t_1, self.system.h, self.system.u)
 
         # Singles
         if self.include_singles:
@@ -219,7 +223,7 @@ class CC2(CoupledCluster):
             self.t_1 = np.reshape(new_vectors[:n_t1], self.t_1.shape)
 
         self.t_2 = np.reshape(new_vectors[n_t1:], self.t_2.shape)
-        
+
     def compute_l_amplitudes(self):
         np = self.np
 
@@ -280,7 +284,6 @@ class CC2(CoupledCluster):
         if self.include_singles:
             n_l1 = self.m * self.n
             self.l_1 = np.reshape(new_vectors[:n_l1], self.l_1.shape)
-            
 
         self.l_2 = np.reshape(new_vectors[n_l1:], self.l_2.shape)
 
@@ -302,20 +305,20 @@ class CC2(CoupledCluster):
         pass
 
     def t1_transform_integrals(self, t_1, h, u):
-         
+
         np = self.np
 
         tot = self.m + self.n
-      
-        t1_t = self.np.zeros((tot,tot),dtype=t_1.dtype)        
-        t1_t[self.n:self.n+t_1.shape[0],0:t_1.shape[1]]= t_1 
+
+        t1_t = self.np.zeros((tot, tot), dtype=t_1.dtype)
+        t1_t[self.n : self.n + t_1.shape[0], 0 : t_1.shape[1]] = t_1
 
         x_transform = np.eye(tot) - t1_t
-        y_transform = np.eye(tot) + t1_t.T 
-        
+        y_transform = np.eye(tot) + t1_t.T
+
         C_tilde = x_transform
         C = y_transform.T
-       
+
         h_transform = self.system.transform_one_body_elements(h, C, C_tilde)
         u_transform = self.system.transform_two_body_elements(u, C, C_tilde)
 
@@ -323,7 +326,7 @@ class CC2(CoupledCluster):
             h_transform, u_transform
         )
 
-        return h_transform, f_transform, u_transform 
+        return h_transform, f_transform, u_transform
 
     def t1_transform_integrals_one_body(self, dipole):
 

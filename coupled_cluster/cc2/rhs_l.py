@@ -1,30 +1,30 @@
 def compute_l_1_amplitudes(f, f_t, u_t, t_1, t_2, l_1, l_2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(l_1)
-    
-    add_s1_l(f_t, o, v, out, np=np)                  
-    add_s2a_l(f_t, l_1, o, v, out, np=np)       
-    add_s2b_l(f_t, l_1, o, v, out, np=np)          
-    add_s3a_l(u_t, l_1, o, v, out, np=np)            
-    add_s4a_l(u_t, l_2, o, v, out, np=np)        
-    add_s4b_l(u_t, l_2, o, v, out, np=np)    
-    add_s7_l(u_t, l_1, t_2, o, v, out, np=np)      
-    add_s10c_l(u_t, l_1, t_2, o, v, out, np=np)    
-    add_s10d_l(u_t, l_1, t_2, o, v, out, np=np) 
-    
+
+    add_s1_l(f_t, o, v, out, np=np)
+    add_s2a_l(f_t, l_1, o, v, out, np=np)
+    add_s2b_l(f_t, l_1, o, v, out, np=np)
+    add_s3a_l(u_t, l_1, o, v, out, np=np)
+    add_s4a_l(u_t, l_2, o, v, out, np=np)
+    add_s4b_l(u_t, l_2, o, v, out, np=np)
+    add_s7_l(u_t, l_1, t_2, o, v, out, np=np)
+    add_s10c_l(u_t, l_1, t_2, o, v, out, np=np)
+    add_s10d_l(u_t, l_1, t_2, o, v, out, np=np)
+
     return out
 
 
 def compute_l_2_amplitudes(f, f_t, u_t, t_1, t_2, l_1, l_2, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(l_2)
-        
-    add_d1_l(u_t, o, v, out, np=np) 
-    add_d2c_l(f, l_2, o, v, out, np=np) 
-    add_d2d_l(f, l_2, o, v, out, np=np) 
-    add_d5a_l(u_t, l_1, o, v, out, np=np)  
-    add_d5b_l(u_t, l_1, o, v, out, np=np) 
-    add_d7a_l(f_t, l_1, o, v, out, np=np) 
+
+    add_d1_l(u_t, o, v, out, np=np)
+    add_d2c_l(f, l_2, o, v, out, np=np)
+    add_d2d_l(f, l_2, o, v, out, np=np)
+    add_d5a_l(u_t, l_1, o, v, out, np=np)
+    add_d5b_l(u_t, l_1, o, v, out, np=np)
+    add_d7a_l(f_t, l_1, o, v, out, np=np)
 
     return out
 

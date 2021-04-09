@@ -7,7 +7,9 @@
 import coupled_cluster.ccd.rhs_t as ccd_t
 
 
-def compute_t_1_amplitudes(f, f_transformed, u_transformed, t_1, t_2, o, v, np, out=None):
+def compute_t_1_amplitudes(
+    f, f_transformed, u_transformed, t_1, t_2, o, v, np, out=None
+):
 
     if out is None:
         out = np.zeros_like(t_1)
@@ -16,20 +18,24 @@ def compute_t_1_amplitudes(f, f_transformed, u_transformed, t_1, t_2, o, v, np, 
     add_s2a_t(f_transformed, t_2, o, v, out, np=np)
     add_s2b_t(u_transformed, t_2, o, v, out, np=np)
     add_s2c_t(u_transformed, t_2, o, v, out, np=np)
-      
+
     return out
 
-def compute_t_2_amplitudes(f, f_transformed, u_transformed, t_1, t_2, o, v, np, out=None):
+
+def compute_t_2_amplitudes(
+    f, f_transformed, u_transformed, t_1, t_2, o, v, np, out=None
+):
 
     if out is None:
         out = np.zeros_like(t_2)
-        
+
     add_d1_t(u_transformed, o, v, out, np=np)
     add_d2a_t(f, t_2, o, v, out, np=np)
-    add_d2b_t(f, t_2, o, v, out, np=np)    
-    
+    add_d2b_t(f, t_2, o, v, out, np=np)
+
     return out
-    
+
+
 def add_s1_t(f, o, v, out, np):
     """Function adding the S1 diagram
 
