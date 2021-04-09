@@ -29,9 +29,9 @@ def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
     return energy
 
 
-def compute_time_dependent_energy(f, u, t_1, t_2, l_1, l_2, o, v, np):
-    energy = compute_reference_energy(f, u, o, v, np=np)
-    energy += lagrangian_functional(f, u, t_1, t_2, l_1, l_2, o, v, np=np)
+def compute_time_dependent_energy(f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np):
+#    energy = compute_reference_energy(f, u, o, v, np=np)
+    energy = lagrangian_functional(f,f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np=np)
 
     return energy
 
