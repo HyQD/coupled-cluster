@@ -1,8 +1,6 @@
 import numpy as np
-import sys
-sys.path.insert(1,"/Users/benedicteofstad/Programs_git/coupled-cluster/")
 from quantum_systems import construct_pyscf_system_rhf
-from coupled_cluster.mix import DIIS, AlphaMixer
+from coupled_cluster.mix import DIIS
 from coupled_cluster.cc2 import CC2
 
 molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
@@ -17,9 +15,9 @@ system = construct_pyscf_system_rhf(
 )
  
 conv_tol = 1e-14
-cc2 = CC2(system, mixer=AlphaMixer, verbose=False)
-t_kwargs = dict(tol=conv_tol, theta=0)
-l_kwargs = dict(tol=conv_tol, theta=0)
+cc2 = CC2(system, mixer=DIIS, verbose=False)
+t_kwargs = dict(tol=conv_tol)
+l_kwargs = dict(tol=conv_tol)
  
 cc2.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
 print("Ground state energy: {0}".format(cc2.compute_energy()))
