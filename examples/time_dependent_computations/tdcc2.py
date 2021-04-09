@@ -8,23 +8,12 @@ import os
 
 from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import DipoleFieldInteraction
-from coupled_cluster.rcc2 import RCC2, TDRCC2
+from coupled_cluster.cc2 import CC2, TDCC2
 from gauss_integrator import GaussIntegrator
 from tdhf import HartreeFock, TimeDependentHartreeFock
 from scipy.integrate import complex_ode
 
 from coupled_cluster.mix import DIIS, AlphaMixer
-
-np.set_printoptions(
-    edgeitems=3,
-    infstr="inf",
-    linewidth=75,
-    nanstr="nan",
-    precision=8,
-    suppress=False,
-    threshold=1000,
-    formatter=None,
-)
 
 
 class sine_square_laser:
@@ -47,16 +36,23 @@ class sine_square_laser:
 
 
 molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
-
 basis = "6-31G"
 system = construct_pyscf_system_rhf(
     molecule,
     basis=basis,
     np=np,
     verbose=False,
-    add_spin=False,
-    anti_symmetrize=False,
+    add_spin=True,
+    anti_symmetrize=True,
 )
+
+conv_tol = 1e-14
+cc2 = CC2(system, mixer=AlphaMixer, verbose=False)
+t_kwargs = dict(tol=conv_tol, theta=0)
+l_kwargs = dict(tol=conv_tol, theta=0)
+
+cc2.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
+print("Ground state energy: {0}".format(cc2.compute_energy()))
 F_str = 0.10
 omega = 0.2
 t_cycle = 2 * np.pi / omega
@@ -67,7 +63,7 @@ polarization = np.zeros(3)
 polarization_direction = 2
 polarization[polarization_direction] = 1
 
-time_after_pulse = 1000
+time_after_pulse = 100
 tfinal = np.floor(tprime) + time_after_pulse
 
 system.set_time_evolution_operator(
@@ -80,22 +76,13 @@ system.set_time_evolution_operator(
 dt = 1e-1
 
 cc_kwargs = dict(verbose=False)
-rccsd = RCC2(system, verbose=True)
-
-ground_state_tolerance = 1e-12
-rccsd.compute_ground_state(
-    t_kwargs=dict(tol=ground_state_tolerance),
-    l_kwargs=dict(tol=ground_state_tolerance),
-)
-
-print("Ground state correlation energy: {0}".format(rccsd.compute_energy()))
-amps0 = rccsd.get_amplitudes(get_t_0=True)
+amps0 = cc2.get_amplitudes(get_t_0=True)
 y0 = amps0.asarray()
 
 print("TDRCCSD initiated")
-tdrccsd = TDRCC2(system)
+tdcc2 = TDCC2(system)
 
-r = complex_ode(tdrccsd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+r = complex_ode(tdcc2).set_integrator("not_GaussIntegrator", s=3, eps=1e-6)
 print("r is initiated, based on call")
 
 r.set_initial_value(y0)
@@ -115,8 +102,8 @@ reference_weight = np.zeros(num_steps, dtype=np.complex128)
 t, l = amps0
 
 
-energy[0] = tdrccsd.compute_energy(r.t, r.y)
-dip_z[0] = tdrccsd.compute_one_body_expectation_value(
+energy[0] = tdcc2.compute_energy(r.t, r.y)
+dip_z[0] = tdcc2.compute_one_body_expectation_value(
     r.t,
     r.y,
     system.dipole_moment[polarization_direction],
@@ -126,41 +113,34 @@ print("initial dipole z")
 print(dip_z[0])
 
 tau0[0] = t[0][0]
-auto_corr[0] = tdrccsd.compute_overlap(r.t, y0, r.y)
+auto_corr[0] = tdcc2.compute_overlap(r.t, y0, r.y)
 reference_weight[0] = (
     0.5 * np.exp(tau0[0])
     + 0.5
-    * (
-        np.exp(-tau0[0]) * tdrccsd.compute_left_reference_overlap(r.t, r.y)
-    ).conj()
+    * (np.exp(-tau0[0]) * tdcc2.compute_left_reference_overlap(r.t, r.y)).conj()
 )
 
-# for i, amp in tqdm.tqdm(
-#    enumerate(tdrccsd.solve(time_points)), total=num_steps - 1
-# ):
 for i, _t in tqdm.tqdm(enumerate(time_points[:-1])):
-    # for i, _t in tqdm.tqdm(enumerate(time_points[0:1])
-    # ):
     r.integrate(r.t + dt)
     if not r.successful():
         break
     # use amps0 as template
     t, l = amps0.from_array(r.y)
-    energy[i + 1] = tdrccsd.compute_energy(r.t, r.y)
-    dip_z[i + 1] = tdrccsd.compute_one_body_expectation_value(
+    energy[i + 1] = tdcc2.compute_energy(r.t, r.y)
+    dip_z[i + 1] = tdcc2.compute_one_body_expectation_value(
         r.t,
         r.y,
         system.dipole_moment[polarization_direction],
         make_hermitian=False,
     )
     tau0[i + 1] = t[0][0]
-    auto_corr[i + 1] = tdrccsd.compute_overlap(r.t, y0, r.y)
+    auto_corr[i + 1] = tdcc2.compute_overlap(r.t, y0, r.y)
     reference_weight[i + 1] = (
         0.5 * np.exp(tau0[i + 1])
         + 0.5
         * (
             np.exp(-tau0[i + 1])
-            * tdrccsd.compute_left_reference_overlap(r.t, r.y)
+            * tdcc2.compute_left_reference_overlap(r.t, r.y)
         ).conj()
     )
 
