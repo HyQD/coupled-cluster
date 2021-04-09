@@ -1,7 +1,7 @@
 from quantum_systems import construct_pyscf_system_rhf
-from coupled_cluster.integrators import GaussIntegrator, RungeKutta4
+from coupled_cluster.integrators import GaussIntegrator
 import numpy as np
-from quantum_systems.time_evolution_operators import LaserField
+from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from coupled_cluster.ccsd import TDCCSD
 import tqdm
 import matplotlib.pyplot as plt
@@ -50,7 +50,7 @@ tfinal = np.floor(tprime)
 print(f"tfinal={tfinal}")
 
 system.set_time_evolution_operator(
-    LaserField(
+    DipoleFieldInteraction(
         sine_square_laser(F_str=F_str, omega=omega, tprime=tprime, phase=phase),
         polarization_vector=polarization,
     )
