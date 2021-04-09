@@ -137,10 +137,7 @@ class CC2(CoupledCluster):
             "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
         )
         
-        
-
-        
-        return energy + self.compute_reference_energy()
+        return energy + self.system.compute_reference_energy()
 
     def compute_reference_energy(self, h, u, o, v, np):
         r"""Function computing the reference energy in a general spin-orbital
@@ -310,7 +307,7 @@ class CC2(CoupledCluster):
 
         tot = self.m + self.n
       
-        t1_t = self.np.zeros((tot,tot),dtype=complex)        
+        t1_t = self.np.zeros((tot,tot),dtype=t_1.dtype)        
         t1_t[self.n:self.n+t_1.shape[0],0:t_1.shape[1]]= t_1 
 
         x_transform = np.eye(tot) - t1_t

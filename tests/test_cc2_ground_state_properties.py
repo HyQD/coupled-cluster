@@ -21,7 +21,7 @@ def compute_ground_state_properties(molecule, basis):
 
     cc2 = CC2(system, mixer=DIIS, verbose=False)
 
-    conv_tol = 1e-10
+    conv_tol = 1e-12
     t_kwargs = dict(tol=conv_tol)
     l_kwargs = dict(tol=conv_tol)
 

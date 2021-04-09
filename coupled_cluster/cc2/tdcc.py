@@ -2,8 +2,6 @@ import abc
 import collections
 import warnings
 from coupled_cluster.cc_helper import AmplitudeContainer
-from coupled_cluster.integrators import RungeKutta4
-
 
 class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     """Time Dependent Coupled Cluster Parent Class
