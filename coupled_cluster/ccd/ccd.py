@@ -1,5 +1,8 @@
 from coupled_cluster.cc import CoupledCluster
-from coupled_cluster.ccd.energies import compute_ccd_ground_state_energy
+from coupled_cluster.ccd.energies import (
+    compute_ccd_ground_state_energy,
+    compute_ccd_ground_state_energy_correction,
+)
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
 from coupled_cluster.ccd.density_matrices import (
@@ -76,8 +79,11 @@ class CCD(CoupledCluster):
         self.t_2_mixer.clear_vectors()
 
     def compute_energy(self):
-        return compute_ccd_ground_state_energy(
-            self.f, self.u, self.t_2, self.o, self.v, np=self.np
+        return (
+            self.system.compute_reference_energy()
+            + compute_ccd_ground_state_energy_correction(
+                self.u, self.t_2, self.o, self.v, np=self.np
+            )
         )
 
     def compute_t_amplitudes(self):
