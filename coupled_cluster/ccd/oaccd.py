@@ -67,8 +67,14 @@ class OACCD(CCD):
         self.kappa_down_mixer = self.mixer(**kwargs)
 
     def compute_energy(self):
-        return compute_time_dependent_energy(
-            self.f, self.u, self.t_2, self.l_2, self.o, self.v, np=self.np
+        rho_qp = self.compute_one_body_density_matrix()
+        rho_qspr = self.compute_two_body_density_matrix()
+
+        return (
+            self.np.einsum("pq,qp->", self.h, rho_qp, optimize=True)
+            + 0.25
+            * self.np.einsum("pqrs,rspq->", self.u, rho_qspr, optimize=True)
+            + self.system.nuclear_repulsion_energy
         )
 
     def compute_one_body_expectation_value(self, mat, make_hermitian=True):
