@@ -65,6 +65,18 @@ class ROACCD(RCCD):
         self.kappa_up_mixer = self.mixer(**kwargs)
         self.kappa_down_mixer = self.mixer(**kwargs)
 
+    def compute_energy(self):
+
+        rho_qp = self.compute_one_body_density_matrix()
+        rho_qspr = self.compute_two_body_density_matrix()
+
+        return (
+            self.np.einsum("pq,qp->", self.h, rho_qp, optimize=True)
+            + 0.5
+            * self.np.einsum("pqrs,rspq->", self.u, rho_qspr, optimize=True)
+            + self.system.nuclear_repulsion_energy
+        )
+
     def compute_ground_state(
         self,
         max_iterations=100,
