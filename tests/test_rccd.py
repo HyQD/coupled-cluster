@@ -25,7 +25,8 @@ def test_density_matrices():
     l_kwargs = dict(tol=conv_tol)
 
     rccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
-    e_rccd = rccd.compute_energy() + system.nuclear_repulsion_energy
+    e_rccd = rccd.compute_energy()
+    print(e_rccd)
 
     dm1 = rccd.compute_one_body_density_matrix()
     dm2 = rccd.compute_two_body_density_matrix()
@@ -62,7 +63,7 @@ def test_rccd_vs_ccd():
     l_kwargs = dict(tol=conv_tol)
 
     rccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
-    e_rccd = rccd.compute_energy() + system.nuclear_repulsion_energy
+    e_rccd = rccd.compute_energy()
     dm1 = rccd.compute_one_body_density_matrix()
     dip_mom_rccd = np.zeros(3)
     for i in range(3):
@@ -78,7 +79,7 @@ def test_rccd_vs_ccd():
     )
     ccd = CCD(system, mixer=DIIS, verbose=False)
     ccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
-    e_ccd = ccd.compute_energy() + system.nuclear_repulsion_energy
+    e_ccd = ccd.compute_energy()
     dm1 = ccd.compute_one_body_density_matrix()
     dip_mom_ccd = np.zeros(3)
     for i in range(3):
