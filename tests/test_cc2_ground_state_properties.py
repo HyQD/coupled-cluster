@@ -26,7 +26,7 @@ def compute_ground_state_properties(molecule, basis):
     l_kwargs = dict(tol=conv_tol)
 
     cc2.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
-    e_cc2 = cc2.compute_energy() + e_nuc
+    e_cc2 = cc2.compute_energy()
 
     """
     Tests the lagrangian functional by calculating the ground state energy
