@@ -1,6 +1,5 @@
 from coupled_cluster.cc import CoupledCluster
 from coupled_cluster.ccd.energies import (
-    compute_ccd_ground_state_energy,
     compute_ccd_ground_state_energy_correction,
 )
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
