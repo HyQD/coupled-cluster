@@ -26,7 +26,6 @@ def test_density_matrices():
 
     rccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
     e_rccd = rccd.compute_energy()
-    print(e_rccd)
 
     dm1 = rccd.compute_one_body_density_matrix()
     dm2 = rccd.compute_two_body_density_matrix()
