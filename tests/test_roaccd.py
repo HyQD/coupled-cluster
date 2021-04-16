@@ -53,7 +53,6 @@ def test_roaccd_vs_oaccd():
     )
 
     e_oaccd = oaccd.compute_energy()
-    print(e_oaccd, e_roaccd)
     assert abs(e_oaccd - e_roaccd) < conv_tol
 
 
