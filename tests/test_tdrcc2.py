@@ -142,7 +142,7 @@ def test_tdrcc2():
             ).conj()
         )
 
-    energy_101_real = energy[100].real
+    energy_101_real = energy[100].real - system.nuclear_repulsion_energy
 
     np.testing.assert_approx_equal(
         energy_101_real, energy_100_iterations, significant=8
