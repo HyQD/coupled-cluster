@@ -26,7 +26,7 @@ def compute_ground_state_properties(molecule, basis):
     l_kwargs = dict(tol=conv_tol)
 
     rcc2.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
-    e_rcc2 = rcc2.compute_energy() + e_nuc
+    e_rcc2 = rcc2.compute_energy()
 
     """
     Tests the one-body part of the lagrangian functional

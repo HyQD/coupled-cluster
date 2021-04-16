@@ -16,7 +16,6 @@ def compute_ground_state_properties(molecule, basis):
     )
 
     e_ref = system.compute_reference_energy()
-    e_nuc = system.nuclear_repulsion_energy
 
     rccsd = RCCSD(system, mixer=DIIS, verbose=False)
 
@@ -25,7 +24,7 @@ def compute_ground_state_properties(molecule, basis):
     l_kwargs = dict(tol=conv_tol)
 
     rccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
-    e_rccsd = rccsd.compute_energy() + e_ref + e_nuc
+    e_rccsd = rccsd.compute_energy() + e_ref
 
     """
     Potentially compute more propeties such as dipole moment
