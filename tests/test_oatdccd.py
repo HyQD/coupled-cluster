@@ -9,6 +9,7 @@ from coupled_cluster.ccd import OATDCCD, OACCD
 from gauss_integrator import GaussIntegrator
 from scipy.integrate import complex_ode
 
+
 class LaserPulse:
     def __init__(self, t0=0, td=5, omega=0.1, E=0.03):
         self.t0 = t0
