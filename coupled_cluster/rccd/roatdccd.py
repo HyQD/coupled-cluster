@@ -1,24 +1,21 @@
 from coupled_cluster.oatdcc import OATDCC
-from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
-from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
-from coupled_cluster.ccd.energies import (
-    compute_time_dependent_energy,
-    compute_ccd_ground_state_energy,
-)
-from coupled_cluster.ccd.density_matrices import (
+from coupled_cluster.rccd.rhs_t import compute_t_2_amplitudes
+from coupled_cluster.rccd.rhs_l import compute_l_2_amplitudes
+
+from coupled_cluster.rccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
-from coupled_cluster.ccd.overlap import compute_orbital_adaptive_overlap
-from coupled_cluster.ccd.p_space_equations import compute_eta
-from coupled_cluster.ccd import OACCD
+
+from coupled_cluster.rccd.p_space_equations import compute_eta
+from coupled_cluster.rccd import ROACCD
 
 
-class OATDCCD(OATDCC):
+class ROATDCCD(OATDCC):
     truncation = "CCD"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
-        return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
+        return self.np.array([0 + 0j])
 
     def rhs_t_amplitudes(self):
         yield compute_t_2_amplitudes
@@ -27,21 +24,18 @@ class OATDCCD(OATDCC):
         yield compute_l_2_amplitudes
 
     def compute_left_reference_overlap(self, current_time, y):
-        t_0, t_2, l_2, _, _ = self._amp_template.from_array(y).unpack()
-
-        return 1 - 0.25 * self.np.tensordot(
-            l_2, t_2, axes=((0, 1, 2, 3), (2, 3, 0, 1))
-        )
+        pass
 
     def compute_energy(self, current_time, y):
         t_0, t_2, l_2, C, C_tilde = self._amp_template.from_array(y).unpack()
         self.update_hamiltonian(current_time=current_time, y=y)
+
         rho_qp = self.compute_one_body_density_matrix(current_time, y)
         rho_qspr = self.compute_two_body_density_matrix(current_time, y)
 
         return (
             self.np.einsum("pq,qp->", self.h_prime, rho_qp, optimize=True)
-            + 0.25
+            + 0.5
             * self.np.einsum(
                 "pqrs,rspq->", self.u_prime, rho_qspr, optimize=True
             )

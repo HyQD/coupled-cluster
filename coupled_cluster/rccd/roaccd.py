@@ -11,9 +11,14 @@ from coupled_cluster.rccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.rccd.rhs_l import compute_l_2_amplitudes
 from coupled_cluster.mix import DIIS
 
+from coupled_cluster.rccd.p_space_equations import (
+    compute_R_ia,
+    compute_R_tilde_ai,
+)
+
 
 class ROACCD(RCCD):
-    """Orbital Adaptive Coupled Cluster Doubles
+    """Restricted Orbital Adaptive Coupled Cluster Doubles
 
     Implementation of the non-orthogonal coupled cluster method with
     double excitations. The code is based on a script written by
@@ -66,7 +71,6 @@ class ROACCD(RCCD):
         self.kappa_down_mixer = self.mixer(**kwargs)
 
     def compute_energy(self):
-
         rho_qp = self.compute_one_body_density_matrix()
         rho_qspr = self.compute_two_body_density_matrix()
 
@@ -75,6 +79,12 @@ class ROACCD(RCCD):
             + 0.5
             * self.np.einsum("pqrs,rspq->", self.u, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
+        )
+
+    def compute_one_body_expectation_value(self, mat, make_hermitian=True):
+        return super().compute_one_body_expectation_value(
+            self.system.transform_one_body_elements(mat, self.C, self.C_tilde),
+            make_hermitian=make_hermitian,
         )
 
     def compute_ground_state(
@@ -110,14 +120,14 @@ class ROACCD(RCCD):
         amp_tol = 0.1
 
         for k_it in range(max_iterations):
-            S = expm(self.kappa)
-            S_inv = expm(-self.kappa)
+            self.C = expm(self.kappa)
+            self.C_tilde = expm(-self.kappa)
 
             self.h = self.system.transform_one_body_elements(
-                self.system.h, S, S_inv
+                self.system.h, self.C, self.C_tilde
             )
             self.u = self.system.transform_two_body_elements(
-                self.system.u, S, S_inv
+                self.system.u, self.C, self.C_tilde
             )
             self.f = self.system.construct_fock_matrix(self.h, self.u)
 
@@ -136,62 +146,22 @@ class ROACCD(RCCD):
             rho_qp = self.compute_one_body_density_matrix()
             rho_qspr = self.compute_two_body_density_matrix()
 
-            kappa_up_rhs = np.einsum(
-                "pi,ap->ai", self.h[:, self.o], rho_qp[self.v, :]
-            ) - np.einsum("aq,qi->ai", self.h[self.v, :], rho_qp[:, self.o])
-            kappa_up_rhs -= 0.5 * np.einsum(
-                "aqrs,rsiq->ai",
-                self.u[self.v, :, :, :],
-                rho_qspr[:, :, self.o, :],
-            )
-            kappa_up_rhs -= 0.5 * np.einsum(
-                "pars,rspi->ai",
-                self.u[:, self.v, :, :],
-                rho_qspr[:, :, :, self.o],
-            )
-            kappa_up_rhs += 0.5 * np.einsum(
-                "pqri,rapq->ai",
-                self.u[:, :, :, self.o],
-                rho_qspr[:, self.v, :, :],
-            )
-            kappa_up_rhs += 0.5 * np.einsum(
-                "pqis,aspq->ai",
-                self.u[:, :, self.o, :],
-                rho_qspr[self.v, :, :, :],
+            kappa_down_rhs = compute_R_ia(
+                self.h, self.u, rho_qp, rho_qspr, self.o, self.v, np
             )
 
-            kappa_down_rhs = np.einsum(
-                "pa,ip->ia", self.h[:, self.v], rho_qp[self.o, :]
-            ) - np.einsum("iq,qa->ia", self.h[self.o, :], rho_qp[:, self.v])
-            kappa_down_rhs -= 0.5 * np.einsum(
-                "iqrs,rsaq->ia",
-                self.u[self.o, :, :, :],
-                rho_qspr[:, :, self.v, :],
-            )
-            kappa_down_rhs -= 0.5 * np.einsum(
-                "pirs,rspa->ia",
-                self.u[:, self.o, :, :],
-                rho_qspr[:, :, :, self.v],
-            )
-            kappa_down_rhs += 0.5 * np.einsum(
-                "pqra,ripq->ia",
-                self.u[:, :, :, self.v],
-                rho_qspr[:, self.o, :, :],
-            )
-            kappa_down_rhs += 0.5 * np.einsum(
-                "pqas,ispq->ia",
-                self.u[:, :, self.v, :],
-                rho_qspr[self.o, :, :, :],
+            kappa_up_rhs = compute_R_tilde_ai(
+                self.h, self.u, rho_qp, rho_qspr, self.o, self.v, np
             )
 
             residual_up = np.linalg.norm(kappa_up_rhs)
             residual_down = np.linalg.norm(kappa_down_rhs)
 
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
-                self.kappa_up, -0.5 * kappa_up_rhs / d_t_1, kappa_up_rhs
+                self.kappa_up, -kappa_up_rhs / d_t_1, kappa_up_rhs
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
-                self.kappa_down, -0.5 * kappa_down_rhs / d_l_1, kappa_down_rhs
+                self.kappa_down, -kappa_down_rhs / d_l_1, kappa_down_rhs
             )
 
             self.kappa[self.v, self.o] = self.kappa_up
@@ -207,12 +177,9 @@ class ROACCD(RCCD):
                 print(f"\nIteration: {k_it}")
                 print(f"\nResidual norms: rd = {residual_down}")
                 print(f"Residual norms: ru = {residual_up}")
-                print(f"Energy: {self.compute_energy()}")
 
-        S = expm(self.kappa)
-        S_inv = expm(-self.kappa)
-        self.C = S
-        self.C_tilde = S_inv
+        self.C = expm(self.kappa)
+        self.C_tilde = expm(-self.kappa)
 
         self.h = self.system.transform_one_body_elements(
             self.system.h, self.C, self.C_tilde
@@ -235,11 +202,3 @@ class ROACCD(RCCD):
                 f"Final {self.__class__.__name__} energy: "
                 + f"{self.compute_energy()}"
             )
-
-
-def compute_kappa_up_rhs(f, u, t2, l2, o, v, np):
-    pass
-
-
-def compute_kappa_down_rhs(f, u, t2, l2, o, v, np):
-    pass
