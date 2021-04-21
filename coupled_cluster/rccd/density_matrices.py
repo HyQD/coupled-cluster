@@ -6,9 +6,9 @@ def compute_one_body_density_matrix(t2, l2, o, v, np, out=None):
     rho = np.zeros((nocc + nvirt, nocc + nvirt), dtype=t2.dtype)
 
     rho[o, o] += 2 * np.eye(nocc)
-    rho[o, o] -= np.einsum("kjab,baik->ij", l2, t2)
+    rho[o, o] -= np.einsum("kjab,baik->ji", l2, t2)
 
-    rho[v, v] += np.einsum("ijac,bcij->ab", l2, t2)
+    rho[v, v] += np.einsum("ijac,bcij->ba", l2, t2)
 
     return rho
 
@@ -42,27 +42,24 @@ def add_rho_klij(t, l, o, v, out, np):
 
     delta = np.eye(o.stop)
 
+    rho = np.zeros((no, no, no, no), dtype=t.dtype)
+    rho += 4 * np.einsum("ik,jl->klij", delta, delta)
+    rho -= 2 * np.einsum("il,jk->klij", delta, delta)
+    rho += np.einsum("klab,abij->klij", l, t)
+
     I0 = np.zeros((no, no), dtype=t.dtype)
 
-    I0 += np.einsum("ikab,abjk->ij", l, t)
+    I0 += np.einsum("mkab,abmi->ki", l, t)
 
-    rho = np.zeros((no, no, no, no), dtype=t.dtype)
+    rho -= 2 * np.einsum("ik,lj->klij", delta, I0)
 
-    rho -= 2 * np.einsum("ik,jl->ijkl", delta, I0)
+    rho += np.einsum("il,kj->klij", delta, I0)
 
-    rho += np.einsum("il,jk->ijkl", delta, I0)
+    rho += np.einsum("jk,li->klij", delta, I0)
 
-    rho += np.einsum("jk,il->ijkl", delta, I0)
-
-    rho -= 2 * np.einsum("jl,ik->ijkl", delta, I0)
+    rho -= 2 * np.einsum("jl,ki->klij", delta, I0)
 
     del I0
-
-    rho += np.einsum("jiab,ablk->ijkl", l, t)
-
-    rho -= 2 * np.einsum("il,jk->ijkl", delta, delta)
-
-    rho += 4 * np.einsum("ik,jl->ijkl", delta, delta)
 
     out[o, o, o, o] += rho
 
@@ -215,4 +212,5 @@ def add_rho_ijab(t, l, o, v, out, np):
 
 
 def add_rho_cdab(t, l, o, v, out, np):
-    out[v, v, v, v] += np.tensordot(t, l, axes=((2, 3), (0, 1)))
+    # out[v, v, v, v] += np.tensordot(t, l, axes=((2, 3), (0, 1)))
+    out[v, v, v, v] += np.einsum("ijab,cdij->cdab", l, t)
