@@ -9,9 +9,6 @@ from coupled_cluster.ccd import OATDCCD, OACCD
 from gauss_integrator import GaussIntegrator
 from scipy.integrate import complex_ode
 
-import tqdm
-
-
 class LaserPulse:
     def __init__(self, t0=0, td=5, omega=0.1, E=0.03):
         self.t0 = t0
@@ -74,7 +71,7 @@ def test_oatdccd_energy_conservation():
         r.t, r.y, system.position[2]
     )
 
-    for i, _t in tqdm.tqdm(enumerate(time_points[:-1])):
+    for i, _t in enumerate(time_points[:-1]):
 
         r.integrate(r.t + dt)
 
