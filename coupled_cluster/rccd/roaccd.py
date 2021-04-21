@@ -83,7 +83,8 @@ class ROACCD(RCCD):
 
     def compute_one_body_expectation_value(self, mat, make_hermitian=True):
         return super().compute_one_body_expectation_value(
-            self.C_tilde @ mat @ self.C, make_hermitian=make_hermitian
+            self.system.transform_one_body_elements(mat, self.C, self.C_tilde),
+            make_hermitian=make_hermitian,
         )
 
     def compute_ground_state(
