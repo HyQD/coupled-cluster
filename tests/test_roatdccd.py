@@ -32,12 +32,12 @@ class LaserPulse:
 
 
 def test_roatdccd_energy_conservation():
-    
+
     omega = 0.2
     E = 0.5
     laser_duration = 1
 
-    system2 = construct_pyscf_system_rhf(
+    system = construct_pyscf_system_rhf(
         molecule="be 0.0 0.0 0.0",
         basis="cc-pvdz",
         np=np,
@@ -48,7 +48,7 @@ def test_roatdccd_energy_conservation():
 
     polarization = np.zeros(3)
     polarization[2] = 1
-    system2.set_time_evolution_operator(
+    system.set_time_evolution_operator(
         DipoleFieldInteraction(
             LaserPulse(td=laser_duration, omega=omega, E=E),
             polarization_vector=polarization,
@@ -62,42 +62,35 @@ def test_roatdccd_energy_conservation():
 
     time_points = np.linspace(0, T, num_steps)
 
-    roaccd = ROACCD(system2, verbose=True)
+    roaccd = ROACCD(system, verbose=True)
     roaccd.compute_ground_state(tol=1e-8)
 
-    roatdccd = ROATDCCD(system2)
-    
+    roatdccd = ROATDCCD(system)
 
-    r2 = complex_ode(roatdccd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
-    r2.set_initial_value(roaccd.get_amplitudes(get_t_0=True).asarray())
+    r = complex_ode(roatdccd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(roaccd.get_amplitudes(get_t_0=True).asarray())
 
     td_energies_roatdccd = np.zeros(len(time_points), dtype=np.complex128)
     dip_z_roatdccd = np.zeros(len(time_points), dtype=np.complex128)
-    td_energies_roatdccd[0] = roatdccd.compute_energy(r2.t, r2.y)
+    td_energies_roatdccd[0] = roatdccd.compute_energy(r.t, r.y)
     dip_z_roatdccd[0] = roatdccd.compute_one_body_expectation_value(
-        r2.t, r2.y, system2.position[2]
+        r.t, r.y, system.position[2]
     )
 
     for i, _t in tqdm.tqdm(enumerate(time_points[:-1])):
-        
-        r2.integrate(r2.t+dt)
 
-        td_energies_roatdccd[i+1] = roatdccd.compute_energy(r2.t, r2.y)
-        dip_z_roatdccd[i+1] = roatdccd.compute_one_body_expectation_value(
-            r2.t, r2.y, system2.position[2]
+        r.integrate(r.t + dt)
+
+        td_energies_roatdccd[i + 1] = roatdccd.compute_energy(r.t, r.y)
+        dip_z_roatdccd[i + 1] = roatdccd.compute_one_body_expectation_value(
+            r.t, r.y, system.position[2]
         )
 
-        
+    energy_conservation = np.linalg.norm(
+        td_energies_roatdccd[11:].real - td_energies_roatdccd[11].real
+    )
 
-    from matplotlib import pyplot as plt 
-    
-    plt.figure()
-    plt.plot(time_points, dip_z_roatdccd.real, label='roatccd')
-    
-    
-    plt.figure()
-    plt.plot(time_points, td_energies_roatdccd.real,label='roatdccd')
-    plt.show()
+    assert energy_conservation < 1e-6
 
 
 def test_roatdccd_helium():
