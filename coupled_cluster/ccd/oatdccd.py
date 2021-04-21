@@ -36,14 +36,16 @@ class OATDCCD(OATDCC):
     def compute_energy(self, current_time, y):
         t_0, t_2, l_2, C, C_tilde = self._amp_template.from_array(y).unpack()
         self.update_hamiltonian(current_time=current_time, y=y)
-        return compute_time_dependent_energy(
-            self.f_prime,
-            self.u_prime,
-            t_2,
-            l_2,
-            self.o_prime,
-            self.v_prime,
-            np=self.np,
+        rho_qp = self.compute_one_body_density_matrix(current_time, y)
+        rho_qspr = self.compute_two_body_density_matrix(current_time, y)
+
+        return (
+            self.np.einsum("pq,qp->", self.h_prime, rho_qp, optimize=True)
+            + 0.25
+            * self.np.einsum(
+                "pqrs,rspq->", self.u_prime, rho_qspr, optimize=True
+            )
+            + self.system.nuclear_repulsion_energy
         )
 
     def one_body_density_matrix(self, t, l):
