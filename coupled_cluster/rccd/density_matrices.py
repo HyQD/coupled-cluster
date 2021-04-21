@@ -47,9 +47,7 @@ def add_rho_klij(t, l, o, v, out, np):
     rho -= 2 * np.einsum("il,jk->klij", delta, delta)
     rho += np.einsum("klab,abij->klij", l, t)
 
-    I0 = np.zeros((no, no), dtype=t.dtype)
-
-    I0 += np.einsum("mkab,abmi->ki", l, t)
+    I0 = np.einsum("mkab,abmi->ki", l, t)
 
     rho -= 2 * np.einsum("ik,lj->klij", delta, I0)
 
@@ -58,8 +56,6 @@ def add_rho_klij(t, l, o, v, out, np):
     rho += np.einsum("jk,li->klij", delta, I0)
 
     rho -= 2 * np.einsum("jl,ki->klij", delta, I0)
-
-    del I0
 
     out[o, o, o, o] += rho
 
