@@ -10,7 +10,6 @@ __copyright__ = "(c) 2014-2018, The Psi4NumPy Developers"
 __license__ = "BSD-3-Clause"
 __date__ = "2017-05-17"
 
-from coupled_cluster.rccsd.l_intermediates import *
 from coupled_cluster.rccsd.cc_hbar import *
 
 """
@@ -162,3 +161,15 @@ def compute_l_2_amplitudes(
     # Final r_l2_ijab = r_l2_ijab + r_l2_jiba
     r_l2 += r_l2.swapaxes(0, 1).swapaxes(2, 3)
     return r_l2
+
+
+def build_Goo(t2, l2, np):
+    Goo = 0
+    Goo += np.einsum("abmj,ijab->mi", t2, l2)
+    return Goo
+
+
+def build_Gvv(t2, l2, np):
+    Gvv = 0
+    Gvv -= np.einsum("ijab,ebij->ae", l2, t2)
+    return Gvv
