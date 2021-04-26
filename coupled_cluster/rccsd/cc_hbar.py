@@ -43,7 +43,7 @@ def build_tau(t1, t2, o, v):
 
 
 def build_Hov(f, Loovv, t1, o, v):
-    """ <m|Hbar|e> = F_me = f_me + t_nf <mn||ef> """
+    """<m|Hbar|e> = F_me = f_me + t_nf <mn||ef>"""
 
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -123,7 +123,7 @@ def build_Hvvvv(u, t1, t2, o, v):
 
 
 def build_Hvovv(u, t1, o, v):
-    """ <am|Hbar|ef> = <am||ef> - t_na <nm||ef> """
+    """<am|Hbar|ef> = <am||ef> - t_na <nm||ef>"""
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
     Hvovv = np.zeros((nvirt, nocc, nvirt, nvirt), dtype=t1.dtype)
@@ -134,7 +134,7 @@ def build_Hvovv(u, t1, o, v):
 
 
 def build_Hooov(u, t1, o, v):
-    """ <mn|Hbar|ie> = <mn||ie> + t_if <mn||fe> """
+    """<mn|Hbar|ie> = <mn||ie> + t_if <mn||fe>"""
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
     Hooov = np.zeros((nocc, nocc, nocc, nvirt), dtype=t1.dtype)
