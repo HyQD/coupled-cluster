@@ -11,22 +11,16 @@ __license__ = "BSD-3-Clause"
 __date__ = "2017-05-17"
 
 
-def compute_t_1_amplitudes(
-    f, u, t1, t2, o, v, np, intermediates=None, out=None
-):
+def compute_t_1_amplitudes(f, u, t1, t2, o, v, np, out=None):
 
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
 
     ### Build OEI intermediates
-    if intermediates == None:
-        Fae = build_Fae(f, u, t1, t2, o, v)
-        Fmi = build_Fmi(f, u, t1, t2, o, v)
-        Fme = build_Fme(f, u, t1, o, v)
-    else:
-        Fae = intermediates.Fae
-        Fmi = intermediates.Fmi
-        Fme = intermediates.Fme
+
+    Fae = build_Fae(f, u, t1, t2, o, v)
+    Fmi = build_Fmi(f, u, t1, t2, o, v)
+    Fme = build_Fme(f, u, t1, o, v)
 
     #### Build residual of T1 equations by spin adaption of  Eqn 1:
     r_T1 = np.zeros((nvirt, nocc), dtype=t1.dtype)
@@ -44,9 +38,7 @@ def compute_t_1_amplitudes(
     return r_T1
 
 
-def compute_t_2_amplitudes(
-    f, u, t1, t2, o, v, np, intermediates=None, out=None
-):
+def compute_t_2_amplitudes(f, u, t1, t2, o, v, np, out=None):
 
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -54,14 +46,10 @@ def compute_t_2_amplitudes(
     ### Build OEI intermediates
     # TODO: This should be handled more smoothly in the sense that
     # they are compute in compute_t1_amplitudes as well
-    if intermediates == None:
-        Fae = build_Fae(f, u, t1, t2, o, v)
-        Fmi = build_Fmi(f, u, t1, t2, o, v)
-        Fme = build_Fme(f, u, t1, o, v)
-    else:
-        Fae = intermediates.Fae
-        Fmi = intermediates.Fmi
-        Fme = intermediates.Fme
+
+    Fae = build_Fae(f, u, t1, t2, o, v)
+    Fmi = build_Fmi(f, u, t1, t2, o, v)
+    Fme = build_Fme(f, u, t1, o, v)
 
     r_T2 = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t1.dtype)
     r_T2 += u[v, v, o, o]
@@ -90,16 +78,10 @@ def compute_t_2_amplitudes(
     # Build TEI Intermediates
     tmp_tau = build_tau(t1, t2, o, v)
 
-    if intermediates == None:
-        Wmnij = build_Wmnij(u, t1, t2, o, v)
-        Wmbej = build_Wmbej(u, t1, t2, o, v)
-        Wmbje = build_Wmbje(u, t1, t2, o, v)
-        Zmbij = build_Zmbij(u, t1, t2, o, v)
-    else:
-        Wmnij = intermediates.Wmnij
-        Wmbej = intermediates.Wmbej
-        Wmbje = intermediates.Wmbje
-        Zmbij = intermediates.Zmbij
+    Wmnij = build_Wmnij(u, t1, t2, o, v)
+    Wmbej = build_Wmbej(u, t1, t2, o, v)
+    Wmbje = build_Wmbje(u, t1, t2, o, v)
+    Zmbij = build_Zmbij(u, t1, t2, o, v)
 
     # 0.5 * tau_mnab Wmnij_mnij  -> tau_mnab Wmnij_mnij
     # This also includes the last term in 0.5 * tau_ijef Wabef
