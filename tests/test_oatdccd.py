@@ -29,6 +29,64 @@ class LaserPulse:
         )
 
 
+def test_oatdccd_energy_conservation():
+
+    omega = 0.2
+    E = 0.5
+    laser_duration = 1
+
+    system = construct_pyscf_system_rhf(
+        molecule="be 0.0 0.0 0.0",
+        basis="cc-pvdz",
+        np=np,
+    )
+
+    polarization = np.zeros(3)
+    polarization[2] = 1
+    system.set_time_evolution_operator(
+        DipoleFieldInteraction(
+            LaserPulse(td=laser_duration, omega=omega, E=E),
+            polarization_vector=polarization,
+        )
+    )
+
+    dt = 1e-1
+    T = 5
+    num_steps = int(T // dt) + 1
+    t_stop_laser = int(laser_duration // dt) + 1
+
+    time_points = np.linspace(0, T, num_steps)
+
+    oaccd = OACCD(system, verbose=True)
+    oaccd.compute_ground_state(tol=1e-8)
+
+    oatdccd = OATDCCD(system)
+
+    r = complex_ode(oatdccd).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(oaccd.get_amplitudes(get_t_0=True).asarray())
+
+    td_energies_oatdccd = np.zeros(len(time_points), dtype=np.complex128)
+    dip_z_oatdccd = np.zeros(len(time_points), dtype=np.complex128)
+    td_energies_oatdccd[0] = oatdccd.compute_energy(r.t, r.y)
+    dip_z_oatdccd[0] = oatdccd.compute_one_body_expectation_value(
+        r.t, r.y, system.position[2]
+    )
+
+    for i, _t in enumerate(time_points[:-1]):
+
+        r.integrate(r.t + dt)
+
+        td_energies_oatdccd[i + 1] = oatdccd.compute_energy(r.t, r.y)
+        dip_z_oatdccd[i + 1] = oatdccd.compute_one_body_expectation_value(
+            r.t, r.y, system.position[2]
+        )
+
+    energy_conservation = np.linalg.norm(
+        td_energies_oatdccd[11:].real - td_energies_oatdccd[11].real
+    )
+    assert energy_conservation < 1e-6
+
+
 def test_oatdccd_helium():
     omega = 2.873_564_3
     E = 0.1
@@ -99,3 +157,7 @@ def test_oatdccd_helium():
         ),
         atol=1e-5,
     )
+
+
+if __name__ == "__main__":
+    test_oatdccd_energy_conservation()
