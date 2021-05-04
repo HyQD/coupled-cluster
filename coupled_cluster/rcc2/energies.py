@@ -23,9 +23,17 @@ def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
 def compute_time_dependent_energy(
     f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np
 ):
-    energy = lagrangian_functional(
-        f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np=np
+
+    energy = (
+        2 * np.trace(f_transform[o, o])
+        - 2 * np.trace(np.trace(u_transform[o, o, o, o], axis1=1, axis2=3))
+        + np.trace(np.trace(u_transform[o, o, o, o], axis1=1, axis2=2))
     )
+    
+    energy += lagrangian_functional(f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np=np)    
+    
+    
+    
     return energy
 
 
@@ -112,6 +120,39 @@ def lagrangian_functional(
     )  # l1*u(o,o,o,v)*t2 + l1*u(o,v,v,v)*t2 +l1*f + l1*f*t2)
     del I39_l1
     del I41_l1
+    del I7_l1
+
+    return lagrangian
+    
+def lagrangian_functional_one_body(f_transform, t1, t2, l1, l2, o, v, np, test=False):
+
+    no = t1.shape[1]
+    nv = t1.shape[0]
+
+    no = t1.shape[1]
+    nv = t1.shape[0]
+
+    lagrangian = 0 + 0j
+
+    I7_l1 = np.zeros((no, no), dtype=t2.dtype)
+    I2_l1 = np.zeros((no, no), dtype=t2.dtype)
+    I2_l1 += np.einsum("kiba,bakj->ij", l2, t2)
+    I7_l1 += np.einsum("ij->ij", I2_l1)
+    lagrangian -= np.einsum("ji,ij->", I2_l1, f_transform[o, o])  # f*l2*t2
+    del I2_l1
+    I3_l1 = np.zeros((nv, nv), dtype=t2.dtype)
+    I3_l1 += np.einsum("jica,cbji->ab", l2, t2)
+    lagrangian += np.einsum("ba,ba->", I3_l1, f_transform[v, v])  # f*l2*t2
+    I39_l1 = np.zeros((no, nv), dtype=t2.dtype)
+    I16_l1 = np.zeros((no, no, nv, nv), dtype=t2.dtype)
+    I16_l1 += 2 * np.einsum("ia,jb->ijab", f_transform[o, v], l1)
+    lagrangian -= np.einsum("ijab,abji->", I16_l1, t2) / 2  # f*l1*t2
+    del I16_l1
+    del I3_l1
+    I39_l1 += np.einsum("ai->ia", f_transform[v, o])
+    I39_l1 += 2 * np.einsum("jb,abij->ia", f_transform[o, v], t2)
+    lagrangian += np.einsum("ia,ia->", I39_l1, l1)
+    del I39_l1
     del I7_l1
 
     return lagrangian

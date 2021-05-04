@@ -21,6 +21,7 @@ from coupled_cluster.rcc2.density_matrices import (
 
 from coupled_cluster.rcc2.energies import (
     compute_ground_state_energy_correction,
+    lagrangian_functional_one_body
 )
 
 
@@ -314,6 +315,35 @@ class RCC2(CoupledCluster):
     def compute_two_body_density_matrix(self):
         pass
 
+    def compute_dipole_moment(self, t_1, t_2, l_1, l_2, o, v, np):
+        """
+        Computes the dipole moment using the one-body lagrangian functional
+        """
+        
+        dipole_moment_array = self.system.dipole_moment
+        cc2_dipole_moment = np.zeros(3, dtype=t_1.dtype)
+        
+        for i in range(3):
+
+            dipole_moment_t1_transformed = self.t1_transform_integrals_one_body(
+                dipole_moment_array[i], t_1
+            )
+        
+            cc2_dipole_moment[i] = lagrangian_functional_one_body(
+                dipole_moment_t1_transformed,
+                t_1,
+                t_2,
+                l_1,
+                l_2,
+                o,
+                v,
+                np,
+            ).real
+
+            cc2_dipole_moment[i] = cc2_dipole_moment[i] + 2 * np.trace(dipole_moment_t1_transformed[o, o])
+
+        return cc2_dipole_moment
+
     def t1_transform_integrals(self, t_1, h, u):
 
         np = self.np
@@ -337,13 +367,12 @@ class RCC2(CoupledCluster):
 
         return h_transform, f_transform, u_transform
 
-    def t1_transform_integrals_one_body(self, dipole):
+    def t1_transform_integrals_one_body(self, dipole, t_1):
 
         np = self.np
 
         tot = self.m + self.n
 
-        t_1 = self.t_1
         t1_t = self.np.zeros((tot, tot), dtype=t_1.dtype)
         t1_t[self.n : self.n + t_1.shape[0], 0 : t_1.shape[1]] = t_1
 
