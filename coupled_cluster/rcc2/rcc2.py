@@ -21,7 +21,7 @@ from coupled_cluster.rcc2.density_matrices import (
 
 from coupled_cluster.rcc2.energies import (
     compute_ground_state_energy_correction,
-    lagrangian_functional_one_body
+    lagrangian_functional_one_body,
 )
 
 
@@ -319,16 +319,16 @@ class RCC2(CoupledCluster):
         """
         Computes the dipole moment using the one-body lagrangian functional
         """
-        
+
         dipole_moment_array = self.system.dipole_moment
         cc2_dipole_moment = np.zeros(3, dtype=t_1.dtype)
-        
+
         for i in range(3):
 
             dipole_moment_t1_transformed = self.t1_transform_integrals_one_body(
                 dipole_moment_array[i], t_1
             )
-        
+
             cc2_dipole_moment[i] = lagrangian_functional_one_body(
                 dipole_moment_t1_transformed,
                 t_1,
@@ -340,7 +340,9 @@ class RCC2(CoupledCluster):
                 np,
             ).real
 
-            cc2_dipole_moment[i] = cc2_dipole_moment[i] + 2 * np.trace(dipole_moment_t1_transformed[o, o])
+            cc2_dipole_moment[i] = cc2_dipole_moment[i] + 2 * np.trace(
+                dipole_moment_t1_transformed[o, o]
+            )
 
         return cc2_dipole_moment
 

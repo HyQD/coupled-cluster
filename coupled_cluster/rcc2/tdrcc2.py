@@ -24,6 +24,10 @@ from coupled_cluster.cc_helper import AmplitudeContainer
 class TDRCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
 
+    def __init__(self, system):
+        super().__init__(system)
+        self.rcc2_instance = RCC2(system)
+
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(
             [
@@ -55,16 +59,14 @@ class TDRCC2(TimeDependentCoupledCluster):
     def compute_energy(self, current_time, y):
 
         t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
-        instance =  RCC2(self.system)
-        
+
         self.update_hamiltonian(current_time, y)
 
         (
-             h_transformed,
-             f_transformed,
-             u_transformed
-        ) = instance.t1_transform_integrals(t_1, self.h, self.u)
-
+            h_transformed,
+            f_transformed,
+            u_transformed,
+        ) = self.rcc2_instance.t1_transform_integrals(t_1, self.h, self.u)
 
         return compute_time_dependent_energy(
             self.f,
@@ -86,9 +88,11 @@ class TDRCC2(TimeDependentCoupledCluster):
         )
 
     def compute_dipole_moment(self, current_time, y):
-        instance =  RCC2(self.system)		
+
         t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
-        return instance.compute_dipole_moment(t_1, t_2, l_1, l_2, self.o, self.v, self.np)
+        return self.rcc2_instance.compute_dipole_moment(
+            t_1, t_2, l_1, l_2, self.o, self.v, self.np
+        )
 
     # TODO: Implement this?
     def compute_two_body_density_matrix(self, current_time, y):
@@ -111,33 +115,33 @@ class TDRCC2(TimeDependentCoupledCluster):
             np=self.np,
             use_old=use_old,
         )
-        
+
     def __call__(self, current_time, prev_amp):
         o, v = self.system.o, self.system.v
 
         prev_amp = self._amp_template.from_array(prev_amp)
         t_old, l_old = prev_amp
         t_0, t_1, t_2 = t_old
-        
+
         self.update_hamiltonian(current_time, prev_amp)
-      
-        instance =  RCC2(self.system) 
-        
+
         # T1-transform integrals
 
         (
-             h_transformed,
-             f_transformed,
-             u_transformed
-        ) = instance.t1_transform_integrals(t_1, self.h, self.u)
-
+            h_transformed,
+            f_transformed,
+            u_transformed,
+        ) = self.rcc2_instance.t1_transform_integrals(t_1, self.h, self.u)
 
         # Remove phase from t-amplitude list
-        
+
         t_old = t_old[1:]
 
         t_new = [
-            -1j * rhs_t_func(self.f, f_transformed, u_transformed, *t_old, o, v, np=self.np)
+            -1j
+            * rhs_t_func(
+                self.f, f_transformed, u_transformed, *t_old, o, v, np=self.np
+            )
             for rhs_t_func in self.rhs_t_amplitudes()
         ]
 
@@ -148,7 +152,17 @@ class TDRCC2(TimeDependentCoupledCluster):
         t_new = [t_0_new, *t_new]
 
         l_new = [
-            1j * rhs_l_func(self.f, f_transformed, u_transformed, *t_old, *l_old, o, v, np=self.np)
+            1j
+            * rhs_l_func(
+                self.f,
+                f_transformed,
+                u_transformed,
+                *t_old,
+                *l_old,
+                o,
+                v,
+                np=self.np
+            )
             for rhs_l_func in self.rhs_l_amplitudes()
         ]
 

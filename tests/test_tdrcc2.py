@@ -45,8 +45,7 @@ def test_tdrcc2():
     omega = 0.2
     t_cycle = 2 * np.pi / omega
 
-    energy_100_iterations = -8.961178829713507
-    print(energy_100_iterations)
+    energy_100_iterations = -9.807268782384162
 
     tprime = t_cycle
     phase = 0

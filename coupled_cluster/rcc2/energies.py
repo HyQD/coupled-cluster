@@ -29,11 +29,11 @@ def compute_time_dependent_energy(
         - 2 * np.trace(np.trace(u_transform[o, o, o, o], axis1=1, axis2=3))
         + np.trace(np.trace(u_transform[o, o, o, o], axis1=1, axis2=2))
     )
-    
-    energy += lagrangian_functional(f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np=np)    
-    
-    
-    
+
+    energy += lagrangian_functional(
+        f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np=np
+    )
+
     return energy
 
 
@@ -123,8 +123,11 @@ def lagrangian_functional(
     del I7_l1
 
     return lagrangian
-    
-def lagrangian_functional_one_body(f_transform, t1, t2, l1, l2, o, v, np, test=False):
+
+
+def lagrangian_functional_one_body(
+    f_transform, t1, t2, l1, l2, o, v, np, test=False
+):
 
     no = t1.shape[1]
     nv = t1.shape[0]
