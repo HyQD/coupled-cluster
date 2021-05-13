@@ -5,4 +5,5 @@ from .ccsd import CCSD, CoupledClusterSinglesDoubles, TDCCSD
 from .rccsd import RCCSD, TDRCCSD
 from .rccd import RCCD, ROACCD, ROATDCCD
 from .rcc2 import RCC2, TDRCC2
+from .romp2 import ROMP2, TDROMP2
 from .cc2 import CC2, TDCC2
