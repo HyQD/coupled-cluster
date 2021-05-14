@@ -158,10 +158,10 @@ class ROACCD(RCCD):
             residual_down = np.linalg.norm(kappa_down_rhs)
 
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
-                self.kappa_up, -kappa_up_rhs / d_t_1, kappa_up_rhs
+                self.kappa_up, -0.5 * kappa_up_rhs / d_t_1, kappa_up_rhs
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
-                self.kappa_down, -kappa_down_rhs / d_l_1, kappa_down_rhs
+                self.kappa_down, -0.5 * kappa_down_rhs / d_l_1, kappa_down_rhs
             )
 
             self.kappa[self.v, self.o] = self.kappa_up
