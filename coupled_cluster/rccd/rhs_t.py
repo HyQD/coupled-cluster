@@ -1,147 +1,107 @@
-def compute_t_2_amplitudes(f, u, t, o, v, np, out=None):
-    """
-    if out is None:
-        out = np.zeros_like(t_2)
-    """
-    nocc = o.stop
-    nvirt = v.stop - nocc
+def compute_t_2_amplitudes(f, u, t2, o, v, np, out=None):
 
-    I0_t2 = np.zeros((nocc, nocc, nocc, nocc), dtype=t.dtype)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
 
-    I0_t2 += np.einsum("abij,klab->ijkl", t, u[o, o, v, v])
+    Fae = build_Fae(f, u, t2, o, v)
+    Fmi = build_Fmi(f, u, t2, o, v)
 
-    rhs = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t.dtype)
+    r_T2 = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t2.dtype)
+    r_T2 += u[v, v, o, o]
 
-    rhs += np.einsum("ijlk,ablk->abij", I0_t2, t)
+    tmp = np.einsum("aeij,be->abij", t2, Fae)
+    r_T2 += tmp
+    r_T2 += tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    del I0_t2
+    tmp = np.einsum("abim,mj->abij", t2, Fmi)
+    r_T2 -= tmp
+    r_T2 -= tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    I1_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    Wmnij = build_Wmnij(u, t2, o, v)
+    Wmbej = build_Wmbej(u, t2, o, v)
+    Wmbje = build_Wmbje(u, t2, o, v)
 
-    I1_t2 += np.einsum("ki,abjk->ijab", f[o, o], t)
+    r_T2 += np.einsum("abmn,mnij->abij", t2, Wmnij)
 
-    I3_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    r_T2 += np.einsum("efij,abef->abij", t2, u[v, v, v, v])
 
-    I3_t2 += np.einsum("ijab->ijab", I1_t2)
+    tmp = np.einsum("aeim,mbej->abij", t2, Wmbej)
+    tmp -= np.einsum("eaim,mbej->abij", t2, Wmbej)
+    r_T2 += tmp
+    r_T2 += tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    del I1_t2
+    tmp = np.einsum("aeim,mbej->abij", t2, Wmbej)
+    tmp += np.einsum("aeim,mbje->abij", t2, Wmbje)
+    r_T2 += tmp
+    r_T2 += tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    I2_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    tmp = np.einsum("aemj,mbie->abij", t2, Wmbje)
+    r_T2 += tmp
+    r_T2 += tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    I2_t2 += np.einsum("ac,bcij->ijab", f[v, v], t)
+    return r_T2
 
-    I3_t2 -= np.einsum("ijab->ijab", I2_t2)
 
-    del I2_t2
+import numpy as np
 
-    rhs -= np.einsum("ijba->abij", I3_t2)
 
-    rhs -= np.einsum("jiab->abij", I3_t2)
+def build_Fae(f, u, t2, o, v):
 
-    del I3_t2
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Fae = np.zeros((nvirt, nvirt), dtype=t2.dtype)
 
-    I4_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    Fae += f[v, v]
+    Fae -= 2 * np.einsum("afmn,mnef->ae", t2, u[o, o, v, v])
+    Fae += np.einsum("afmn,mnfe->ae", t2, u[o, o, v, v])
+    return Fae
 
-    I4_t2 -= np.einsum("jiab->ijab", u[o, o, v, v])
 
-    I4_t2 += 2 * np.einsum("jiba->ijab", u[o, o, v, v])
+def build_Fmi(f, u, t2, o, v):
 
-    I5_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Fmi = np.zeros((nocc, nocc), dtype=t2.dtype)
 
-    I5_t2 += np.einsum("kjcb,acki->ijab", I4_t2, t)
+    Fmi += f[o, o]
+    Fmi += 2 * np.einsum("efin,mnef->mi", t2, u[o, o, v, v])
+    Fmi -= np.einsum("efin,mnfe->mi", t2, u[o, o, v, v])
+    return Fmi
 
-    I6_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
 
-    I6_t2 += np.einsum("jkbc,caki->ijab", I5_t2, t)
+def build_Wmnij(u, t2, o, v):
 
-    del I5_t2
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Wmnij = np.zeros((nocc, nocc, nocc, nocc), dtype=t2.dtype)
 
-    I11_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    Wmnij += u[o, o, o, o]
 
-    I11_t2 += np.einsum("ijab->ijab", I6_t2)
+    Wmnij += np.einsum("efij,mnef->mnij", t2, u[o, o, v, v])
+    return Wmnij
 
-    del I6_t2
 
-    I7_t2 = np.zeros((nvirt, nvirt), dtype=t.dtype)
+def build_Wmbej(u, t2, o, v):
 
-    I7_t2 += np.einsum("ijbc,acij->ab", I4_t2, t)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Wmbej = np.zeros((nocc, nvirt, nvirt, nocc), dtype=t2.dtype)
 
-    I8_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    Wmbej += u[o, v, v, o]
 
-    I8_t2 += np.einsum("bc,caij->ijab", I7_t2, t)
+    Wmbej -= 0.5 * np.einsum("fbjn,mnef->mbej", t2, u[o, o, v, v])
+    Wmbej += np.einsum("fbnj,mnef->mbej", t2, u[o, o, v, v])
+    Wmbej -= 0.5 * np.einsum("fbnj,mnfe->mbej", t2, u[o, o, v, v])
+    return Wmbej
 
-    del I7_t2
 
-    I11_t2 += np.einsum("jiab->ijab", I8_t2)
+def build_Wmbje(u, t2, o, v):
 
-    del I8_t2
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Wmbje = np.zeros((nocc, nvirt, nocc, nvirt), dtype=t2.dtype)
 
-    I9_t2 = np.zeros((nocc, nocc), dtype=t.dtype)
+    Wmbje -= u[o, v, o, v]
+    Wmbje += 0.5 * np.einsum("fbjn,mnfe->mbje", t2, u[o, o, v, v])
 
-    I9_t2 += np.einsum("kjab,abki->ij", I4_t2, t)
-
-    I10_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
-
-    I10_t2 += np.einsum("jk,abki->ijab", I9_t2, t)
-
-    del I9_t2
-
-    I11_t2 += np.einsum("ijba->ijab", I10_t2)
-
-    del I10_t2
-
-    rhs -= np.einsum("ijab->abij", I11_t2)
-
-    rhs -= np.einsum("jiba->abij", I11_t2)
-
-    del I11_t2
-
-    I12_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
-
-    I12_t2 += 2 * np.einsum("kjcb,caki->ijab", I4_t2, t)
-
-    del I4_t2
-
-    I12_t2 += 2 * np.einsum("jabi->ijab", u[o, v, v, o])
-
-    I12_t2 -= np.einsum("jaib->ijab", u[o, v, o, v])
-
-    rhs += np.einsum("jkbc,caki->abij", I12_t2, t)
-
-    del I12_t2
-
-    I13_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
-
-    I13_t2 -= np.einsum("jabi->ijab", u[o, v, v, o])
-
-    I13_t2 += np.einsum("caik,jkbc->ijab", t, u[o, o, v, v])
-
-    rhs += np.einsum("ikac,bckj->abij", I13_t2, t)
-
-    del I13_t2
-
-    I14_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
-
-    I14_t2 -= np.einsum("jaib->ijab", u[o, v, o, v])
-
-    I14_t2 += np.einsum("caik,kjbc->ijab", t, u[o, o, v, v])
-
-    rhs += np.einsum("ikbc,ackj->abij", I14_t2, t)
-
-    del I14_t2
-
-    rhs += np.einsum("baji->abij", u[v, v, o, o])
-
-    rhs -= np.einsum("bcjk,kaic->abij", t, u[o, v, o, v])
-
-    rhs -= np.einsum("caik,kbcj->abij", t, u[o, v, v, o])
-
-    rhs -= np.einsum("cbik,kajc->abij", t, u[o, v, o, v])
-
-    rhs += 2 * np.einsum("bcjk,kaci->abij", t, u[o, v, v, o])
-
-    rhs += np.einsum("balk,lkji->abij", t, u[o, o, o, o])
-
-    rhs += np.einsum("cdji,abdc->abij", t, u[v, v, v, v])
-
-    return rhs
+    return Wmbje
