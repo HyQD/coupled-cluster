@@ -10,7 +10,7 @@ from coupled_cluster.mix import DIIS
 def test_roaccd_vs_oaccd():
     import numpy as np
 
-    molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
+    molecule = "b 0.0 0.0 0.0;h 0.0 0.0 2.4"
     basis = "cc-pvdz"
 
     system = construct_pyscf_system_rhf(
@@ -23,7 +23,7 @@ def test_roaccd_vs_oaccd():
     )
 
     conv_tol = 1e-10
-    roaccd = ROACCD(system, mixer=DIIS, verbose=False)
+    roaccd = ROACCD(system, mixer=DIIS, verbose=True)
     roaccd.compute_ground_state(
         max_iterations=100,
         num_vecs=10,
@@ -43,7 +43,7 @@ def test_roaccd_vs_oaccd():
         anti_symmetrize=True,
     )
 
-    oaccd = OACCD(system, mixer=DIIS, verbose=False)
+    oaccd = OACCD(system, mixer=DIIS, verbose=True)
     oaccd.compute_ground_state(
         max_iterations=100,
         num_vecs=10,

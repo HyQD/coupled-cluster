@@ -21,13 +21,71 @@ These solvers use the ground state calculations from their corresponding ground 
 3. [Orbital-adaptive time-dependent coupled cluster doubles](https://github.com/Schoyen/coupled-cluster/blob/master/coupled_cluster/ccd/oatdccd.py) method, also know as the non-orthogonal time-dependent coupled cluster doubles method as we by default avoid truncating the basis when computing the Q-space equations.
 
 ## Installation
-This project can be installed by running:
-
+This project can be installed via `pip` by running:
 ```bash
 pip install git+https://github.com/Schoyen/coupled-cluster.git
 ```
+Optionally add a `-U` or `--upgrade` to ensure that previously installed versions gets upgraded.
+If you have set up ssh-key authentication to Github you can run:
+```bash
+pip install git+ssh://git@github.com/Schoyen/coupled-cluster.git
+```
+In a project both options can be added to a `requirements.txt`-file (sans the `pip install`-part).
 
-During development it is a good idea to create a _conda environment_ such that all dependencies gets installed correctly. This is easiest done by executing:
+### Installation via Pipenv
+If you choose to use Pipenv the project can be included in the `Pipfile` by running:
+```bash
+pipenv install -e git+ssh://git@github.com/Schoyen/coupled-cluster.git#egg=coupled-cluster
+```
+for installation via ssh, and by running:
+```bash
+pipenv install -e git+https://github.com/Schoyen/coupled-cluster.git#egg=coupled-cluster
+```
+for installation via https.
+
+## Development
+During development it is a good idea to create an environment such that all dependencies gets installed correctly.
+In the following examples we assume that you have cloned the repository and that you are standing in the top directory.
+The recommended way to do development is then to use a virtual environment alongside pip.
+This is achieved by running:
+```bash
+python -m venv venv
+```
+which sets up a virtual environment called `venv`.
+To activate this environment run:
+```bash
+source activate venv/bin/activate
+```
+It is recommended to upgrade pip the first time the environment has been activated:
+```bash
+pip install -U pip
+```
+The development dependencies for this project can now be installed by:
+```bash
+pip install -r requirements.txt
+```
+and the project itself by:
+```bash
+pip install .
+```
+Here as well, you can add a `-U` or `--upgrade` to ensure that the project is updated to the latest version.
+
+### Pipenv
+If you wish to use Pipenv the dependencies can be installed via:
+```bash
+pipenv install
+```
+and the environment can be activated by:
+```bash
+pipenv shell
+```
+Once the environment is activated install the project by:
+```bash
+pip install .
+```
+
+### Anaconda
+If you wish to use a _conda environment_ this is easiest done by executing:
 
 ```bash
 conda env create -f environment.yml
