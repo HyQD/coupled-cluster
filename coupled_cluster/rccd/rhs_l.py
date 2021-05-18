@@ -44,7 +44,7 @@ def compute_l_2_amplitudes(f, u, t2, l2, o, v, np, out=None):
 
     Hovvo = build_Hovvo(u, Loovv, t2, o, v, np)
     Hovov = build_Hovov(u, t2, o, v, np)
-    
+
     Hoooo = build_Hoooo(u, t2, o, v, np)
     Hvvvv = build_Hvvvv(u, t2, o, v, np)
 
