@@ -35,4 +35,6 @@ def test_romp2_groundstate_pyscf(bh_groundstate_romp2):
 
     energy_tol = 1e-10
 
-    assert abs((romp2.compute_energy().real) - bh_groundstate_romp2) < energy_tol
+    assert (
+        abs((romp2.compute_energy().real) - bh_groundstate_romp2) < energy_tol
+    )
