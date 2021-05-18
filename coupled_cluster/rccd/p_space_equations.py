@@ -1,41 +1,29 @@
 def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
+
     eta = np.zeros(h.shape, dtype=np.complex128)
-    A_ibaj = compute_A_ibaj(rho_qp, o, v, np=np)
-    R_ia = compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np=np)
 
-    A_iajb = A_ibaj.transpose(0, 2, 3, 1)
-    eta_jb = -1j * np.linalg.tensorsolve(A_iajb, R_ia)
+    rho_oo = rho_qp[o, o]
+    rho_vv = rho_qp[v, v]
 
-    # To make the indices match in the tensorsolve, we treat R_tilde_ai as
-    # R_tilde_bj. Thus we get the tensor equation
-    #
-    #   -i A^{ja}_{bi} eta^{b}_{j} = R_tilde^{a}_{i}
-    #
-    #    => -i A^{ib}_{aj} eta^{a}_{i} = R_tilde^{b}_{j}.
-    #
-    # Rephrased as a matrix equation with compound indices in paranthesis we get
-    #
-    #    => -i A_tilde_{(bj), (ai)} eta_{(ai)} = R_tilde_{(bj)}.
-    #
-    # We solve this equation for eta_{(ai)} <==> eta^{b}_{j}.
-    R_tilde_bj = compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np=np)
-    A_bjai = A_ibaj.transpose(1, 3, 2, 0)
-    eta_ai = 1j * np.linalg.tensorsolve(A_bjai, R_tilde_bj)
+    n_o, U = np.linalg.eig(rho_oo)
+    n_v, V = np.linalg.eig(rho_vv)
 
-    eta[o, v] += eta_jb
-    eta[v, o] += eta_ai
+    Uinv = np.linalg.inv(U)
+    Vinv = np.linalg.inv(V)
+
+    N_vo = n_v.reshape(-1, 1) - n_o
+    N_ov = n_o.reshape(-1, 1) - n_v
+
+    R_jb = compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np=np)
+    R_bj = compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np=np)
+
+    G_tilde_ov = np.dot(Uinv, np.dot(R_jb, V)) / N_ov
+    G_tilde_vo = np.dot(Vinv, np.dot(R_bj, U)) / N_vo
+
+    eta[o, v] = -1j * np.dot(U, np.dot(G_tilde_ov, Vinv))
+    eta[v, o] = -1j * np.dot(V, np.dot(G_tilde_vo, Uinv))
 
     return eta
-
-
-def compute_A_ibaj(rho_qp, o, v, np):
-    delta_ij = np.eye(o.stop)
-    delta_ba = np.eye(v.stop - o.stop)
-
-    A_ibaj = np.einsum("ba, ij -> ibaj", delta_ba, rho_qp[o, o])
-    A_ibaj -= np.einsum("ij, ba -> ibaj", delta_ij, rho_qp[v, v])
-
-    return A_ibaj
 
 
 def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
@@ -44,24 +32,16 @@ def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
         "iq,qa->ia", h[o, :], rho_qp[:, v]
     )
     R_ia -= 0.5 * np.einsum(
-        "iqrs,rsaq->ia",
-        u[o, :, :, :],
-        rho_qspr[:, :, v, :],
+        "iqrs,rsaq->ia", u[o, :, :, :], rho_qspr[:, :, v, :]
     )
     R_ia -= 0.5 * np.einsum(
-        "pirs,rspa->ia",
-        u[:, o, :, :],
-        rho_qspr[:, :, :, v],
+        "pirs,rspa->ia", u[:, o, :, :], rho_qspr[:, :, :, v]
     )
     R_ia += 0.5 * np.einsum(
-        "pqra,ripq->ia",
-        u[:, :, :, v],
-        rho_qspr[:, o, :, :],
+        "pqra,ripq->ia", u[:, :, :, v], rho_qspr[:, o, :, :]
     )
     R_ia += 0.5 * np.einsum(
-        "pqas,ispq->ia",
-        u[:, :, v, :],
-        rho_qspr[o, :, :, :],
+        "pqas,ispq->ia", u[:, :, v, :], rho_qspr[o, :, :, :]
     )
 
     return R_ia
@@ -72,24 +52,16 @@ def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
         "aq,qi->ai", h[v, :], rho_qp[:, o]
     )
     R_tilde_ai -= 0.5 * np.einsum(
-        "aqrs,rsiq->ai",
-        u[v, :, :, :],
-        rho_qspr[:, :, o, :],
+        "aqrs,rsiq->ai", u[v, :, :, :], rho_qspr[:, :, o, :]
     )
     R_tilde_ai -= 0.5 * np.einsum(
-        "pars,rspi->ai",
-        u[:, v, :, :],
-        rho_qspr[:, :, :, o],
+        "pars,rspi->ai", u[:, v, :, :], rho_qspr[:, :, :, o]
     )
     R_tilde_ai += 0.5 * np.einsum(
-        "pqri,rapq->ai",
-        u[:, :, :, o],
-        rho_qspr[:, v, :, :],
+        "pqri,rapq->ai", u[:, :, :, o], rho_qspr[:, v, :, :]
     )
     R_tilde_ai += 0.5 * np.einsum(
-        "pqis,aspq->ai",
-        u[:, :, o, :],
-        rho_qspr[v, :, :, :],
+        "pqis,aspq->ai", u[:, :, o, :], rho_qspr[v, :, :, :]
     )
 
     return R_tilde_ai
