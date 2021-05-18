@@ -191,7 +191,7 @@ class OMP2(CCD):
             )
             residual_w_ai = np.linalg.norm(w_ai)
 
-            self.kappa[self.v, self.o] += w_ai / self.d_t_1
+            self.kappa[self.v, self.o] -= w_ai / self.d_t_1
 
             C = expm(self.kappa - self.kappa.T)
             Ctilde = C.T
