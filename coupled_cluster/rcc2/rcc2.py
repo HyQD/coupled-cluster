@@ -19,9 +19,7 @@ from coupled_cluster.rcc2.density_matrices import (
     compute_one_body_density_matrix,
 )
 
-from coupled_cluster.rcc2.energies import (
-    compute_ground_state_energy_correction,
-)
+from coupled_cluster.rcc2.energies import compute_ground_state_energy_correction
 
 
 class RCC2(CoupledCluster):

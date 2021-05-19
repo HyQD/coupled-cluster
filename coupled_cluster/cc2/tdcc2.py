@@ -16,9 +16,7 @@ from coupled_cluster.cc2.energies import (
     compute_ground_state_energy_correction,
 )
 
-from coupled_cluster.cc2.density_matrices import (
-    compute_one_body_density_matrix,
-)
+from coupled_cluster.cc2.density_matrices import compute_one_body_density_matrix
 
 from coupled_cluster.cc2.time_dependent_overlap import (
     compute_time_dependent_overlap,

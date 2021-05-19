@@ -15,9 +15,7 @@ from coupled_cluster.cc_helper import (
     construct_d_t_2_matrix,
 )
 
-from coupled_cluster.cc2.density_matrices import (
-    compute_one_body_density_matrix,
-)
+from coupled_cluster.cc2.density_matrices import compute_one_body_density_matrix
 
 
 class CC2(CoupledCluster):

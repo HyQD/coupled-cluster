@@ -44,24 +44,16 @@ def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
         "iq,qa->ia", h[o, :], rho_qp[:, v]
     )
     R_ia -= 0.5 * np.einsum(
-        "iqrs,rsaq->ia",
-        u[o, :, :, :],
-        rho_qspr[:, :, v, :],
+        "iqrs,rsaq->ia", u[o, :, :, :], rho_qspr[:, :, v, :]
     )
     R_ia -= 0.5 * np.einsum(
-        "pirs,rspa->ia",
-        u[:, o, :, :],
-        rho_qspr[:, :, :, v],
+        "pirs,rspa->ia", u[:, o, :, :], rho_qspr[:, :, :, v]
     )
     R_ia += 0.5 * np.einsum(
-        "pqra,ripq->ia",
-        u[:, :, :, v],
-        rho_qspr[:, o, :, :],
+        "pqra,ripq->ia", u[:, :, :, v], rho_qspr[:, o, :, :]
     )
     R_ia += 0.5 * np.einsum(
-        "pqas,ispq->ia",
-        u[:, :, v, :],
-        rho_qspr[o, :, :, :],
+        "pqas,ispq->ia", u[:, :, v, :], rho_qspr[o, :, :, :]
     )
 
     return R_ia
@@ -72,24 +64,16 @@ def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
         "aq,qi->ai", h[v, :], rho_qp[:, o]
     )
     R_tilde_ai -= 0.5 * np.einsum(
-        "aqrs,rsiq->ai",
-        u[v, :, :, :],
-        rho_qspr[:, :, o, :],
+        "aqrs,rsiq->ai", u[v, :, :, :], rho_qspr[:, :, o, :]
     )
     R_tilde_ai -= 0.5 * np.einsum(
-        "pars,rspi->ai",
-        u[:, v, :, :],
-        rho_qspr[:, :, :, o],
+        "pars,rspi->ai", u[:, v, :, :], rho_qspr[:, :, :, o]
     )
     R_tilde_ai += 0.5 * np.einsum(
-        "pqri,rapq->ai",
-        u[:, :, :, o],
-        rho_qspr[:, v, :, :],
+        "pqri,rapq->ai", u[:, :, :, o], rho_qspr[:, v, :, :]
     )
     R_tilde_ai += 0.5 * np.einsum(
-        "pqis,aspq->ai",
-        u[:, :, o, :],
-        rho_qspr[v, :, :, :],
+        "pqis,aspq->ai", u[:, :, o, :], rho_qspr[v, :, :, :]
     )
 
     return R_tilde_ai
