@@ -18,6 +18,7 @@ from coupled_cluster.oatdcc import OATDCC
 
 from opt_einsum import contract
 
+
 class TDROMP2(OATDCC):
     """Time-dependent orbital-optimized second-order Møller-Plesset perturbation theory (TDOMP2)
 

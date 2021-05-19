@@ -37,6 +37,7 @@ Modified from the original source code:
 import numpy as np
 from opt_einsum import contract
 
+
 def build_Loovv(u, o, v):
     tmp = u[o, o, v, v].copy()
     Loovv = 2.0 * tmp - tmp.swapaxes(2, 3)
@@ -122,9 +123,7 @@ def build_Hoooo(u, t1, t2, o, v):
     Hoooo += u[o, o, o, o]
     Hoooo += contract("ej,mnie->mnij", t1, u[o, o, o, v])
     Hoooo += contract("ei,mnej->mnij", t1, u[o, o, v, o])
-    Hoooo += contract(
-        "efij,mnef->mnij", build_tau(t1, t2, o, v), u[o, o, v, v]
-    )
+    Hoooo += contract("efij,mnef->mnij", build_tau(t1, t2, o, v), u[o, o, v, v])
     return Hoooo
 
 
@@ -140,9 +139,7 @@ def build_Hvvvv(u, t1, t2, o, v):
     Hvvvv += u[v, v, v, v]
     Hvvvv -= contract("bm,amef->abef", t1, u[v, o, v, v])
     Hvvvv -= contract("am,bmfe->abef", t1, u[v, o, v, v])
-    Hvvvv += contract(
-        "abmn,mnef->abef", build_tau(t1, t2, o, v), u[o, o, v, v]
-    )
+    Hvvvv += contract("abmn,mnef->abef", build_tau(t1, t2, o, v), u[o, o, v, v])
     return Hvvvv
 
 
@@ -180,9 +177,7 @@ def build_Hovvo(u, Loovv, t1, t2, o, v):
     Hovvo += u[o, v, v, o]
     Hovvo += contract("fj,mbef->mbej", t1, u[o, v, v, v])
     Hovvo -= contract("bn,mnej->mbej", t1, u[o, o, v, o])
-    Hovvo -= contract(
-        "fbjn,nmfe->mbej", build_tau(t1, t2, o, v), u[o, o, v, v]
-    )
+    Hovvo -= contract("fbjn,nmfe->mbej", build_tau(t1, t2, o, v), u[o, o, v, v])
     Hovvo += contract("bfjn,nmfe->mbej", t2, Loovv)
     return Hovvo
 
@@ -199,9 +194,7 @@ def build_Hovov(u, t1, t2, o, v):
     Hovov += u[o, v, o, v]
     Hovov += contract("fj,bmef->mbje", t1, u[v, o, v, v])
     Hovov -= contract("bn,mnje->mbje", t1, u[o, o, o, v])
-    Hovov -= contract(
-        "fbjn,nmef->mbje", build_tau(t1, t2, o, v), u[o, o, v, v]
-    )
+    Hovov -= contract("fbjn,nmef->mbje", build_tau(t1, t2, o, v), u[o, o, v, v])
     return Hovov
 
 
@@ -238,9 +231,7 @@ def build_Hvvvo(f, u, Loovv, Lvovv, t1, t2, o, v):
 
     # 0.5 * tau_mnab <mn||ei>
 
-    Hvvvo += contract(
-        "abmn,mnei->abei", build_tau(t1, t2, o, v), u[o, o, v, o]
-    )
+    Hvvvo += contract("abmn,mnei->abei", build_tau(t1, t2, o, v), u[o, o, v, o])
 
     # - P(ab) t_miaf <mb||ef>
 
@@ -296,9 +287,7 @@ def build_Hovoo(f, u, Loovv, Looov, t1, t2, o, v):
 
     # 0.5 * tau_ijef <mb||ef>
 
-    Hovoo += contract(
-        "efij,mbef->mbij", build_tau(t1, t2, o, v), u[o, v, v, v]
-    )
+    Hovoo += contract("efij,mbef->mbij", build_tau(t1, t2, o, v), u[o, v, v, v])
 
     # P(ij) t_jnbe <mn||ie>
 

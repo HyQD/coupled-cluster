@@ -7,6 +7,8 @@ from coupled_cluster.rccd.density_matrices import (
 )
 from coupled_cluster.cc_helper import construct_d_t_2_matrix
 
+from opt_einsum import contract
+
 
 class RCCD(CoupledCluster):
     """Coupled Cluster Doubles
@@ -76,10 +78,10 @@ class RCCD(CoupledCluster):
 
     def compute_energy(self):
         e_ref = self.system.compute_reference_energy()
-        ccd_corr = 2 * self.np.einsum(
+        ccd_corr = 2 * contract(
             "abij,ijab->", self.t_2, self.u[self.o, self.o, self.v, self.v]
         )
-        ccd_corr -= self.np.einsum(
+        ccd_corr -= contract(
             "abij,ijba->", self.t_2, self.u[self.o, self.o, self.v, self.v]
         )
         return e_ref + ccd_corr

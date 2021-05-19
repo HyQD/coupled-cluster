@@ -34,6 +34,8 @@ Modified from the original source code:
     https://github.com/psi4/psi4numpy/blob/cbef6ddcb32ccfbf773befea6dc4aaae2b428776/Coupled-Cluster/RHF/helper_cclambda.py
 """
 
+from opt_einsum import contract
+
 
 def compute_l_2_amplitudes(f, u, t2, l2, o, v, np, out=None):
 
@@ -53,20 +55,20 @@ def compute_l_2_amplitudes(f, u, t2, l2, o, v, np, out=None):
     r_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
 
     r_l2 += Loovv
-    r_l2 += np.einsum("ijeb,ea->ijab", l2, Hvv)
-    r_l2 -= np.einsum("im,mjab->ijab", Hoo, l2)
+    r_l2 += contract("ijeb,ea->ijab", l2, Hvv)
+    r_l2 -= contract("im,mjab->ijab", Hoo, l2)
 
-    r_l2 += 0.5 * np.einsum("ijmn,mnab->ijab", Hoooo, l2)
+    r_l2 += 0.5 * contract("ijmn,mnab->ijab", Hoooo, l2)
 
-    r_l2 += 0.5 * np.einsum("ijef,efab->ijab", l2, Hvvvv)
+    r_l2 += 0.5 * contract("ijef,efab->ijab", l2, Hvvvv)
 
-    r_l2 += 2 * np.einsum("ieam,mjeb->ijab", Hovvo, l2)
-    r_l2 -= np.einsum("iema,mjeb->ijab", Hovov, l2)
-    r_l2 -= np.einsum("mibe,jema->ijab", l2, Hovov)
-    r_l2 -= np.einsum("mieb,jeam->ijab", l2, Hovvo)
+    r_l2 += 2 * contract("ieam,mjeb->ijab", Hovvo, l2)
+    r_l2 -= contract("iema,mjeb->ijab", Hovov, l2)
+    r_l2 -= contract("mibe,jema->ijab", l2, Hovov)
+    r_l2 -= contract("mieb,jeam->ijab", l2, Hovvo)
 
-    r_l2 += np.einsum("ijeb,ae->ijab", Loovv, build_Gvv(t2, l2, np))
-    r_l2 -= np.einsum("mi,mjab->ijab", build_Goo(t2, l2, np), Loovv)
+    r_l2 += contract("ijeb,ae->ijab", Loovv, build_Gvv(t2, l2, np))
+    r_l2 -= contract("mi,mjab->ijab", build_Goo(t2, l2, np), Loovv)
 
     r_l2 += r_l2.swapaxes(0, 1).swapaxes(2, 3)
 
@@ -86,7 +88,7 @@ def build_Hoo(f, Loovv, t2, o, v, np):
     Hoo = np.zeros((nocc, nocc), dtype=t2.dtype)
 
     Hoo += f[o, o]
-    Hoo += np.einsum("efin,mnef->mi", t2, Loovv)
+    Hoo += contract("efin,mnef->mi", t2, Loovv)
     return Hoo
 
 
@@ -97,7 +99,7 @@ def build_Hvv(f, Loovv, t2, o, v, np):
     Hvv = np.zeros((nvirt, nvirt), dtype=t2.dtype)
 
     Hvv += f[v, v]
-    Hvv -= np.einsum("famn,mnfe->ae", t2, Loovv)
+    Hvv -= contract("famn,mnfe->ae", t2, Loovv)
     return Hvv
 
 
@@ -108,7 +110,7 @@ def build_Hoooo(u, t2, o, v, np):
     Hoooo = np.zeros((nocc, nocc, nocc, nocc), dtype=t2.dtype)
 
     Hoooo += u[o, o, o, o]
-    Hoooo += np.einsum("efij,mnef->mnij", t2, u[o, o, v, v])
+    Hoooo += contract("efij,mnef->mnij", t2, u[o, o, v, v])
     return Hoooo
 
 
@@ -119,7 +121,7 @@ def build_Hvvvv(u, t2, o, v, np):
     Hvvvv = np.zeros((nvirt, nvirt, nvirt, nvirt), dtype=t2.dtype)
 
     Hvvvv += u[v, v, v, v]
-    Hvvvv += np.einsum("abmn,mnef->abef", t2, u[o, o, v, v])
+    Hvvvv += contract("abmn,mnef->abef", t2, u[o, o, v, v])
     return Hvvvv
 
 
@@ -130,8 +132,8 @@ def build_Hovvo(u, Loovv, t2, o, v, np):
     Hovvo = np.zeros((nocc, nvirt, nvirt, nocc), dtype=t2.dtype)
 
     Hovvo += u[o, v, v, o]
-    Hovvo -= np.einsum("fbjn,nmfe->mbej", t2, u[o, o, v, v])
-    Hovvo += np.einsum("bfjn,nmfe->mbej", t2, Loovv)
+    Hovvo -= contract("fbjn,nmfe->mbej", t2, u[o, o, v, v])
+    Hovvo += contract("bfjn,nmfe->mbej", t2, Loovv)
     return Hovvo
 
 
@@ -142,17 +144,17 @@ def build_Hovov(u, t2, o, v, np):
     Hovov = np.zeros((nocc, nvirt, nocc, nvirt), dtype=t2.dtype)
 
     Hovov += u[o, v, o, v]
-    Hovov -= np.einsum("fbjn,nmef->mbje", t2, u[o, o, v, v])
+    Hovov -= contract("fbjn,nmef->mbje", t2, u[o, o, v, v])
     return Hovov
 
 
 def build_Goo(t2, l2, np):
     Goo = 0
-    Goo += np.einsum("abmj,ijab->mi", t2, l2)
+    Goo += contract("abmj,ijab->mi", t2, l2)
     return Goo
 
 
 def build_Gvv(t2, l2, np):
     Gvv = 0
-    Gvv -= np.einsum("ijab,ebij->ae", l2, t2)
+    Gvv -= contract("ijab,ebij->ae", l2, t2)
     return Gvv

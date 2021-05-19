@@ -1,4 +1,6 @@
 from opt_einsum import contract
+
+
 def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
     eta = np.zeros(h.shape, dtype=np.complex128)
     A_ibaj = compute_A_ibaj(rho_qp, o, v, np=np)

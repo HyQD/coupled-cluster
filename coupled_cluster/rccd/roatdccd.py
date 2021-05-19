@@ -10,6 +10,8 @@ from coupled_cluster.rccd.density_matrices import (
 from coupled_cluster.rccd.p_space_equations import compute_eta
 from coupled_cluster.rccd import ROACCD
 
+from opt_einsum import contract
+
 
 class ROATDCCD(OATDCC):
     truncation = "CCD"
@@ -34,11 +36,8 @@ class ROATDCCD(OATDCC):
         rho_qspr = self.compute_two_body_density_matrix(current_time, y)
 
         return (
-            self.np.einsum("pq,qp->", self.h_prime, rho_qp, optimize=True)
-            + 0.5
-            * self.np.einsum(
-                "pqrs,rspq->", self.u_prime, rho_qspr, optimize=True
-            )
+            contract("pq,qp->", self.h_prime, rho_qp)
+            + 0.5 * contract("pqrs,rspq->", self.u_prime, rho_qspr)
             + self.system.nuclear_repulsion_energy
         )
 

@@ -35,6 +35,8 @@ Modified from the original source code:
 """
 
 from opt_einsum import contract
+
+
 def compute_t_1_amplitudes(f, u, t1, t2, o, v, np, out=None):
 
     nocc = t1.shape[1]
@@ -167,7 +169,10 @@ def compute_t_2_amplitudes(f, u, t1, t2, o, v, np, out=None):
 
     return r_T2
 
+
 import numpy as np
+
+
 def build_tilde_tau(t1, t2, o, v):
     ttau = t2.copy()
     tmp = 0.5 * contract("ai,bj->abij", t1, t1)
@@ -241,9 +246,7 @@ def build_Wmnij(u, t1, t2, o, v):
     Wmnij += contract("ei,mnej->mnij", t1, u[o, o, v, o])
     # prefactor of 1 instead of 0.5 below to fold the last term of
     # 0.5 * tau_ijef Wabef in Wmnij contraction: 0.5 * tau_mnab Wmnij_mnij
-    Wmnij += contract(
-        "efij,mnef->mnij", build_tau(t1, t2, o, v), u[o, o, v, v]
-    )
+    Wmnij += contract("efij,mnef->mnij", build_tau(t1, t2, o, v), u[o, o, v, v])
     return Wmnij
 
 
@@ -284,7 +287,5 @@ def build_Zmbij(u, t1, t2, o, v):
     nvirt = t1.shape[0]
     Zmbij = np.zeros((nocc, nvirt, nocc, nocc), dtype=t1.dtype)
 
-    Zmbij += contract(
-        "mbef,efij->mbij", u[o, v, v, v], build_tau(t1, t2, o, v)
-    )
+    Zmbij += contract("mbef,efij->mbij", u[o, v, v, v], build_tau(t1, t2, o, v))
     return Zmbij

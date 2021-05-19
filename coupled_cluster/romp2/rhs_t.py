@@ -1,4 +1,6 @@
 from opt_einsum import contract
+
+
 def compute_t_2_amplitudes(f, u, t, o, v, np, out=None):
 
     rhs_T2 = u[v, v, o, o].copy()

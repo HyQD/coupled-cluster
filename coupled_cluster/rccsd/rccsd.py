@@ -21,6 +21,7 @@ from coupled_cluster.rccsd.density_matrices import (
 
 from opt_einsum import contract
 
+
 class RCCSD(CoupledCluster):
     r"""Restricted Coupled Cluster Singels Doubles
 
