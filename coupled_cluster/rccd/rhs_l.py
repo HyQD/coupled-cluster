@@ -1,217 +1,158 @@
+"""
+Copyright (c) 2014-2018, The Psi4NumPy Developers.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+       copyright notice, this list of conditions and the following
+       disclaimer in the documentation and/or other materials provided
+       with the distribution.
+
+    * Neither the name of the Psi4NumPy Developers nor the names of any
+       contributors may be used to endorse or promote products derived
+       from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Modified from the original source code:
+    https://github.com/psi4/psi4numpy/blob/cbef6ddcb32ccfbf773befea6dc4aaae2b428776/Coupled-Cluster/RHF/helper_cclambda.py
+"""
+
+
 def compute_l_2_amplitudes(f, u, t2, l2, o, v, np, out=None):
-    """
-    if out is None:
-        out = np.zeros_like(l_1)
-    """
-    nocc = o.stop
-    nvirt = v.stop - nocc
 
-    I0_l2 = np.zeros((nocc, nocc, nocc, nocc), dtype=t2.dtype)
+    Loovv = build_Loovv(u, o, v, np)
 
-    I0_l2 += np.einsum("ijba,bakl->ijkl", l2, t2)
+    Hoo = build_Hoo(f, Loovv, t2, o, v, np)
+    Hvv = build_Hvv(f, Loovv, t2, o, v, np)
 
-    rhs = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+    Hovvo = build_Hovvo(u, Loovv, t2, o, v, np)
+    Hovov = build_Hovov(u, t2, o, v, np)
 
-    rhs += np.einsum("jilk,lkba->ijab", I0_l2, u[o, o, v, v])
+    Hoooo = build_Hoooo(u, t2, o, v, np)
+    Hvvvv = build_Hvvvv(u, t2, o, v, np)
 
-    del I0_l2
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    r_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
 
-    I1_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+    r_l2 += Loovv
+    r_l2 += np.einsum("ijeb,ea->ijab", l2, Hvv)
+    r_l2 -= np.einsum("im,mjab->ijab", Hoo, l2)
 
-    I1_l2 += np.einsum("ik,jkab->ijab", f[o, o], l2)
+    r_l2 += 0.5 * np.einsum("ijmn,mnab->ijab", Hoooo, l2)
 
-    I6_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+    r_l2 += 0.5 * np.einsum("ijef,efab->ijab", l2, Hvvvv)
 
-    I6_l2 += np.einsum("ijab->ijab", I1_l2)
+    r_l2 += 2 * np.einsum("ieam,mjeb->ijab", Hovvo, l2)
+    r_l2 -= np.einsum("iema,mjeb->ijab", Hovov, l2)
+    r_l2 -= np.einsum("mibe,jema->ijab", l2, Hovov)
+    r_l2 -= np.einsum("mieb,jeam->ijab", l2, Hovvo)
 
-    del I1_l2
+    r_l2 += np.einsum("ijeb,ae->ijab", Loovv, build_Gvv(t2, l2, np))
+    r_l2 -= np.einsum("mi,mjab->ijab", build_Goo(t2, l2, np), Loovv)
 
-    I2_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+    r_l2 += r_l2.swapaxes(0, 1).swapaxes(2, 3)
 
-    I2_l2 += np.einsum("ca,ijbc->ijab", f[v, v], l2)
+    return r_l2
 
-    I6_l2 -= np.einsum("ijab->ijab", I2_l2)
 
-    del I2_l2
+def build_Loovv(u, o, v, np):
+    tmp = u[o, o, v, v].copy()
+    Loovv = 2.0 * tmp - tmp.swapaxes(2, 3)
+    return Loovv
 
-    I3_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
 
-    I3_l2 += np.einsum("acki,jkcb->ijab", t2, u[o, o, v, v])
+def build_Hoo(f, Loovv, t2, o, v, np):
 
-    I4_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Hoo = np.zeros((nocc, nocc), dtype=t2.dtype)
 
-    I4_l2 += np.einsum("ijab->ijab", I3_l2)
+    Hoo += f[o, o]
+    Hoo += np.einsum("efin,mnef->mi", t2, Loovv)
+    return Hoo
 
-    del I3_l2
 
-    I4_l2 -= np.einsum("jaib->ijab", u[o, v, o, v])
+def build_Hvv(f, Loovv, t2, o, v, np):
 
-    I5_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Hvv = np.zeros((nvirt, nvirt), dtype=t2.dtype)
 
-    I5_l2 += np.einsum("kjcb,kiac->ijab", I4_l2, l2)
+    Hvv += f[v, v]
+    Hvv -= np.einsum("famn,mnfe->ae", t2, Loovv)
+    return Hvv
 
-    I6_l2 -= np.einsum("ijab->ijab", I5_l2)
 
-    del I5_l2
+def build_Hoooo(u, t2, o, v, np):
 
-    rhs -= np.einsum("ijba->ijab", I6_l2)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Hoooo = np.zeros((nocc, nocc, nocc, nocc), dtype=t2.dtype)
 
-    rhs -= np.einsum("jiab->ijab", I6_l2)
+    Hoooo += u[o, o, o, o]
+    Hoooo += np.einsum("efij,mnef->mnij", t2, u[o, o, v, v])
+    return Hoooo
 
-    del I6_l2
 
-    I7_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+def build_Hvvvv(u, t2, o, v, np):
 
-    I7_l2 += np.einsum("kjcb,kica->ijab", I4_l2, l2)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Hvvvv = np.zeros((nvirt, nvirt, nvirt, nvirt), dtype=t2.dtype)
 
-    del I4_l2
+    Hvvvv += u[v, v, v, v]
+    Hvvvv += np.einsum("abmn,mnef->abef", t2, u[o, o, v, v])
+    return Hvvvv
 
-    I14_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
 
-    I14_l2 -= np.einsum("ijab->ijab", I7_l2)
+def build_Hovvo(u, Loovv, t2, o, v, np):
 
-    del I7_l2
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Hovvo = np.zeros((nocc, nvirt, nvirt, nocc), dtype=t2.dtype)
 
-    I8_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+    Hovvo += u[o, v, v, o]
+    Hovvo -= np.einsum("fbjn,nmfe->mbej", t2, u[o, o, v, v])
+    Hovvo += np.einsum("bfjn,nmfe->mbej", t2, Loovv)
+    return Hovvo
 
-    I8_l2 -= np.einsum("abji->ijab", t2)
 
-    I8_l2 += 2 * np.einsum("baji->ijab", t2)
+def build_Hovov(u, t2, o, v, np):
 
-    I9_l2 = np.zeros((nvirt, nvirt), dtype=t2.dtype)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Hovov = np.zeros((nocc, nvirt, nocc, nvirt), dtype=t2.dtype)
 
-    I9_l2 += np.einsum("ijbc,ijac->ab", I8_l2, u[o, o, v, v])
+    Hovov += u[o, v, o, v]
+    Hovov -= np.einsum("fbjn,nmef->mbje", t2, u[o, o, v, v])
+    return Hovov
 
-    del I8_l2
 
-    I10_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
+def build_Goo(t2, l2, np):
+    Goo = 0
+    Goo += np.einsum("abmj,ijab->mi", t2, l2)
+    return Goo
 
-    I10_l2 += np.einsum("bc,ijca->ijab", I9_l2, l2)
 
-    del I9_l2
-
-    I14_l2 += np.einsum("jiab->ijab", I10_l2)
-
-    del I10_l2
-
-    I11_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I11_l2 += 2 * np.einsum("abji->ijab", t2)
-
-    I11_l2 -= np.einsum("baji->ijab", t2)
-
-    I12_l2 = np.zeros((nocc, nocc), dtype=t2.dtype)
-
-    I12_l2 += np.einsum("kjba,kiab->ij", I11_l2, u[o, o, v, v])
-
-    I13_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I13_l2 += np.einsum("jk,kiab->ijab", I12_l2, l2)
-
-    del I12_l2
-
-    I14_l2 += np.einsum("ijba->ijab", I13_l2)
-
-    del I13_l2
-
-    rhs -= np.einsum("ijab->ijab", I14_l2)
-
-    rhs -= np.einsum("jiba->ijab", I14_l2)
-
-    del I14_l2
-
-    I16_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I16_l2 += np.einsum("kjbc,kica->ijab", I11_l2, u[o, o, v, v])
-
-    del I11_l2
-
-    I17_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I17_l2 += np.einsum("jiba->ijab", I16_l2)
-
-    del I16_l2
-
-    I15_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I15_l2 += np.einsum("caki,jkcb->ijab", t2, u[o, o, v, v])
-
-    I17_l2 -= np.einsum("ijab->ijab", I15_l2)
-
-    del I15_l2
-
-    I17_l2 += np.einsum("jabi->ijab", u[o, v, v, o])
-
-    I18_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I18_l2 += np.einsum("kjcb,kica->ijab", I17_l2, l2)
-
-    del I17_l2
-
-    rhs += 2 * np.einsum("ijab->ijab", I18_l2)
-
-    rhs -= np.einsum("ijba->ijab", I18_l2)
-
-    rhs -= np.einsum("jiab->ijab", I18_l2)
-
-    rhs += 2 * np.einsum("jiba->ijab", I18_l2)
-
-    del I18_l2
-
-    I19_l2 = np.zeros((nocc, nocc), dtype=t2.dtype)
-
-    I19_l2 += np.einsum("ikba,abkj->ij", l2, t2)
-
-    I20_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I20_l2 += np.einsum("ik,jkab->ijab", I19_l2, u[o, o, v, v])
-
-    del I19_l2
-
-    I23_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I23_l2 += np.einsum("ijab->ijab", I20_l2)
-
-    del I20_l2
-
-    I21_l2 = np.zeros((nvirt, nvirt), dtype=t2.dtype)
-
-    I21_l2 += np.einsum("jica,cbji->ab", l2, t2)
-
-    I22_l2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t2.dtype)
-
-    I22_l2 += np.einsum("ac,ijbc->ijab", I21_l2, u[o, o, v, v])
-
-    del I21_l2
-
-    I23_l2 += np.einsum("ijab->ijab", I22_l2)
-
-    del I22_l2
-
-    rhs += np.einsum("ijab->ijab", I23_l2)
-
-    rhs -= 2 * np.einsum("ijba->ijab", I23_l2)
-
-    rhs -= 2 * np.einsum("jiab->ijab", I23_l2)
-
-    rhs += np.einsum("jiba->ijab", I23_l2)
-
-    del I23_l2
-
-    I24_l2 = np.zeros((nocc, nocc, nocc, nocc), dtype=t2.dtype)
-
-    I24_l2 += np.einsum("jilk->ijkl", u[o, o, o, o])
-
-    I24_l2 += np.einsum("ablk,ijba->ijkl", t2, u[o, o, v, v])
-
-    rhs += np.einsum("jilk,klab->ijab", I24_l2, l2)
-
-    del I24_l2
-
-    rhs += np.einsum("jidc,dcba->ijab", l2, u[v, v, v, v])
-
-    rhs -= 2 * np.einsum("jiab->ijab", u[o, o, v, v])
-
-    rhs += 4 * np.einsum("jiba->ijab", u[o, o, v, v])
-
-    return rhs
+def build_Gvv(t2, l2, np):
+    Gvv = 0
+    Gvv -= np.einsum("ijab,ebij->ae", l2, t2)
+    return Gvv

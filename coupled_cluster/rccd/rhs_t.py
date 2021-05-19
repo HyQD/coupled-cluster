@@ -1,147 +1,141 @@
-def compute_t_2_amplitudes(f, u, t, o, v, np, out=None):
-    """
-    if out is None:
-        out = np.zeros_like(t_2)
-    """
-    nocc = o.stop
-    nvirt = v.stop - nocc
+"""
+Copyright (c) 2014-2018, The Psi4NumPy Developers.
+All rights reserved.
 
-    I0_t2 = np.zeros((nocc, nocc, nocc, nocc), dtype=t.dtype)
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
 
-    I0_t2 += np.einsum("abij,klab->ijkl", t, u[o, o, v, v])
+    * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
 
-    rhs = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t.dtype)
+    * Redistributions in binary form must reproduce the above
+       copyright notice, this list of conditions and the following
+       disclaimer in the documentation and/or other materials provided
+       with the distribution.
 
-    rhs += np.einsum("ijlk,ablk->abij", I0_t2, t)
+    * Neither the name of the Psi4NumPy Developers nor the names of any
+       contributors may be used to endorse or promote products derived
+       from this software without specific prior written permission.
 
-    del I0_t2
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-    I1_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+Modified from the original source code:
+    https://github.com/psi4/psi4numpy/blob/cbef6ddcb32ccfbf773befea6dc4aaae2b428776/Coupled-Cluster/RHF/helper_ccenergy.py
+"""
 
-    I1_t2 += np.einsum("ki,abjk->ijab", f[o, o], t)
 
-    I3_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+def compute_t_2_amplitudes(f, u, t2, o, v, np, out=None):
 
-    I3_t2 += np.einsum("ijab->ijab", I1_t2)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
 
-    del I1_t2
+    Fae = build_Fae(f, u, t2, o, v, np)
+    Fmi = build_Fmi(f, u, t2, o, v, np)
 
-    I2_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    r_T2 = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t2.dtype)
+    r_T2 += u[v, v, o, o]
 
-    I2_t2 += np.einsum("ac,bcij->ijab", f[v, v], t)
+    tmp = np.einsum("aeij,be->abij", t2, Fae)
+    r_T2 += tmp
+    r_T2 += tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    I3_t2 -= np.einsum("ijab->ijab", I2_t2)
+    tmp = np.einsum("abim,mj->abij", t2, Fmi)
+    r_T2 -= tmp
+    r_T2 -= tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    del I2_t2
+    Wmnij = build_Wmnij(u, t2, o, v, np)
+    Wmbej = build_Wmbej(u, t2, o, v, np)
+    Wmbje = build_Wmbje(u, t2, o, v, np)
 
-    rhs -= np.einsum("ijba->abij", I3_t2)
+    r_T2 += np.einsum("abmn,mnij->abij", t2, Wmnij)
 
-    rhs -= np.einsum("jiab->abij", I3_t2)
+    r_T2 += np.einsum("efij,abef->abij", t2, u[v, v, v, v])
 
-    del I3_t2
+    tmp = np.einsum("aeim,mbej->abij", t2, Wmbej)
+    tmp -= np.einsum("eaim,mbej->abij", t2, Wmbej)
+    r_T2 += tmp
+    r_T2 += tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    I4_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    tmp = np.einsum("aeim,mbej->abij", t2, Wmbej)
+    tmp += np.einsum("aeim,mbje->abij", t2, Wmbje)
+    r_T2 += tmp
+    r_T2 += tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    I4_t2 -= np.einsum("jiab->ijab", u[o, o, v, v])
+    tmp = np.einsum("aemj,mbie->abij", t2, Wmbje)
+    r_T2 += tmp
+    r_T2 += tmp.swapaxes(0, 1).swapaxes(2, 3)
 
-    I4_t2 += 2 * np.einsum("jiba->ijab", u[o, o, v, v])
+    return r_T2
 
-    I5_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
 
-    I5_t2 += np.einsum("kjcb,acki->ijab", I4_t2, t)
+def build_Fae(f, u, t2, o, v, np):
 
-    I6_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Fae = np.zeros((nvirt, nvirt), dtype=t2.dtype)
 
-    I6_t2 += np.einsum("jkbc,caki->ijab", I5_t2, t)
+    Fae += f[v, v]
+    Fae -= 2 * np.einsum("afmn,mnef->ae", t2, u[o, o, v, v])
+    Fae += np.einsum("afmn,mnfe->ae", t2, u[o, o, v, v])
+    return Fae
 
-    del I5_t2
 
-    I11_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+def build_Fmi(f, u, t2, o, v, np):
 
-    I11_t2 += np.einsum("ijab->ijab", I6_t2)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Fmi = np.zeros((nocc, nocc), dtype=t2.dtype)
 
-    del I6_t2
+    Fmi += f[o, o]
+    Fmi += 2 * np.einsum("efin,mnef->mi", t2, u[o, o, v, v])
+    Fmi -= np.einsum("efin,mnfe->mi", t2, u[o, o, v, v])
+    return Fmi
 
-    I7_t2 = np.zeros((nvirt, nvirt), dtype=t.dtype)
 
-    I7_t2 += np.einsum("ijbc,acij->ab", I4_t2, t)
+def build_Wmnij(u, t2, o, v, np):
 
-    I8_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Wmnij = np.zeros((nocc, nocc, nocc, nocc), dtype=t2.dtype)
 
-    I8_t2 += np.einsum("bc,caij->ijab", I7_t2, t)
+    Wmnij += u[o, o, o, o]
 
-    del I7_t2
+    Wmnij += np.einsum("efij,mnef->mnij", t2, u[o, o, v, v])
+    return Wmnij
 
-    I11_t2 += np.einsum("jiab->ijab", I8_t2)
 
-    del I8_t2
+def build_Wmbej(u, t2, o, v, np):
 
-    I9_t2 = np.zeros((nocc, nocc), dtype=t.dtype)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Wmbej = np.zeros((nocc, nvirt, nvirt, nocc), dtype=t2.dtype)
 
-    I9_t2 += np.einsum("kjab,abki->ij", I4_t2, t)
+    Wmbej += u[o, v, v, o]
 
-    I10_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
+    Wmbej -= 0.5 * np.einsum("fbjn,mnef->mbej", t2, u[o, o, v, v])
+    Wmbej += np.einsum("fbnj,mnef->mbej", t2, u[o, o, v, v])
+    Wmbej -= 0.5 * np.einsum("fbnj,mnfe->mbej", t2, u[o, o, v, v])
+    return Wmbej
 
-    I10_t2 += np.einsum("jk,abki->ijab", I9_t2, t)
 
-    del I9_t2
+def build_Wmbje(u, t2, o, v, np):
 
-    I11_t2 += np.einsum("ijba->ijab", I10_t2)
+    nocc = t2.shape[2]
+    nvirt = t2.shape[0]
+    Wmbje = np.zeros((nocc, nvirt, nocc, nvirt), dtype=t2.dtype)
 
-    del I10_t2
+    Wmbje -= u[o, v, o, v]
+    Wmbje += 0.5 * np.einsum("fbjn,mnfe->mbje", t2, u[o, o, v, v])
 
-    rhs -= np.einsum("ijab->abij", I11_t2)
-
-    rhs -= np.einsum("jiba->abij", I11_t2)
-
-    del I11_t2
-
-    I12_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
-
-    I12_t2 += 2 * np.einsum("kjcb,caki->ijab", I4_t2, t)
-
-    del I4_t2
-
-    I12_t2 += 2 * np.einsum("jabi->ijab", u[o, v, v, o])
-
-    I12_t2 -= np.einsum("jaib->ijab", u[o, v, o, v])
-
-    rhs += np.einsum("jkbc,caki->abij", I12_t2, t)
-
-    del I12_t2
-
-    I13_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
-
-    I13_t2 -= np.einsum("jabi->ijab", u[o, v, v, o])
-
-    I13_t2 += np.einsum("caik,jkbc->ijab", t, u[o, o, v, v])
-
-    rhs += np.einsum("ikac,bckj->abij", I13_t2, t)
-
-    del I13_t2
-
-    I14_t2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t.dtype)
-
-    I14_t2 -= np.einsum("jaib->ijab", u[o, v, o, v])
-
-    I14_t2 += np.einsum("caik,kjbc->ijab", t, u[o, o, v, v])
-
-    rhs += np.einsum("ikbc,ackj->abij", I14_t2, t)
-
-    del I14_t2
-
-    rhs += np.einsum("baji->abij", u[v, v, o, o])
-
-    rhs -= np.einsum("bcjk,kaic->abij", t, u[o, v, o, v])
-
-    rhs -= np.einsum("caik,kbcj->abij", t, u[o, v, v, o])
-
-    rhs -= np.einsum("cbik,kajc->abij", t, u[o, v, o, v])
-
-    rhs += 2 * np.einsum("bcjk,kaci->abij", t, u[o, v, v, o])
-
-    rhs += np.einsum("balk,lkji->abij", t, u[o, o, o, o])
-
-    rhs += np.einsum("cdji,abdc->abij", t, u[v, v, v, v])
-
-    return rhs
+    return Wmbje
