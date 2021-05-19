@@ -13,6 +13,8 @@ from coupled_cluster.ccd.overlap import compute_orbital_adaptive_overlap
 from coupled_cluster.ccd.p_space_equations import compute_eta
 from coupled_cluster.ccd import OACCD
 
+from opt_einsum import contract
+
 
 class OATDCCD(OATDCC):
     truncation = "CCD"
@@ -40,11 +42,9 @@ class OATDCCD(OATDCC):
         rho_qspr = self.compute_two_body_density_matrix(current_time, y)
 
         return (
-            self.np.einsum("pq,qp->", self.h_prime, rho_qp, optimize=True)
+            contract("pq,qp->", self.h_prime, rho_qp, optimize=True)
             + 0.25
-            * self.np.einsum(
-                "pqrs,rspq->", self.u_prime, rho_qspr, optimize=True
-            )
+            * contract("pqrs,rspq->", self.u_prime, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
         )
 
