@@ -35,7 +35,7 @@ Modified from the original source code:
 """
 
 import numpy as np
-
+from opt_einsum import contract
 
 def build_Loovv(u, o, v):
     tmp = u[o, o, v, v].copy()
@@ -57,7 +57,7 @@ def build_Lvovv(u, o, v):
 
 def build_tau(t1, t2, o, v):
     ttau = t2.copy()
-    tmp = np.einsum("ai,bj->abij", t1, t1)
+    tmp = contract("ai,bj->abij", t1, t1)
     ttau += tmp
     return ttau
 
@@ -74,7 +74,7 @@ def build_Hov(f, Loovv, t1, o, v):
     Hov = np.zeros((nocc, nvirt), dtype=t1.dtype)
 
     Hov += f[o, v]
-    Hov += np.einsum("fn,mnef->me", t1, Loovv)
+    Hov += contract("fn,mnef->me", t1, Loovv)
     return Hov
 
 
@@ -88,9 +88,9 @@ def build_Hoo(f, Looov, Loovv, t1, t2, o, v):
     Hoo = np.zeros((nocc, nocc), dtype=t1.dtype)
 
     Hoo += f[o, o]
-    Hoo += np.einsum("ei,me->mi", t1, f[o, v])
-    Hoo += np.einsum("en,mnie->mi", t1, Looov)
-    Hoo += np.einsum("efin,mnef->mi", build_tau(t1, t2, o, v), Loovv)
+    Hoo += contract("ei,me->mi", t1, f[o, v])
+    Hoo += contract("en,mnie->mi", t1, Looov)
+    Hoo += contract("efin,mnef->mi", build_tau(t1, t2, o, v), Loovv)
     return Hoo
 
 
@@ -104,9 +104,9 @@ def build_Hvv(f, Lvovv, Loovv, t1, t2, o, v):
     Hvv = np.zeros((nvirt, nvirt), dtype=t1.dtype)
 
     Hvv += f[v, v]
-    Hvv -= np.einsum("am,me->ae", t1, f[o, v])
-    Hvv += np.einsum("fm,amef->ae", t1, Lvovv)
-    Hvv -= np.einsum("famn,mnfe->ae", build_tau(t1, t2, o, v), Loovv)
+    Hvv -= contract("am,me->ae", t1, f[o, v])
+    Hvv += contract("fm,amef->ae", t1, Lvovv)
+    Hvv -= contract("famn,mnfe->ae", build_tau(t1, t2, o, v), Loovv)
     return Hvv
 
 
@@ -120,9 +120,9 @@ def build_Hoooo(u, t1, t2, o, v):
     Hoooo = np.zeros((nocc, nocc, nocc, nocc), dtype=t1.dtype)
 
     Hoooo += u[o, o, o, o]
-    Hoooo += np.einsum("ej,mnie->mnij", t1, u[o, o, o, v])
-    Hoooo += np.einsum("ei,mnej->mnij", t1, u[o, o, v, o])
-    Hoooo += np.einsum(
+    Hoooo += contract("ej,mnie->mnij", t1, u[o, o, o, v])
+    Hoooo += contract("ei,mnej->mnij", t1, u[o, o, v, o])
+    Hoooo += contract(
         "efij,mnef->mnij", build_tau(t1, t2, o, v), u[o, o, v, v]
     )
     return Hoooo
@@ -138,9 +138,9 @@ def build_Hvvvv(u, t1, t2, o, v):
     Hvvvv = np.zeros((nvirt, nvirt, nvirt, nvirt), dtype=t1.dtype)
 
     Hvvvv += u[v, v, v, v]
-    Hvvvv -= np.einsum("bm,amef->abef", t1, u[v, o, v, v])
-    Hvvvv -= np.einsum("am,bmfe->abef", t1, u[v, o, v, v])
-    Hvvvv += np.einsum(
+    Hvvvv -= contract("bm,amef->abef", t1, u[v, o, v, v])
+    Hvvvv -= contract("am,bmfe->abef", t1, u[v, o, v, v])
+    Hvvvv += contract(
         "abmn,mnef->abef", build_tau(t1, t2, o, v), u[o, o, v, v]
     )
     return Hvvvv
@@ -153,7 +153,7 @@ def build_Hvovv(u, t1, o, v):
     Hvovv = np.zeros((nvirt, nocc, nvirt, nvirt), dtype=t1.dtype)
 
     Hvovv += u[v, o, v, v]
-    Hvovv -= np.einsum("an,nmef->amef", t1, u[o, o, v, v])
+    Hvovv -= contract("an,nmef->amef", t1, u[o, o, v, v])
     return Hvovv
 
 
@@ -164,7 +164,7 @@ def build_Hooov(u, t1, o, v):
     Hooov = np.zeros((nocc, nocc, nocc, nvirt), dtype=t1.dtype)
 
     Hooov += u[o, o, o, v]
-    Hooov += np.einsum("fi,mnfe->mnie", t1, u[o, o, v, v])
+    Hooov += contract("fi,mnfe->mnie", t1, u[o, o, v, v])
     return Hooov
 
 
@@ -178,12 +178,12 @@ def build_Hovvo(u, Loovv, t1, t2, o, v):
     Hovvo = np.zeros((nocc, nvirt, nvirt, nocc), dtype=t1.dtype)
 
     Hovvo += u[o, v, v, o]
-    Hovvo += np.einsum("fj,mbef->mbej", t1, u[o, v, v, v])
-    Hovvo -= np.einsum("bn,mnej->mbej", t1, u[o, o, v, o])
-    Hovvo -= np.einsum(
+    Hovvo += contract("fj,mbef->mbej", t1, u[o, v, v, v])
+    Hovvo -= contract("bn,mnej->mbej", t1, u[o, o, v, o])
+    Hovvo -= contract(
         "fbjn,nmfe->mbej", build_tau(t1, t2, o, v), u[o, o, v, v]
     )
-    Hovvo += np.einsum("bfjn,nmfe->mbej", t2, Loovv)
+    Hovvo += contract("bfjn,nmfe->mbej", t2, Loovv)
     return Hovvo
 
 
@@ -197,9 +197,9 @@ def build_Hovov(u, t1, t2, o, v):
     Hovov = np.zeros((nocc, nvirt, nocc, nvirt), dtype=t1.dtype)
 
     Hovov += u[o, v, o, v]
-    Hovov += np.einsum("fj,bmef->mbje", t1, u[v, o, v, v])
-    Hovov -= np.einsum("bn,mnje->mbje", t1, u[o, o, o, v])
-    Hovov -= np.einsum(
+    Hovov += contract("fj,bmef->mbje", t1, u[v, o, v, v])
+    Hovov -= contract("bn,mnje->mbje", t1, u[o, o, o, v])
+    Hovov -= contract(
         "fbjn,nmef->mbje", build_tau(t1, t2, o, v), u[o, o, v, v]
     )
     return Hovov
@@ -220,46 +220,46 @@ def build_Hvvvo(f, u, Loovv, Lvovv, t1, t2, o, v):
 
     # - Fme t_miab
 
-    Hvvvo -= np.einsum("me,abmi->abei", f[o, v], t2)
-    tmp = np.einsum("mnfe,fm->ne", Loovv, t1)
-    Hvvvo -= np.einsum("abni,ne->abei", t2, tmp)
+    Hvvvo -= contract("me,abmi->abei", f[o, v], t2)
+    tmp = contract("mnfe,fm->ne", Loovv, t1)
+    Hvvvo -= contract("abni,ne->abei", t2, tmp)
 
     # t_if Wabef
 
-    Hvvvo += np.einsum("fi,abef->abei", t1, u[v, v, v, v])
-    tmp = np.einsum("fi,am->imfa", t1, t1)
-    Hvvvo -= np.einsum("imfa,mbef->abei", tmp, u[o, v, v, v])
-    Hvvvo -= np.einsum("imfb,amef->abei", tmp, u[v, o, v, v])
-    tmp = np.einsum("mnef,fi->mnei", u[o, o, v, v], t1)
-    Hvvvo += np.einsum("abmn,mnei->abei", t2, tmp)
-    tmp = np.einsum("fi,am->imfa", t1, t1)
-    tmp1 = np.einsum("mnef,bn->mbef", u[o, o, v, v], t1)
-    Hvvvo += np.einsum("imfa,mbef->abei", tmp, tmp1)
+    Hvvvo += contract("fi,abef->abei", t1, u[v, v, v, v])
+    tmp = contract("fi,am->imfa", t1, t1)
+    Hvvvo -= contract("imfa,mbef->abei", tmp, u[o, v, v, v])
+    Hvvvo -= contract("imfb,amef->abei", tmp, u[v, o, v, v])
+    tmp = contract("mnef,fi->mnei", u[o, o, v, v], t1)
+    Hvvvo += contract("abmn,mnei->abei", t2, tmp)
+    tmp = contract("fi,am->imfa", t1, t1)
+    tmp1 = contract("mnef,bn->mbef", u[o, o, v, v], t1)
+    Hvvvo += contract("imfa,mbef->abei", tmp, tmp1)
 
     # 0.5 * tau_mnab <mn||ei>
 
-    Hvvvo += np.einsum(
+    Hvvvo += contract(
         "abmn,mnei->abei", build_tau(t1, t2, o, v), u[o, o, v, o]
     )
 
     # - P(ab) t_miaf <mb||ef>
 
-    Hvvvo -= np.einsum("faim,mbef->abei", t2, u[o, v, v, v])
-    Hvvvo -= np.einsum("fbim,amef->abei", t2, u[v, o, v, v])
-    Hvvvo += np.einsum("fbmi,amef->abei", t2, Lvovv)
+    Hvvvo -= contract("faim,mbef->abei", t2, u[o, v, v, v])
+    Hvvvo -= contract("fbim,amef->abei", t2, u[v, o, v, v])
+    Hvvvo += contract("fbmi,amef->abei", t2, Lvovv)
 
     # - P(ab) t_ma <mb||ei>
-    Hvvvo -= np.einsum("bm,amei->abei", t1, u[v, o, v, o])
-    Hvvvo -= np.einsum("am,bmie->abei", t1, u[v, o, o, v])
+    Hvvvo -= contract("bm,amei->abei", t1, u[v, o, v, o])
+    Hvvvo -= contract("am,bmie->abei", t1, u[v, o, o, v])
 
     # P(ab) t_ma * t_nibf <mn||ef>
 
-    tmp = np.einsum("mnef,am->anef", u[o, o, v, v], t1)
-    Hvvvo += np.einsum("fbin,anef->abei", t2, tmp)
-    tmp = np.einsum("mnef,am->nafe", Loovv, t1)
-    Hvvvo -= np.einsum("fbni,nafe->abei", t2, tmp)
-    tmp = np.einsum("nmef,bm->nefb", u[o, o, v, v], t1)
-    Hvvvo += np.einsum("afni,nefb->abei", t2, tmp)
+    tmp = contract("mnef,am->anef", u[o, o, v, v], t1)
+    Hvvvo += contract("fbin,anef->abei", t2, tmp)
+    tmp = contract("mnef,am->nafe", Loovv, t1)
+    Hvvvo -= contract("fbni,nafe->abei", t2, tmp)
+    tmp = contract("nmef,bm->nefb", u[o, o, v, v], t1)
+    Hvvvo += contract("afni,nefb->abei", t2, tmp)
     return Hvvvo
 
 
@@ -278,45 +278,45 @@ def build_Hovoo(f, u, Loovv, Looov, t1, t2, o, v):
 
     # - Fme t_ijbe
 
-    Hovoo += np.einsum("me,ebij->mbij", f[o, v], t2)
-    tmp = np.einsum("mnef,fn->me", Loovv, t1)
-    Hovoo += np.einsum("me,ebij->mbij", tmp, t2)
+    Hovoo += contract("me,ebij->mbij", f[o, v], t2)
+    tmp = contract("mnef,fn->me", Loovv, t1)
+    Hovoo += contract("me,ebij->mbij", tmp, t2)
 
     # - t_nb Wmnij
 
-    Hovoo -= np.einsum("bn,mnij->mbij", t1, u[o, o, o, o])
-    tmp = np.einsum("ei,bn->ineb", t1, t1)
-    Hovoo -= np.einsum("ineb,mnej->mbij", tmp, u[o, o, v, o])
-    Hovoo -= np.einsum("jneb,mnie->mbij", tmp, u[o, o, o, v])
-    tmp = np.einsum("bn,mnef->mefb", t1, u[o, o, v, v])
-    Hovoo -= np.einsum("efij,mefb->mbij", t2, tmp)
-    tmp = np.einsum("ei,fj->ijef", t1, t1)
-    tmp1 = np.einsum("bn,mnef->mbef", t1, u[o, o, v, v])
-    Hovoo -= np.einsum("mbef,ijef->mbij", tmp1, tmp)
+    Hovoo -= contract("bn,mnij->mbij", t1, u[o, o, o, o])
+    tmp = contract("ei,bn->ineb", t1, t1)
+    Hovoo -= contract("ineb,mnej->mbij", tmp, u[o, o, v, o])
+    Hovoo -= contract("jneb,mnie->mbij", tmp, u[o, o, o, v])
+    tmp = contract("bn,mnef->mefb", t1, u[o, o, v, v])
+    Hovoo -= contract("efij,mefb->mbij", t2, tmp)
+    tmp = contract("ei,fj->ijef", t1, t1)
+    tmp1 = contract("bn,mnef->mbef", t1, u[o, o, v, v])
+    Hovoo -= contract("mbef,ijef->mbij", tmp1, tmp)
 
     # 0.5 * tau_ijef <mb||ef>
 
-    Hovoo += np.einsum(
+    Hovoo += contract(
         "efij,mbef->mbij", build_tau(t1, t2, o, v), u[o, v, v, v]
     )
 
     # P(ij) t_jnbe <mn||ie>
 
-    Hovoo -= np.einsum("ebin,mnej->mbij", t2, u[o, o, v, o])
-    Hovoo -= np.einsum("ebjn,mnie->mbij", t2, u[o, o, o, v])
-    Hovoo += np.einsum("bejn,mnie->mbij", t2, Looov)
+    Hovoo -= contract("ebin,mnej->mbij", t2, u[o, o, v, o])
+    Hovoo -= contract("ebjn,mnie->mbij", t2, u[o, o, o, v])
+    Hovoo += contract("bejn,mnie->mbij", t2, Looov)
 
     # P(ij) t_ie <mb||ej>
 
-    Hovoo += np.einsum("ej,mbie->mbij", t1, u[o, v, o, v])
-    Hovoo += np.einsum("ei,mbej->mbij", t1, u[o, v, v, o])
+    Hovoo += contract("ej,mbie->mbij", t1, u[o, v, o, v])
+    Hovoo += contract("ei,mbej->mbij", t1, u[o, v, v, o])
 
     # - P(ij) t_ie * t_njbf <mn||ef>
 
-    tmp = np.einsum("ei,mnef->mnif", t1, u[o, o, v, v])
-    Hovoo -= np.einsum("fbjn,mnif->mbij", t2, tmp)
-    tmp = np.einsum("mnef,fbnj->mejb", Loovv, t2)
-    Hovoo += np.einsum("mejb,ei->mbij", tmp, t1)
-    tmp = np.einsum("ej,mnfe->mnfj", t1, u[o, o, v, v])
-    Hovoo -= np.einsum("fbin,mnfj->mbij", t2, tmp)
+    tmp = contract("ei,mnef->mnif", t1, u[o, o, v, v])
+    Hovoo -= contract("fbjn,mnif->mbij", t2, tmp)
+    tmp = contract("mnef,fbnj->mejb", Loovv, t2)
+    Hovoo += contract("mejb,ei->mbij", tmp, t1)
+    tmp = contract("ej,mnfe->mnfj", t1, u[o, o, v, v])
+    Hovoo -= contract("fbin,mnfj->mbij", t2, tmp)
     return Hovoo

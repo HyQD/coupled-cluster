@@ -1,3 +1,4 @@
+from opt_einsum import contract
 def compute_one_body_density_matrix(t1, t2, l1, l2, o, v, np, out=None):
 
     nocc = o.stop
@@ -6,20 +7,20 @@ def compute_one_body_density_matrix(t1, t2, l1, l2, o, v, np, out=None):
     rho = np.zeros((nocc + nvirt, nocc + nvirt), dtype=t1.dtype)
 
     rho[o, o] += 2 * np.eye(nocc)
-    rho[o, o] -= np.einsum("kjab,baik->ij", l2, t2)
-    rho[o, o] -= np.einsum("ja,ai->ij", l1, t1)
+    rho[o, o] -= contract("kjab,baik->ij", l2, t2)
+    rho[o, o] -= contract("ja,ai->ij", l1, t1)
 
     rho[v, o] = 2 * t1
-    rho[v, o] -= np.einsum("ak,jkcb,bcij->ai", t1, l2, t2, optimize=True)
-    rho[v, o] -= np.einsum("ci,jkcb,abjk->ai", t1, l2, t2, optimize=True)
-    rho[v, o] -= np.einsum("jb,abji->ai", l1, t2)
-    rho[v, o] += 2 * np.einsum("jb,abij->ai", l1, t2)
-    rho[v, o] -= np.einsum("jb,aj,bi->ai", l1, t1, t1, optimize=True)
+    rho[v, o] -= contract("ak,jkcb,bcij->ai", t1, l2, t2, optimize=True)
+    rho[v, o] -= contract("ci,jkcb,abjk->ai", t1, l2, t2, optimize=True)
+    rho[v, o] -= contract("jb,abji->ai", l1, t2)
+    rho[v, o] += 2 * contract("jb,abij->ai", l1, t2)
+    rho[v, o] -= contract("jb,aj,bi->ai", l1, t1, t1, optimize=True)
 
     rho[o, v] = l1
 
-    rho[v, v] = np.einsum("ia,bi->ab", l1, t1)
-    rho[v, v] += np.einsum("ijac,bcij->ab", l2, t2)
+    rho[v, v] = contract("ia,bi->ab", l1, t1)
+    rho[v, v] += contract("ijac,bcij->ab", l2, t2)
 
     return rho
 
@@ -61,7 +62,7 @@ def add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np):
 
     out[v, o] += t_1
 
-    term = t_2 - np.einsum("bi, aj->abij", t_1, t_1)
+    term = t_2 - contract("bi, aj->abij", t_1, t_1)
     out[v, o] += np.tensordot(l_1, term, axes=((0, 1), (3, 1)))
 
     term = (0.5) * np.tensordot(t_1, l_2, axes=((0), (3)))  # ikjc
