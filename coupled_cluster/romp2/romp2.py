@@ -79,9 +79,9 @@ class ROMP2(RCCD):
         rho_qspr = self.compute_two_body_density_matrix()
 
         return (
-            self.contract("pq,qp->", self.h, rho_qp, optimize=True)
+            contract("pq,qp->", self.h, rho_qp, optimize=True)
             + 0.5
-            * self.contract("pqrs,rspq->", self.u, rho_qspr, optimize=True)
+            * contract("pqrs,rspq->", self.u, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
         )
 
