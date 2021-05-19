@@ -78,8 +78,11 @@ class CCD(CoupledCluster):
         self.t_2_mixer.clear_vectors()
 
     def compute_energy(self):
-        return self.system.compute_reference_energy() + compute_ccd_ground_state_energy_correction(
-            self.u, self.t_2, self.o, self.v, np=self.np
+        return (
+            self.system.compute_reference_energy()
+            + compute_ccd_ground_state_energy_correction(
+                self.u, self.t_2, self.o, self.v, np=self.np
+            )
         )
 
     def compute_t_amplitudes(self):
