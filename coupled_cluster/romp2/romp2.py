@@ -20,6 +20,7 @@ from coupled_cluster.romp2.density_matrices import (
 
 from coupled_cluster.romp2.p_space_equations import compute_R_tilde_ai
 
+from opt_einsum import contract
 
 class ROMP2(RCCD):
     """Orbital-optimized second-order Møller-Plesset perturbation theory (OMP2)
@@ -78,9 +79,9 @@ class ROMP2(RCCD):
         rho_qspr = self.compute_two_body_density_matrix()
 
         return (
-            self.np.einsum("pq,qp->", self.h, rho_qp, optimize=True)
+            self.contract("pq,qp->", self.h, rho_qp, optimize=True)
             + 0.5
-            * self.np.einsum("pqrs,rspq->", self.u, rho_qspr, optimize=True)
+            * self.contract("pqrs,rspq->", self.u, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
         )
 

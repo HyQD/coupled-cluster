@@ -1,3 +1,4 @@
+from opt_einsum import contract
 def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
     eta = np.zeros(h.shape, dtype=np.complex128)
     A_ibaj = compute_A_ibaj(rho_qp, o, v, np=np)
@@ -16,8 +17,8 @@ def compute_A_ibaj(rho_qp, o, v, np):
     delta_ij = np.eye(o.stop)
     delta_ba = np.eye(v.stop - o.stop)
 
-    A_ibaj = np.einsum("ba, ij -> ibaj", delta_ba, rho_qp[o, o])
-    A_ibaj -= np.einsum("ij, ba -> ibaj", delta_ij, rho_qp[v, v])
+    A_ibaj = contract("ba, ij -> ibaj", delta_ba, rho_qp[o, o])
+    A_ibaj -= contract("ij, ba -> ibaj", delta_ij, rho_qp[v, v])
 
     return A_ibaj
 
