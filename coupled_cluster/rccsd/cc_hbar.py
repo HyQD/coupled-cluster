@@ -34,29 +34,28 @@ Modified from the original source code:
     https://github.com/psi4/psi4numpy/blob/cbef6ddcb32ccfbf773befea6dc4aaae2b428776/Coupled-Cluster/RHF/helper_cchbar.py
 """
 
-import numpy as np
 from opt_einsum import contract
 
 
-def build_Loovv(u, o, v):
+def build_Loovv(u, o, v, np):
     tmp = u[o, o, v, v].copy()
     Loovv = 2.0 * tmp - tmp.swapaxes(2, 3)
     return Loovv
 
 
-def build_Looov(u, o, v):
+def build_Looov(u, o, v, np):
     tmp = u[o, o, o, v].copy()
     Looov = 2.0 * tmp - tmp.swapaxes(0, 1)
     return Looov
 
 
-def build_Lvovv(u, o, v):
+def build_Lvovv(u, o, v, np):
     tmp = u[v, o, v, v].copy()
     Lvovv = 2.0 * tmp - tmp.swapaxes(2, 3)
     return Lvovv
 
 
-def build_tau(t1, t2, o, v):
+def build_tau(t1, t2, o, v, np):
     ttau = t2.copy()
     tmp = contract("ai,bj->abij", t1, t1)
     ttau += tmp
@@ -67,7 +66,7 @@ def build_tau(t1, t2, o, v):
 # T1 and T2 equations. Please refer to helper_ccenergy file for more details.
 
 
-def build_Hov(f, Loovv, t1, o, v):
+def build_Hov(f, Loovv, t1, o, v, np):
     """<m|Hbar|e> = F_me = f_me + t_nf <mn||ef>"""
 
     nocc = t1.shape[1]
@@ -79,7 +78,7 @@ def build_Hov(f, Loovv, t1, o, v):
     return Hov
 
 
-def build_Hoo(f, Looov, Loovv, t1, t2, o, v):
+def build_Hoo(f, Looov, Loovv, t1, t2, o, v, np):
     """
     <m|Hbar|i> = F_mi + 0.5 * t_ie F_me = f_mi + t_ie f_me
                  + t_ne <mn||ie> + tau_inef <mn||ef>
@@ -91,11 +90,11 @@ def build_Hoo(f, Looov, Loovv, t1, t2, o, v):
     Hoo += f[o, o]
     Hoo += contract("ei,me->mi", t1, f[o, v])
     Hoo += contract("en,mnie->mi", t1, Looov)
-    Hoo += contract("efin,mnef->mi", build_tau(t1, t2, o, v), Loovv)
+    Hoo += contract("efin,mnef->mi", build_tau(t1, t2, o, v, np), Loovv)
     return Hoo
 
 
-def build_Hvv(f, Lvovv, Loovv, t1, t2, o, v):
+def build_Hvv(f, Lvovv, Loovv, t1, t2, o, v, np):
     """
     <a|Hbar|e> = F_ae - 0.5 * t_ma F_me = f_ae - t_ma f_me
                  + t_mf <am||ef> - tau_mnfa <mn||fe>
@@ -107,11 +106,11 @@ def build_Hvv(f, Lvovv, Loovv, t1, t2, o, v):
     Hvv += f[v, v]
     Hvv -= contract("am,me->ae", t1, f[o, v])
     Hvv += contract("fm,amef->ae", t1, Lvovv)
-    Hvv -= contract("famn,mnfe->ae", build_tau(t1, t2, o, v), Loovv)
+    Hvv -= contract("famn,mnfe->ae", build_tau(t1, t2, o, v, np), Loovv)
     return Hvv
 
 
-def build_Hoooo(u, t1, t2, o, v):
+def build_Hoooo(u, t1, t2, o, v, np):
     """
     <mn|Hbar|ij> = W_mnij + 0.25 * tau_ijef <mn||ef> = <mn||ij>
                    + P(ij) t_je <mn||ie> + 0.5 * tau_ijef <mn||ef>
@@ -123,11 +122,13 @@ def build_Hoooo(u, t1, t2, o, v):
     Hoooo += u[o, o, o, o]
     Hoooo += contract("ej,mnie->mnij", t1, u[o, o, o, v])
     Hoooo += contract("ei,mnej->mnij", t1, u[o, o, v, o])
-    Hoooo += contract("efij,mnef->mnij", build_tau(t1, t2, o, v), u[o, o, v, v])
+    Hoooo += contract(
+        "efij,mnef->mnij", build_tau(t1, t2, o, v, np), u[o, o, v, v]
+    )
     return Hoooo
 
 
-def build_Hvvvv(u, t1, t2, o, v):
+def build_Hvvvv(u, t1, t2, o, v, np):
     """
     <ab|Hbar|ef> = W_abef + 0.25 * tau_mnab <mn||ef> = <ab||ef>
                    - P(ab) t_mb <am||ef> + 0.5 * tau_mnab <mn||ef>
@@ -139,11 +140,13 @@ def build_Hvvvv(u, t1, t2, o, v):
     Hvvvv += u[v, v, v, v]
     Hvvvv -= contract("bm,amef->abef", t1, u[v, o, v, v])
     Hvvvv -= contract("am,bmfe->abef", t1, u[v, o, v, v])
-    Hvvvv += contract("abmn,mnef->abef", build_tau(t1, t2, o, v), u[o, o, v, v])
+    Hvvvv += contract(
+        "abmn,mnef->abef", build_tau(t1, t2, o, v, np), u[o, o, v, v]
+    )
     return Hvvvv
 
 
-def build_Hvovv(u, t1, o, v):
+def build_Hvovv(u, t1, o, v, np):
     """<am|Hbar|ef> = <am||ef> - t_na <nm||ef>"""
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -154,7 +157,7 @@ def build_Hvovv(u, t1, o, v):
     return Hvovv
 
 
-def build_Hooov(u, t1, o, v):
+def build_Hooov(u, t1, o, v, np):
     """<mn|Hbar|ie> = <mn||ie> + t_if <mn||fe>"""
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -165,7 +168,7 @@ def build_Hooov(u, t1, o, v):
     return Hooov
 
 
-def build_Hovvo(u, Loovv, t1, t2, o, v):
+def build_Hovvo(u, Loovv, t1, t2, o, v, np):
     """
     <mb|Hbar|ej> = W_mbej - 0.5 * t_jnfb <mn||ef> = <mb||ej> + t_jf <mb||ef>
                    - t_nb <mn||ej> - (t_jnfb + t_jf t_nb) <nm||fe>
@@ -177,12 +180,14 @@ def build_Hovvo(u, Loovv, t1, t2, o, v):
     Hovvo += u[o, v, v, o]
     Hovvo += contract("fj,mbef->mbej", t1, u[o, v, v, v])
     Hovvo -= contract("bn,mnej->mbej", t1, u[o, o, v, o])
-    Hovvo -= contract("fbjn,nmfe->mbej", build_tau(t1, t2, o, v), u[o, o, v, v])
+    Hovvo -= contract(
+        "fbjn,nmfe->mbej", build_tau(t1, t2, o, v, np), u[o, o, v, v]
+    )
     Hovvo += contract("bfjn,nmfe->mbej", t2, Loovv)
     return Hovvo
 
 
-def build_Hovov(u, t1, t2, o, v):
+def build_Hovov(u, t1, t2, o, v, np):
     """
     <mb|Hbar|je> = - <mb|Hbar|ej> = <mb||je> + t_jf <bm||ef> - t_nb <mn||je>
                    - (t_jnfb + t_jf t_nb) <nm||ef>
@@ -194,11 +199,13 @@ def build_Hovov(u, t1, t2, o, v):
     Hovov += u[o, v, o, v]
     Hovov += contract("fj,bmef->mbje", t1, u[v, o, v, v])
     Hovov -= contract("bn,mnje->mbje", t1, u[o, o, o, v])
-    Hovov -= contract("fbjn,nmef->mbje", build_tau(t1, t2, o, v), u[o, o, v, v])
+    Hovov -= contract(
+        "fbjn,nmef->mbje", build_tau(t1, t2, o, v, np), u[o, o, v, v]
+    )
     return Hovov
 
 
-def build_Hvvvo(f, u, Loovv, Lvovv, t1, t2, o, v):
+def build_Hvvvo(f, u, Loovv, Lvovv, t1, t2, o, v, np):
     """
     <ab|Hbar|ei> = <ab||ei> - F_me t_miab + t_if Wabef + 0.5 * tau_mnab <mn||ei>
                    - P(ab) t_miaf <mb||ef> - P(ab) t_ma {<mb||ei> - t_nibf <mn||ef>}
@@ -231,7 +238,9 @@ def build_Hvvvo(f, u, Loovv, Lvovv, t1, t2, o, v):
 
     # 0.5 * tau_mnab <mn||ei>
 
-    Hvvvo += contract("abmn,mnei->abei", build_tau(t1, t2, o, v), u[o, o, v, o])
+    Hvvvo += contract(
+        "abmn,mnei->abei", build_tau(t1, t2, o, v, np), u[o, o, v, o]
+    )
 
     # - P(ab) t_miaf <mb||ef>
 
@@ -254,7 +263,7 @@ def build_Hvvvo(f, u, Loovv, Lvovv, t1, t2, o, v):
     return Hvvvo
 
 
-def build_Hovoo(f, u, Loovv, Looov, t1, t2, o, v):
+def build_Hovoo(f, u, Loovv, Looov, t1, t2, o, v, np):
     """
     <mb|Hbar|ij> = <mb||ij> - Fme t_ijbe - t_nb Wmnij + 0.5 * tau_ijef <mb||ef>
                    + P(ij) t_jnbe <mn||ie> + P(ij) t_ie {<mb||ej> - t_njbf <mn||ef>}
@@ -287,7 +296,9 @@ def build_Hovoo(f, u, Loovv, Looov, t1, t2, o, v):
 
     # 0.5 * tau_ijef <mb||ef>
 
-    Hovoo += contract("efij,mbef->mbij", build_tau(t1, t2, o, v), u[o, v, v, v])
+    Hovoo += contract(
+        "efij,mbef->mbij", build_tau(t1, t2, o, v, np), u[o, v, v, v]
+    )
 
     # P(ij) t_jnbe <mn||ie>
 

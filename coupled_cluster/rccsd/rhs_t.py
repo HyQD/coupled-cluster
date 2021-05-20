@@ -44,9 +44,9 @@ def compute_t_1_amplitudes(f, u, t1, t2, o, v, np, out=None):
 
     ### Build OEI intermediates
 
-    Fae = build_Fae(f, u, t1, t2, o, v)
-    Fmi = build_Fmi(f, u, t1, t2, o, v)
-    Fme = build_Fme(f, u, t1, o, v)
+    Fae = build_Fae(f, u, t1, t2, o, v, np)
+    Fmi = build_Fmi(f, u, t1, t2, o, v, np)
+    Fme = build_Fme(f, u, t1, o, v, np)
 
     #### Build residual of T1 equations by spin adaption of  Eqn 1:
     r_T1 = np.zeros((nvirt, nocc), dtype=t1.dtype)
@@ -73,9 +73,9 @@ def compute_t_2_amplitudes(f, u, t1, t2, o, v, np, out=None):
     # TODO: This should be handled more smoothly in the sense that
     # they are compute in compute_t1_amplitudes as well
 
-    Fae = build_Fae(f, u, t1, t2, o, v)
-    Fmi = build_Fmi(f, u, t1, t2, o, v)
-    Fme = build_Fme(f, u, t1, o, v)
+    Fae = build_Fae(f, u, t1, t2, o, v, np)
+    Fmi = build_Fmi(f, u, t1, t2, o, v, np)
+    Fme = build_Fme(f, u, t1, o, v, np)
 
     r_T2 = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t1.dtype)
     r_T2 += u[v, v, o, o]
@@ -102,12 +102,12 @@ def compute_t_2_amplitudes(f, u, t1, t2, o, v, np, out=None):
     r_T2 -= first.swapaxes(0, 1).swapaxes(2, 3)
 
     # Build TEI Intermediates
-    tmp_tau = build_tau(t1, t2, o, v)
+    tmp_tau = build_tau(t1, t2, o, v, np)
 
-    Wmnij = build_Wmnij(u, t1, t2, o, v)
-    Wmbej = build_Wmbej(u, t1, t2, o, v)
-    Wmbje = build_Wmbje(u, t1, t2, o, v)
-    Zmbij = build_Zmbij(u, t1, t2, o, v)
+    Wmnij = build_Wmnij(u, t1, t2, o, v, np)
+    Wmbej = build_Wmbej(u, t1, t2, o, v, np)
+    Wmbje = build_Wmbje(u, t1, t2, o, v, np)
+    Zmbij = build_Zmbij(u, t1, t2, o, v, np)
 
     # 0.5 * tau_mnab Wmnij_mnij  -> tau_mnab Wmnij_mnij
     # This also includes the last term in 0.5 * tau_ijef Wabef
@@ -170,24 +170,21 @@ def compute_t_2_amplitudes(f, u, t1, t2, o, v, np, out=None):
     return r_T2
 
 
-import numpy as np
-
-
-def build_tilde_tau(t1, t2, o, v):
+def build_tilde_tau(t1, t2, o, v, np):
     ttau = t2.copy()
     tmp = 0.5 * contract("ai,bj->abij", t1, t1)
     ttau += tmp
     return ttau
 
 
-def build_tau(t1, t2, o, v):
+def build_tau(t1, t2, o, v, np):
     ttau = t2.copy()
     tmp = contract("ai,bj->abij", t1, t1)
     ttau += tmp
     return ttau
 
 
-def build_Fae(f, u, t1, t2, o, v):
+def build_Fae(f, u, t1, t2, o, v, np):
 
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -198,15 +195,15 @@ def build_Fae(f, u, t1, t2, o, v):
     Fae += 2 * contract("fm,mafe->ae", t1, u[o, v, v, v])
     Fae -= contract("fm,maef->ae", t1, u[o, v, v, v])
     Fae -= 2 * contract(
-        "afmn,mnef->ae", build_tilde_tau(t1, t2, o, v), u[o, o, v, v]
+        "afmn,mnef->ae", build_tilde_tau(t1, t2, o, v, np), u[o, o, v, v]
     )
     Fae += contract(
-        "afmn,mnfe->ae", build_tilde_tau(t1, t2, o, v), u[o, o, v, v]
+        "afmn,mnfe->ae", build_tilde_tau(t1, t2, o, v, np), u[o, o, v, v]
     )
     return Fae
 
 
-def build_Fmi(f, u, t1, t2, o, v):
+def build_Fmi(f, u, t1, t2, o, v, np):
 
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -217,15 +214,15 @@ def build_Fmi(f, u, t1, t2, o, v):
     Fmi += 2 * contract("en,mnie->mi", t1, u[o, o, o, v])
     Fmi -= contract("en,mnei->mi", t1, u[o, o, v, o])
     Fmi += 2 * contract(
-        "efin,mnef->mi", build_tilde_tau(t1, t2, o, v), u[o, o, v, v]
+        "efin,mnef->mi", build_tilde_tau(t1, t2, o, v, np), u[o, o, v, v]
     )
     Fmi -= contract(
-        "efin,mnfe->mi", build_tilde_tau(t1, t2, o, v), u[o, o, v, v]
+        "efin,mnfe->mi", build_tilde_tau(t1, t2, o, v, np), u[o, o, v, v]
     )
     return Fmi
 
 
-def build_Fme(f, u, t1, o, v):
+def build_Fme(f, u, t1, o, v, np):
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
     Fme = np.zeros((nocc, nvirt), dtype=t1.dtype)
@@ -235,7 +232,7 @@ def build_Fme(f, u, t1, o, v):
     return Fme
 
 
-def build_Wmnij(u, t1, t2, o, v):
+def build_Wmnij(u, t1, t2, o, v, np):
 
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -246,11 +243,13 @@ def build_Wmnij(u, t1, t2, o, v):
     Wmnij += contract("ei,mnej->mnij", t1, u[o, o, v, o])
     # prefactor of 1 instead of 0.5 below to fold the last term of
     # 0.5 * tau_ijef Wabef in Wmnij contraction: 0.5 * tau_mnab Wmnij_mnij
-    Wmnij += contract("efij,mnef->mnij", build_tau(t1, t2, o, v), u[o, o, v, v])
+    Wmnij += contract(
+        "efij,mnef->mnij", build_tau(t1, t2, o, v, np), u[o, o, v, v]
+    )
     return Wmnij
 
 
-def build_Wmbej(u, t1, t2, o, v):
+def build_Wmbej(u, t1, t2, o, v, np):
 
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -267,7 +266,7 @@ def build_Wmbej(u, t1, t2, o, v):
     return Wmbej
 
 
-def build_Wmbje(u, t1, t2, o, v):
+def build_Wmbje(u, t1, t2, o, v, np):
 
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
@@ -282,10 +281,12 @@ def build_Wmbje(u, t1, t2, o, v):
     return Wmbje
 
 
-def build_Zmbij(u, t1, t2, o, v):
+def build_Zmbij(u, t1, t2, o, v, np):
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
     Zmbij = np.zeros((nocc, nvirt, nocc, nocc), dtype=t1.dtype)
 
-    Zmbij += contract("mbef,efij->mbij", u[o, v, v, v], build_tau(t1, t2, o, v))
+    Zmbij += contract(
+        "mbef,efij->mbij", u[o, v, v, v], build_tau(t1, t2, o, v, np)
+    )
     return Zmbij
