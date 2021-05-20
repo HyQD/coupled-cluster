@@ -1,3 +1,6 @@
+from opt_einsum import contract
+
+
 def compute_one_body_density_matrix(t_1, t_2, l_1, l_2, o, v, np, out=None):
     if out is None:
         out = np.zeros((v.stop, v.stop), dtype=t_1.dtype)
@@ -49,7 +52,7 @@ def add_rho_ai(t_1, t_2, l_1, l_2, o, v, out, np):
 
     out[v, o] += t_1
 
-    term = t_2 - np.einsum("bi, aj->abij", t_1, t_1)
+    term = t_2 - contract("bi, aj->abij", t_1, t_1)
     out[v, o] += np.tensordot(l_1, term, axes=((0, 1), (3, 1)))
 
     term = (0.5) * np.tensordot(t_1, l_2, axes=((0), (3)))  # ikjc

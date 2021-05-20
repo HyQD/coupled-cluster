@@ -17,6 +17,8 @@ from coupled_cluster.ccd.p_space_equations import (
     compute_R_tilde_ai,
 )
 
+from opt_einsum import contract
+
 
 class OACCD(CCD):
     """Orbital Adaptive Coupled Cluster Doubles
@@ -76,9 +78,8 @@ class OACCD(CCD):
         rho_qspr = self.compute_two_body_density_matrix()
 
         return (
-            self.np.einsum("pq,qp->", self.h, rho_qp, optimize=True)
-            + 0.25
-            * self.np.einsum("pqrs,rspq->", self.u, rho_qspr, optimize=True)
+            contract("pq,qp->", self.h, rho_qp, optimize=True)
+            + 0.25 * contract("pqrs,rspq->", self.u, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
         )
 

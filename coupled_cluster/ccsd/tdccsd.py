@@ -19,6 +19,8 @@ from coupled_cluster.ccsd.time_dependent_overlap import (
     compute_time_dependent_overlap,
 )
 
+from opt_einsum import contract
+
 
 class TDCCSD(TimeDependentCoupledCluster):
     truncation = "CCSD"
@@ -41,7 +43,7 @@ class TDCCSD(TimeDependentCoupledCluster):
 
         t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
 
-        temp = np.einsum("ai, bj -> abij", t_1, t_1)
+        temp = contract("ai, bj -> abij", t_1, t_1)
         temp -= temp.swapaxes(2, 3)
         temp -= temp.swapaxes(0, 1)
 

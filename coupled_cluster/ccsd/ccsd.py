@@ -19,6 +19,8 @@ from coupled_cluster.ccsd.density_matrices import (
     compute_one_body_density_matrix,
 )
 
+from opt_einsum import contract
+
 
 class CCSD(CoupledCluster):
     """Coupled Cluster Singels Doubles
@@ -129,11 +131,9 @@ class CCSD(CoupledCluster):
         np = self.np
         o, v = self.o, self.v
 
-        energy = np.einsum("ia, ai ->", self.f[o, v], self.t_1)
-        energy += 0.25 * np.einsum(
-            "ijab, abij ->", self.u[o, o, v, v], self.t_2
-        )
-        energy += 0.5 * np.einsum(
+        energy = contract("ia, ai ->", self.f[o, v], self.t_1)
+        energy += 0.25 * contract("ijab, abij ->", self.u[o, o, v, v], self.t_2)
+        energy += 0.5 * contract(
             "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
         )
 

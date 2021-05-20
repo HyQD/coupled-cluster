@@ -26,6 +26,8 @@ from coupled_cluster.rcc2.time_dependent_overlap import (
 
 from coupled_cluster.cc_helper import AmplitudeContainer
 
+from opt_einsum import contract
+
 
 class TDRCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
@@ -114,9 +116,9 @@ class TDRCC2(TimeDependentCoupledCluster):
         t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
 
         val = 1
-        val -= 0.5 * np.einsum("ijab,abij->", l_2, t_2)
-        val += 0.5 * np.einsum("ai,bj,ijab->", t_1, t_1, l_2, optimize=True)
-        val -= np.einsum("ia,ai->", l_1, t_1)
+        val -= 0.5 * contract("ijab,abij->", l_2, t_2)
+        val += 0.5 * contract("ai,bj,ijab->", t_1, t_1, l_2, optimize=True)
+        val -= contract("ia,ai->", l_1, t_1)
 
         return val
 

@@ -1,3 +1,6 @@
+from opt_einsum import contract
+
+
 def compute_one_body_density_matrix(t2, l2, o, v, np, out=None):
 
     nocc = o.stop
@@ -6,9 +9,9 @@ def compute_one_body_density_matrix(t2, l2, o, v, np, out=None):
     rho = np.zeros((nocc + nvirt, nocc + nvirt), dtype=t2.dtype)
 
     rho[o, o] += 2 * np.eye(nocc)
-    rho[o, o] -= np.einsum("kjab,baik->ji", l2, t2)
+    rho[o, o] -= contract("kjab,baik->ji", l2, t2)
 
-    rho[v, v] += np.einsum("ijac,bcij->ba", l2, t2)
+    rho[v, v] += contract("ijac,bcij->ba", l2, t2)
 
     return rho
 
@@ -17,7 +20,7 @@ def compute_two_body_density_matrix(t, l, o, v, np, out=None):
     """
     The final two body density matrix should satisfy
 
-        np.einsum('pqpq->', rho_qspr) = N(N-1)
+        contract('pqpq->', rho_qspr) = N(N-1)
 
     where N is the number of electrons.
     """
@@ -43,19 +46,19 @@ def add_rho_klij(t, l, o, v, out, np):
     delta = np.eye(o.stop)
 
     rho = np.zeros((no, no, no, no), dtype=t.dtype)
-    rho += 4 * np.einsum("ik,jl->klij", delta, delta)
-    rho -= 2 * np.einsum("il,jk->klij", delta, delta)
-    rho += np.einsum("klab,abij->klij", l, t)
+    rho += 4 * contract("ik,jl->klij", delta, delta)
+    rho -= 2 * contract("il,jk->klij", delta, delta)
+    rho += contract("klab,abij->klij", l, t)
 
-    I0 = np.einsum("mkab,abmi->ki", l, t)
+    I0 = contract("mkab,abmi->ki", l, t)
 
-    rho -= 2 * np.einsum("ik,lj->klij", delta, I0)
+    rho -= 2 * contract("ik,lj->klij", delta, I0)
 
-    rho += np.einsum("il,kj->klij", delta, I0)
+    rho += contract("il,kj->klij", delta, I0)
 
-    rho += np.einsum("jk,li->klij", delta, I0)
+    rho += contract("jk,li->klij", delta, I0)
 
-    rho -= 2 * np.einsum("jl,ki->klij", delta, I0)
+    rho -= 2 * contract("jl,ki->klij", delta, I0)
 
     out[o, o, o, o] += rho
 
@@ -67,99 +70,99 @@ def add_rho_abij(t, l, o, v, out, np):
 
     I0 = np.zeros((no, no, no, no), dtype=t.dtype)
 
-    I0 += np.einsum("ijba,bakl->ijkl", l, t)
+    I0 += contract("ijba,bakl->ijkl", l, t)
 
     rho = np.zeros((nv, nv, no, no), dtype=t.dtype)
 
-    rho += np.einsum("lkij,ablk->abij", I0, t)
+    rho += contract("lkij,ablk->abij", I0, t)
 
     del I0
 
     I1 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I1 += np.einsum("ikac,cbjk->ijab", l, t)
+    I1 += contract("ikac,cbjk->ijab", l, t)
 
-    rho += np.einsum("kica,cbjk->abij", I1, t)
+    rho += contract("kica,cbjk->abij", I1, t)
 
     del I1
 
     I2 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I2 += np.einsum("ikca,cbjk->ijab", l, t)
+    I2 += contract("ikca,cbjk->ijab", l, t)
 
-    rho += np.einsum("kicb,cajk->abij", I2, t)
+    rho += contract("kicb,cajk->abij", I2, t)
 
     del I2
 
     I3 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I3 += np.einsum("kica,bcjk->ijab", l, t)
+    I3 += contract("kica,bcjk->ijab", l, t)
 
     I4 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I4 += np.einsum("kjcb,acik->ijab", I3, t)
+    I4 += contract("kjcb,acik->ijab", I3, t)
 
     I5 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I5 += np.einsum("ijab->ijab", I4)
+    I5 += contract("ijab->ijab", I4)
 
     del I4
 
     I10 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I10 += np.einsum("kica,cbjk->ijab", I3, t)
+    I10 += contract("kica,cbjk->ijab", I3, t)
 
     del I3
 
     I11 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I11 += np.einsum("ijab->ijab", I10)
+    I11 += contract("ijab->ijab", I10)
 
     del I10
 
-    I5 += np.einsum("baji->ijab", t)
+    I5 += contract("baji->ijab", t)
 
-    rho -= 2 * np.einsum("ijba->abij", I5)
+    rho -= 2 * contract("ijba->abij", I5)
 
-    rho += 4 * np.einsum("ijab->abij", I5)
+    rho += 4 * contract("ijab->abij", I5)
 
     del I5
 
     I6 = np.zeros((no, no), dtype=t.dtype)
 
-    I6 += np.einsum("kiab,bajk->ij", l, t)
+    I6 += contract("kiab,bajk->ij", l, t)
 
     I7 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I7 += np.einsum("kj,abik->ijab", I6, t)
+    I7 += contract("kj,abik->ijab", I6, t)
 
     del I6
 
-    I11 += np.einsum("ijab->ijab", I7)
+    I11 += contract("ijab->ijab", I7)
 
     del I7
 
     I8 = np.zeros((nv, nv), dtype=t.dtype)
 
-    I8 += np.einsum("jiac,bcji->ab", l, t)
+    I8 += contract("jiac,bcji->ab", l, t)
 
     I9 = np.zeros((no, no, nv, nv), dtype=t.dtype)
 
-    I9 += np.einsum("cb,acij->ijab", I8, t)
+    I9 += contract("cb,acij->ijab", I8, t)
 
     del I8
 
-    I11 += np.einsum("ijab->ijab", I9)
+    I11 += contract("ijab->ijab", I9)
 
     del I9
 
-    rho -= 2 * np.einsum("ijab->abij", I11)
+    rho -= 2 * contract("ijab->abij", I11)
 
-    rho += np.einsum("ijba->abij", I11)
+    rho += contract("ijba->abij", I11)
 
-    rho += np.einsum("jiab->abij", I11)
+    rho += contract("jiab->abij", I11)
 
-    rho -= 2 * np.einsum("jiba->abij", I11)
+    rho -= 2 * contract("jiba->abij", I11)
 
     del I11
 
@@ -175,11 +178,11 @@ def add_rho_jbia(t, l, o, v, out, np):
 
     rho = np.zeros((no, nv, no, nv), dtype=t.dtype)
 
-    rho -= np.einsum("kjac,bcki->jbia", l, t)
-    rho -= np.einsum("kjca,bcik->jbia", l, t)
+    rho -= contract("kjac,bcki->jbia", l, t)
+    rho -= contract("kjca,bcik->jbia", l, t)
 
-    tmp = np.einsum("klac,bckl->ab", l, t)
-    rho += 2 * np.einsum("ij,ab->jbia", delta, tmp)
+    tmp = contract("klac,bckl->ab", l, t)
+    rho += 2 * contract("ij,ab->jbia", delta, tmp)
     out[o, v, o, v] += rho
     out[v, o, v, o] += rho.transpose(1, 0, 3, 2)
 
@@ -193,11 +196,11 @@ def add_rho_bjia(t, l, o, v, out, np):
 
     rho = np.zeros((nv, no, no, nv), dtype=t.dtype)
 
-    rho -= np.einsum("kjca,bcki->bjia", l, t)
-    rho += 2 * np.einsum("kjca,bcik->bjia", l, t)
+    rho -= contract("kjca,bcki->bjia", l, t)
+    rho += 2 * contract("kjca,bcik->bjia", l, t)
 
-    tmp = np.einsum("klac,bckl->ab", l, t)
-    rho -= np.einsum("ij,ab->bjia", delta, tmp)
+    tmp = contract("klac,bckl->ab", l, t)
+    rho -= contract("ij,ab->bjia", delta, tmp)
 
     out[v, o, o, v] += rho
     out[o, v, v, o] += rho.transpose(1, 0, 3, 2)
@@ -209,4 +212,4 @@ def add_rho_ijab(t, l, o, v, out, np):
 
 def add_rho_cdab(t, l, o, v, out, np):
     # out[v, v, v, v] += np.tensordot(t, l, axes=((2, 3), (0, 1)))
-    out[v, v, v, v] += np.einsum("ijab,cdij->cdab", l, t)
+    out[v, v, v, v] += contract("ijab,cdij->cdab", l, t)

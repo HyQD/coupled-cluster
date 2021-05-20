@@ -1,3 +1,6 @@
+from opt_einsum import contract
+
+
 def compute_one_body_density_matrix(t, l, o, v, np, out=None):
     if out is None:
         out = np.zeros((v.stop, v.stop), dtype=t.dtype)
@@ -15,7 +18,7 @@ def compute_two_body_density_matrix(t, l, o, v, np, out=None):
 
     The final two body density matrix should satisfy
 
-        np.einsum('pqpq->', rho_qspr) = N(N-1)
+        contract('pqpq->', rho_qspr) = N(N-1)
 
     where N is the number of electrons.
     """
@@ -44,12 +47,12 @@ def add_rho_klij(t, l, o, v, out, np):
     """
     delta = np.eye(o.stop)
 
-    term = np.einsum("ki, lj -> klij", delta, delta)
+    term = contract("ki, lj -> klij", delta, delta)
     term -= term.swapaxes(2, 3)
     out[o, o, o, o] += term
 
     term_lj = -0.5 * np.tensordot(l, t, axes=((1, 2, 3), (3, 0, 1)))
-    term = np.einsum("ki, lj -> klij", delta, term_lj)
+    term = contract("ki, lj -> klij", delta, term_lj)
     term -= term.swapaxes(0, 1)
     term -= term.swapaxes(2, 3)
     out[o, o, o, o] += term
@@ -117,7 +120,7 @@ def add_rho_jbia(t, l, o, v, out, np):
 
     # Complexity: O(n^2 m^3)
     W_ba = 0.5 * np.tensordot(t, l, axes=((1, 2, 3), (3, 0, 1)))
-    term_jbia = np.einsum("ji, ba -> jbia", delta, W_ba)
+    term_jbia = contract("ji, ba -> jbia", delta, W_ba)
 
     # Complexity: O(m^3 n^3)
     term_jbia -= np.tensordot(l, t, axes=((1, 3), (3, 1))).transpose(0, 2, 3, 1)

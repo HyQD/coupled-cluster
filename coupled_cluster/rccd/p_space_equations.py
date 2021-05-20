@@ -1,3 +1,6 @@
+from opt_einsum import contract
+
+
 def compute_eta(h, u, rho_qp, rho_qspr, o, v, np):
     eta = np.zeros(h.shape, dtype=np.complex128)
     A_ibaj = compute_A_ibaj(rho_qp, o, v, np=np)
@@ -32,33 +35,33 @@ def compute_A_ibaj(rho_qp, o, v, np):
     delta_ij = np.eye(o.stop)
     delta_ba = np.eye(v.stop - o.stop)
 
-    A_ibaj = np.einsum("ba, ij -> ibaj", delta_ba, rho_qp[o, o])
-    A_ibaj -= np.einsum("ij, ba -> ibaj", delta_ij, rho_qp[v, v])
+    A_ibaj = contract("ba, ij -> ibaj", delta_ba, rho_qp[o, o])
+    A_ibaj -= contract("ij, ba -> ibaj", delta_ij, rho_qp[v, v])
 
     return A_ibaj
 
 
 def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
 
-    R_ia = np.einsum("pa,ip->ia", h[:, v], rho_qp[o, :]) - np.einsum(
+    R_ia = contract("pa,ip->ia", h[:, v], rho_qp[o, :]) - contract(
         "iq,qa->ia", h[o, :], rho_qp[:, v]
     )
-    R_ia -= 0.5 * np.einsum(
+    R_ia -= 0.5 * contract(
         "iqrs,rsaq->ia",
         u[o, :, :, :],
         rho_qspr[:, :, v, :],
     )
-    R_ia -= 0.5 * np.einsum(
+    R_ia -= 0.5 * contract(
         "pirs,rspa->ia",
         u[:, o, :, :],
         rho_qspr[:, :, :, v],
     )
-    R_ia += 0.5 * np.einsum(
+    R_ia += 0.5 * contract(
         "pqra,ripq->ia",
         u[:, :, :, v],
         rho_qspr[:, o, :, :],
     )
-    R_ia += 0.5 * np.einsum(
+    R_ia += 0.5 * contract(
         "pqas,ispq->ia",
         u[:, :, v, :],
         rho_qspr[o, :, :, :],
@@ -68,25 +71,25 @@ def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
 
 
 def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
-    R_tilde_ai = np.einsum("pi,ap->ai", h[:, o], rho_qp[v, :]) - np.einsum(
+    R_tilde_ai = contract("pi,ap->ai", h[:, o], rho_qp[v, :]) - contract(
         "aq,qi->ai", h[v, :], rho_qp[:, o]
     )
-    R_tilde_ai -= 0.5 * np.einsum(
+    R_tilde_ai -= 0.5 * contract(
         "aqrs,rsiq->ai",
         u[v, :, :, :],
         rho_qspr[:, :, o, :],
     )
-    R_tilde_ai -= 0.5 * np.einsum(
+    R_tilde_ai -= 0.5 * contract(
         "pars,rspi->ai",
         u[:, v, :, :],
         rho_qspr[:, :, :, o],
     )
-    R_tilde_ai += 0.5 * np.einsum(
+    R_tilde_ai += 0.5 * contract(
         "pqri,rapq->ai",
         u[:, :, :, o],
         rho_qspr[:, v, :, :],
     )
-    R_tilde_ai += 0.5 * np.einsum(
+    R_tilde_ai += 0.5 * contract(
         "pqis,aspq->ai",
         u[:, :, o, :],
         rho_qspr[v, :, :, :],

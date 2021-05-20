@@ -19,6 +19,8 @@ from coupled_cluster.rccsd.density_matrices import (
     compute_one_body_density_matrix,
 )
 
+from opt_einsum import contract
+
 
 class RCCSD(CoupledCluster):
     r"""Restricted Coupled Cluster Singels Doubles
@@ -163,19 +165,19 @@ class RCCSD(CoupledCluster):
         np = self.np
         o, v = self.o, self.v
 
-        e_corr = 2 * np.einsum("ia,ai->", self.f[o, v], self.t_1)
+        e_corr = 2 * contract("ia,ai->", self.f[o, v], self.t_1)
 
-        e_corr += 2 * np.einsum("abij,ijab->", self.t_2, self.u[o, o, v, v])
-        e_corr -= np.einsum("abij,ijba->", self.t_2, self.u[o, o, v, v])
+        e_corr += 2 * contract("abij,ijab->", self.t_2, self.u[o, o, v, v])
+        e_corr -= contract("abij,ijba->", self.t_2, self.u[o, o, v, v])
 
-        e_corr += 2 * np.einsum(
+        e_corr += 2 * contract(
             "ai,bj,ijab->",
             self.t_1,
             self.t_1,
             self.u[o, o, v, v],
             optimize=True,
         )
-        e_corr -= np.einsum(
+        e_corr -= contract(
             "ai,bj,ijba->",
             self.t_1,
             self.t_1,
