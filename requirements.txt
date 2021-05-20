@@ -17,6 +17,9 @@ black
 sphinx
 sphinx_rtd_theme
 
+# Install numpy
+numpy
+
 # Install PySCF
 pyscf
 
