@@ -89,7 +89,6 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
     Hovov = build_Hovov(u, t1, t2, o, v, np)
     ################################################
     Hoooo = build_Hoooo(u, t1, t2, o, v, np)
-    Hvvvv = build_Hvvvv(u, t1, t2, o, v, np)
 
     # l2 equations
     nocc = t1.shape[1]
@@ -102,7 +101,20 @@ def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
     r_l2 += contract("ijeb,ea->ijab", l2, Hvv)
     r_l2 -= contract("im,mjab->ijab", Hoo, l2)
     r_l2 += 0.5 * contract("ijmn,mnab->ijab", Hoooo, l2)
-    r_l2 += 0.5 * contract("ijef,efab->ijab", l2, Hvvvv)
+
+    ###########################################################################
+    # Avoid explicit construction og Hvvvv
+    r_l2 += 0.5 * contract("ijef, efab->ijab", l2, u[v, v, v, v])
+
+    tmp_ijem = contract("ijef, fm->ijem", l2, t1)
+    tmp_ijmf = contract("ijef, em->ijmf", l2, t1)
+    r_l2 -= 0.5 * contract("ijem, emab->ijab", tmp_ijem, u[v, o, v, v])
+    r_l2 -= 0.5 * contract("ijmf, fmba->ijab", tmp_ijmf, u[v, o, v, v])
+
+    tmp_ijmn = contract("ijef, efmn->ijmn", l2, build_tau(t1, t2, o, v, np))
+    r_l2 += 0.5 * contract("ijmn, mnab->ijab", tmp_ijmn, u[o, o, v, v])
+    ###########################################################################
+
     r_l2 += 2 * contract("ie,ejab->ijab", l1, Hvovv)
     r_l2 -= contract("ie,ejba->ijab", l1, Hvovv)
     r_l2 -= 2 * contract("mb,jima->ijab", l1, Hooov)
