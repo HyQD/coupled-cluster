@@ -48,7 +48,6 @@ def compute_l_2_amplitudes(f, u, t2, l2, o, v, np, out=None):
     Hovov = build_Hovov(u, t2, o, v, np)
 
     Hoooo = build_Hoooo(u, t2, o, v, np)
-    Hvvvv = build_Hvvvv(u, t2, o, v, np)
 
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
@@ -60,7 +59,13 @@ def compute_l_2_amplitudes(f, u, t2, l2, o, v, np, out=None):
 
     r_l2 += 0.5 * contract("ijmn,mnab->ijab", Hoooo, l2)
 
-    r_l2 += 0.5 * contract("ijef,efab->ijab", l2, Hvvvv)
+    ###########################################################################
+    # Avoid explicit construction og Hvvvv
+    r_l2 += 0.5 * contract("ijef, efab->ijab", l2, u[v, v, v, v])
+
+    tmp_ijmn = contract("ijef, efmn->ijmn", l2, t2)
+    r_l2 += 0.5 * contract("ijmn, mnab->ijab", tmp_ijmn, u[o, o, v, v])
+    ###########################################################################
 
     r_l2 += 2 * contract("ieam,mjeb->ijab", Hovvo, l2)
     r_l2 -= contract("iema,mjeb->ijab", Hovov, l2)
