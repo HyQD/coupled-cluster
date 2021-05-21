@@ -62,11 +62,9 @@ class TDROMP2(OATDCC):
         rho_qspr = self.compute_two_body_density_matrix(current_time, y)
 
         return (
-            self.contract("pq,qp->", self.h_prime, rho_qp, optimize=True)
+            contract("pq,qp->", self.h_prime, rho_qp, optimize=True)
             + 0.5
-            * self.contract(
-                "pqrs,rspq->", self.u_prime, rho_qspr, optimize=True
-            )
+            * contract("pqrs,rspq->", self.u_prime, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
         )
 
