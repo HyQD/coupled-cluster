@@ -27,24 +27,16 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         self.o = self.system.o
         self.v = self.system.v
 
-        if C is None:
-            C = self.np.eye(system.l)
-        if C_tilde is None:
-            C_tilde = C.T
-
-        assert C.shape == C_tilde.T.shape
-
         n_prime = self.system.n
-        l_prime = C.shape[1]
+        l_prime = self.system.l if C is None else C.shape[1]
         m_prime = l_prime - n_prime
+
+        self._amp_template = OACCVector.construct_amplitude_template(
+            self.truncation, n_prime, m_prime, self.system.l, np=self.np
+        )
 
         self.o_prime = slice(0, n_prime)
         self.v_prime = slice(n_prime, l_prime)
-
-        _amp = self.construct_amplitude_template(
-            self.truncation, n_prime, m_prime, np=self.np
-        )
-        self._amp_template = OACCVector(*_amp, C, C_tilde, np=self.np)
 
         self.last_timestep = None
 

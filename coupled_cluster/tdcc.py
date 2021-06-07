@@ -27,7 +27,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
         self.o = self.system.o
         self.v = self.system.v
 
-        self._amp_template = self.construct_amplitude_template(
+        self._amp_template = AmplitudeContainer.construct_amplitude_template(
             self.truncation, self.system.n, self.system.m, np=self.np
         )
 
@@ -37,23 +37,6 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def truncation(self):
         pass
-
-    @staticmethod
-    def construct_amplitude_template(truncation, n, m, np):
-        """Constructs an empty AmplitudeContainer with the correct shapes, for
-        convertion between arrays and amplitudes."""
-        codes = {"S": 1, "D": 2, "T": 3, "Q": 4}
-        levels = [codes[c] for c in truncation[2:]]
-
-        # start with t_0
-        t = [np.array([0], dtype=np.complex128)]
-        l = []
-
-        for lvl in levels:
-            shape = lvl * [m] + lvl * [n]
-            t.append(np.zeros(shape, dtype=np.complex128))
-            l.append(np.zeros(shape[::-1], dtype=np.complex128))
-        return AmplitudeContainer(t=t, l=l, np=np)
 
     def amplitudes_from_array(self, y):
         """Construct AmplitudeContainer from numpy array."""

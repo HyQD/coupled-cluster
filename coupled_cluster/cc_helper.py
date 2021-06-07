@@ -248,6 +248,78 @@ class OACCVector(AmplitudeContainer):
         self.n += self._C.size
         self.n += self._C_tilde.size
 
+    @staticmethod
+    def construct_amplitude_template(
+        truncation, n_prime, m_prime, l, np, dtype=complex
+    ):
+        r"""Constructs an empty ``OACCVector`` with the correct shapes, for
+        conversion between arrays and amplitudes and coefficients.
+        This construction supports variable sizes for the untransformed atomic
+        orbital basis and the orbital optimized basis.
+
+        Parameters
+        ----------
+        truncation : str
+            String of the form ``CCXYZ...`` where ``XYZ...`` specifies the
+            coupled-cluster truncation. For example ``CCSD`` for the singles-
+            and doubles-truncation.
+        n_prime : int
+            Number of occupied optimized orbitals.
+        m_prime : int
+            Number of virtual optimized oritals.
+        l : int
+            Number of atomic orbitals, i.e., the untransformed basis.
+        np : module
+            Array module, often NumPy.
+        dtype : type
+            Data type for the elements in the amplitude arrays. Default is
+            ``complex``.
+
+        Returns
+        -------
+        OACCVector
+            An instatiated ``OACCVector`` with the necessary amplitudes and
+            coefficient matrices for the specified truncation level.
+
+        See Also
+        --------
+        AmplitudeContainer
+
+
+        >>> import numpy as np
+        >>> n_prime, m_prime, l = 4, 6, 20
+        >>> oa_vec = OACCVector.construct_amplitude_template(
+        ...     "CCSD", n_prime, m_prime, l, np, dtype=complex
+        ... )
+        >>> oa_vec.t[0].shape
+        (1,)
+        >>> oa_vec.t[1].shape
+        (6, 4)
+        >>> oa_vec.t[2].shape
+        (6, 6, 4, 4)
+        >>> oa_vec.l[0].shape
+        (4, 6)
+        >>> oa_vec.l[1].shape
+        (4, 4, 6, 6)
+        >>> oa_vec.C.shape
+        (20, 10)
+        >>> oa_vec.C.shape == oa_vec.C_tilde.T.shape
+        True
+        >>> oa_vec.l[1].dtype
+        dtype('complex128')
+        """
+
+        amps = AmplitudeContainer.construct_amplitude_template(
+            truncation, n_prime, m_prime, np, dtype=dtype
+        )
+
+        shape = (l, l) if n_prime + m_prime == l else (l, n_prime + m_prime)
+
+        C = np.zeros(shape, dtype=dtype)
+        C_tilde = C.T.copy()
+
+        return OACCVector(*amps, C, C_tilde, np=np)
+
     @property
     def C(self):
         return self._C
