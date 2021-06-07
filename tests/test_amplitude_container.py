@@ -1,5 +1,59 @@
 import numpy as np
+
+from coupled_cluster import TDCCS, TDCCD, TDCCSD, TDRCCSD, OATDCCD
 from coupled_cluster.cc_helper import AmplitudeContainer, OACCVector
+
+from quantum_systems import (
+    RandomBasisSet,
+    SpatialOrbitalSystem,
+)
+
+
+def test_amp_template():
+    l, dim = 20, 1
+    n = 4
+    m = l - n
+    l_spat = l // 2
+    n_spat = n // 2
+    m_spat = m // 2
+    k = 8
+    m_trunc = k - n
+    rbs = RandomBasisSet(l_spat, dim, includes_spin=False)
+
+    sos = SpatialOrbitalSystem(n, rbs)
+    gos = sos.construct_general_orbital_system()
+
+    C_mat = np.eye(l)
+
+    # sizes
+    t_0 = 1
+    t_1 = n * m
+    t_2 = n * n * m * m
+    l_1 = m * n
+    l_2 = m * m * n * n
+    C = l * l
+    t_2_trunc = m_trunc * m_trunc * n * n
+    l_2_trunc = n * n * m_trunc * m_trunc
+    C_trunc = l * k
+
+    assert TDCCS(gos)._amp_template.asarray().size == t_0 + t_1 + l_1
+    assert TDCCD(gos)._amp_template.asarray().size == t_0 + t_2 + l_2
+    assert (
+        TDCCSD(gos)._amp_template.asarray().size == t_0 + t_1 + l_1 + t_2 + l_2
+    )
+    assert (
+        OATDCCD(gos, C=C_mat)._amp_template.asarray().size
+        == t_0 + t_2 + l_2 + 2 * C
+    )
+    assert (
+        OATDCCD(gos, C=C_mat[:, :k])._amp_template.asarray().size
+        == t_0 + t_2_trunc + l_2_trunc + 2 * C_trunc
+    )
+
+    assert (
+        TDRCCSD(sos)._amp_template.asarray().size
+        == t_0 + t_1 // 4 + l_1 // 4 + t_2 // 16 + l_2 // 16
+    )
 
 
 def test_addition_single_amp(large_system_ccd):
@@ -266,3 +320,33 @@ def test_splat(large_system_ccsd):
 
     for amp, amp_e in zip(amp_container.unpack(), [*t_sp, *l_sp]):
         np.testing.assert_allclose(amp, amp_e)
+
+
+def test_construct_container_from_array():
+    truncation = "CCSD"
+
+    n, m = 4, 10
+
+    t_1_shape = (m, n)
+    t_2_shape = (m, m, n, n)
+
+    t_0 = RandomBasisSet.get_random_elements((1,), np)
+    t_1 = RandomBasisSet.get_random_elements(t_1_shape, np)
+    t_2 = RandomBasisSet.get_random_elements(t_2_shape, np)
+
+    l_1 = RandomBasisSet.get_random_elements(t_1_shape[::-1], np)
+    l_2 = RandomBasisSet.get_random_elements(t_2_shape[::-1], np)
+
+    arr = np.concatenate(
+        [t_0.ravel(), t_1.ravel(), t_2.ravel(), l_1.ravel(), l_2.ravel()]
+    )
+
+    amps = AmplitudeContainer.construct_container_from_array(
+        arr, truncation, n, m, np
+    )
+
+    np.testing.assert_allclose(t_0, amps.t[0])
+    np.testing.assert_allclose(t_1, amps.t[1])
+    np.testing.assert_allclose(t_2, amps.t[2])
+    np.testing.assert_allclose(l_1, amps.l[0])
+    np.testing.assert_allclose(l_2, amps.l[1])

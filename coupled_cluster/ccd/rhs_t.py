@@ -2,7 +2,7 @@
 # Chemistry and Physics" by I. Shavitt and R. J. Bartlett.
 
 
-def compute_t_2_amplitudes(f, u, t, o, v, np, out=None):
+def compute_rhs_t_2_amplitudes(f, u, t, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(t)
 

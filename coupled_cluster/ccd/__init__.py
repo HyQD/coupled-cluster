@@ -1,4 +1,4 @@
-from .ccd import CCD, CoupledClusterDoubles
+from .ccd import CCD
 from .oaccd import OACCD
 from .tdccd import TDCCD
 from .oatdccd import OATDCCD

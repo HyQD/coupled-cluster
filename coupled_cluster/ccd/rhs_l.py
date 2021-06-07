@@ -4,7 +4,7 @@
 # and R. J. Bartlett.
 
 
-def compute_l_2_amplitudes(f, u, t, l, o, v, np, out=None):
+def compute_rhs_l_2_amplitudes(f, u, t, l, o, v, np, out=None):
     if out is None:
         out = np.zeros_like(l)
 

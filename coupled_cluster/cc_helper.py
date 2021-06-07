@@ -1,3 +1,7 @@
+TRUNCATION_CODES = {"S": 1, "D": 2, "T": 3, "Q": 4, "5": 5, "6": 6}
+INV_TRUNCATION_CODES = {v: k for k, v in TRUNCATION_CODES.items()}
+
+
 class AmplitudeContainer:
     """Container for Amplitude functions
 
@@ -77,15 +81,15 @@ class AmplitudeContainer:
         >>> amps.l[1].dtype
         dtype('complex128')
         """
-        codes = {"S": 1, "D": 2, "T": 3, "Q": 4, "5": 5, "6": 6}
-        levels = [codes[c] for c in truncation[2:]]
+
+        levels = [TRUNCATION_CODES[c] for c in truncation[2:]]
 
         # start with t_0
         t = [np.array([0], dtype=dtype)]
         l = []
 
-        for lvl in levels:
-            shape = lvl * [m] + lvl * [n]
+        for level in levels:
+            shape = level * [m] + level * [n]
             t.append(np.zeros(shape, dtype=dtype))
             l.append(np.zeros(shape[::-1], dtype=dtype))
         return AmplitudeContainer(t=t, l=l, np=np)
@@ -189,30 +193,86 @@ class AmplitudeContainer:
 
         return type(self)(*args, np=np)
 
+    @staticmethod
+    def construct_container_from_array(
+        arr,
+        truncation,
+        n,
+        m,
+        np,
+    ):
+        r"""Method constructing an ``AmplitudeContainer`` from an array.  This
+        function assumes that the elements in the array are the flattened
+        amplitudes sorted as [t_0, t_1, t_2, ..., l_1, l_2, ...] in a long flat
+        array.
+
+        Parameters
+        ----------
+        arr : np.array
+            Array with the flattened amplitudes.
+        truncation : str
+            String of the form ``CCXYZ...`` where ``XYZ...`` specifies the
+            coupled-cluster truncation. For example ``CCSD`` for the singles-
+            and doubles-truncation.
+        n : int
+            Number of occupied orbitals.
+        m : int
+            Number of virtual oritals.
+        np : module
+            Array module, often NumPy.
+
+        Returns
+        -------
+        AmplitudeContainer
+            A filled ``AmplitudeContainer`` built from ``arr``.
+
+        >>> import numpy as np
+        >>> n, m = 4, 6
+        >>> amps = AmplitudeContainer.construct_amplitude_template(
+        ...     "CCSD", n, m, np, dtype=complex
+        ... )
+        >>> arr = amps.asarray()
+        >>> amps_2 = AmplitudeContainer.construct_container_from_array(
+        ...     arr, "CCSD", n, m, np
+        ... )
+        >>> for t, t_2 in zip(amps.t, amps_2.t):
+        ...     assert np.linalg.norm(t - t_2) < 1e-12
+        >>> for l, l_2 in zip(amps.l, amps_2.l):
+        ...     assert np.linalg.norm(l - l_2) < 1e-12
+        """
+
+        import math
+
+        # Pick out t_0
+        t = [np.array([arr[0]])]
+        l = []
+
+        assert (len(arr) - 1) % 2 == 0
+
+        start_t_index = 1
+        start_l_index = int((len(arr) - 1) / 2) + 1
+        levels = [TRUNCATION_CODES[c] for c in truncation[2:]]
+
+        for level in levels:
+            shape = level * [m] + level * [n]
+            stop_t_index = start_t_index + math.prod(shape)
+            stop_l_index = start_l_index + math.prod(shape)
+            t.append(arr[start_t_index:stop_t_index].reshape(shape))
+            l.append(arr[start_l_index:stop_l_index].reshape(shape[::-1]))
+            start_t_index = stop_t_index
+            start_l_index = stop_l_index
+
+        return AmplitudeContainer(t=t, l=l, np=np)
+
     def from_array(self, arr):
-        np = self.np
+        levels = [int(len(t.shape) / 2) for t in self._t[1:]]
+        truncation = "CC" + "".join(
+            [INV_TRUNCATION_CODES[level] for level in levels]
+        )
 
-        args = []
-        start_index = 0
-        stop_index = 0
-
-        for amps in self:
-            inner = []
-
-            if type(amps) == list:
-                for amp in amps:
-                    start_index = stop_index
-                    stop_index += amp.size
-
-                    inner.append(arr[start_index:stop_index].reshape(amp.shape))
-            else:
-                start_index = stop_index
-                stop_index += amps.size
-                inner = arr[start_index:stop_index].reshape(amps.shape)
-
-            args.append(inner)
-
-        return type(self)(*args, np=np)
+        return self.construct_container_from_array(
+            arr, truncation, self._t[1].shape[-1], self._t[1].shape[0], self.np
+        )
 
     def residuals(self):
         return [

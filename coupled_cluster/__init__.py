@@ -1,7 +1,7 @@
 from .ccs import CCS, TDCCS
-from .ccd import CCD, CoupledClusterDoubles, OACCD, TDCCD, OATDCCD
+from .ccd import CCD, OACCD, TDCCD, OATDCCD
 from .omp2 import OMP2, TDOMP2
-from .ccsd import CCSD, CoupledClusterSinglesDoubles, TDCCSD
+from .ccsd import CCSD, TDCCSD
 from .rccsd import RCCSD, TDRCCSD
 from .rccd import RCCD, ROACCD, ROATDCCD
 from .rcc2 import RCC2, TDRCC2
