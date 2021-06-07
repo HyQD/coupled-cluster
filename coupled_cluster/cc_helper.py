@@ -31,6 +31,65 @@ class AmplitudeContainer:
         for _l in self._l:
             self.n += _l.size
 
+    @staticmethod
+    def construct_amplitude_template(truncation, n, m, np, dtype=complex):
+        r"""Constructs an empty ``AmplitudeContainer`` with the correct shapes,
+        for conversion between arrays and amplitudes.
+
+        Parameters
+        ----------
+        truncation : str
+            String of the form ``CCXYZ...`` where ``XYZ...`` specifies the
+            coupled-cluster truncation. For example ``CCSD`` for the singles-
+            and doubles-truncation.
+        n : int
+            Number of occupied orbitals.
+        m : int
+            Number of virtual oritals.
+        np : module
+            Array module, often NumPy.
+        dtype : type
+            Data type for the elements in the amplitude arrays. Default is
+            ``complex``.
+
+        Returns
+        -------
+        AmplitudeContainer
+            An instatiated ``AmplitudeContainer`` with the necessary amplitudes
+            for the specified truncation level.
+
+
+        >>> import numpy as np
+        >>> n, m = 4, 6
+        >>> amps = AmplitudeContainer.construct_amplitude_template(
+        ...     "CCSD", n, m, np, dtype=complex
+        ... )
+        >>> amps.t[0].shape
+        (1,)
+        >>> amps.t[1].shape
+        (6, 4)
+        >>> amps.t[2].shape
+        (6, 6, 4, 4)
+        >>> amps.l[0].shape
+        (4, 6)
+        >>> amps.l[1].shape
+        (4, 4, 6, 6)
+        >>> amps.l[1].dtype
+        dtype('complex128')
+        """
+        codes = {"S": 1, "D": 2, "T": 3, "Q": 4, "5": 5, "6": 6}
+        levels = [codes[c] for c in truncation[2:]]
+
+        # start with t_0
+        t = [np.array([0], dtype=dtype)]
+        l = []
+
+        for lvl in levels:
+            shape = lvl * [m] + lvl * [n]
+            t.append(np.zeros(shape, dtype=dtype))
+            l.append(np.zeros(shape[::-1], dtype=dtype))
+        return AmplitudeContainer(t=t, l=l, np=np)
+
     @property
     def t(self):
         return self._t
