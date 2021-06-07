@@ -18,6 +18,8 @@ from coupled_cluster.cc_helper import AmplitudeContainer
 
 from coupled_cluster.oatdcc import OATDCC
 
+from opt_einsum import contract
+
 
 class TDOMP2(OATDCC):
     """Time-dependent orbital-optimized second-order Møller-Plesset perturbation theory (TDOMP2)
@@ -62,11 +64,8 @@ class TDOMP2(OATDCC):
         rho_qspr = self.compute_two_body_density_matrix(current_time, y)
 
         return (
-            self.np.einsum("pq,qp->", self.h_prime, rho_qp, optimize=True)
-            + 0.25
-            * self.np.einsum(
-                "pqrs,rspq->", self.u_prime, rho_qspr, optimize=True
-            )
+            contract("pq,qp->", self.h_prime, rho_qp)
+            + 0.25 * contract("pqrs,rspq->", self.u_prime, rho_qspr)
             + self.system.nuclear_repulsion_energy
         )
 

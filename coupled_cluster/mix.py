@@ -52,16 +52,13 @@ class DIIS(AlphaMixer):
 
     Parameters
     ----------
-    num_vecs : int
-        Number of vectors to keep in memory
     np : module
         Matrix library to be used, e.g., numpy, cupy, etc.
+    num_vecs : int
+        Number of vectors to keep in memory. Default is ``10``.
     """
 
-    def __init__(self, num_vecs=10, np=None):
-        if np is None:
-            import numpy as np
-
+    def __init__(self, np, num_vecs=10):
         self.np = np
         self.num_vecs = num_vecs
         self.stored = 0

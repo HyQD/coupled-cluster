@@ -16,6 +16,8 @@ from coupled_cluster.rccd.p_space_equations import (
     compute_R_tilde_ai,
 )
 
+from opt_einsum import contract
+
 
 class ROACCD(RCCD):
     """Restricted Orbital Adaptive Coupled Cluster Doubles
@@ -75,9 +77,8 @@ class ROACCD(RCCD):
         rho_qspr = self.compute_two_body_density_matrix()
 
         return (
-            self.np.einsum("pq,qp->", self.h, rho_qp, optimize=True)
-            + 0.5
-            * self.np.einsum("pqrs,rspq->", self.u, rho_qspr, optimize=True)
+            contract("pq,qp->", self.h, rho_qp, optimize=True)
+            + 0.5 * contract("pqrs,rspq->", self.u, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
         )
 
@@ -158,10 +159,10 @@ class ROACCD(RCCD):
             residual_down = np.linalg.norm(kappa_down_rhs)
 
             self.kappa_up = self.kappa_up_mixer.compute_new_vector(
-                self.kappa_up, -kappa_up_rhs / d_t_1, kappa_up_rhs
+                self.kappa_up, -0.5 * kappa_up_rhs / d_t_1, kappa_up_rhs
             )
             self.kappa_down = self.kappa_down_mixer.compute_new_vector(
-                self.kappa_down, -kappa_down_rhs / d_l_1, kappa_down_rhs
+                self.kappa_down, -0.5 * kappa_down_rhs / d_l_1, kappa_down_rhs
             )
 
             self.kappa[self.v, self.o] = self.kappa_up

@@ -1,29 +1,29 @@
 from scipy.linalg import expm
 
-from coupled_cluster.ccd.ccd import CCD
+from coupled_cluster.rccd.rccd import RCCD
 from coupled_cluster.cc_helper import (
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
     OACCVector,
 )
 
-from coupled_cluster.omp2.rhs_t import (
+from coupled_cluster.romp2.rhs_t import (
     compute_t_2_amplitudes,
     compute_l_2_amplitudes,
 )
 from coupled_cluster.mix import DIIS
 
-from coupled_cluster.omp2.density_matrices import (
+from coupled_cluster.romp2.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
 
-from coupled_cluster.omp2.p_space_equations import compute_R_tilde_ai
+from coupled_cluster.romp2.p_space_equations import compute_R_tilde_ai
 
 from opt_einsum import contract
 
 
-class OMP2(CCD):
+class ROMP2(RCCD):
     """Orbital-optimized second-order Møller-Plesset perturbation theory (OMP2)
 
     Parameters
@@ -80,8 +80,8 @@ class OMP2(CCD):
         rho_qspr = self.compute_two_body_density_matrix()
 
         return (
-            contract("pq,qp->", self.h, rho_qp)
-            + 0.25 * contract("pqrs,rspq->", self.u, rho_qspr)
+            contract("pq,qp->", self.h, rho_qp, optimize=True)
+            + 0.5 * contract("pqrs,rspq->", self.u, rho_qspr, optimize=True)
             + self.system.nuclear_repulsion_energy
         )
 
@@ -180,6 +180,10 @@ class OMP2(CCD):
                 / self.d_t_2
             )
 
+            self.l_2 += compute_l_2_amplitudes(
+                self.f, self.u, self.t_2, self.l_2, self.o, self.v, np
+            ) / self.d_t_2.transpose(2, 3, 0, 1)
+
             rho_qp = self.compute_one_body_density_matrix()
             rho_qspr = self.compute_two_body_density_matrix()
 
@@ -192,7 +196,7 @@ class OMP2(CCD):
             )
             residual_w_ai = np.linalg.norm(w_ai)
 
-            self.kappa[self.v, self.o] -= w_ai / self.d_t_1
+            self.kappa[self.v, self.o] -= 0.5 * w_ai / self.d_t_1
 
             C = expm(self.kappa - self.kappa.T)
             Ctilde = C.T
