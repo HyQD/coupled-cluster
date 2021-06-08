@@ -44,27 +44,8 @@ def compute_A_ibaj(rho_qp, o, v, np):
 def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
     R_ia = np.dot(rho_qp[o, o], h[o, v])
     R_ia -= np.dot(h[o, v], rho_qp[v, v])
-    """
-    R_ia += np.tensordot(
-        # rho^{is}_{pr}
-        rho_qspr[o, :, :, :],
-        # u^{pr}_{as}
-        u[:, :, v, :],
-        # axes=((s, p, r), (s, p, r))
-        axes=((1, 2, 3), (3, 0, 1)),
-    )
-    """
+
     R_ia += contract("ispr, pras->ia", rho_qspr[o, :, :, :], u[:, :, v, :])
-    """
-    R_ia -= np.tensordot(
-        # u^{ir}_{qs}
-        u[o, :, :, :],
-        # rho^{qs}_{ar}
-        rho_qspr[:, :, v, :],
-        # axes=((r, q, s), (r, q, s))
-        axes=((1, 2, 3), (3, 0, 1)),
-    )
-    """
     R_ia -= contract("irqs, qsar->ia", u[o, :, :, :], rho_qspr[:, :, v, :])
 
     return R_ia
