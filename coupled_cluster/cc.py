@@ -79,7 +79,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             y, self.truncation, self.system.n, self.system.m, self.np
         )
 
-        return construct_one_body_density_matrix(
+        return self.construct_one_body_density_matrix(
             *amps.t[1:], *amps.l, self.system.o, self.system.v, self.np
         )
 
@@ -88,7 +88,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             y, self.truncation, self.system.n, self.system.m, self.np
         )
 
-        return construct_two_body_density_matrix(
+        return self.construct_two_body_density_matrix(
             *amps.t[1:], *amps.l, self.system.o, self.system.v, self.np
         )
 
@@ -151,18 +151,18 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         return self.system.compute_particle_density(ob_density)
 
-    def compute_ground_state(self):
-        amp_0 = self.get_initial_guess()
+    # def compute_ground_state(self):
+    #     amp_0 = self.get_initial_guess()
 
-        res = scipy.optimize.minimize(
-            self.compute_energy,
-            amp_0.asarray(),
-            method="BFGS",
-            jac=self,
-            options={"gtol": 1e-6, "disp": True},
-        )
+    #     res = scipy.optimize.minimize(
+    #         self.compute_energy,
+    #         amp_0.asarray(),
+    #         method="BFGS",
+    #         jac=self,
+    #         options={"gtol": 1e-6, "disp": True},
+    #     )
 
-        print(self.compute_energy(res))
+    #     print(self.compute_energy(res))
 
     def __call__(self, y):
         amps = AmplitudeContainer.construct_container_from_array(
@@ -180,6 +180,7 @@ class CoupledCluster(metaclass=abc.ABCMeta):
             )
             for rhs_t_func in self.rhs_t_amplitudes
         ]
+        t_rhs.insert(0, amps.t[0])
 
         l_rhs = [
             rhs_l_func(
