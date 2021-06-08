@@ -42,57 +42,42 @@ def compute_A_ibaj(rho_qp, o, v, np):
 
 
 def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
-
-    R_ia = contract("pa,ip->ia", h[:, v], rho_qp[o, :]) - contract(
-        "iq,qa->ia", h[o, :], rho_qp[:, v]
-    )
-    R_ia -= 0.5 * contract(
-        "iqrs,rsaq->ia",
-        u[o, :, :, :],
-        rho_qspr[:, :, v, :],
-    )
-    R_ia -= 0.5 * contract(
-        "pirs,rspa->ia",
-        u[:, o, :, :],
-        rho_qspr[:, :, :, v],
-    )
-    R_ia += 0.5 * contract(
-        "pqra,ripq->ia",
-        u[:, :, :, v],
-        rho_qspr[:, o, :, :],
-    )
-    R_ia += 0.5 * contract(
-        "pqas,ispq->ia",
-        u[:, :, v, :],
+    R_ia = np.dot(rho_qp[o, o], h[o, v])
+    R_ia -= np.dot(h[o, v], rho_qp[v, v])
+    """
+    R_ia += np.tensordot(
+        # rho^{is}_{pr}
         rho_qspr[o, :, :, :],
+        # u^{pr}_{as}
+        u[:, :, v, :],
+        # axes=((s, p, r), (s, p, r))
+        axes=((1, 2, 3), (3, 0, 1)),
     )
+    """
+    R_ia += contract("ispr, pras->ia", rho_qspr[o, :, :, :], u[:, :, v, :])
+    """
+    R_ia -= np.tensordot(
+        # u^{ir}_{qs}
+        u[o, :, :, :],
+        # rho^{qs}_{ar}
+        rho_qspr[:, :, v, :],
+        # axes=((r, q, s), (r, q, s))
+        axes=((1, 2, 3), (3, 0, 1)),
+    )
+    """
+    R_ia -= contract("irqs, qsar->ia", u[o, :, :, :], rho_qspr[:, :, v, :])
 
     return R_ia
 
 
 def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
-    R_tilde_ai = contract("pi,ap->ai", h[:, o], rho_qp[v, :]) - contract(
-        "aq,qi->ai", h[v, :], rho_qp[:, o]
+    R_tilde_ai = np.dot(rho_qp[v, v], h[v, o])
+    R_tilde_ai -= np.dot(h[v, o], rho_qp[o, o])
+    R_tilde_ai += contract(
+        "pqir, arpq->ai", u[:, :, o, :], rho_qspr[v, :, :, :]
     )
-    R_tilde_ai -= 0.5 * contract(
-        "aqrs,rsiq->ai",
-        u[v, :, :, :],
-        rho_qspr[:, :, o, :],
-    )
-    R_tilde_ai -= 0.5 * contract(
-        "pars,rspi->ai",
-        u[:, v, :, :],
-        rho_qspr[:, :, :, o],
-    )
-    R_tilde_ai += 0.5 * contract(
-        "pqri,rapq->ai",
-        u[:, :, :, o],
-        rho_qspr[:, v, :, :],
-    )
-    R_tilde_ai += 0.5 * contract(
-        "pqis,aspq->ai",
-        u[:, :, o, :],
-        rho_qspr[v, :, :, :],
+    R_tilde_ai -= contract(
+        "aqrs, rsiq->ai", u[v, :, :, :], rho_qspr[:, :, o, :]
     )
 
     return R_tilde_ai
