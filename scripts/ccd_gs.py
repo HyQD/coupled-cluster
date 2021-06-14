@@ -21,5 +21,15 @@ res = scipy.optimize.minimize(
     options=dict(gtol=1e-6, disp=True),
 )
 
+y = res.x.view(np.complex128)
 
-print(f"Final CCD energy: {ccd.compute_energy(real_to_complex(res.x))}")
+print(f"Final CCD energy: {ccd.compute_energy(y)}")
+
+# Explicit computation of the energy
+energy = (
+    ccd.compute_one_body_expectation_value(y, system.h)
+    + 0.5 * ccd.compute_two_body_expectation_value(y, system.u)
+    + system.nuclear_repulsion_energy
+)
+
+print(f"Manual CCD energy: {energy}")
