@@ -2,13 +2,22 @@ import numpy as np
 from scipy.optimize import minimize
 
 from quantum_systems import construct_pyscf_system_rhf
-from coupled_cluster import CCSD
+
+# from coupled_cluster import CCSD
+
+
+def complex_to_real(x):
+    return np.concatenate((x.real, x.imag))
+
+
+def real_to_complex(x):
+    return x[: len(x) // 2] + 1j * x[len(x) // 2 :]
 
 
 system = construct_pyscf_system_rhf("he")
 
-F = system.construct_fock_matrix(system.h, system.u).real
-W = system.u.real
+F = system.construct_fock_matrix(system.h, system.u)
+W = system.u
 o = system.o
 v = system.v
 nocc = system.n
@@ -40,7 +49,7 @@ def vec_to_amp(x):
 
 def amp_to_vec(T1, T2, L1, L2):
 
-    y = np.zeros(2 * nn * (1 + nn))
+    y = np.zeros(2 * nn * (1 + nn), dtype=T2.dtype)
 
     y[0:nn] = np.reshape(T1, (nn,))
     y[nn : (nn + nn * nn)] = np.reshape(T2, (nn * nn,))
@@ -57,25 +66,25 @@ Lagrangian_fun = lambda L1, F, T1, L2, W, T2: compute_time_dependent_energy(
 )
 
 from coupled_cluster.ccsd.rhs_t import (
-    compute_t_1_amplitudes,
-    compute_t_2_amplitudes,
+    compute_rhs_t_1_amplitudes,
+    compute_rhs_t_2_amplitudes,
 )
 from coupled_cluster.ccsd.rhs_l import (
-    compute_l_1_amplitudes,
-    compute_l_2_amplitudes,
+    compute_rhs_l_1_amplitudes,
+    compute_rhs_l_2_amplitudes,
 )
 
-Omega1_fun = lambda T1, F, W, T2: compute_t_1_amplitudes(
+Omega1_fun = lambda T1, F, W, T2: compute_rhs_t_1_amplitudes(
     F, W, T1.T, T2.transpose(2, 3, 0, 1), o, v, np
 ).T
-Omega2_fun = lambda W, T2, T1, F: compute_t_2_amplitudes(
+Omega2_fun = lambda W, T2, T1, F: compute_rhs_t_2_amplitudes(
     F, W, T1.T, T2.transpose(2, 3, 0, 1), o, v, np
 ).transpose(2, 3, 0, 1)
 
-tOmega1_fun = lambda L1, F, W, T1, L2, T2: compute_l_1_amplitudes(
+tOmega1_fun = lambda L1, F, W, T1, L2, T2: compute_rhs_l_1_amplitudes(
     F, W, T1.T, T2.transpose(2, 3, 0, 1), L1, L2, o, v, np
 )
-tOmega2_fun = lambda W, L2, T1, L1, F, T2: compute_l_2_amplitudes(
+tOmega2_fun = lambda W, L2, T1, L1, F, T2: compute_rhs_l_2_amplitudes(
     F, W, T1.T, T2.transpose(2, 3, 0, 1), L1, L2, o, v, np
 )
 
@@ -100,16 +109,20 @@ def fprime(x):
     return amp_to_vec(Omega1, Omega2, tOmega1, tOmega2)
 
 
-T1 = np.zeros((nocc, nvirt))
-T2 = np.zeros((nocc, nocc, nvirt, nvirt))
-L1 = np.zeros((nocc, nvirt))
-L2 = np.zeros((nocc, nocc, nvirt, nvirt))
+T1 = np.zeros((nocc, nvirt), dtype=F.dtype)
+T2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=F.dtype)
+L1 = np.zeros((nocc, nvirt), dtype=F.dtype)
+L2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=F.dtype)
 
 
-x0 = np.zeros(2 * nn * (nn + 1))
+x0 = np.zeros(2 * nn * (nn + 1), dtype=T2.dtype)
 
 res = minimize(
-    f, x0, method="BFGS", jac=fprime, options={"gtol": 1e-6, "disp": True}
+    lambda x: f(real_to_complex(x)).real,
+    complex_to_real(x0),
+    method="BFGS",
+    jac=lambda x: complex_to_real(fprime(real_to_complex(x))),
+    options={"gtol": 1e-6, "disp": True},
 )
 
 T1 = res.x[0:nn]
@@ -132,6 +145,4 @@ E_CC = ccsd_energy_fun(
     T1, F, T2, W
 )  # Warwning! Order of arguments not predictable from code generator a.t.m.
 
-print("Final CCSD correlation energy: %.16g" % E_CC)
-
-ccsd = CCSD(system, verbose=True).compute_ground_state()
+print(f"Final CCSD correlation energy: { E_CC}")
