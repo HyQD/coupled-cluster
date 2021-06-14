@@ -7,11 +7,13 @@ from quantum_systems import construct_pyscf_system_rhf
 
 
 def complex_to_real(x):
-    return np.concatenate((x.real, x.imag))
+    # return np.concatenate((x.real, x.imag))
+    return x.view(np.float64)
 
 
 def real_to_complex(x):
-    return x[: len(x) // 2] + 1j * x[len(x) // 2 :]
+    # return x[: len(x) // 2] + 1j * x[len(x) // 2 :]
+    return x.view(np.complex128)
 
 
 system = construct_pyscf_system_rhf("he")
@@ -125,10 +127,12 @@ res = minimize(
     options={"gtol": 1e-6, "disp": True},
 )
 
-T1 = res.x[0:nn]
-T2 = res.x[nn : (nn + nn * nn)]
-L1 = res.x[(nn + nn * nn) : (2 * nn + nn * nn)]
-L2 = res.x[(2 * nn + nn * nn) : (2 * nn + 2 * nn * nn)]
+x = real_to_complex(res.x)
+
+T1 = x[0:nn]
+T2 = x[nn : (nn + nn * nn)]
+L1 = x[(nn + nn * nn) : (2 * nn + nn * nn)]
+L2 = x[(2 * nn + nn * nn) : (2 * nn + 2 * nn * nn)]
 
 from coupled_cluster.ccsd.energies import compute_ccsd_ground_state_energy
 

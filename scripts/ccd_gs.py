@@ -7,8 +7,8 @@ from coupled_cluster import CCD
 
 system = construct_pyscf_system_rhf("he")
 
-complex_to_real = lambda x: np.concatenate((x.real, x.imag))
-real_to_complex = lambda x: x[: len(x) // 2] + 1j * x[len(x) // 2 :]
+complex_to_real = lambda x: x.view(np.float64)
+real_to_complex = lambda x: x.view(np.complex128)
 
 ccd = CCD(system, verbose=True)
 y_0 = ccd.get_initial_guess().asarray()
