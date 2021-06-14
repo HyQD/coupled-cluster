@@ -56,6 +56,11 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
+    def truncation(self):
+        pass
+
+    @property
+    @abc.abstractmethod
     def rhs_t_amplitudes(self):
         pass
 
