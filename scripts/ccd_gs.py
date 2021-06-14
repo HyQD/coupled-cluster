@@ -20,3 +20,6 @@ res = scipy.optimize.minimize(
     jac=lambda x: complex_to_real(ccd(real_to_complex(x))),
     options=dict(gtol=1e-6, disp=True),
 )
+
+
+print(f"Final CCD energy: {ccd.compute_energy(real_to_complex(res.x))}")
