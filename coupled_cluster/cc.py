@@ -137,6 +137,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         return self.np.trace(self.np.dot(ob_density_mat, mat))
 
+    def compute_two_body_expectation_value(self, y, op, asym=True):
+        tb_density_mat = self.compute_two_body_density_matrix(y)
+
+        return (0.5 if asym else 1.0) * contract(
+            "pqrs, rspq ->", op, tb_density_mat
+        )
 
     def compute_particle_density(self, y):
         """Computes one-particle density
