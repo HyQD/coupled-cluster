@@ -45,12 +45,12 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         )
 
     def compute_energy(self, y):
-        ob_density = self.compute_one_body_density_matrix(y)
-        tb_density = self.compute_two_body_density_matrix(y)
+        ob_density_mat = self.compute_one_body_density_matrix(y)
+        tb_density_mat = self.compute_two_body_density_matrix(y)
 
         return (
-            contract("pq, qp ->", self.h, ob_density)
-            + 0.25 * contract("pqrs, rspq ->", self.u, tb_density)
+            contract("pq, qp ->", self.h, ob_density_mat)
+            + 0.25 * contract("pqrs, rspq ->", self.u, tb_density_mat)
             + self.system.nuclear_repulsion_energy
         )
 
@@ -130,12 +130,13 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         CoupledCluster.compute_one_body_density_matrix
 
         """
-        ob_density = self.compute_one_body_density_matrix(y)
+        ob_density_mat = self.compute_one_body_density_matrix(y)
 
         if make_hermitian:
-            ob_density = 0.5 * (ob_density.conj().T + ob_density)
+            ob_density_mat = 0.5 * (ob_density_mat.conj().T + ob_density_mat)
 
-        return self.np.trace(self.np.dot(ob_density, mat))
+        return self.np.trace(self.np.dot(ob_density_mat, mat))
+
 
     def compute_particle_density(self, y):
         """Computes one-particle density
@@ -147,14 +148,14 @@ class CoupledCluster(metaclass=abc.ABCMeta):
         """
         np = self.np
 
-        ob_density = self.compute_one_body_density_matrix(y)
+        ob_density_mat = self.compute_one_body_density_matrix(y)
 
-        if np.abs(np.trace(ob_density) - self.system.n) > 1e-8:
-            warn = "Trace of ob_density = {0} != {1} = number of particles"
-            warn = warn.format(np.trace(ob_density), self.system.n)
+        if np.abs(np.trace(ob_density_mat) - self.system.n) > 1e-8:
+            warn = "Trace of ob_density_mat = {0} != {1} = number of particles"
+            warn = warn.format(np.trace(ob_density_mat), self.system.n)
             warnings.warn(warn)
 
-        return self.system.compute_particle_density(ob_density)
+        return self.system.compute_particle_density(ob_density_mat)
 
     # def compute_ground_state(self):
     #     amp_0 = self.get_initial_guess()
