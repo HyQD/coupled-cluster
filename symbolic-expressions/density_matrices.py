@@ -201,6 +201,7 @@ def get_one_body_density_matrix(
 
     for i in range(1, num_commutators + 1):
         comm = Commutator(comm, get_clusters(cc_t_functions))
+        rho_eq += Rational(1, int(math.factorial(i))) * eval_equation(comm)
         rho_eq += Rational(1, int(math.factorial(i))) * eval_equation(L * comm)
 
     rho = beautify_equation(rho_eq)
@@ -251,6 +252,7 @@ def get_two_body_density_matrix(
 
     for i in range(1, num_commutators + 1):
         comm = Commutator(comm, get_clusters(cc_t_functions))
+        rho_eq += Rational(1, int(math.factorial(i))) * eval_equation(comm)
         rho_eq += Rational(1, int(math.factorial(i))) * eval_equation(L * comm)
         # print()
         # print(latex(beautify_equation(rho_eq)))
