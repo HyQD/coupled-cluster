@@ -1,4 +1,4 @@
-from one_body_density_matrix import (
+from density_matrices import (
     get_ccs_one_body_density_matrix,
     symbol_list_one_body,
     get_ccs_two_body_density_matrix,
