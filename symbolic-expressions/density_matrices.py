@@ -76,6 +76,13 @@ symbol_list_two_body = [
         ),
     ),
     (
+        "rho^{cd}_{ij} = ",
+        (
+            *symbols("i, j", below_fermi=True, cls=Dummy),
+            *symbols("c, d", above_fermi=True, cls=Dummy),
+        ),
+    ),
+    (
         "rho^{kd}_{ib} = ",
         (
             symbols("i", below_fermi=True, cls=Dummy),
