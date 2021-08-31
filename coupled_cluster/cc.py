@@ -153,6 +153,46 @@ class CoupledCluster(metaclass=abc.ABCMeta):
 
         return self.np.trace(self.np.dot(rho_qp, mat))
 
+    def compute_two_body_expectation_value(self, op, asym=True):
+        r"""Function computing the expectation value of a two-body operator
+        :math:`\hat{A}`.  This is done by evaluating
+
+        .. math:: \langle A \rangle = a\rho^{rs}_{pq} A^{pq}_{rs},
+
+        where :math:`p, q, r, s` are general single-particle indices,
+        :math:`\rho^{rs}_{pq}` is the two-body density matrix, and :math:`a` is
+        a pre factor that is :math:`0.5` if :math:`A^{pq}_{rs}` are the
+        anti-symmetrized matrix elements and :math:`1.0` else.
+
+        Parameters
+        ----------
+        op : np.ndarray
+            The two-body operator to evaluate (:math:`\hat{A}`), as an ndarray.
+            The dimensionality of the matrix must be the same as the two-body
+            density matrix, i.e., :math:`\mathbb{C}^{l \times l \times l \times
+            l}`, where ``l`` is the number of basis functions.
+        asym : bool
+            Toggle whether or not ``op`` is anti-symmetrized with ``True``
+            being used for anti-symmetric matrix elements. This determines the
+            prefactor :math:`a` when tracing the two-body density matrix with
+            the two-body operator. Default is ``True``.
+
+        Returns
+        -------
+        complex
+            The expectation value of the one-body operator.
+
+        See Also
+        --------
+        CoupledCluster.compute_two_body_density_matrix
+
+        """
+        rho_rspq = self.compute_two_body_density_matrix()
+
+        return (0.5 if asym else 1.0) * self.np.tensordot(
+            op, rho_rspq, axes=((0, 1, 2, 3), (2, 3, 0, 1))
+        )
+
     def compute_particle_density(self):
         """Computes one-particle density
 

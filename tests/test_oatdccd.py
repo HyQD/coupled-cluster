@@ -72,6 +72,11 @@ def test_oatdccd_energy_conservation():
         r.t, r.y, system.position[2]
     )
 
+    man_energy = oatdccd.compute_one_body_expectation_value(
+        r.t, r.y, system.h_t(r.t), make_hermitian=False
+    ) + 0.5 * oatdccd.compute_two_body_expectation_value(r.t, r.y, system.u)
+    assert abs(td_energies_oatdccd[0] - man_energy) < 1e-12
+
     for i, _t in enumerate(time_points[:-1]):
 
         r.integrate(r.t + dt)
@@ -80,6 +85,14 @@ def test_oatdccd_energy_conservation():
         dip_z_oatdccd[i + 1] = oatdccd.compute_one_body_expectation_value(
             r.t, r.y, system.position[2]
         )
+
+        # When comparing the two ways of computing the energy, we should not
+        # explicitly make the one-body density matrix Hermitian as the energy
+        # calculation using the Lagrangian functional does no such thing.
+        man_energy = oatdccd.compute_one_body_expectation_value(
+            r.t, r.y, system.h_t(r.t), make_hermitian=False
+        ) + 0.5 * oatdccd.compute_two_body_expectation_value(r.t, r.y, system.u)
+        assert abs(td_energies_oatdccd[i + 1] - man_energy) < 1e-12
 
     energy_conservation = np.linalg.norm(
         td_energies_oatdccd[11:].real - td_energies_oatdccd[11].real
@@ -134,6 +147,11 @@ def test_oatdccd_helium():
             r.t, r.y, system.position[2]
         )
 
+        man_energy = oatdccd.compute_one_body_expectation_value(
+            r.t, r.y, system.h_t(r.t), make_hermitian=False
+        ) + 0.5 * oatdccd.compute_two_body_expectation_value(r.t, r.y, system.u)
+        assert abs(td_energies[i] - man_energy) < 1e-12
+
         i += 1
         r.integrate(time_points[i])
 
@@ -141,6 +159,11 @@ def test_oatdccd_helium():
     dip_z[i] = oatdccd.compute_one_body_expectation_value(
         r.t, r.y, system.position[2]
     )
+
+    man_energy = oatdccd.compute_one_body_expectation_value(
+        r.t, r.y, system.h_t(r.t), make_hermitian=False
+    ) + 0.5 * oatdccd.compute_two_body_expectation_value(r.t, r.y, system.u)
+    assert abs(td_energies[i] - man_energy) < 1e-12
 
     np.testing.assert_allclose(
         td_energies.real,
