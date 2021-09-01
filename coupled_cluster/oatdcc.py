@@ -106,7 +106,22 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         t, l, C, C_tilde = self._amp_template.from_array(y)
 
         return super().compute_one_body_expectation_value(
-            current_time, y, C_tilde @ mat @ C, make_hermitian=make_hermitian
+            current_time,
+            y,
+            self.system.transform_one_body_elements(mat, C, C_tilde),
+            make_hermitian=make_hermitian,
+        )
+
+    def compute_two_body_expectation_value(
+        self, current_time, y, op, asym=True
+    ):
+        t, l, C, C_tilde = self._amp_template.from_array(y)
+
+        return super().compute_two_body_expectation_value(
+            current_time,
+            y,
+            self.system.transform_two_body_elements(op, C, C_tilde),
+            asym=asym,
         )
 
     def compute_particle_density(self, current_time, y):

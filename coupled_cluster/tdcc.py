@@ -223,6 +223,72 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         return self.np.trace(self.np.dot(rho_qp, mat))
 
+    def compute_two_body_expectation_value(
+        self, current_time, y, op, asym=True
+    ):
+        r"""Function computing the expectation value of a two-body operator
+        :math:`\hat{A}`.  This is done by evaluating
+
+        .. math:: \langle A \rangle = a\rho^{rs}_{pq} A^{pq}_{rs},
+
+        where :math:`p, q, r, s` are general single-particle indices,
+        :math:`\rho^{rs}_{pq}` is the two-body density matrix, and :math:`a` is
+        a pre factor that is :math:`0.5` if :math:`A^{pq}_{rs}` are the
+        anti-symmetrized matrix elements and :math:`1.0` else.
+
+        Parameters
+        ----------
+        current_time : float
+            The current time step.
+        y : np.ndarray
+            The amplitudes at the current time step.
+        op : np.ndarray
+            The two-body operator to evaluate (:math:`\hat{A}`), as an ndarray.
+            The dimensionality of the matrix must be the same as the two-body
+            density matrix, i.e., :math:`\mathbb{C}^{l \times l \times l \times
+            l}`, where ``l`` is the number of basis functions.
+        asym : bool
+            Toggle whether or not ``op`` is anti-symmetrized with ``True``
+            being used for anti-symmetric matrix elements. This determines the
+            prefactor :math:`a` when tracing the two-body density matrix with
+            the two-body operator. Default is ``True``.
+
+        Returns
+        -------
+        complex
+            The expectation value of the one-body operator.
+
+        See Also
+        --------
+        TimeDependentCoupledCluster.compute_two_body_density_matrix
+        CoupledCluster.compute_two_body_expectation_value
+
+        """
+        rho_rspq = self.compute_two_body_density_matrix(current_time, y)
+
+        return (0.5 if asym else 1.0) * self.np.tensordot(
+            op, rho_rspq, axes=((0, 1, 2, 3), (2, 3, 0, 1))
+        )
+
+    def compute_particle_density(self):
+        """Computes one-particle density
+
+        Returns
+        -------
+        np.array
+            Particle density
+        """
+        np = self.np
+
+        rho_qp = self.compute_one_body_density_matrix()
+
+        if np.abs(np.trace(rho_qp) - self.n) > 1e-8:
+            warn = "Trace of rho_qp = {0} != {1} = number of particles"
+            warn = warn.format(np.trace(rho_qp), self.n)
+            warnings.warn(warn)
+
+        return self.system.compute_particle_density(rho_qp)
+
     def compute_particle_density(self, current_time, y):
         """Computes current one-body density
 

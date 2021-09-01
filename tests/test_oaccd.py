@@ -26,3 +26,11 @@ def test_he_oaccd_groundstate(he_groundstate_oaccd):
     )
 
     assert abs(oaccd.compute_energy() - he_groundstate_oaccd) < energy_tol
+
+    man_energy = oaccd.compute_one_body_expectation_value(
+        helium_system.h
+    ) + 0.5 * oaccd.compute_two_body_expectation_value(
+        helium_system.u, asym=True
+    )
+
+    assert abs(he_groundstate_oaccd - man_energy) < energy_tol
