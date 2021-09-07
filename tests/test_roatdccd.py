@@ -76,6 +76,18 @@ def test_roatdccd_energy_conservation():
         r.t, r.y, system.position[2]
     )
 
+    man_energy = (
+        roatdccd.compute_one_body_expectation_value(
+            r.t, r.y, system.h_t(r.t), make_hermitian=False
+        )
+        + 0.5
+        * roatdccd.compute_two_body_expectation_value(
+            r.t, r.y, system.u, asym=False
+        )
+        + system.nuclear_repulsion_energy
+    )
+    assert abs(td_energies_roatdccd[0] - man_energy) < 1e-12
+
     for i, _t in enumerate(time_points[:-1]):
 
         r.integrate(r.t + dt)
@@ -84,6 +96,18 @@ def test_roatdccd_energy_conservation():
         dip_z_roatdccd[i + 1] = roatdccd.compute_one_body_expectation_value(
             r.t, r.y, system.position[2]
         )
+
+        man_energy = (
+            roatdccd.compute_one_body_expectation_value(
+                r.t, r.y, system.h_t(r.t), make_hermitian=False
+            )
+            + 0.5
+            * roatdccd.compute_two_body_expectation_value(
+                r.t, r.y, system.u, asym=False
+            )
+            + system.nuclear_repulsion_energy
+        )
+        assert abs(td_energies_roatdccd[i + 1] - man_energy) < 1e-12
 
     energy_conservation = np.linalg.norm(
         td_energies_roatdccd[11:].real - td_energies_roatdccd[11].real

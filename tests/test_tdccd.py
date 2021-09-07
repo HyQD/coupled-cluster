@@ -49,6 +49,12 @@ def test_time_dependent_observables(
 
         psi_overlap[i] = tdccd.compute_overlap(r.t, y0, r.y).real
         td_energies[i] = tdccd.compute_energy(r.t, r.y).real
+        man_energy = tdccd.compute_one_body_expectation_value(
+            r.t, r.y, zanghellini_system.h_t(r.t)
+        ) + 0.5 * tdccd.compute_two_body_expectation_value(
+            r.t, r.y, zanghellini_system.u
+        )
+        assert abs(td_energies[i] - man_energy.real) < 1e-12
 
         # avoid extra integration step
         if t != time_points[-1]:
