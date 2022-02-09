@@ -24,7 +24,7 @@ def compute_ground_state_properties(molecule, basis):
     l_kwargs = dict(tol=conv_tol)
 
     rccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
-    e_rccsd = rccsd.compute_energy() + e_ref
+    e_rccsd = rccsd.compute_energy()
 
     """
     Potentially compute more propeties such as dipole moment

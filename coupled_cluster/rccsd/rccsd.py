@@ -185,7 +185,7 @@ class RCCSD(CoupledCluster):
             optimize=True,
         )
 
-        e_ref = 0
+        e_ref = self.system.compute_reference_energy()
 
         return e_corr + e_ref
 
