@@ -1,15 +1,5 @@
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
 
-from coupled_cluster.cc2.rhs_t import (
-    compute_t_1_amplitudes,
-    compute_t_2_amplitudes,
-)
-
-from coupled_cluster.cc2.rhs_l import (
-    compute_l_1_amplitudes,
-    compute_l_2_amplitudes,
-)
-
 from coupled_cluster.cc2 import CC2
 from coupled_cluster.cc2.energies import (
     compute_time_dependent_energy,
@@ -32,9 +22,31 @@ from opt_einsum import contract
 class TDCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
 
-    def __init__(self, system):
+    def __init__(self, system, cc2_b=False):
         super().__init__(system)
         self.cc2 = CC2(system)
+        
+        if cc2_b=False:
+            from coupled_cluster.cc2.rhs_t import (
+                compute_t_1_amplitudes,
+                compute_t_2_amplitudes,
+            )
+
+            from coupled_cluster.cc2.rhs_l import (
+                compute_l_1_amplitudes,
+                compute_l_2_amplitudes,
+            )
+
+        if cc2_b=True:
+            from coupled_cluster.cc2.rhs_t_b import (
+                compute_t_1_amplitudes,
+                compute_t_2_amplitudes,
+            )
+
+            from coupled_cluster.cc2.rhs_l_b import (
+                compute_l_1_amplitudes,
+                compute_l_2_amplitudes,
+            )
 
     def __call__(self, current_time, prev_amp):
         o, v = self.system.o, self.system.v
