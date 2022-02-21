@@ -18,7 +18,7 @@ from opt_einsum import contract
 class TDRCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
 
-    def __init__(self, system, cc2_b = False):
+    def __init__(self, system, cc2_b=False):
         super().__init__(system)
         self.rcc2_instance = RCC2(system)
 
@@ -48,7 +48,6 @@ class TDRCC2(TimeDependentCoupledCluster):
         self.compute_t_2_amplitudes = compute_t_2_amplitudes
         self.compute_l_1_amplitudes = compute_l_1_amplitudes
         self.compute_l_2_amplitudes = compute_l_2_amplitudes
-
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(

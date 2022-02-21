@@ -22,8 +22,8 @@ class TDCC2(TimeDependentCoupledCluster):
         super().__init__(system)
         self.cc2_instance = CC2(system)
         self.cc2 = CC2(system)
-        
-        if cc2_b==False:
+
+        if cc2_b == False:
             from coupled_cluster.cc2.rhs_t import (
                 compute_t_1_amplitudes,
                 compute_t_2_amplitudes,
@@ -34,7 +34,7 @@ class TDCC2(TimeDependentCoupledCluster):
                 compute_l_2_amplitudes,
             )
 
-        if cc2_b==True:
+        if cc2_b == True:
             from coupled_cluster.cc2.rhs_t_b import (
                 compute_t_1_amplitudes,
                 compute_t_2_amplitudes,
@@ -236,7 +236,7 @@ class TDCC2(TimeDependentCoupledCluster):
                 *l_old,
                 o,
                 v,
-                np=self.np
+                np=self.np,
             )
             for rhs_l_func in self.rhs_l_amplitudes()
         ]

@@ -44,19 +44,18 @@ class CC2(CoupledCluster):
                 compute_t_1_amplitudes,
                 compute_t_2_amplitudes,
             )
-                        
+
             from coupled_cluster.cc2.rhs_l import (
                 compute_l_1_amplitudes,
                 compute_l_2_amplitudes,
             )
 
-        
         if cc2_b == True:
             from coupled_cluster.cc2.rhs_t_b import (
                 compute_t_1_amplitudes,
                 compute_t_2_amplitudes,
             )
-                        
+
             from coupled_cluster.cc2.rhs_l_b import (
                 compute_l_1_amplitudes,
                 compute_l_2_amplitudes,

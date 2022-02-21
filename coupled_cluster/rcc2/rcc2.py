@@ -32,7 +32,6 @@ class RCC2(CoupledCluster):
     def __init__(self, system, include_singles=True, cc2_b=False, **kwargs):
 
         super().__init__(system, **kwargs)
-   
 
         if cc2_b == False:
             from coupled_cluster.rcc2.rhs_t import (
@@ -55,12 +54,11 @@ class RCC2(CoupledCluster):
                 compute_l_1_amplitudes,
                 compute_l_2_amplitudes,
             )
-       
+
         self.compute_t_1_amplitudes = compute_t_1_amplitudes
         self.compute_t_2_amplitudes = compute_t_2_amplitudes
         self.compute_l_1_amplitudes = compute_l_1_amplitudes
         self.compute_l_2_amplitudes = compute_l_2_amplitudes
-
 
         np = self.np
 
