@@ -1,15 +1,5 @@
 from coupled_cluster.cc import CoupledCluster
 
-from coupled_cluster.rcc2.rhs_t import (
-    compute_t_1_amplitudes,
-    compute_t_2_amplitudes,
-)
-
-from coupled_cluster.rcc2.rhs_l import (
-    compute_l_1_amplitudes,
-    compute_l_2_amplitudes,
-)
-
 from coupled_cluster.cc_helper import (
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
@@ -39,9 +29,38 @@ class RCC2(CoupledCluster):
         Include singles
     """
 
-    def __init__(self, system, include_singles=True, **kwargs):
+    def __init__(self, system, include_singles=True, cc2_b=False, **kwargs):
 
         super().__init__(system, **kwargs)
+   
+
+        if cc2_b == False:
+            from coupled_cluster.rcc2.rhs_t import (
+                compute_t_1_amplitudes,
+                compute_t_2_amplitudes,
+            )
+
+            from coupled_cluster.rcc2.rhs_l import (
+                compute_l_1_amplitudes,
+                compute_l_2_amplitudes,
+            )
+
+        if cc2_b == True:
+            from coupled_cluster.rcc2.rhs_t_b import (
+                compute_t_1_amplitudes,
+                compute_t_2_amplitudes,
+            )
+
+            from coupled_cluster.rcc2.rhs_l_b import (
+                compute_l_1_amplitudes,
+                compute_l_2_amplitudes,
+            )
+       
+        self.compute_t_1_amplitudes = compute_t_1_amplitudes
+        self.compute_t_2_amplitudes = compute_t_2_amplitudes
+        self.compute_l_1_amplitudes = compute_l_1_amplitudes
+        self.compute_l_2_amplitudes = compute_l_2_amplitudes
+
 
         np = self.np
 
@@ -185,7 +204,7 @@ class RCC2(CoupledCluster):
         # Singles
         if self.include_singles:
             self.rhs_t_1.fill(0)
-            self.rhs_t_1 = compute_t_1_amplitudes(
+            self.rhs_t_1 = self.compute_t_1_amplitudes(
                 self.f,
                 self.f_transform,
                 self.u_transform,
@@ -202,7 +221,7 @@ class RCC2(CoupledCluster):
 
         # Doubles
         self.rhs_t_2.fill(0)
-        self.rhs_t_2 = compute_t_2_amplitudes(
+        self.rhs_t_2 = self.compute_t_2_amplitudes(
             self.f,
             self.f_transform,
             self.u_transform,
@@ -247,7 +266,7 @@ class RCC2(CoupledCluster):
         # Singles
         if self.include_singles:
             self.rhs_l_1.fill(0)
-            self.rhs_l_1 = compute_l_1_amplitudes(
+            self.rhs_l_1 = self.compute_l_1_amplitudes(
                 self.f,
                 self.f_transform,
                 self.u_transform,
@@ -267,7 +286,7 @@ class RCC2(CoupledCluster):
 
         # Doubles
         self.rhs_l_2.fill(0)
-        self.rhs_l_2 = compute_l_2_amplitudes(
+        self.rhs_l_2 = self.compute_l_2_amplitudes(
             self.f,
             self.f_transform,
             self.u_transform,

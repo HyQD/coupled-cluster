@@ -1,12 +1,4 @@
 from coupled_cluster.tdcc import TimeDependentCoupledCluster
-from coupled_cluster.rcc2.rhs_t import (
-    compute_t_1_amplitudes,
-    compute_t_2_amplitudes,
-)
-from coupled_cluster.rcc2.rhs_l import (
-    compute_l_1_amplitudes,
-    compute_l_2_amplitudes,
-)
 from coupled_cluster.rcc2 import RCC2
 from coupled_cluster.rcc2.energies import (
     compute_time_dependent_energy,
@@ -26,9 +18,37 @@ from opt_einsum import contract
 class TDRCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
 
-    def __init__(self, system):
+    def __init__(self, system, cc2_b = False):
         super().__init__(system)
         self.rcc2_instance = RCC2(system)
+
+        if cc2_b == False:
+            from coupled_cluster.rcc2.rhs_t import (
+                compute_t_1_amplitudes,
+                compute_t_2_amplitudes,
+            )
+
+            from coupled_cluster.rcc2.rhs_l import (
+                compute_l_1_amplitudes,
+                compute_l_2_amplitudes,
+            )
+
+        if cc2_b == True:
+            from coupled_cluster.rcc2.rhs_t_b import (
+                compute_t_1_amplitudes,
+                compute_t_2_amplitudes,
+            )
+
+            from coupled_cluster.rcc2.rhs_l_b import (
+                compute_l_1_amplitudes,
+                compute_l_2_amplitudes,
+            )
+
+        self.compute_t_1_amplitudes = compute_t_1_amplitudes
+        self.compute_t_2_amplitudes = compute_t_2_amplitudes
+        self.compute_l_1_amplitudes = compute_l_1_amplitudes
+        self.compute_l_2_amplitudes = compute_l_2_amplitudes
+
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(
@@ -39,12 +59,12 @@ class TDRCC2(TimeDependentCoupledCluster):
         )
 
     def rhs_t_amplitudes(self):
-        yield compute_t_1_amplitudes
-        yield compute_t_2_amplitudes
+        yield self.compute_t_1_amplitudes
+        yield self.compute_t_2_amplitudes
 
     def rhs_l_amplitudes(self):
-        yield compute_l_1_amplitudes
-        yield compute_l_2_amplitudes
+        yield self.compute_l_1_amplitudes
+        yield self.compute_l_2_amplitudes
 
     def compute_left_reference_overlap(self, current_time, y):
         np = self.np
