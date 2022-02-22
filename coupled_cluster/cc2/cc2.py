@@ -36,30 +36,8 @@ class CC2(CoupledCluster):
         Include singles
     """
 
-    def __init__(self, system, include_singles=True, cc2_b=False, **kwargs):
+    def __init__(self, system, include_singles=True, **kwargs):
         super().__init__(system, **kwargs)
-
-        if cc2_b == False:
-            from coupled_cluster.cc2.rhs_t import (
-                compute_t_1_amplitudes,
-                compute_t_2_amplitudes,
-            )
-
-            from coupled_cluster.cc2.rhs_l import (
-                compute_l_1_amplitudes,
-                compute_l_2_amplitudes,
-            )
-
-        if cc2_b == True:
-            from coupled_cluster.cc2.rhs_t_b import (
-                compute_t_1_amplitudes,
-                compute_t_2_amplitudes,
-            )
-
-            from coupled_cluster.cc2.rhs_l_b import (
-                compute_l_1_amplitudes,
-                compute_l_2_amplitudes,
-            )
 
         np = self.np
         n, m = self.n, self.m
