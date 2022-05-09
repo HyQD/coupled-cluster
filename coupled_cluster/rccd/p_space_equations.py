@@ -42,6 +42,24 @@ def compute_A_ibaj(rho_qp, o, v, np):
 
 
 def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
+
+    R_ia = np.dot(rho_qp[o, o], h[o, v])
+    R_ia -= np.dot(h[o, v], rho_qp[v, v])
+
+    R_ia += contract("ijkl, klaj->ia", rho_qspr[o, o, o, o], u[o, o, v, o])
+    R_ia += contract("ijbc, bcaj->ia", rho_qspr[o, o, v, v], u[v, v, v, o])
+    R_ia += contract("ibjc, jcab->ia", rho_qspr[o, v, o, v], u[o, v, v, v])
+    R_ia += contract("ibcj, cjab->ia", rho_qspr[o, v, v, o], u[v, o, v, v])
+
+    R_ia -= contract("ibjk, jkab->ia", u[o, v, o, o], rho_qspr[o, o, v, v])
+    R_ia -= contract("ibcd, cdab->ia", u[o, v, v, v], rho_qspr[v, v, v, v])
+    R_ia -= contract("ijbk, bkaj->ia", u[o, o, v, o], rho_qspr[v, o, v, o])
+    R_ia -= contract("ijkb, kbaj->ia", u[o, o, o, v], rho_qspr[o, v, v, o])
+
+    return R_ia
+
+
+def compute_R_ia_compact(h, u, rho_qp, rho_qspr, o, v, np):
     R_ia = np.dot(rho_qp[o, o], h[o, v])
     R_ia -= np.dot(h[o, v], rho_qp[v, v])
 
