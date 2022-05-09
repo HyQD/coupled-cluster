@@ -59,6 +59,40 @@ def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
     return R_ia
 
 
+def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
+
+    R_tilde_ai = np.dot(rho_qp[v, v], h[v, o])
+    R_tilde_ai -= np.dot(h[v, o], rho_qp[o, o])
+
+    R_tilde_ai += contract(
+        "jkib, abjk->ai", u[o, o, o, v], rho_qspr[v, v, o, o]
+    )
+    R_tilde_ai += contract(
+        "cdib, abcd->ai", u[v, v, o, v], rho_qspr[v, v, v, v]
+    )
+    R_tilde_ai += contract(
+        "bkij, ajbk->ai", u[v, o, o, o], rho_qspr[v, o, v, o]
+    )
+    R_tilde_ai += contract(
+        "kbij, ajkb->ai", u[o, v, o, o], rho_qspr[v, o, o, v]
+    )
+
+    R_tilde_ai -= contract(
+        "klij, ajkl->ai", rho_qspr[o, o, o, o], u[v, o, o, o]
+    )
+    R_tilde_ai -= contract(
+        "bcij, ajbc->ai", rho_qspr[v, v, o, o], u[v, o, v, v]
+    )
+    R_tilde_ai -= contract(
+        "jcib, abjc->ai", rho_qspr[o, v, o, v], u[v, v, o, v]
+    )
+    R_tilde_ai -= contract(
+        "cjib, abcj->ai", rho_qspr[v, o, o, v], u[v, v, v, o]
+    )
+
+    return R_tilde_ai
+
+
 def compute_R_ia_compact(h, u, rho_qp, rho_qspr, o, v, np):
     R_ia = np.dot(rho_qp[o, o], h[o, v])
     R_ia -= np.dot(h[o, v], rho_qp[v, v])
@@ -69,7 +103,7 @@ def compute_R_ia_compact(h, u, rho_qp, rho_qspr, o, v, np):
     return R_ia
 
 
-def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
+def compute_R_tilde_ai_compact(h, u, rho_qp, rho_qspr, o, v, np):
     R_tilde_ai = np.dot(rho_qp[v, v], h[v, o])
     R_tilde_ai -= np.dot(h[v, o], rho_qp[o, o])
     R_tilde_ai += contract(
