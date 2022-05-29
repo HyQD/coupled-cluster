@@ -65,6 +65,35 @@ def add_rho_klij(t, l, o, v, out, np):
 
 def add_rho_abij(t, l, o, v, out, np):
 
+    tt = 2 * t - t.swapaxes(2, 3)
+
+    tmp_oo = contract("klcd, cdil->ki", l, t)
+    out[v, v, o, o] -= contract("abkj, ki->abij", tt, tmp_oo)
+    out[v, v, o, o] -= contract("abik, kj->abij", tt, tmp_oo)
+
+    tmp_vv = contract("klcd, bdkl->bc", l, t)
+    out[v, v, o, o] -= contract("acij, bc->abij", tt, tmp_vv)
+    out[v, v, o, o] -= contract("bdji, ad->abij", tt, tmp_vv)
+
+    tmp_ovvo = contract("klcd, acjk->ldaj", l, t)
+    out[v, v, o, o] -= contract("bdil, ldaj->abij", tt, tmp_ovvo)
+    out[v, v, o, o] += 2 * contract("acik, kcbj->abij", tt, tmp_ovvo)
+    out[v, v, o, o] += contract("ackj, kcbi->abij", t, tmp_ovvo)
+
+    tmp_oooo = contract("klcd, cdij->klij", l, t)
+    out[v, v, o, o] += contract("abkl, klij->abij", t, tmp_oooo)
+
+    tmp_ovvo = contract("klcd, bdlj->kcbj", l, t)
+    out[v, v, o, o] -= contract("acik, kcbj->abij", tt, tmp_ovvo)
+
+    tmp_ovvo = contract("kldc, bdli->kcbi", l, t)
+    out[v, v, o, o] += contract("ackj, kcbi->abij", t, tmp_ovvo)
+
+    out[v, v, o, o] += 2 * tt
+
+
+def add_rho_abij_old(t, l, o, v, out, np):
+
     no = o.stop
     nv = v.stop - no
 
