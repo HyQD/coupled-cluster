@@ -91,6 +91,7 @@ def add_rho_abij(t, l, o, v, out, np):
 
     out[v, v, o, o] += 2 * tt
 
+
 def add_rho_jbia(t, l, o, v, out, np):
 
     no = o.stop
