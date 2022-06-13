@@ -2,7 +2,7 @@ from opt_einsum import contract
 
 
 def compute_l_1_amplitudes(
-    f, f_t, u_t, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
+    f, f_t, V_t, u_t, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
 ):
 
     no = t1.shape[1]
@@ -35,6 +35,11 @@ def compute_l_1_amplitudes(
     r_L1 -= contract("jkab, ibjk->ia", l2, u_t[o, v, o, o])
 
     # What about Vt[o,v] contributions?
+    tmp_ba = contract("jkac, bcjk->ba", l2, t2)
+    r_L1 -= contract("ib, ba->ia", V_t[o, v], tmp_ba)
+
+    tmp_ji = contract("ikbc, bcjk->ji", l2, t2)
+    r_L1 -= contract("ja, ji->ia", V_t[o, v], tmp_ji)
 
     return r_L1
 

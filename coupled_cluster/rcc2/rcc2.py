@@ -249,6 +249,7 @@ class RCC2(CoupledCluster):
             self.rhs_l_1 = compute_l_1_amplitudes(
                 self.f,
                 self.f_transform,
+                np.zeros(self.h.shape),
                 self.u_transform,
                 self.t_1,
                 self.t_2,
@@ -318,13 +319,27 @@ class RCC2(CoupledCluster):
 
         np = self.np
 
-        tot = self.m + self.n
+        # tot = self.m + self.n
 
-        t1_t = self.np.zeros((tot, tot), dtype=t_1.dtype)
-        t1_t[self.n : self.n + t_1.shape[0], 0 : t_1.shape[1]] = t_1
+        # t1_t = self.np.zeros((tot, tot), dtype=t_1.dtype)
+        # t1_t[self.n : self.n + t_1.shape[0], 0 : t_1.shape[1]] = t_1
 
-        x_transform = np.eye(tot) - t1_t
-        y_transform = np.eye(tot) + t1_t.T
+        # t1_matrix = self.np.zeros((self.l, self.l),dtype=t_1.dtype)
+        # t1_matrix[self.v, self.o] = t_1
+
+        # assert(self.np.allclose(t1_matrix, t1_t))
+
+        # x_transform = np.eye(self.l) - t1_t
+        # y_transform = np.eye(self.l) + t1_t.T
+        x_transform = np.zeros((self.l, self.l), dtype=t_1.dtype)
+        y_transform = np.zeros((self.l, self.l), dtype=t_1.dtype)
+
+        x_transform += np.eye(self.l)
+        x_transform[self.v, self.o] -= t_1
+
+        y_transform += np.eye(self.l)
+        y_transform[self.o, self.v] += t_1.T
+
         C_tilde = x_transform
         C = y_transform.T
 

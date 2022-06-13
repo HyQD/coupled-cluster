@@ -35,6 +35,27 @@ class TDRCC2(TimeDependentCoupledCluster):
     def __init__(self, system):
         super().__init__(system)
         self.rcc2 = RCC2(system)
+        self.h_t = self.system.h.copy()
+        self.f0 = self.system.construct_fock_matrix(self.h, self.u)
+
+    def update_hamiltonian(self, current_time, y):
+        # print(f"Update Hamiltonian TDRCC2")
+        if self.last_timestep == current_time:
+            return
+
+        self.last_timestep = current_time
+
+        if self.system.has_one_body_time_evolution_operator:
+            self.h = self.system.h_t(current_time)
+
+        if self.system.has_two_body_time_evolution_operator:
+            self.u = self.system.u_t(current_time)
+
+        self.v_t = self.system.v_t(current_time)
+
+        self.h_t = self.system.h + self.v_t
+
+        self.f = self.system.construct_fock_matrix(self.h, self.u)
 
     def __call__(self, current_time, prev_amp):
         o, v = self.system.o, self.system.v
@@ -45,12 +66,42 @@ class TDRCC2(TimeDependentCoupledCluster):
 
         self.update_hamiltonian(current_time, prev_amp)
 
+        ##################################################################
         # T1-transform integrals
-        (
-            self.h_transformed,
-            self.f_transformed,
-            self.u_transformed,
-        ) = self.rcc2.t1_transform_integrals(t_1, self.h, self.u)
+        x_transform = self.np.zeros(
+            (self.system.l, self.system.l), dtype=t_1.dtype
+        )
+        y_transform = self.np.zeros(
+            (self.system.l, self.system.l), dtype=t_1.dtype
+        )
+
+        x_transform += self.np.eye(self.system.l)
+        x_transform[self.system.v, self.system.o] -= t_1
+
+        y_transform += self.np.eye(self.system.l)
+        y_transform[self.system.o, self.system.v] += t_1.T
+
+        C_tilde = x_transform
+        C = y_transform.T
+
+        h_t1 = self.system.transform_one_body_elements(
+            self.system.h, C, C_tilde
+        )
+        v_t1 = self.system.transform_one_body_elements(self.v_t, C, C_tilde)
+        u_t1 = self.system.transform_two_body_elements(self.u, C, C_tilde)
+
+        f1 = self.system.construct_fock_matrix(h_t1 + v_t1, u_t1)
+        f2 = self.f0 + v_t1
+
+        # (
+        #     self.h_transformed,
+        #     self.f_transformed,
+        #     self.u_transformed,
+        # ) = self.rcc2.t1_transform_integrals(t_1, self.h, self.u)
+
+        # print(self.np.allclose(f2, self.f))
+        # assert self.np.allclose(f1, self.f_transformed)
+        ##################################################################
 
         # Remove phase from t-amplitude list
         t_old = t_old[1:]
@@ -58,9 +109,9 @@ class TDRCC2(TimeDependentCoupledCluster):
         t_new = [
             -1j
             * rhs_t_func(
-                self.f,
-                self.f_transformed,
-                self.u_transformed,
+                f2,
+                f1,
+                u_t1,
                 *t_old,
                 o,
                 v,
@@ -75,20 +126,42 @@ class TDRCC2(TimeDependentCoupledCluster):
         )
         t_new = [t_0_new, *t_new]
 
-        l_new = [
-            1j
-            * rhs_l_func(
-                self.f,
-                self.f_transformed,
-                self.u_transformed,
-                *t_old,
-                *l_old,
-                o,
-                v,
-                np=self.np,
-            )
-            for rhs_l_func in self.rhs_l_amplitudes()
-        ]
+        # l_new = [
+        #     1j
+        #     * rhs_l_func(
+        #         self.f,
+        #         self.f_transformed,
+        #         self.u_transformed,
+        #         *t_old,
+        #         *l_old,
+        #         o,
+        #         v,
+        #         np=self.np,
+        #     )
+        #     for rhs_l_func in self.rhs_l_amplitudes()
+        # ]
+        l1_new = 1j * compute_l_1_amplitudes(
+            f2,
+            f1,
+            v_t1,
+            u_t1,
+            *t_old,
+            *l_old,
+            o,
+            v,
+            np=self.np,
+        )
+        l2_new = 1j * compute_l_2_amplitudes(
+            f2,
+            f1,
+            u_t1,
+            *t_old,
+            *l_old,
+            o,
+            v,
+            np=self.np,
+        )
+        l_new = [l1_new, l2_new]
 
         self.last_timestep = current_time
 
