@@ -38,9 +38,11 @@ class RCC2(CoupledCluster):
         Include singles
     """
 
-    def __init__(self, system, include_singles=True, **kwargs):
+    def __init__(self, system, include_singles=True, cc2_b=False, **kwargs):
 
         super().__init__(system, **kwargs)
+
+        self.cc2_b = cc2_b
 
         np = self.np
 
@@ -184,7 +186,52 @@ class RCC2(CoupledCluster):
         # Singles
         if self.include_singles:
             self.rhs_t_1.fill(0)
-            self.rhs_t_1 = compute_t_1_amplitudes(
+
+            if self.cc2_b:
+                self.rhs_t_1 = compute_t_1_amplitudes(
+                    self.f_transform,
+                    self.f_transform,
+                    self.u_transform,
+                    self.t_1,
+                    self.t_2,
+                    self.o,
+                    self.v,
+                    out=self.rhs_t_1,
+                    np=np,
+                )
+            else:
+                self.rhs_t_1 = compute_t_1_amplitudes(
+                    self.f,
+                    self.f_transform,
+                    self.u_transform,
+                    self.t_1,
+                    self.t_2,
+                    self.o,
+                    self.v,
+                    out=self.rhs_t_1,
+                    np=np,
+                )
+
+            trial_vector = self.t_1.ravel()
+            direction_vector = (self.rhs_t_1 / self.d_t_1).ravel()
+            error_vector = self.rhs_t_1.ravel().copy()
+
+        # Doubles
+        self.rhs_t_2.fill(0)
+        if self.cc2_b:
+            self.rhs_t_2 = compute_t_2_amplitudes(
+                self.f_transform,
+                self.f_transform,
+                self.u_transform,
+                self.t_1,
+                self.t_2,
+                self.o,
+                self.v,
+                out=self.rhs_t_2,
+                np=np,
+            )
+        else:
+            self.rhs_t_2 = compute_t_2_amplitudes(
                 self.f,
                 self.f_transform,
                 self.u_transform,
@@ -192,26 +239,9 @@ class RCC2(CoupledCluster):
                 self.t_2,
                 self.o,
                 self.v,
-                out=self.rhs_t_1,
+                out=self.rhs_t_2,
                 np=np,
             )
-            trial_vector = self.t_1.ravel()
-            direction_vector = (self.rhs_t_1 / self.d_t_1).ravel()
-            error_vector = self.rhs_t_1.ravel().copy()
-
-        # Doubles
-        self.rhs_t_2.fill(0)
-        self.rhs_t_2 = compute_t_2_amplitudes(
-            self.f,
-            self.f_transform,
-            self.u_transform,
-            self.t_1,
-            self.t_2,
-            self.o,
-            self.v,
-            out=self.rhs_t_2,
-            np=np,
-        )
 
         trial_vector = np.concatenate((trial_vector, self.t_2.ravel()), axis=0)
         direction_vector = np.concatenate(
@@ -246,20 +276,36 @@ class RCC2(CoupledCluster):
         # Singles
         if self.include_singles:
             self.rhs_l_1.fill(0)
-            self.rhs_l_1 = compute_l_1_amplitudes(
-                self.f,
-                self.f_transform,
-                np.zeros(self.h.shape),
-                self.u_transform,
-                self.t_1,
-                self.t_2,
-                self.l_1,
-                self.l_2,
-                self.o,
-                self.v,
-                out=self.rhs_l_1,
-                np=np,
-            )
+            if self.cc2_b:
+                self.rhs_l_1 = compute_l_1_amplitudes(
+                    self.f_transform,
+                    self.f_transform,
+                    np.zeros(self.h.shape),
+                    self.u_transform,
+                    self.t_1,
+                    self.t_2,
+                    self.l_1,
+                    self.l_2,
+                    self.o,
+                    self.v,
+                    out=self.rhs_l_1,
+                    np=np,
+                )
+            else:
+                self.rhs_l_1 = compute_l_1_amplitudes(
+                    self.f,
+                    self.f_transform,
+                    np.zeros(self.h.shape),
+                    self.u_transform,
+                    self.t_1,
+                    self.t_2,
+                    self.l_1,
+                    self.l_2,
+                    self.o,
+                    self.v,
+                    out=self.rhs_l_1,
+                    np=np,
+                )
 
             trial_vector = self.l_1.ravel()
             direction_vector = (self.rhs_l_1 / self.d_l_1).ravel()
@@ -267,19 +313,34 @@ class RCC2(CoupledCluster):
 
         # Doubles
         self.rhs_l_2.fill(0)
-        self.rhs_l_2 = compute_l_2_amplitudes(
-            self.f,
-            self.f_transform,
-            self.u_transform,
-            self.t_1,
-            self.t_2,
-            self.l_1,
-            self.l_2,
-            self.o,
-            self.v,
-            out=self.rhs_l_2,
-            np=np,
-        )
+        if self.cc2_b:
+            self.rhs_l_2 = compute_l_2_amplitudes(
+                self.f_transform,
+                self.f_transform,
+                self.u_transform,
+                self.t_1,
+                self.t_2,
+                self.l_1,
+                self.l_2,
+                self.o,
+                self.v,
+                out=self.rhs_l_2,
+                np=np,
+            )
+        else:
+            self.rhs_l_2 = compute_l_2_amplitudes(
+                self.f,
+                self.f_transform,
+                self.u_transform,
+                self.t_1,
+                self.t_2,
+                self.l_1,
+                self.l_2,
+                self.o,
+                self.v,
+                out=self.rhs_l_2,
+                np=np,
+            )
 
         trial_vector = np.concatenate((trial_vector, self.l_2.ravel()), axis=0)
         direction_vector = np.concatenate(

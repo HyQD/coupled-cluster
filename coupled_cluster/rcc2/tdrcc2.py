@@ -28,12 +28,15 @@ from coupled_cluster.cc_helper import AmplitudeContainer
 
 from opt_einsum import contract
 
+from scipy.linalg import expm
+
 
 class TDRCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
 
-    def __init__(self, system):
+    def __init__(self, system, cc2_b=False):
         super().__init__(system)
+        self.cc2_b = cc2_b
         self.rcc2 = RCC2(system)
         self.h_t = self.system.h.copy()
         self.f0 = self.system.construct_fock_matrix(self.h, self.u)
@@ -84,6 +87,14 @@ class TDRCC2(TimeDependentCoupledCluster):
         C_tilde = x_transform
         C = y_transform.T
 
+        kappa = self.np.zeros((self.system.l, self.system.l), dtype=t_1.dtype)
+        kappa[v, o] += t_1
+        _C = expm(kappa)
+        _C_tilde = expm(-kappa)
+
+        # print(self.np.allclose(C, _C))
+        # print(self.np.allclose(C_tilde, _C_tilde))
+
         h_t1 = self.system.transform_one_body_elements(
             self.system.h, C, C_tilde
         )
@@ -91,7 +102,10 @@ class TDRCC2(TimeDependentCoupledCluster):
         u_t1 = self.system.transform_two_body_elements(self.u, C, C_tilde)
 
         f1 = self.system.construct_fock_matrix(h_t1 + v_t1, u_t1)
-        f2 = self.f0 + v_t1
+        if self.cc2_b:
+            f2 = f1.copy()
+        else:
+            f2 = self.f0 + v_t1
 
         # (
         #     self.h_transformed,
