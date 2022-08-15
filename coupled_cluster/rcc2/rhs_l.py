@@ -34,7 +34,6 @@ def compute_l_1_amplitudes(
     r_L1 += contract("ijbc, bcaj->ia", l2, u_t[v, v, v, o])
     r_L1 -= contract("jkab, ibjk->ia", l2, u_t[o, v, o, o])
 
-    # What about Vt[o,v] contributions?
     tmp_ba = contract("jkac, bcjk->ba", l2, t2)
     r_L1 -= contract("ib, ba->ia", V_t[o, v], tmp_ba)
 
