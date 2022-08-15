@@ -28,8 +28,6 @@ from coupled_cluster.cc_helper import AmplitudeContainer
 
 from opt_einsum import contract
 
-from scipy.linalg import expm
-
 
 class TDRCC2(TimeDependentCoupledCluster):
     truncation = "CCSD"
@@ -71,6 +69,8 @@ class TDRCC2(TimeDependentCoupledCluster):
 
         ##################################################################
         # T1-transform integrals
+        # self.rcc2.t1_transform_integrals(t_1, self.h, self.u) only transforms h and u.
+        # However, we also need the t1 transform of the bare matrix elements of the interaction operator, v_t1.
         x_transform = self.np.zeros(
             (self.system.l, self.system.l), dtype=t_1.dtype
         )
@@ -87,14 +87,6 @@ class TDRCC2(TimeDependentCoupledCluster):
         C_tilde = x_transform
         C = y_transform.T
 
-        kappa = self.np.zeros((self.system.l, self.system.l), dtype=t_1.dtype)
-        kappa[v, o] += t_1
-        _C = expm(kappa)
-        _C_tilde = expm(-kappa)
-
-        # print(self.np.allclose(C, _C))
-        # print(self.np.allclose(C_tilde, _C_tilde))
-
         h_t1 = self.system.transform_one_body_elements(
             self.system.h, C, C_tilde
         )
@@ -107,15 +99,14 @@ class TDRCC2(TimeDependentCoupledCluster):
         else:
             f2 = self.f0 + v_t1
 
-        # (
-        #     self.h_transformed,
-        #     self.f_transformed,
-        #     self.u_transformed,
-        # ) = self.rcc2.t1_transform_integrals(t_1, self.h, self.u)
-
-        # print(self.np.allclose(f2, self.f))
-        # assert self.np.allclose(f1, self.f_transformed)
-        ##################################################################
+        ######################################################################
+        # from scipy.linalg import expm
+        # kappa = self.np.zeros((self.system.l, self.system.l), dtype=t_1.dtype)
+        # kappa[v, o] += t_1
+        # _C = expm(kappa)
+        # _C_tilde = expm(-kappa)
+        # Potential test for CC2: np.allclose(C, _C) and np.allclose(C_tilde, _C_tilde)
+        ######################################################################
 
         # Remove phase from t-amplitude list
         t_old = t_old[1:]
@@ -140,20 +131,8 @@ class TDRCC2(TimeDependentCoupledCluster):
         )
         t_new = [t_0_new, *t_new]
 
-        # l_new = [
-        #     1j
-        #     * rhs_l_func(
-        #         self.f,
-        #         self.f_transformed,
-        #         self.u_transformed,
-        #         *t_old,
-        #         *l_old,
-        #         o,
-        #         v,
-        #         np=self.np,
-        #     )
-        #     for rhs_l_func in self.rhs_l_amplitudes()
-        # ]
+        # Note that compute_l_1_amplitudes(...) has a different signature from compute_l_2_amplitudes(...).
+        # In particular, it requires the bare v_t1 matrix elements as input.
         l1_new = 1j * compute_l_1_amplitudes(
             f2,
             f1,
@@ -165,6 +144,7 @@ class TDRCC2(TimeDependentCoupledCluster):
             v,
             np=self.np,
         )
+
         l2_new = 1j * compute_l_2_amplitudes(
             f2,
             f1,
