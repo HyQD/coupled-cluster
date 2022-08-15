@@ -380,18 +380,6 @@ class RCC2(CoupledCluster):
 
         np = self.np
 
-        # tot = self.m + self.n
-
-        # t1_t = self.np.zeros((tot, tot), dtype=t_1.dtype)
-        # t1_t[self.n : self.n + t_1.shape[0], 0 : t_1.shape[1]] = t_1
-
-        # t1_matrix = self.np.zeros((self.l, self.l),dtype=t_1.dtype)
-        # t1_matrix[self.v, self.o] = t_1
-
-        # assert(self.np.allclose(t1_matrix, t1_t))
-
-        # x_transform = np.eye(self.l) - t1_t
-        # y_transform = np.eye(self.l) + t1_t.T
         x_transform = np.zeros((self.l, self.l), dtype=t_1.dtype)
         y_transform = np.zeros((self.l, self.l), dtype=t_1.dtype)
 
