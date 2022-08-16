@@ -63,7 +63,10 @@ def test_tdrcc2():
                 F_str=F_str, omega=omega, tprime=tprime, phase=phase
             ),
             polarization_vector=polarization,
-        )
+        ),
+        # Make sure h_t only includes the perturbation, and not the
+        # time-independent one-body Hamiltonian.
+        add_h_0=False,
     )
 
     dt = 1e-1
