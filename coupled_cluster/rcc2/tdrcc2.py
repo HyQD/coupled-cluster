@@ -39,6 +39,11 @@ class TDRCC2(TimeDependentCoupledCluster):
         self.h_t = self.system.h.copy()
         self.f0 = self.system.construct_fock_matrix(self.h, self.u)
 
+        assert not system._add_h_0, (
+            f"TDRCC2 requires access to the time-dependent perturbation \n"
+            + "separately."
+        )
+
     def update_hamiltonian(self, current_time, y):
         # print(f"Update Hamiltonian TDRCC2")
         if self.last_timestep == current_time:
@@ -47,12 +52,12 @@ class TDRCC2(TimeDependentCoupledCluster):
         self.last_timestep = current_time
 
         if self.system.has_one_body_time_evolution_operator:
-            self.h = self.system.h_t(current_time)
+            # Note, since system._add_h_0 is False, system.h_t will only return
+            # the time-dependent perturbation (dubbed v_t).
+            self.v_t = self.system.h_t(current_time)
 
         if self.system.has_two_body_time_evolution_operator:
             self.u = self.system.u_t(current_time)
-
-        self.v_t = self.system.v_t(current_time)
 
         self.h_t = self.system.h + self.v_t
 
