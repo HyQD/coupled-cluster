@@ -18,53 +18,35 @@ def compute_t_1_amplitudes(
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
 
-    tau0 = np.zeros((nocc, nvirt, nvirt, nvirt), dtype=t1.dtype)
-    tau0 += 2 * contract("iabc->iabc", W_t[o, v, v, v], optimize=True)
-    tau0 -= contract("iacb->iabc", W_t[o, v, v, v], optimize=True)
-    Omega = np.zeros((nvirt, nocc), dtype=t1.dtype)
-    Omega += contract("bcji,jabc->ai", t2, tau0, optimize=True)
-    del tau0
-    tau2 = np.zeros((nocc, nocc, nocc, nvirt), dtype=t1.dtype)
-    tau2 -= contract("jkia->ijka", W_t[o, o, o, v], optimize=True)
-    tau2 += 2 * contract("kjia->ijka", W_t[o, o, o, v], optimize=True)
-    Omega -= contract("bajk,ijkb->ai", t2, tau2, optimize=True)
-    del tau2
-    tau5 = np.zeros((nocc, nvirt), dtype=t1.dtype)
-    tau5 += contract("ia->ia", F_t[o, v], optimize=True)
-    tau6 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t1.dtype)
-    tau6 += 2 * contract("abji->ijab", t2, optimize=True)
-    tau6 -= contract("baji->ijab", t2, optimize=True)
-    Omega += contract("jb,jiab->ai", tau5, tau6, optimize=True)
-    del tau5
-    del tau6
-    Omega += contract("ai->ai", F_t[v, o], optimize=True)
+    r_T1 = np.zeros((nvirt, nocc), dtype=t1.dtype)
+    r_T1 += F_t[v, o]
 
-    return Omega
+    r_T1 += 2 * contract("bcij, ajbc->ai", t2, W_t[v, o, v, v])
+    r_T1 -= contract("bcij, ajcb->ai", t2, W_t[v, o, v, v])
+
+    r_T1 -= 2 * contract("abjk, jkib->ai", t2, W_t[o, o, o, v])
+    r_T1 += contract("abjk, kjib->ai", t2, W_t[o, o, o, v])
+
+    tt = 2 * t2 - t2.swapaxes(2, 3)
+    r_T1 += contract("jb, abij->ai", F_t[o, v], tt)
+
+    return r_T1
 
 
 def compute_t_2_amplitudes(
     F, F_t, W_t, t1, t2, o, v, np, intermediates=None, out=None
 ):
-    """
-    if out is None:
-        out = np.zeros_like(t_2)
-    """
-
     nocc = t1.shape[1]
     nvirt = t1.shape[0]
-    Omegb = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t1.dtype)
-    tau2 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t1.dtype)
-    tau2 += contract("ki,abjk->ijab", F[o, o], t2, optimize=True)
-    tau16 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t1.dtype)
-    tau16 -= contract("ijab->ijab", tau2, optimize=True)
-    del tau2
-    tau3 = np.zeros((nocc, nocc, nvirt, nvirt), dtype=t1.dtype)
-    tau3 += contract("ac,bcij->ijab", F[v, v], t2, optimize=True)
-    tau16 += contract("ijab->ijab", tau3, optimize=True)
-    del tau3
-    Omegb += contract("ijba->abij", tau16, optimize=True)
-    Omegb += contract("jiab->abij", tau16, optimize=True)
-    del tau16
-    Omegb += contract("baji->abij", W_t[v, v, o, o], optimize=True)
 
-    return Omegb
+    r_T2 = np.zeros((nvirt, nvirt, nocc, nocc), dtype=t2.dtype)
+
+    r_T2 += W_t[v, v, o, o]
+
+    r_T2 += contract("bc, acij->abij", F[v, v], t2)
+    r_T2 += contract("ac, bcji->abij", F[v, v], t2)
+
+    r_T2 -= contract("kj, abik->abij", F[o, o], t2)
+    r_T2 -= contract("ki, abkj->abij", F[o, o], t2)
+
+    return r_T2
