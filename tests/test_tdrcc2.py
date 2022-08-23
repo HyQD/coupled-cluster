@@ -1,3 +1,5 @@
+import pytest
+
 import numpy as np
 import tqdm
 import os
@@ -27,6 +29,7 @@ class sine_square_laser:
         return pulse
 
 
+@pytest.mark.skip
 def test_tdrcc2():
 
     molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
