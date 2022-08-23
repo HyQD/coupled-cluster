@@ -137,7 +137,7 @@ class CCSD(CoupledCluster):
             "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
         )
 
-        return energy + self.compute_reference_energy()
+        return energy + self.system.compute_reference_energy()
 
     def compute_t_amplitudes(self):
         np = self.np
