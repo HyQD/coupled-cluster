@@ -99,6 +99,65 @@ from coupled_cluster.ccsd.density_matrices import (
     add_rho_ai,
     add_rho_ji,
 )
+from coupled_cluster.ccsd.energies import lagrangian_functional
+
+
+def test_two_body_density_matrix():
+
+    molecule = "li 0.0 0.0 0.0; H 0.0 0.0 3.08"
+    basis = "cc-pvdz"
+
+    system = construct_pyscf_system_rhf(
+        molecule,
+        basis=basis,
+        np=np,
+        verbose=False,
+        add_spin=True,
+        anti_symmetrize=True,
+    )
+
+    ccsd = CCSD(system, mixer=DIIS, verbose=False)
+
+    conv_tol = 1e-10
+    t_kwargs = dict(tol=conv_tol)
+    l_kwargs = dict(tol=conv_tol)
+
+    ccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
+    e_ccsd = ccsd.compute_energy()
+    lagrangian = lagrangian_functional(
+        ccsd.f,
+        system.u,
+        ccsd.t_1,
+        ccsd.t_2,
+        ccsd.l_1,
+        ccsd.l_2,
+        system.o,
+        system.v,
+        np,
+    )
+    assert (
+        abs(lagrangian + system.compute_reference_energy() - e_ccsd) < 1e-10
+    )  # This test is only true if the amplitudes satisfy the cc-equations.
+
+    rho_qp = ccsd.compute_one_body_density_matrix()
+    rho_rspq = ccsd.compute_two_body_density_matrix()
+    assert (
+        np.trace(np.trace(rho_rspq, axis1=0, axis2=2))
+        - system.n * (system.n - 1)
+        < 1e-10
+    )  # This is a minimal test, since only the elements rho^{pq}_{pq} contribute to the trace.
+
+    expec_H = np.einsum("pq,qp", system.h, rho_qp) + 0.25 * np.einsum(
+        "pqrs, rspq", system.u, rho_rspq
+    )
+    assert (
+        abs(
+            expec_H
+            + system.nuclear_repulsion_energy
+            - (lagrangian + system.compute_reference_energy())
+        )
+        < 1e-10
+    )
 
 
 @pytest.fixture
