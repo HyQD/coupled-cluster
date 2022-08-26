@@ -10,6 +10,10 @@ from coupled_cluster.ccsd.rhs_l import (
     compute_l_2_amplitudes,
 )
 
+from coupled_cluster.ccsd.energies import (
+    compute_ccsd_energy,
+)
+
 from coupled_cluster.cc_helper import (
     construct_d_t_1_matrix,
     construct_d_t_2_matrix,
@@ -122,6 +126,7 @@ class CCSD(CoupledCluster):
         self.t_mixer.clear_vectors()
 
     def compute_energy(self):
+
         """Compute Energy
 
         Returns
@@ -129,16 +134,28 @@ class CCSD(CoupledCluster):
         float
             Energy of current state
         """
-        np = self.np
-        o, v = self.o, self.v
 
-        energy = contract("ia, ai ->", self.f[o, v], self.t_1)
-        energy += 0.25 * contract("ijab, abij ->", self.u[o, o, v, v], self.t_2)
-        energy += 0.5 * contract(
-            "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
+        # np = self.np
+        # o, v = self.o, self.v
+
+        # energy = contract("ia, ai ->", self.f[o, v], self.t_1)
+        # energy += 0.25 * contract("ijab, abij ->", self.u[o, o, v, v], self.t_2)
+        # energy += 0.5 * contract(
+        #     "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
+        # )
+
+        # return energy + self.system.compute_reference_energy()
+
+        return compute_ccsd_energy(
+            self.system,
+            self.f,
+            self.u,
+            self.t_1,
+            self.t_2,
+            self.o,
+            self.v,
+            self.np,
         )
-
-        return energy + self.system.compute_reference_energy()
 
     def compute_t_amplitudes(self):
         np = self.np
