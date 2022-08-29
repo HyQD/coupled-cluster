@@ -1,8 +1,8 @@
 from coupled_cluster.cc_helper import compute_reference_energy
 
 
-def compute_ccd_ground_state_energy(f, u, t, o, v, np):
-    energy = compute_reference_energy(f, u, o, v, np=np)
+def compute_ccd_ground_state_energy(system, f, u, t, o, v, np):
+    energy = system.compute_reference_energy()
     energy += compute_ccd_ground_state_energy_correction(u, t, o, v, np=np)
 
     return energy

@@ -9,13 +9,13 @@ from coupled_cluster.ccd.energies import (
 from opt_einsum import contract
 
 
-def compute_rccsd_ground_state_energy(f, u, t_1, t_2, o, v, np):
+def compute_rccsd_ground_state_energy(system, f, u, t_1, t_2, o, v, np):
 
     # energy = compute_reference_energy(f, u, o, v, np=np)
     """
     Reference energy missing
     """
-    energy = 0
+    energy = system.compute_reference_energy()
 
     energy += compute_ground_state_energy_correction(
         f, u, t_1, t_2, o, v, np=np
