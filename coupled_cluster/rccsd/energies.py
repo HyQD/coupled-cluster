@@ -24,7 +24,7 @@ def compute_rccsd_ground_state_energy(system, f, u, t_1, t_2, o, v, np):
     return energy
 
 
-def compute_ground_state_energy_correction(f, u, t_1, t_2, o, v, np):
+def compute_rccsd_correlation_energy(f, u, t_1, t_2, o, v, np):
     """
 
     f^{i}_{a} t^{a}_{i}

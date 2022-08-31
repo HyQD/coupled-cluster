@@ -8,7 +8,7 @@ def compute_ccd_ground_state_energy(system, f, u, t, o, v, np):
     return energy
 
 
-def compute_ccd_ground_state_energy_correction(u, t, o, v, np):
+def compute_ccd_correlation_energy(f, u, t, o, v, np):
     r"""Ground state correlation energy for the coupled cluster doubles method
 
     \Delta E_{CCD} = 0.25 * t^{ab}_{ij} u^{ij}_{ab}.
