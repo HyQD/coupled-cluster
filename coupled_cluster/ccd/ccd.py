@@ -1,6 +1,6 @@
 from coupled_cluster.cc import CoupledCluster
 from coupled_cluster.ccd.energies import (
-    compute_ccd_ground_state_energy_correction,
+    compute_ccd_correlation_energy,
 )
 from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
@@ -80,8 +80,8 @@ class CCD(CoupledCluster):
     def compute_energy(self):
         return (
             self.system.compute_reference_energy()
-            + compute_ccd_ground_state_energy_correction(
-                self.u, self.t_2, self.o, self.v, np=self.np
+            + compute_ccd_correlation_energy(
+                self.f, self.u, self.t_2, self.o, self.v, np=self.np
             )
         )
 

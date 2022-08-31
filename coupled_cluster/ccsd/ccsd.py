@@ -12,6 +12,7 @@ from coupled_cluster.ccsd.rhs_l import (
 
 from coupled_cluster.ccsd.energies import (
     compute_ccsd_energy,
+    compute_ccsd_correlation_energy,
 )
 
 from coupled_cluster.cc_helper import (
@@ -135,26 +136,17 @@ class CCSD(CoupledCluster):
             Energy of current state
         """
 
-        # np = self.np
-        # o, v = self.o, self.v
-
-        # energy = contract("ia, ai ->", self.f[o, v], self.t_1)
-        # energy += 0.25 * contract("ijab, abij ->", self.u[o, o, v, v], self.t_2)
-        # energy += 0.5 * contract(
-        #     "ijab, ai, bj ->", self.u[o, o, v, v], self.t_1, self.t_1
-        # )
-
-        # return energy + self.system.compute_reference_energy()
-
-        return compute_ccsd_energy(
-            self.system,
-            self.f,
-            self.u,
-            self.t_1,
-            self.t_2,
-            self.o,
-            self.v,
-            self.np,
+        return (
+            self.system.compute_reference_energy()
+            + compute_ccsd_correlation_energy(
+                self.f,
+                self.u,
+                self.t_1,
+                self.t_2,
+                self.o,
+                self.v,
+                self.np,
+            )
         )
 
     def compute_t_amplitudes(self):
