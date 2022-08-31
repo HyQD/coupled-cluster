@@ -3,7 +3,7 @@ from coupled_cluster.ccd.rhs_t import compute_t_2_amplitudes
 from coupled_cluster.ccd.rhs_l import compute_l_2_amplitudes
 from coupled_cluster.ccd.energies import (
     compute_time_dependent_energy,
-    compute_ccd_ground_state_energy,
+    compute_ccd_correlation_energy,
 )
 from coupled_cluster.ccd.density_matrices import (
     compute_one_body_density_matrix,
@@ -20,7 +20,7 @@ class OATDCCD(OATDCC):
     truncation = "CCD"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
-        return self.np.array([compute_ccd_ground_state_energy(*args, **kwargs)])
+        return self.np.array([compute_ccd_correlation_energy(*args, **kwargs)])
 
     def rhs_t_amplitudes(self):
         yield compute_t_2_amplitudes
