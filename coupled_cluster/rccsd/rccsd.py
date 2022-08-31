@@ -166,7 +166,7 @@ class RCCSD(CoupledCluster):
         float
             The total coupled-cluster energy of the current state.
         """
-        
+
         return (
             self.system.compute_reference_energy()
             + compute_rccsd_correlation_energy(
