@@ -203,13 +203,7 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
 
         # Compute derivative of phase
         t_0_new = -1j * self.rhs_t_0_amplitude(
-            self.system,
-            self.f_prime,
-            self.u_prime,
-            *t_old,
-            o_prime,
-            v_prime,
-            np=self.np
+            self.f_prime, self.u_prime, *t_old, o_prime, v_prime, np=self.np
         )
 
         t_new = [t_0_new, *t_new]

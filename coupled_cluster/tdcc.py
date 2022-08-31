@@ -340,7 +340,7 @@ class TimeDependentCoupledCluster(metaclass=abc.ABCMeta):
 
         # Compute derivative of phase
         t_0_new = -1j * self.rhs_t_0_amplitude(
-            self.system, self.f, self.u, *t_old, self.o, self.v, np=self.np
+            self.f, self.u, *t_old, self.o, self.v, np=self.np
         )
         t_new = [t_0_new, *t_new]
 
