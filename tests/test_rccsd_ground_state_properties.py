@@ -6,7 +6,7 @@ from coupled_cluster.rccsd import RCCSD
 
 def test_two_body_density_matrix():
 
-    molecule = "He 0.0 0.0 0.0; He 0.0 0.0 1.4"
+    molecule = "li 0.0 0.0 0.0; h 0.0 0.0 3.08"
     basis = "cc-pvdz"
 
     system = construct_pyscf_system_rhf(
@@ -29,12 +29,16 @@ def test_two_body_density_matrix():
 
     rho_qp = rccsd.compute_one_body_density_matrix()
     rho_rspq = rccsd.compute_two_body_density_matrix()
-    print(np.trace(np.trace(rho_rspq, axis1=0, axis2=2)))
+    assert (
+        np.trace(np.trace(rho_rspq, axis1=0, axis2=2))
+        - system.n * (system.n - 1)
+        < 1e-10
+    )  # This is a minimal (and useful) test, since only the elements rho^{pq}_{pq} contribute to the trace.
     expec_H = np.einsum("pq,qp", system.h, rho_qp) + 0.5 * np.einsum(
         "pqrs, rspq", system.u, rho_rspq
     )
 
-    print(e_rccsd - (expec_H + system.nuclear_repulsion_energy))
+    assert (e_rccsd - (expec_H + system.nuclear_repulsion_energy)) < 1e-10
 
 
 def compute_ground_state_properties(molecule, basis):
