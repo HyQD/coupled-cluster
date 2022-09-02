@@ -31,7 +31,7 @@ def test_two_body_density_matrix():
     rho_rspq = rccsd.compute_two_body_density_matrix()
     assert (
         np.trace(np.trace(rho_rspq, axis1=0, axis2=2))
-        - system.n * (system.n - 1)
+        - 2 * system.n * (2 * system.n - 1)
         < 1e-10
     )  # This is a minimal (and useful) test, since only the elements rho^{pq}_{pq} contribute to the trace.
     expec_H = np.einsum("pq,qp", system.h, rho_qp) + 0.5 * np.einsum(
