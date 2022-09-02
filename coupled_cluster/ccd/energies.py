@@ -1,13 +1,6 @@
 from coupled_cluster.cc_helper import compute_reference_energy
 
 
-def compute_ccd_ground_state_energy(system, f, u, t, o, v, np):
-    energy = system.compute_reference_energy()
-    energy += compute_ccd_ground_state_energy_correction(u, t, o, v, np=np)
-
-    return energy
-
-
 def compute_ccd_correlation_energy(f, u, t, o, v, np):
     r"""Ground state correlation energy for the coupled cluster doubles method
 
