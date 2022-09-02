@@ -17,6 +17,7 @@ from coupled_cluster.cc_helper import (
 
 from coupled_cluster.rccsd.density_matrices import (
     compute_one_body_density_matrix,
+    compute_two_body_density_matrix,
 )
 
 from opt_einsum import contract
@@ -336,4 +337,6 @@ class RCCSD(CoupledCluster):
         )
 
     def compute_two_body_density_matrix(self):
-        pass
+        return compute_two_body_density_matrix(
+            self.t_1, self.t_2, self.l_1, self.l_2, self.o, self.v, np=self.np
+        )

@@ -4,6 +4,39 @@ from coupled_cluster.mix import DIIS, AlphaMixer
 from coupled_cluster.rccsd import RCCSD
 
 
+def test_two_body_density_matrix():
+
+    molecule = "He 0.0 0.0 0.0; He 0.0 0.0 1.4"
+    basis = "cc-pvdz"
+
+    system = construct_pyscf_system_rhf(
+        molecule,
+        basis=basis,
+        np=np,
+        verbose=False,
+        add_spin=False,
+        anti_symmetrize=False,
+    )
+
+    rccsd = RCCSD(system, mixer=DIIS, verbose=False)
+
+    conv_tol = 1e-10
+    t_kwargs = dict(tol=conv_tol)
+    l_kwargs = dict(tol=conv_tol)
+
+    rccsd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
+    e_rccsd = rccsd.compute_energy()
+
+    rho_qp = rccsd.compute_one_body_density_matrix()
+    rho_rspq = rccsd.compute_two_body_density_matrix()
+    print(np.trace(np.trace(rho_rspq, axis1=0, axis2=2)))
+    expec_H = np.einsum("pq,qp", system.h, rho_qp) + 0.5 * np.einsum(
+        "pqrs, rspq", system.u, rho_rspq
+    )
+
+    print(e_rccsd - (expec_H + system.nuclear_repulsion_energy))
+
+
 def compute_ground_state_properties(molecule, basis):
 
     system = construct_pyscf_system_rhf(
@@ -48,4 +81,5 @@ def test_rccsd():
 
 
 if __name__ == "__main__":
-    test_rccsd()
+    test_two_body_density_matrix()
+    # test_rccsd()

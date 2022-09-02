@@ -14,6 +14,7 @@ from coupled_cluster.rccsd.energies import (
 )
 from coupled_cluster.rccsd.density_matrices import (
     compute_one_body_density_matrix,
+    compute_two_body_density_matrix,
 )
 from coupled_cluster.rccsd.time_dependent_overlap import (
     compute_time_dependent_overlap,
@@ -78,7 +79,10 @@ class TDRCCSD(TimeDependentCoupledCluster):
 
     # TODO: Implement this?
     def compute_two_body_density_matrix(self, current_time, y):
-        pass
+        t_0, t_1, t_2, l_1, l_2 = self._amp_template.from_array(y).unpack()
+        return compute_two_body_density_matrix(
+            t_1, t_2, l_1, l_2, self.o, self.v, np=self.np
+        )
 
     def compute_overlap(self, current_time, y_a, y_b, use_old=False):
         t0a, t1a, t2a, l1a, l2a = self._amp_template.from_array(y_a).unpack()
