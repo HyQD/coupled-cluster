@@ -11,7 +11,6 @@ from coupled_cluster.rccsd import RCCSD
 from coupled_cluster.rccsd.energies import (
     compute_time_dependent_energy,
     compute_rccsd_correlation_energy,
-    compute_rccsd_ground_state_energy,
 )
 from coupled_cluster.rccsd.density_matrices import (
     compute_one_body_density_matrix,

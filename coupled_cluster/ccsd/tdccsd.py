@@ -10,7 +10,6 @@ from coupled_cluster.ccsd.rhs_l import (
 from coupled_cluster.ccsd import CCSD
 from coupled_cluster.ccsd.energies import (
     compute_time_dependent_energy,
-    compute_ccsd_energy,
     compute_ccsd_correlation_energy,
 )
 from coupled_cluster.ccsd.density_matrices import (

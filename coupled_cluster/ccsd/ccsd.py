@@ -11,7 +11,6 @@ from coupled_cluster.ccsd.rhs_l import (
 )
 
 from coupled_cluster.ccsd.energies import (
-    compute_ccsd_energy,
     compute_ccsd_correlation_energy,
 )
 
