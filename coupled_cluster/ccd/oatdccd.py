@@ -20,7 +20,12 @@ class OATDCCD(OATDCC):
     truncation = "CCD"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
-        return self.np.array([compute_ccd_correlation_energy(*args, **kwargs)])
+        return self.np.array(
+            [
+                self.system.compute_reference_energy(self.h_prime, self.u_prime)
+                + compute_ccd_correlation_energy(*args, **kwargs)
+            ]
+        )
 
     def rhs_t_amplitudes(self):
         yield compute_t_2_amplitudes
