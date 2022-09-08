@@ -5,6 +5,9 @@ from coupled_cluster.rccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
+from coupled_cluster.rccd.energies import (
+    compute_rccd_correlation_energy,
+)
 from coupled_cluster.cc_helper import construct_d_t_2_matrix
 
 from opt_einsum import contract
@@ -77,14 +80,12 @@ class RCCD(CoupledCluster):
         self.t_2_mixer.clear_vectors()
 
     def compute_energy(self):
-        e_ref = self.system.compute_reference_energy()
-        ccd_corr = 2 * contract(
-            "abij,ijab->", self.t_2, self.u[self.o, self.o, self.v, self.v]
+        return (
+            self.system.compute_reference_energy()
+            + compute_rccd_correlation_energy(
+                self.f, self.u, self.t_2, self.o, self.v, np=self.np
+            )
         )
-        ccd_corr -= contract(
-            "abij,ijba->", self.t_2, self.u[self.o, self.o, self.v, self.v]
-        )
-        return e_ref + ccd_corr
 
     def compute_t_amplitudes(self):
         np = self.np
