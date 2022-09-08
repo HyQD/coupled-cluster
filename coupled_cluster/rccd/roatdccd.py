@@ -6,7 +6,9 @@ from coupled_cluster.rccd.density_matrices import (
     compute_one_body_density_matrix,
     compute_two_body_density_matrix,
 )
-
+from coupled_cluster.rccd.energies import (
+    compute_rccd_correlation_energy,
+)
 from coupled_cluster.rccd.p_space_equations import compute_eta
 from coupled_cluster.rccd import ROACCD
 
@@ -17,7 +19,12 @@ class ROATDCCD(OATDCC):
     truncation = "CCD"
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
-        return self.np.array([0 + 0j])
+        return self.np.array(
+            [
+                self.system.compute_reference_energy(self.h_prime, self.u_prime)
+                + compute_rccd_correlation_energy(*args, **kwargs)
+            ]
+        )
 
     def rhs_t_amplitudes(self):
         yield compute_t_2_amplitudes

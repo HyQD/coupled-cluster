@@ -10,7 +10,7 @@ from coupled_cluster.ccsd.rhs_l import (
 from coupled_cluster.ccsd import CCSD
 from coupled_cluster.ccsd.energies import (
     compute_time_dependent_energy,
-    compute_ccsd_ground_state_energy,
+    compute_ccsd_correlation_energy,
 )
 from coupled_cluster.ccsd.density_matrices import (
     compute_one_body_density_matrix,
@@ -27,7 +27,10 @@ class TDCCSD(TimeDependentCoupledCluster):
 
     def rhs_t_0_amplitude(self, *args, **kwargs):
         return self.np.array(
-            [compute_ccsd_ground_state_energy(*args, **kwargs)]
+            [
+                self.system.compute_reference_energy()
+                + compute_ccsd_correlation_energy(*args, **kwargs)
+            ]
         )
 
     def rhs_t_amplitudes(self):
