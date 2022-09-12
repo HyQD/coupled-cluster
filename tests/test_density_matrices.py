@@ -80,8 +80,10 @@ def test_ccd(gos_system):
     )
 
     expec_H = (
-        np.einsum("pq,qp->", gos_system.h, rho_qp)
-        + 0.25 * np.einsum("pqrs, rspq->", gos_system.u, rho_rspq)
+        ccd.compute_one_body_expectation_value(
+            gos_system.h, make_hermitian=False
+        )
+        + ccd.compute_two_body_expectation_value(0.5 * gos_system.u, asym=True)
         + gos_system.nuclear_repulsion_energy
     )
     assert abs(expec_H - (lagrangian)) < conv_tol
@@ -120,8 +122,12 @@ def test_rccd(sos_system):
     )
 
     expec_H = (
-        np.einsum("pq,qp->", sos_system.h, rho_qp)
-        + 0.5 * np.einsum("pqrs, rspq->", sos_system.u, rho_rspq)
+        rccd.compute_one_body_expectation_value(
+            sos_system.h, make_hermitian=False
+        )
+        + rccd.compute_two_body_expectation_value(
+            0.5 * sos_system.u, asym=False
+        )
         + sos_system.nuclear_repulsion_energy
     )
     assert abs(expec_H - (lagrangian)) < conv_tol
@@ -162,8 +168,10 @@ def test_ccsd(gos_system):
     )
 
     expec_H = (
-        np.einsum("pq,qp->", gos_system.h, rho_qp)
-        + 0.25 * np.einsum("pqrs, rspq->", gos_system.u, rho_rspq)
+        ccsd.compute_one_body_expectation_value(
+            gos_system.h, make_hermitian=False
+        )
+        + ccsd.compute_two_body_expectation_value(0.5 * gos_system.u, asym=True)
         + gos_system.nuclear_repulsion_energy
     )
     assert abs(expec_H - (lagrangian)) < conv_tol
@@ -204,8 +212,12 @@ def test_rccsd(sos_system):
     )
 
     expec_H = (
-        np.einsum("pq,qp->", sos_system.h, rho_qp)
-        + 0.5 * np.einsum("pqrs, rspq->", sos_system.u, rho_rspq)
+        rccsd.compute_one_body_expectation_value(
+            sos_system.h, make_hermitian=False
+        )
+        + rccsd.compute_two_body_expectation_value(
+            0.5 * sos_system.u, asym=False
+        )
         + sos_system.nuclear_repulsion_energy
     )
     assert abs(expec_H - (lagrangian)) < conv_tol
@@ -261,7 +273,7 @@ def test_roaccd(sos_system):
         termination_tol=1e-12,
         tol_factor=1e-1,
     )
-    # oaccd.compute_energy() uses the density matrices internally to compute the energy, so
+    # roaccd.compute_energy() uses the density matrices internally to compute the energy, so
     # it is only necessary to compare with the explicit expression for ccd-lagrangian.
     e_roaccd = roaccd.compute_energy()
     lagrangian = sos_system.compute_reference_energy(
