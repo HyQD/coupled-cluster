@@ -3,6 +3,7 @@ from quantum_systems import construct_pyscf_system_rhf
 from coupled_cluster.mix import DIIS, AlphaMixer
 from coupled_cluster.rccd import RCCD
 from coupled_cluster.ccd import CCD
+from coupled_cluster.rccd.energies import compute_lagrangian_functional
 
 
 def test_density_matrices():
@@ -38,7 +39,22 @@ def test_density_matrices():
     e_rccd_density += 0.5 * np.einsum("pqrs,rspq->", system.u, dm2)
     e_rccd_density += system.nuclear_repulsion_energy
 
+    rccd_lagrangian = (
+        system.compute_reference_energy()
+        + compute_lagrangian_functional(
+            system.construct_fock_matrix(system.h, system.u),
+            system.u,
+            rccd.t_2,
+            rccd.l_2,
+            system.o,
+            system.v,
+            np,
+        )
+    )
+
     assert abs(e_rccd - e_rccd_density) < conv_tol
+    assert abs(e_rccd_density - rccd_lagrangian) < conv_tol
+    assert abs(e_rccd - rccd_lagrangian) < conv_tol
 
 
 def test_rccd_vs_ccd():
