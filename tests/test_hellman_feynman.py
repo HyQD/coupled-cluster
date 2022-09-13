@@ -8,7 +8,7 @@ from coupled_cluster.mix import DIIS
 from coupled_cluster import CCD, OACCD, RCCD, ROACCD, CCSD, RCCSD
 
 """
-These tests tests if the Hellman-Feynman theorem
+These tests test if the Hellman-Feynman theorem
 	\frac{d}{de}<\tilde{\Psi}|\hat{H}+e*\hat{V}|\Psi> = <\tilde{\Psi}|\hat{V}|\Psi>,
 holds with \hat{V} = \hat{r}. 
 
