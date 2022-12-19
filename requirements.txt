@@ -23,9 +23,5 @@ numpy
 # Install PySCF
 pyscf
 
-# Stupid hack to fix h5py-pyscf issues
-# Remove this annoying line when PySCF gets updated on pypi
-h5py<=3.2.0
-
 # Install the Gauss-integrator
 git+ssh://git@github.com/Schoyen/gauss-integrator.git
