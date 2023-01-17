@@ -24,4 +24,4 @@ numpy
 pyscf
 
 # Install the Gauss-integrator
-git+ssh://git@github.com/Schoyen/gauss-integrator.git
+git+https://github.com/HyQD/gauss-integrator.git

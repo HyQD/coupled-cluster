@@ -7,6 +7,6 @@ setup(
     install_requires=[
         "scipy",
         "opt_einsum",
-        "quantum-systems @ git+https://github.com/Schoyen/quantum-systems",
+        "quantum-systems @ git+https://github.com/HyQD/quantum-systems",
     ],
 )
