@@ -243,7 +243,6 @@ def test_amplitude_divide_and_join(large_system_ccsd):
 
     i = 0
     for amp in amp_container.unpack():
-
         np.testing.assert_allclose(amp.ravel(), concat_amp[i : i + amp.size])
 
         i += amp.size

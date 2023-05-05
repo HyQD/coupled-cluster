@@ -4,7 +4,6 @@ from opt_einsum import contract
 def compute_l_1_amplitudes(
     f, f_t, V_t, u_t, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
 ):
-
     no = t1.shape[1]
     nv = t1.shape[0]
 
@@ -46,7 +45,6 @@ def compute_l_1_amplitudes(
 def compute_l_2_amplitudes(
     f, f_t, u_t, t1, t2, l1, l2, o, v, np, intermediates=None, out=None
 ):
-
     no = t1.shape[1]
     nv = t1.shape[0]
 

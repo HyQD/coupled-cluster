@@ -44,7 +44,6 @@ def compute_time_dependent_energy(
 def lagrangian_functional(
     f, f_transform, u_transform, t_1, t_2, l_1, l_2, o, v, np
 ):
-
     energy = np.tensordot(
         f_transform[v, o], l_1, axes=((0, 1), (1, 0))
     )  # l_1*f

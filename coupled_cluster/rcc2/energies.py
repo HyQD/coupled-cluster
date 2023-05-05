@@ -35,7 +35,6 @@ def compute_time_dependent_energy(
 def lagrangian_functional(
     f, f_transform, u_transform, t1, t2, l1, l2, o, v, np
 ):
-
     no = t1.shape[1]
     nv = t1.shape[0]
 

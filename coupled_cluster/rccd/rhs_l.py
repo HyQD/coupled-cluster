@@ -38,7 +38,6 @@ from opt_einsum import contract
 
 
 def compute_l_2_amplitudes(f, u, t2, l2, o, v, np, out=None):
-
     Loovv = build_Loovv(u, o, v, np)
 
     Hoo = build_Hoo(f, Loovv, t2, o, v, np)
@@ -87,7 +86,6 @@ def build_Loovv(u, o, v, np):
 
 
 def build_Hoo(f, Loovv, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Hoo = np.zeros((nocc, nocc), dtype=t2.dtype)
@@ -98,7 +96,6 @@ def build_Hoo(f, Loovv, t2, o, v, np):
 
 
 def build_Hvv(f, Loovv, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Hvv = np.zeros((nvirt, nvirt), dtype=t2.dtype)
@@ -109,7 +106,6 @@ def build_Hvv(f, Loovv, t2, o, v, np):
 
 
 def build_Hoooo(u, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Hoooo = np.zeros((nocc, nocc, nocc, nocc), dtype=t2.dtype)
@@ -120,7 +116,6 @@ def build_Hoooo(u, t2, o, v, np):
 
 
 def build_Hvvvv(u, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Hvvvv = np.zeros((nvirt, nvirt, nvirt, nvirt), dtype=t2.dtype)
@@ -131,7 +126,6 @@ def build_Hvvvv(u, t2, o, v, np):
 
 
 def build_Hovvo(u, Loovv, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Hovvo = np.zeros((nocc, nvirt, nvirt, nocc), dtype=t2.dtype)
@@ -143,7 +137,6 @@ def build_Hovvo(u, Loovv, t2, o, v, np):
 
 
 def build_Hovov(u, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Hovov = np.zeros((nocc, nvirt, nocc, nvirt), dtype=t2.dtype)

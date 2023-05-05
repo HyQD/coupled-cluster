@@ -17,7 +17,6 @@ def test_time_dependent_observables(
     l_kwargs,
     time_params,
 ):
-
     ccd = CCD(zanghellini_system, mixer=AlphaMixer)
     ccd.compute_ground_state(t_kwargs=t_kwargs, l_kwargs=l_kwargs)
     y0 = ccd.get_amplitudes(get_t_0=True).asarray()

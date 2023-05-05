@@ -38,7 +38,6 @@ from opt_einsum import contract
 
 
 def compute_t_2_amplitudes(f, u, t2, o, v, np, out=None):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
 
@@ -82,7 +81,6 @@ def compute_t_2_amplitudes(f, u, t2, o, v, np, out=None):
 
 
 def build_Fae(f, u, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Fae = np.zeros((nvirt, nvirt), dtype=t2.dtype)
@@ -94,7 +92,6 @@ def build_Fae(f, u, t2, o, v, np):
 
 
 def build_Fmi(f, u, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Fmi = np.zeros((nocc, nocc), dtype=t2.dtype)
@@ -106,7 +103,6 @@ def build_Fmi(f, u, t2, o, v, np):
 
 
 def build_Wmnij(u, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Wmnij = np.zeros((nocc, nocc, nocc, nocc), dtype=t2.dtype)
@@ -118,7 +114,6 @@ def build_Wmnij(u, t2, o, v, np):
 
 
 def build_Wmbej(u, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Wmbej = np.zeros((nocc, nvirt, nvirt, nocc), dtype=t2.dtype)
@@ -132,7 +127,6 @@ def build_Wmbej(u, t2, o, v, np):
 
 
 def build_Wmbje(u, t2, o, v, np):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     Wmbje = np.zeros((nocc, nvirt, nocc, nvirt), dtype=t2.dtype)

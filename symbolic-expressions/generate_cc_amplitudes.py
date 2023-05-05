@@ -101,7 +101,6 @@ def generate_ccsd_amplitude_equations(verbose=False):
 
 
 def generate_ccsdt_amplitude_equations(verbose=False):
-
     if verbose:
         print("Generating Lagrangian")
     ccsdt_lagrangian = eval_equation(

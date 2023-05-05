@@ -6,7 +6,6 @@ from coupled_cluster.cc2.energies import lagrangian_functional
 
 
 def compute_ground_state_properties(molecule, basis):
-
     system = construct_pyscf_system_rhf(
         molecule,
         basis=basis,
@@ -64,7 +63,6 @@ def compute_ground_state_properties(molecule, basis):
     cc2_dipole_moment = np.zeros(3)
 
     for i in range(3):
-
         dipole_moment_t1_transformed = cc2.t1_transform_integrals_one_body(
             dipole_moment_array[i]
         )
@@ -90,7 +88,6 @@ def compute_ground_state_properties(molecule, basis):
 
 
 def test_cc2():
-
     molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
     basis = "6-31G"
     e_cc2_psi4 = -7.992515440819747

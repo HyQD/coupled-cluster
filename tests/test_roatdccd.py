@@ -31,7 +31,6 @@ class LaserPulse:
 
 
 def test_roatdccd_energy_conservation():
-
     omega = 0.2
     E = 0.5
     laser_duration = 1
@@ -89,7 +88,6 @@ def test_roatdccd_energy_conservation():
     assert abs(td_energies_roatdccd[0] - man_energy) < 1e-12
 
     for i, _t in enumerate(time_points[:-1]):
-
         r.integrate(r.t + dt)
 
         td_energies_roatdccd[i + 1] = roatdccd.compute_energy(r.t, r.y)
@@ -117,7 +115,6 @@ def test_roatdccd_energy_conservation():
 
 
 def test_roatdccd_vs_oatdccd():
-
     omega = 0.2
     E = 0.5
     laser_duration = 3
@@ -160,7 +157,6 @@ def test_roatdccd_vs_oatdccd():
     )
 
     for i, _t in enumerate(time_points[:-1]):
-
         r.integrate(r.t + dt)
 
         td_energies_oatdccd[i + 1] = oatdccd.compute_energy(r.t, r.y)
@@ -200,7 +196,6 @@ def test_roatdccd_vs_oatdccd():
     )
 
     for i, _t in enumerate(time_points[:-1]):
-
         r2.integrate(r2.t + dt)
 
         td_energies_roatdccd[i + 1] = roatdccd.compute_energy(r2.t, r2.y)

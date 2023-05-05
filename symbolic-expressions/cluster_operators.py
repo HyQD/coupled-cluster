@@ -64,7 +64,6 @@ def eval_derivative(self, s):
         sign_tau = 1
 
         for tau in permutations(self.lower):
-
             if c_tau % 2 == 0:
                 sign_tau *= -1
 

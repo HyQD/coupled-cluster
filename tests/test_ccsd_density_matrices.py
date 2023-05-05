@@ -4,7 +4,6 @@ from coupled_cluster.mix import AlphaMixer, DIIS
 
 
 def test_one_body_density(zanghellini_system):
-
     zang_ccsd = CCSD(zanghellini_system, verbose=True, mixer=AlphaMixer)
 
     t_kwargs = dict(theta=0.8)
@@ -61,7 +60,6 @@ def test_one_body_density(zanghellini_system):
 
 
 def test_v_o_term(zanghellini_system):
-
     zang_ccsd = CCSD(zanghellini_system, verbose=True, mixer=AlphaMixer)
 
     t_kwargs = dict(theta=0.8)

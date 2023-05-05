@@ -29,7 +29,6 @@ class sine_square_laser:
 
 
 def test_energy_conservation_after_pulse():
-
     name = "beryllium"
     atom = "be 0.0 0.0 0.0"
     basis = "cc-pvdz"

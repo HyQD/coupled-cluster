@@ -10,7 +10,6 @@ import coupled_cluster.ccd.rhs_t as ccd_t
 def compute_t_1_amplitudes(
     f, f_transformed, u_transformed, t_1, t_2, o, v, np, out=None
 ):
-
     if out is None:
         out = np.zeros_like(t_1)
 
@@ -25,7 +24,6 @@ def compute_t_1_amplitudes(
 def compute_t_2_amplitudes(
     f, f_transformed, u_transformed, t_1, t_2, o, v, np, out=None
 ):
-
     if out is None:
         out = np.zeros_like(t_2)
 

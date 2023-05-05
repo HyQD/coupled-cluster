@@ -103,7 +103,6 @@ from coupled_cluster.ccsd.energies import lagrangian_functional
 
 
 def test_two_body_density_matrix():
-
     molecule = "li 0.0 0.0 0.0; H 0.0 0.0 3.08"
     basis = "cc-pvdz"
 

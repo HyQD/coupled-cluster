@@ -2,7 +2,6 @@ from opt_einsum import contract
 
 
 def compute_one_body_density_matrix(t1, t2, l1, l2, o, v, np, out=None):
-
     nocc = o.stop
     nvirt = v.stop - nocc
 
@@ -60,7 +59,6 @@ def compute_two_body_density_matrix(t1, t2, l1, l2, o, v, np, out=None):
 
 
 def add_rho_klij(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[o, o, o, o] -= 2 * contract("il, jk->klij", delta, delta)
@@ -89,7 +87,6 @@ def add_rho_klij(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_kaij(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[o, v, o, o] += contract("ai,lkbc,bclj->kaij", t1, l2, t2)
@@ -142,7 +139,6 @@ def add_rho_kaij(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_akij(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[v, o, o, o] += contract("aj,lkbc,cbil->akij", t1, l2, t2)
@@ -195,7 +191,6 @@ def add_rho_akij(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_jkai(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[o, o, v, o] -= contract("ij, ka->jkai", delta, l1)
@@ -206,7 +201,6 @@ def add_rho_jkai(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_jkia(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[o, o, o, v] -= contract("ik, ja->jkia", delta, l1)
@@ -217,12 +211,10 @@ def add_rho_jkia(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_ijab(t1, t2, l1, l2, o, v, out, np):
-
     out[o, o, v, v] += l2
 
 
 def add_rho_abij(t1, t2, l1, l2, o, v, out, np):
-
     out[v, v, o, o] -= 2 * contract("abji->abij", t2)
 
     out[v, v, o, o] += 4 * contract("abij->abij", t2)
@@ -345,7 +337,6 @@ def add_rho_abij(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_jbia(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[o, v, o, v] -= contract("ja,bi->jbia", l1, t1)
@@ -362,7 +353,6 @@ def add_rho_jbia(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_bjai(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[v, o, v, o] -= contract("ja,bi->bjai", l1, t1)
@@ -379,7 +369,6 @@ def add_rho_bjai(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_bjia(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[v, o, o, v] += 2 * contract("ja,bi->bjia", l1, t1)
@@ -396,7 +385,6 @@ def add_rho_bjia(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_jbai(t1, t2, l1, l2, o, v, out, np):
-
     delta = np.eye(o.stop)
 
     out[o, v, v, o] += 2 * contract("ja,bi->jbai", l1, t1)
@@ -413,7 +401,6 @@ def add_rho_jbai(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_bcai(t1, t2, l1, l2, o, v, out, np):
-
     out[v, v, v, o] -= contract("bi,jkad,cdjk->bcai", t1, l2, t2)
 
     out[v, v, v, o] -= contract("bj,jkad,cdki->bcai", t1, l2, t2)
@@ -440,7 +427,6 @@ def add_rho_bcai(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_bcia(t1, t2, l1, l2, o, v, out, np):
-
     out[v, v, o, v] -= contract("bj,jkad,cdik->bcia", t1, l2, t2)
 
     out[v, v, o, v] -= contract("bk,jkad,cdji->bcia", t1, l2, t2)
@@ -467,17 +453,14 @@ def add_rho_bcia(t1, t2, l1, l2, o, v, out, np):
 
 
 def add_rho_icab(t1, t2, l1, l2, o, v, out, np):
-
     out[o, v, v, v] += contract("cj,ijab->icab", t1, l2)
 
 
 def add_rho_ciab(t1, t2, l1, l2, o, v, out, np):
-
     out[v, o, v, v] += contract("cj,ijba->ciab", t1, l2)
 
 
 def add_rho_cdab(t1, t2, l1, l2, o, v, out, np):
-
     out[v, v, v, v] += contract("ijab,cdij->cdab", l2, t2)
 
     out[v, v, v, v] += contract("ci,dj,ijab->cdab", t1, t1, l2)

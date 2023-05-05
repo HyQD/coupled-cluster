@@ -48,7 +48,6 @@ def sos_system():
 
 
 def test_ccd(gos_system):
-
     ccd = CCD(gos_system, mixer=DIIS, verbose=False)
 
     conv_tol = 1e-10
@@ -90,7 +89,6 @@ def test_ccd(gos_system):
 
 
 def test_rccd(sos_system):
-
     rccd = RCCD(sos_system, mixer=DIIS, verbose=False)
 
     conv_tol = 1e-10
@@ -134,7 +132,6 @@ def test_rccd(sos_system):
 
 
 def test_ccsd(gos_system):
-
     ccsd = CCSD(gos_system, mixer=DIIS, verbose=False)
 
     conv_tol = 1e-10
@@ -178,7 +175,6 @@ def test_ccsd(gos_system):
 
 
 def test_rccsd(sos_system):
-
     rccsd = RCCSD(sos_system, mixer=DIIS, verbose=False)
 
     conv_tol = 1e-10
@@ -224,7 +220,6 @@ def test_rccsd(sos_system):
 
 
 def test_oaccd(gos_system):
-
     oaccd = OACCD(gos_system, mixer=DIIS, verbose=False)
 
     conv_tol = 1e-10
@@ -262,7 +257,6 @@ def test_oaccd(gos_system):
 
 
 def test_roaccd(sos_system):
-
     roaccd = ROACCD(sos_system, mixer=DIIS, verbose=False)
 
     conv_tol = 1e-10

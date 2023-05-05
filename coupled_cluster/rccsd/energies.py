@@ -42,7 +42,6 @@ def compute_time_dependent_energy(f, u, t_1, t_2, l_1, l_2, o, v, np):
 
 
 def lagrangian_functional(f, u, t1, t2, l1, l2, o, v, np, test=False):
-
     no = o.stop
     nv = v.stop - no
 

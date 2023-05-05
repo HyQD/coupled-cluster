@@ -11,7 +11,6 @@ def corr_energy(t2, u):
 
 
 def t2_rhs(f, u, t):
-
     nocc = t.shape[2]
     nvirt = t.shape[0]
     o, v = slice(0, nocc), slice(nocc, nvirt + nocc)

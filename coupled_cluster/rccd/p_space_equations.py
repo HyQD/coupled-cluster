@@ -42,7 +42,6 @@ def compute_A_ibaj(rho_qp, o, v, np):
 
 
 def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
-
     R_ia = np.dot(rho_qp[o, o], h[o, v])
     R_ia -= np.dot(h[o, v], rho_qp[v, v])
 
@@ -60,7 +59,6 @@ def compute_R_ia(h, u, rho_qp, rho_qspr, o, v, np):
 
 
 def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
-
     R_tilde_ai = np.dot(rho_qp[v, v], h[v, o])
     R_tilde_ai -= np.dot(h[v, o], rho_qp[o, o])
 
@@ -94,7 +92,6 @@ def compute_R_tilde_ai(h, u, rho_qp, rho_qspr, o, v, np):
 
 
 def compute_R_ia_compact(h, u, rho_qp, rho_qspr, o, v, np):
-
     """
     The use of ":"-slices leads to unpredictable performance.
     However, the function is kept for testing purposes.
@@ -110,7 +107,6 @@ def compute_R_ia_compact(h, u, rho_qp, rho_qspr, o, v, np):
 
 
 def compute_R_tilde_ai_compact(h, u, rho_qp, rho_qspr, o, v, np):
-
     """
     The use of ":"-slices leads to unpredictable performance.
     However, the function is kept for testing purposes.
