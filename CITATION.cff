@@ -19,6 +19,9 @@ authors:
 - family-names: "Heilemann Myhre"
   given-names: "Rolf"
   orcid: "https://orcid.org/0000-0002-0674-4639"
+- family-names: "Aurbakken"
+  given-names: "Einar"
+  orcid: "https://orcid.org/0009-0000-4571-032X"
 title: "HyQD: Coupled Cluster"
 version: 0.2.7
 date-released: 2021-04-21
