@@ -12,7 +12,6 @@ def bh_groundstate_romp2():
 
 
 def test_romp2_groundstate_pyscf(bh_groundstate_romp2):
-
     molecule = "b 0.0 0.0 0.0;h 0.0 0.0 2.4"
     basis = "cc-pvdz"
 

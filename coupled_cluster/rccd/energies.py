@@ -15,7 +15,6 @@ def compute_rccd_correlation_energy(f, u, t, o, v, np):
 
 
 def compute_lagrangian_functional(f, u, t, l, o, v, np):
-
     energy = -contract("ijab,acik,kbjc->", l, t, u[o, v, o, v])
 
     energy -= contract("ijab,acki,kbcj->", l, t, u[o, v, v, o])

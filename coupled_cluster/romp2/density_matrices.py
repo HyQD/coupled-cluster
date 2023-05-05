@@ -2,7 +2,6 @@ from opt_einsum import contract
 
 
 def compute_one_body_density_matrix(t2, l2, o, v, np, out=None):
-
     nocc = o.stop
     nvirt = v.stop - nocc
 
@@ -39,7 +38,6 @@ def compute_two_body_density_matrix(t, l, o, v, np, out=None):
 
 
 def add_rho_klij(t, l, o, v, np, out):
-
     no = o.stop
     nv = v.stop - no
 
@@ -64,7 +62,6 @@ def add_rho_klij(t, l, o, v, np, out):
 
 
 def add_rho_abij(t, l, o, v, np, out):
-
     no = o.stop
     nv = v.stop - no
 
@@ -74,7 +71,6 @@ def add_rho_abij(t, l, o, v, np, out):
 
 
 def add_rho_jbia(t, l, o, v, np, out):
-
     no = o.stop
     nv = v.stop - no
 
@@ -89,7 +85,6 @@ def add_rho_jbia(t, l, o, v, np, out):
 
 
 def add_rho_bjia(t, l, o, v, np, out):
-
     no = o.stop
     nv = v.stop - no
 

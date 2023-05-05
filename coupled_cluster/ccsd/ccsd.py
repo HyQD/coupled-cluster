@@ -126,7 +126,6 @@ class CCSD(CoupledCluster):
         self.t_mixer.clear_vectors()
 
     def compute_energy(self):
-
         """Compute Energy
 
         Returns
@@ -282,7 +281,6 @@ class CCSD(CoupledCluster):
         )
 
     def compute_two_body_density_matrix(self):
-
         """Computes two-body density matrix
 
         Returns

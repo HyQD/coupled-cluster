@@ -5,7 +5,6 @@ from coupled_cluster.rccsd import RCCSD
 
 
 def test_two_body_density_matrix():
-
     molecule = "li 0.0 0.0 0.0; h 0.0 0.0 3.08"
     basis = "cc-pvdz"
 
@@ -42,7 +41,6 @@ def test_two_body_density_matrix():
 
 
 def compute_ground_state_properties(molecule, basis):
-
     system = construct_pyscf_system_rhf(
         molecule,
         basis=basis,
@@ -70,7 +68,6 @@ def compute_ground_state_properties(molecule, basis):
 
 
 def test_rccsd():
-
     molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
     basis = "cc-pvdz"
     e_rccsd_dalton = -8.0147418652916809

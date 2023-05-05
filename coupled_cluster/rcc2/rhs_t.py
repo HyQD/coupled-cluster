@@ -10,7 +10,6 @@ from opt_einsum import contract
 def compute_t_1_amplitudes(
     F, F_t, W_t, t1, t2, o, v, np, intermediates=None, out=None
 ):
-
     """
     if out is None:
         out = np.zeros_like(t_1)

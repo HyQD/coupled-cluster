@@ -89,7 +89,6 @@ max_iters = 100
 while max(norm_residual_t1, norm_residual_t2) > conv_tol and (
     iters < max_iters
 ):
-
     t1 = t1_rhs(F_zero, W, t1, t2) / Dai
     t2 = t2_rhs(F_zero, W, t1, t2) / Dabij
 
@@ -112,7 +111,6 @@ max_iters = 100
 while max(norm_residual_l1, norm_residual_l2) > conv_tol and (
     iters < max_iters
 ):
-
     l1 = l1_rhs(F_zero, W, l1, l2, t1, t2) / Dai.T
     l2 = 0.5 * l2_rhs(F_zero, W, l1, l2, t1, t2) / Dabij.transpose(2, 3, 0, 1)
 

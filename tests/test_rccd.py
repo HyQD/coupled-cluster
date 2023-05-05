@@ -58,7 +58,6 @@ def test_density_matrices():
 
 
 def test_rccd_vs_ccd():
-
     molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
     basis = "cc-pvdz"
 

@@ -39,7 +39,6 @@ from opt_einsum import contract
 
 
 def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
-
     Loovv = build_Loovv(u, o, v, np)
     Lvovv = build_Lvovv(u, o, v, np)
     Looov = build_Looov(u, o, v, np)
@@ -71,7 +70,6 @@ def compute_l_1_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
 
 
 def compute_l_2_amplitudes(f, u, t1, t2, l1, l2, o, v, np, out=None):
-
     ################################################
     # These intermediates are common with those used in
     # compute_l1_amplitudes

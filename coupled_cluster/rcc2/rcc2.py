@@ -39,7 +39,6 @@ class RCC2(CoupledCluster):
     """
 
     def __init__(self, system, include_singles=True, cc2_b=False, **kwargs):
-
         super().__init__(system, **kwargs)
 
         self.cc2_b = cc2_b
@@ -377,7 +376,6 @@ class RCC2(CoupledCluster):
         pass
 
     def t1_transform_integrals(self, t_1, h, u):
-
         np = self.np
 
         x_transform = np.zeros((self.l, self.l), dtype=t_1.dtype)
@@ -402,7 +400,6 @@ class RCC2(CoupledCluster):
         return h_transform, f_transform, u_transform
 
     def t1_transform_integrals_one_body(self, dipole):
-
         np = self.np
 
         tot = self.m + self.n

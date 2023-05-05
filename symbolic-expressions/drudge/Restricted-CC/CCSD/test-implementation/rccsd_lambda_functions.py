@@ -2,7 +2,6 @@ import numpy as np
 
 
 def l1_rhs(f, u, l1, l2, t1, t2):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     o, v = slice(0, nocc), slice(nocc, nvirt + nocc)
@@ -289,7 +288,6 @@ def l1_rhs(f, u, l1, l2, t1, t2):
 
 
 def l2_rhs(f, u, l1, l2, t1, t2):
-
     nocc = t2.shape[2]
     nvirt = t2.shape[0]
     o, v = slice(0, nocc), slice(nocc, nvirt + nocc)

@@ -28,7 +28,6 @@ class sine_square_laser:
 
 
 def test_tdcc2():
-
     molecule = "li 0.0 0.0 0.0;h 0.0 0.0 3.08"
 
     basis = "6-31G"

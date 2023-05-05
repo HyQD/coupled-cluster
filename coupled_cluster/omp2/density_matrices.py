@@ -2,7 +2,6 @@ from opt_einsum import contract
 
 
 def compute_one_body_density_matrix(t, l, o, v, np, out=None):
-
     nocc = t.shape[2]
     nvirt = t.shape[0]
     nso = v.stop
@@ -23,7 +22,6 @@ def compute_one_body_density_matrix(t, l, o, v, np, out=None):
 
 
 def compute_two_body_density_matrix(t, l, o, v, np, out=None):
-
     nocc = t.shape[2]
     nvirt = t.shape[0]
     nso = v.stop

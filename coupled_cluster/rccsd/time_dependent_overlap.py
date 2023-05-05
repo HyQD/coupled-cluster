@@ -14,7 +14,6 @@ def compute_time_dependent_overlap(
     np,
     use_old=False,
 ):
-
     """
     t_1_t1 refer to the t_1 amplitude at time t1
     t_1_t1 refer to the t_1 amplitude at time t2

@@ -75,7 +75,6 @@ class ROMP2(RCCD):
         self.kappa_down_mixer = self.mixer(**kwargs)
 
     def compute_energy(self):
-
         rho_qp = self.compute_one_body_density_matrix()
         rho_qspr = self.compute_two_body_density_matrix()
 
@@ -167,7 +166,6 @@ class ROMP2(RCCD):
         e_old = self.compute_energy() + self.system.nuclear_repulsion_energy
 
         for i in range(max_iterations):
-
             self.f = self.system.construct_fock_matrix(self.h, self.u)
 
             self.d_t_1 = construct_d_t_1_matrix(self.f, self.o, self.v, np)

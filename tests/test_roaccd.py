@@ -8,7 +8,6 @@ from coupled_cluster.mix import DIIS
 
 
 def test_kappa_derivatives():
-
     """
     Consistency test that kappa derivatives using only non-zero two-body
     density matrix elements (compute_R_ia, compute_R_tilde_ai)

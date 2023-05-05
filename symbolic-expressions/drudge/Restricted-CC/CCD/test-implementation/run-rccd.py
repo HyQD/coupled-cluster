@@ -81,7 +81,6 @@ max_iters = 100
 iters = 1
 
 while (np.abs(norm_residual_t2) > conv_tol) and (iters < max_iters):
-
     t2 = t2_rhs(F_zero, W, t2) / Dabij
     l2 = 0.5 * l2_rhs(F_zero, W, l2, t2) / Dabij.transpose(2, 3, 0, 1)
 

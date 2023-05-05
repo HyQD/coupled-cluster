@@ -2,7 +2,6 @@ from opt_einsum import contract
 
 
 def compute_t_2_amplitudes(f, u, t, o, v, np, out=None):
-
     nocc = t.shape[2]
     nvirt = t.shape[0]
 

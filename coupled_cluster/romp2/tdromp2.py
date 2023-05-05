@@ -54,7 +54,6 @@ class TDROMP2(OATDCC):
         )
 
     def compute_energy(self, current_time, y):
-
         t_0, t_2, l_2, C, C_tilde = self._amp_template.from_array(y).unpack()
         self.update_hamiltonian(current_time=current_time, y=y)
 

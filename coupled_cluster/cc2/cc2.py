@@ -301,11 +301,9 @@ class CC2(CoupledCluster):
         )
 
     def compute_two_body_density_matrix(self):
-
         pass
 
     def t1_transform_integrals(self, t_1, h, u):
-
         np = self.np
 
         tot = self.m + self.n
@@ -329,7 +327,6 @@ class CC2(CoupledCluster):
         return h_transform, f_transform, u_transform
 
     def t1_transform_integrals_one_body(self, dipole):
-
         np = self.np
 
         tot = self.m + self.n
