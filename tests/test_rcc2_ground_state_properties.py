@@ -80,8 +80,8 @@ def test_rcc2():
     e_rcc2, dipole_rcc2 = compute_ground_state_properties(molecule, basis)
 
     np.testing.assert_approx_equal(e_rcc2, e_rcc2_psi4, significant=8)
-    np.testing.assert_approx_equal(
-        dipole_rcc2[2], dipole_z_rcc2_psi4, significant=8
+    np.testing.assert_allclose(
+        dipole_rcc2[2], dipole_z_rcc2_psi4, atol=1e-8, rtol=0.0
     )
 
 
