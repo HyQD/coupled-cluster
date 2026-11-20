@@ -51,18 +51,22 @@ cache assumption itself.
 
 ### Implicit Gauss integration
 
-The implicit Gauss integrator solves its stage equations by fixed-point
-iteration. During that iteration it repeatedly evaluates the RHS at the same
-stage times,
+Whether the current cache fails inside an implicit Gauss step depends on the
+order in which the stage RHS values are evaluated. The installed
+`gauss_integrator` solves its stage equations by fixed-point iteration using
+the call sequence
 
 ```text
-t_stage = t_n + dt * c_i,
+c_1, c_2, c_3, c_1, c_2, c_3, ...
 ```
 
-but with successively updated trial states. For OATDCC, each trial state has
-new `C` and `C_tilde` matrices. The first evaluation at a stage time computes
-the transformed integrals; later evaluations at that same time hit the early
-return and incorrectly reuse the first trial state's transformed integrals.
+for `s = 3`. Although each stage time is revisited with an updated trial state,
+two consecutive RHS calls have different times. The one-entry
+`last_timestep` cache is therefore invalidated between visits, and the stale
+early return is not taken in this implementation. A Gauss implementation that
+performs consecutive updates at one stage time could still expose the issue;
+the important condition is consecutive same-time calls with different orbital
+states, not the name of the integrator.
 
 ### Classical RK4 reproduction
 
@@ -203,7 +207,45 @@ stale-cache trajectory has a visible phase/amplitude error. Together with the
 exact uncached-control agreement, these results strongly support the cache
 split as the correct fix for this test case.
 
+### Gauss `s = 3`, `eps = 1e-10`
+
+The same three methods were propagated with the installed sixth-order
+three-stage Gauss integrator. Its internal stage nodes all lie inside the first
+`DiscreteDeltaPulse` interval, giving the full effective kick `1e-3` for every
+time step. This differs from the earlier RK4 effective kick `8.3333e-4`, so
+absolute RK4 and Gauss dipole amplitudes should not be compared as if the
+applied impulses were identical.
+
+The post-pulse energy ranges were
+
+| `dt` | TDRCCSD | stale ROATDCCD | corrected ROATDCCD |
+| ---: | ---: | ---: | ---: |
+| 0.20 | 2.6334e-13 | 1.7586e-13 | 1.7586e-13 |
+| 0.10 | 3.8636e-14 | 2.4869e-14 | 2.4869e-14 |
+| 0.05 | 1.2390e-13 | 8.3045e-14 | 8.3045e-14 |
+
+These values have reached a `1e-14`--`1e-13` solver/roundoff floor: the range
+decreases from `dt = 0.2` to `0.1` but rises at `0.05`, so fitting the nominal
+sixth-order truncation error would not be meaningful at `eps = 1e-10`.
+
+Stale and corrected ROATDCCD produced the same energy ranges and differed by
+at most `1.1e-19` a.u. in the sampled dipole. Their maximum dipole differences
+from TDRCCSD were
+
+| `dt` | stale ROATDCCD | corrected ROATDCCD |
+| ---: | ---: | ---: |
+| 0.20 | 1.3620e-11 | 1.3620e-11 |
+| 0.10 | 4.8698e-12 | 4.8698e-12 |
+| 0.05 | 1.5941e-12 | 1.5941e-12 |
+
+Thus this particular Gauss implementation does not activate the stale-cache
+path during the propagation. The result does not validate the old cache in
+general; it shows that the bug is sensitive to RHS call ordering and is masked
+here by the cyclic stage evaluation described above.
+
 The production runs and analysis are reproducible with
 `dev/run_corrected_roatdccd_delta_rk4.py` and
 `dev/compare_corrected_roatdccd_results.py`. The associated energy, dipole,
 direct method-comparison, and three-way plots are stored in `dev/results/`.
+The Gauss runs use `dev/run_he_delta_gauss.py`, and their combined analysis
+uses `dev/analyze_he_delta_gauss.py`.
