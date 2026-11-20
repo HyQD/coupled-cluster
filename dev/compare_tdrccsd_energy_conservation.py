@@ -107,9 +107,15 @@ def main():
     fig.savefig(figure_path, dpi=180)
     plt.close(fig)
 
-    dipole_fig, dipole_axis = plt.subplots(figsize=(7.2, 4.6))
+    dipole_fig, dipole_axes = plt.subplots(
+        2,
+        1,
+        figsize=(7.2, 7.0),
+        sharex=True,
+        gridspec_kw={"height_ratios": (2, 1)},
+    )
     for item in datasets:
-        dipole_axis.plot(
+        dipole_axes[0].plot(
             item["time"],
             item["dipole_z"],
             marker="o",
@@ -117,13 +123,33 @@ def main():
             markevery=max(1, round(0.2 / item["dt"])),
             label=rf"$dt={item['dt']:g}$",
         )
-    dipole_axis.set_xlabel("Time [a.u.]")
-    dipole_axis.set_ylabel(r"$\mathrm{Re}\,\langle d_z(t)\rangle$")
-    dipole_axis.set_title(
+    dipole_axes[0].set_ylabel(r"$\mathrm{Re}\,\langle d_z(t)\rangle$")
+    dipole_axes[0].set_title(
         "He/cc-pVDZ TDRCCSD dipole after length-gauge delta pulse"
     )
-    dipole_axis.grid(alpha=0.3)
-    dipole_axis.legend()
+    dipole_axes[0].grid(alpha=0.3)
+    dipole_axes[0].legend()
+
+    reference = datasets[-1]
+    for item in datasets[:-1]:
+        reference_at_time = np.interp(
+            item["time"], reference["time"], reference["dipole_z"]
+        )
+        dipole_axes[1].plot(
+            item["time"],
+            item["dipole_z"] - reference_at_time,
+            marker="o",
+            ms=2.5,
+            label=rf"$dt={item['dt']:g}$",
+        )
+    dipole_axes[1].axhline(0, color="black", lw=0.8, alpha=0.5)
+    dipole_axes[1].set_xlabel("Time [a.u.]")
+    dipole_axes[1].set_ylabel(
+        rf"$\langle d_z\rangle_{{dt}}-\langle d_z\rangle_{{{reference['dt']:g}}}$"
+    )
+    dipole_axes[1].set_title(r"Difference relative to $dt=0.05$")
+    dipole_axes[1].grid(alpha=0.3)
+    dipole_axes[1].legend()
     dipole_fig.tight_layout()
     dipole_path = results_directory / "tdrccsd_dipole_vs_dt.png"
     dipole_fig.savefig(dipole_path, dpi=180)
