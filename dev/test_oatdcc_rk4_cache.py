@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Expose the OATDCC time-only cache error in classical RK4 stages."""
+"""Check OATDCC Hamiltonian transformations at classical RK4 stages."""
 
 import numpy as np
 
@@ -91,10 +91,10 @@ def main():
         )
 
     assert by_stage["step 1: k2"] < 1e-12
-    assert by_stage["step 1: k3"] > 1e-8
+    assert by_stage["step 1: k3"] < 1e-12
     assert by_stage["step 1: k4"] < 1e-12
-    assert by_stage["step 2: k1"] > 1e-8
-    assert by_stage["step 2: k3"] > 1e-8
+    assert by_stage["step 2: k1"] < 1e-12
+    assert by_stage["step 2: k3"] < 1e-12
 
 
 if __name__ == "__main__":

@@ -1,8 +1,13 @@
 # Stale transformed Hamiltonian in OATDCC propagation
 
+> **Status:** Fixed in the production `OATDCC.update_hamiltonian()` on the
+> `oatdcc_stale_hamiltonian` branch. Historical stale behavior is retained only
+> in an explicit development subclass for reproducible comparisons.
+
 ## Summary
 
-`OATDCC.update_hamiltonian()` returns early when `current_time` equals
+Before the fix, `OATDCC.update_hamiltonian()` returned early when
+`current_time` equaled
 `self.last_timestep`. This is valid for the laboratory-frame integrals
 `h(t)` and `u(t)`, which depend only on time, but it is not valid for the
 orbital-basis integrals
@@ -51,7 +56,7 @@ cache assumption itself.
 
 ### Implicit Gauss integration
 
-Whether the current cache fails inside an implicit Gauss step depends on the
+Whether the old cache fails inside an implicit Gauss step depends on the
 order in which the stage RHS values are evaluated. The installed
 `gauss_integrator` solves its stage equations by fixed-point iteration using
 the call sequence
@@ -111,28 +116,28 @@ energies, and other observables. The problem applies to all solvers derived
 from `OATDCC`, including OATDCCD, ROATDCCD, TDOMP2, and TDROMP2, independently
 of which integration algorithm is selected.
 
-## Recommended fix
+## Implemented fix
 
-Separate the two kinds of work in `update_hamiltonian()`:
+The production implementation now separates the two kinds of work in
+`update_hamiltonian()`:
 
 1. Cache updates of the laboratory-frame `h(t)` and `u(t)` by time.
 2. Always transform the current `h` and `u` with the supplied `C` and
    `C_tilde`, and rebuild `f_prime`, on every OATDCC RHS or observable
    evaluation.
 
-Removing the early return entirely is the simplest correct fix. A more
-efficient implementation may retain the time cache only around calls to
-`system.h_t()` and `system.u_t()`; the orbital transformations themselves
-must not be skipped based on time alone.
+The early return has been removed. The time comparison now guards only calls
+to `system.h_t()` and `system.u_t()`; the orbital transformations are always
+performed.
 
 ## Regression test
 
 Construct two OATDCC state vectors with different biorthogonal orbital
 matrices, call `update_hamiltonian()` for both at the same time, and compare
 the second result against a direct `system.transform_one_body_elements()` and
-`system.transform_two_body_elements()` calculation. The test should fail with
-the current time-only cache and pass once the transformations are recomputed
-for every state.
+`system.transform_two_body_elements()` calculation.
+`tests/test_oatdccd.py` contains this regression test and also checks that the
+time-dependent laboratory Hamiltonian is evaluated only once.
 
 The development scripts `dev/test_oatdcc_same_time_cache.py` and
 `dev/test_oatdcc_rk4_cache.py` reproduce the direct and RK4 cases,
@@ -141,11 +146,11 @@ reject systems with a two-body time-evolution operator.
 
 ## Split-cache validation and He benchmark
 
-A development implementation of the recommended fix is provided in
-`dev/corrected_roatdccd.py`. It retains a time cache for the laboratory-frame
-`h(t)` and `u(t)`, but transforms them and rebuilds `f_prime` for every supplied
-orbital state. The production `OATDCC` source is not changed by this
-experiment.
+The production implementation is in `coupled_cluster/oatdcc.py`.
+`dev/corrected_roatdccd.py` retains instrumented corrected, uncached, and
+historical stale variants for the comparison runs. The corrected behavior
+retains a time cache for laboratory-frame `h(t)` and `u(t)`, but transforms
+them and rebuilds `f_prime` for every supplied orbital state.
 
 ### Correctness against a fully uncached control
 

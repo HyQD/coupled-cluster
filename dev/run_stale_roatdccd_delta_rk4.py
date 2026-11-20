@@ -17,7 +17,8 @@ from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from scipy.integrate import complex_ode
 
-from coupled_cluster.rccd import ROACCD, ROATDCCD
+from corrected_roatdccd import StaleROATDCCD
+from coupled_cluster.rccd import ROACCD
 
 DEFAULT_DT = 0.2
 DEFAULT_T_FINAL = 5.0
@@ -79,7 +80,7 @@ def main():
     assert system.has_one_body_time_evolution_operator
     assert not system.has_two_body_time_evolution_operator
 
-    solver = ROATDCCD(system)
+    solver = StaleROATDCCD(system)
     integrator = complex_ode(solver).set_integrator("Rk4Integrator", dt=dt)
     integrator.set_initial_value(initial_state, 0.0)
 

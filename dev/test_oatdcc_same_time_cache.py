@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Reproduce the OATDCC time-only cache error without an integrator."""
+"""Check same-time OATDCC transformations with different orbital states."""
 
 import numpy as np
 
@@ -52,24 +52,14 @@ def main():
 
     expected = transformed_integrals(system, second_state, solver, time)
 
-    # The same-time call returns early and leaves transformed integrals from
-    # first_state in the solver.
     solver.update_hamiltonian(time, y=second_state)
-    stale_errors = errors(solver, expected)
-
-    solver.last_timestep = None
-    solver.update_hamiltonian(time, y=second_state)
-    refreshed_errors = errors(solver, expected)
+    same_time_errors = errors(solver, expected)
 
     labels = "h_prime", "u_prime", "f_prime"
-    for label, stale, refreshed in zip(labels, stale_errors, refreshed_errors):
-        print(
-            f"{label:7s}: stale_error={stale:.12e}  "
-            f"refreshed_error={refreshed:.12e}"
-        )
+    for label, error in zip(labels, same_time_errors):
+        print(f"{label:7s}: same_time_error={error:.12e}")
 
-    assert max(stale_errors) > 1e-8
-    assert max(refreshed_errors) < 1e-12
+    assert max(same_time_errors) < 1e-12
 
 
 if __name__ == "__main__":

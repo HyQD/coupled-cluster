@@ -17,8 +17,8 @@ from quantum_systems import construct_pyscf_system_rhf
 from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from scipy.integrate import complex_ode
 
-from corrected_roatdccd import CorrectedROATDCCD
-from coupled_cluster.rccd import ROACCD, ROATDCCD
+from corrected_roatdccd import CorrectedROATDCCD, StaleROATDCCD
+from coupled_cluster.rccd import ROACCD
 from coupled_cluster.rccsd import RCCSD, TDRCCSD
 
 DEFAULT_DT = 0.2
@@ -30,26 +30,6 @@ DEFAULT_GAUSS_STAGES = 3
 DEFAULT_GAUSS_MAX_ITERATIONS = 20
 GAUSS_TOLERANCE = 1e-10
 METHODS = ("tdrccsd", "stale_roatdccd", "corrected_roatdccd")
-
-
-class InstrumentedStaleROATDCCD(ROATDCCD):
-    """Count calls and early returns without changing stale-cache behavior."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.hamiltonian_update_calls = 0
-        self.stale_cache_hits = 0
-        self.stale_cache_misses = 0
-
-    def update_hamiltonian(self, current_time, y=None, C=None, C_tilde=None):
-        self.hamiltonian_update_calls += 1
-        if self.last_timestep == current_time:
-            self.stale_cache_hits += 1
-        else:
-            self.stale_cache_misses += 1
-        return super().update_hamiltonian(
-            current_time, y=y, C=C, C_tilde=C_tilde
-        )
 
 
 def parse_args():
@@ -80,7 +60,7 @@ def construct_initial_state_and_solver(method, system):
         ground_state = ROACCD(system)
         ground_state.compute_ground_state(tol=GROUND_STATE_TOLERANCE)
         solver_class = (
-            InstrumentedStaleROATDCCD
+            StaleROATDCCD
             if method == "stale_roatdccd"
             else CorrectedROATDCCD
         )
@@ -206,7 +186,7 @@ def main():
     if isinstance(solver, CorrectedROATDCCD):
         result["lab_hamiltonian_updates"] = solver.lab_hamiltonian_updates
         result["orbital_transform_updates"] = solver.orbital_transform_updates
-    if isinstance(solver, InstrumentedStaleROATDCCD):
+    if isinstance(solver, StaleROATDCCD):
         result["hamiltonian_update_calls"] = solver.hamiltonian_update_calls
         result["stale_cache_hits"] = solver.stale_cache_hits
         result["stale_cache_misses"] = solver.stale_cache_misses
@@ -253,7 +233,7 @@ def main():
     if isinstance(solver, CorrectedROATDCCD):
         print(f"Lab Hamiltonian updates:   {solver.lab_hamiltonian_updates}")
         print(f"Orbital transformations:   {solver.orbital_transform_updates}")
-    if isinstance(solver, InstrumentedStaleROATDCCD):
+    if isinstance(solver, StaleROATDCCD):
         print(f"Hamiltonian update calls:  {solver.hamiltonian_update_calls}")
         print(f"Stale-cache early returns: {solver.stale_cache_hits}")
         print(f"Full transformations:      {solver.stale_cache_misses}")
