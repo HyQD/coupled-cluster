@@ -134,3 +134,76 @@ The development scripts `dev/test_oatdcc_same_time_cache.py` and
 `dev/test_oatdcc_rk4_cache.py` reproduce the direct and RK4 cases,
 respectively. Both explicitly require a one-body time-evolution operator and
 reject systems with a two-body time-evolution operator.
+
+## Split-cache validation and He benchmark
+
+A development implementation of the recommended fix is provided in
+`dev/corrected_roatdccd.py`. It retains a time cache for the laboratory-frame
+`h(t)` and `u(t)`, but transforms them and rebuilds `f_prime` for every supplied
+orbital state. The production `OATDCC` source is not changed by this
+experiment.
+
+### Correctness against a fully uncached control
+
+`dev/validate_corrected_roatdccd_cache.py` propagates the corrected and fully
+uncached implementations side by side for two complete RK4 steps. This covers
+the repeated `t + dt/2` stage and a shared step endpoint. At every accepted
+step it compares the state vector, energy, and dipole moment. The result was
+
+```text
+maximum state difference    0
+maximum energy difference   0
+maximum dipole difference   0
+
+                             lab updates   transformations
+split cache                        5              10
+fully uncached                    10              10
+```
+
+Thus the split cache gives the same evaluated dynamics as recomputing
+everything, while avoiding redundant evaluations of the time-dependent
+laboratory-frame Hamiltonian.
+
+### Physical test
+
+The systematic benchmark uses
+
+- He/cc-pVDZ with the PySCF backend;
+- the converged ROACCD ground state as the initial state;
+- ROATDCCD, TDRCCSD, and the old stale-cache ROATDCCD;
+- a length-gauge, z-polarized `DiscreteDeltaPulse` with strength `1e-3`;
+- classical RK4 to `T = 5` a.u. at `dt = 0.2`, `0.1`, and `0.05`;
+- only a one-body time-evolution operator.
+
+For this two-electron system, ROATDCCD and TDRCCSD should both reproduce the
+finite-basis exact dynamics. The post-pulse energy ranges were
+
+| `dt` | TDRCCSD | corrected ROATDCCD | stale ROATDCCD |
+| ---: | ---: | ---: | ---: |
+| 0.20 | 9.8040e-9 | 6.6393e-9 | 4.6921e-7 |
+| 0.10 | 3.2857e-10 | 2.2514e-10 | 4.2116e-7 |
+| 0.05 | 1.0483e-11 | 7.3421e-12 | 4.0122e-7 |
+
+The corrected ROATDCCD energy range converges with fitted order `4.91`
+(pairwise orders `4.88` and `4.94`), consistent with the TDRCCSD fitted order
+`4.93`. The stale result has fitted order `0.11` and remains near `4e-7` a.u.
+as `dt` is refined.
+
+The maximum absolute dipole differences relative to TDRCCSD were
+
+| `dt` | corrected ROATDCCD | stale ROATDCCD |
+| ---: | ---: | ---: |
+| 0.20 | 1.4869e-11 | 2.8113e-4 |
+| 0.10 | 5.1686e-11 | 7.1720e-5 |
+| 0.05 | 5.8133e-11 | 1.9425e-5 |
+
+The corrected dipole is therefore indistinguishable from TDRCCSD on the plot
+scale; its residual difference is at the `1e-11` level. In contrast, the
+stale-cache trajectory has a visible phase/amplitude error. Together with the
+exact uncached-control agreement, these results strongly support the cache
+split as the correct fix for this test case.
+
+The production runs and analysis are reproducible with
+`dev/run_corrected_roatdccd_delta_rk4.py` and
+`dev/compare_corrected_roatdccd_results.py`. The associated energy, dipole,
+direct method-comparison, and three-way plots are stored in `dev/results/`.
