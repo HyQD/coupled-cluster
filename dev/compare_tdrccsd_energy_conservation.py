@@ -27,6 +27,7 @@ def main():
         data = np.load(path)
         time = data["time_points"]
         energy = data["energy"].real
+        dipole_z = data["dipole_z"].real
         post_pulse_energy = energy[1:]
         energy_range = np.ptp(post_pulse_energy)
         max_deviation = np.max(np.abs(post_pulse_energy - post_pulse_energy[0]))
@@ -35,6 +36,7 @@ def main():
                 "dt": dt,
                 "time": time,
                 "energy": energy,
+                "dipole_z": dipole_z,
                 "range": energy_range,
                 "max_deviation": max_deviation,
             }
@@ -105,6 +107,28 @@ def main():
     fig.savefig(figure_path, dpi=180)
     plt.close(fig)
 
+    dipole_fig, dipole_axis = plt.subplots(figsize=(7.2, 4.6))
+    for item in datasets:
+        dipole_axis.plot(
+            item["time"],
+            item["dipole_z"],
+            marker="o",
+            ms=2.5,
+            markevery=max(1, round(0.2 / item["dt"])),
+            label=rf"$dt={item['dt']:g}$",
+        )
+    dipole_axis.set_xlabel("Time [a.u.]")
+    dipole_axis.set_ylabel(r"$\mathrm{Re}\,\langle d_z(t)\rangle$")
+    dipole_axis.set_title(
+        "He/cc-pVDZ TDRCCSD dipole after length-gauge delta pulse"
+    )
+    dipole_axis.grid(alpha=0.3)
+    dipole_axis.legend()
+    dipole_fig.tight_layout()
+    dipole_path = results_directory / "tdrccsd_dipole_vs_dt.png"
+    dipole_fig.savefig(dipole_path, dpi=180)
+    plt.close(dipole_fig)
+
     for item in datasets:
         print(
             f"dt={item['dt']:.2f}: range={item['range']:.12e}, "
@@ -117,6 +141,7 @@ def main():
     print(f"Three-point fitted order: {fitted_order:.6f}")
     print(f"Saved table: {table_path}")
     print(f"Saved plot: {figure_path}")
+    print(f"Saved dipole plot: {dipole_path}")
 
 
 if __name__ == "__main__":
