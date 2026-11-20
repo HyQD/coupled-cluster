@@ -64,15 +64,18 @@ def main():
     for item in datasets:
         post_time = item["time"][1:]
         post_energy = item["energy"][1:]
-        axes[0].plot(
-            post_time,
-            post_energy - post_energy[0],
+        absolute_drift = np.abs(post_energy - post_energy[0])
+        # Skip t_s itself because the difference is exactly zero and cannot be
+        # displayed on a logarithmic axis.
+        axes[0].semilogy(
+            post_time[1:],
+            absolute_drift[1:],
             label=rf"$dt={item['dt']:g}$",
         )
     axes[0].set_xlabel("Time [a.u.]")
-    axes[0].set_ylabel(r"$E(t)-E(dt)$ [a.u.]")
+    axes[0].set_ylabel(r"$|E(t)-E(t_s)|$ [a.u.]")
     axes[0].set_title("Post-pulse energy drift")
-    axes[0].grid(alpha=0.3)
+    axes[0].grid(alpha=0.3, which="both")
     axes[0].legend()
 
     order_grid = np.linspace(time_steps.min(), time_steps.max(), 200)
