@@ -145,11 +145,6 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
         pass
 
     def update_hamiltonian(self, current_time, y=None, C=None, C_tilde=None):
-        if self.last_timestep == current_time:
-            return
-
-        self.last_timestep = current_time
-
         if y is not None:
             _, _, C, C_tilde = self._amp_template.from_array(y)
         elif C is not None and C_tilde is not None:
@@ -160,12 +155,17 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
                 + "None."
             )
 
-        # Evolve system in time
-        if self.system.has_one_body_time_evolution_operator:
-            self.h = self.system.h_t(current_time)
+        # The laboratory-frame integrals depend only on time and can be
+        # cached. The transformed integrals below also depend on C and
+        # C_tilde, so they must be rebuilt for every supplied orbital state.
+        if self.last_timestep != current_time:
+            self.last_timestep = current_time
 
-        if self.system.has_two_body_time_evolution_operator:
-            self.u = self.system.u_t(current_time)
+            if self.system.has_one_body_time_evolution_operator:
+                self.h = self.system.h_t(current_time)
+
+            if self.system.has_two_body_time_evolution_operator:
+                self.u = self.system.u_t(current_time)
 
         # Change basis to C and C_tilde
         self.h_prime = self.system.transform_one_body_elements(
@@ -276,8 +276,6 @@ class OATDCC(TimeDependentCoupledCluster, metaclass=abc.ABCMeta):
             np=np,
         )
         """
-
-        self.last_timestep = current_time
 
         # Return amplitudes and C and C_tilde
         return OACCVector(
