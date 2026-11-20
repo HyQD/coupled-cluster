@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-"""Analyze the He/cc-pVDZ three-stage Gauss propagation results."""
+"""Analyze the He/cc-pVDZ Gauss propagation results."""
 
+import argparse
 from pathlib import Path
 
 import matplotlib
@@ -16,17 +17,23 @@ METHOD_LABELS = {
     "stale_roatdccd": "stale ROATDCCD",
     "corrected_roatdccd": "corrected ROATDCCD",
 }
-GAUSS_STAGES = 3
+DEFAULT_GAUSS_STAGES = 3
 GAUSS_TOLERANCE_LABEL = "1e-10"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stages", type=int, default=DEFAULT_GAUSS_STAGES)
+    return parser.parse_args()
 
 
 def timestep_label(dt):
     return f"{dt:g}".replace(".", "p")
 
 
-def load_dataset(results_directory, method, dt):
+def load_dataset(results_directory, method, dt, gauss_stages):
     stem = (
-        f"{method}_he_ccpvdz_delta_gauss_s{GAUSS_STAGES}_"
+        f"{method}_he_ccpvdz_delta_gauss_s{gauss_stages}_"
         f"eps{GAUSS_TOLERANCE_LABEL}_dt{timestep_label(dt)}"
     )
     data = np.load(results_directory / f"{stem}.npz")
@@ -41,14 +48,39 @@ def load_dataset(results_directory, method, dt):
         "energy_range": np.ptp(post_energy),
         "max_energy_deviation": np.max(np.abs(post_energy - post_energy[0])),
         "rhs_evaluations": int(data["rhs_evaluations"]),
+        "stale_cache_hits": (
+            int(data["stale_cache_hits"])
+            if "stale_cache_hits" in data.files
+            else -1
+        ),
+        "stale_cache_misses": (
+            int(data["stale_cache_misses"])
+            if "stale_cache_misses" in data.files
+            else -1
+        ),
+        "lab_hamiltonian_updates": (
+            int(data["lab_hamiltonian_updates"])
+            if "lab_hamiltonian_updates" in data.files
+            else -1
+        ),
+        "orbital_transform_updates": (
+            int(data["orbital_transform_updates"])
+            if "orbital_transform_updates" in data.files
+            else -1
+        ),
     }
 
 
 def main():
+    args = parse_args()
+    gauss_stages = args.stages
+    if gauss_stages <= 0:
+        raise ValueError("stages must be positive")
     results_directory = Path(__file__).parent / "results"
     datasets = {
         method: [
-            load_dataset(results_directory, method, dt) for dt in TIME_STEPS
+            load_dataset(results_directory, method, dt, gauss_stages)
+            for dt in TIME_STEPS
         ]
         for method in METHODS
     }
@@ -83,18 +115,22 @@ def main():
     energy_axes[-1, 0].set_xlabel("Time [a.u.]")
     energy_axes[-1, 1].set_xlabel(r"$dt$ [a.u.]")
     energy_fig.suptitle(
-        r"He/cc-pVDZ, length-gauge delta pulse, Gauss $s=3$, "
+        rf"He/cc-pVDZ, length-gauge delta pulse, Gauss $s={gauss_stages}$, "
         r"$\epsilon=10^{-10}$"
     )
     energy_fig.tight_layout()
-    energy_path = (
-        results_directory / "gauss_s3_eps1e-10_energy_conservation.png"
+    energy_path = results_directory / (
+        f"gauss_s{gauss_stages}_eps1e-10_energy_conservation.png"
     )
     energy_fig.savefig(energy_path, dpi=180)
     plt.close(energy_fig)
 
     dipole_fig, dipole_axes = plt.subplots(
-        len(METHODS), 2, figsize=(11.0, 11.0), sharex="col"
+        len(METHODS),
+        2,
+        figsize=(11.0, 11.0),
+        sharex="col",
+        sharey="col",
     )
     for row, method in enumerate(METHODS):
         method_data = datasets[method]
@@ -132,9 +168,13 @@ def main():
     dipole_axes[0, 1].set_title(r"Difference relative to $dt=0.05$")
     dipole_axes[-1, 0].set_xlabel("Time [a.u.]")
     dipole_axes[-1, 1].set_xlabel("Time [a.u.]")
-    dipole_fig.suptitle(r"He/cc-pVDZ dipole, Gauss $s=3$, $\epsilon=10^{-10}$")
+    dipole_fig.suptitle(
+        rf"He/cc-pVDZ dipole, Gauss $s={gauss_stages}$, " r"$\epsilon=10^{-10}$"
+    )
     dipole_fig.tight_layout()
-    dipole_path = results_directory / "gauss_s3_eps1e-10_dipole_vs_dt.png"
+    dipole_path = results_directory / (
+        f"gauss_s{gauss_stages}_eps1e-10_dipole_vs_dt.png"
+    )
     dipole_fig.savefig(dipole_path, dpi=180)
     plt.close(dipole_fig)
 
@@ -197,10 +237,13 @@ def main():
     method_axes[-1, 0].set_xlabel("Time [a.u.]")
     method_axes[-1, 1].set_xlabel("Time [a.u.]")
     method_fig.suptitle(
-        r"He/cc-pVDZ method comparison, Gauss $s=3$, $\epsilon=10^{-10}$"
+        rf"He/cc-pVDZ method comparison, Gauss $s={gauss_stages}$, "
+        r"$\epsilon=10^{-10}$"
     )
     method_fig.tight_layout()
-    method_path = results_directory / "gauss_s3_eps1e-10_method_dipoles.png"
+    method_path = results_directory / (
+        f"gauss_s{gauss_stages}_eps1e-10_method_dipoles.png"
+    )
     method_fig.savefig(method_path, dpi=180)
     plt.close(method_fig)
 
@@ -214,20 +257,30 @@ def main():
                     item["energy_range"],
                     item["max_energy_deviation"],
                     item["rhs_evaluations"],
+                    item["stale_cache_hits"],
+                    item["stale_cache_misses"],
+                    item["lab_hamiltonian_updates"],
+                    item["orbital_transform_updates"],
                 )
             )
-    energy_table_path = results_directory / "gauss_s3_eps1e-10_energy.csv"
+    energy_table_path = results_directory / (
+        f"gauss_s{gauss_stages}_eps1e-10_energy.csv"
+    )
     np.savetxt(
         energy_table_path,
         np.asarray(energy_rows),
         delimiter=",",
         header=(
             "method_index (0=tdrccsd;1=stale;2=corrected),dt,"
-            "post_pulse_energy_range,max_post_pulse_deviation,rhs_evaluations"
+            "post_pulse_energy_range,max_post_pulse_deviation,rhs_evaluations,"
+            "stale_cache_hits,stale_cache_misses,lab_hamiltonian_updates,"
+            "orbital_transform_updates"
         ),
         comments="",
     )
-    comparison_table_path = results_directory / "gauss_s3_eps1e-10_dipoles.csv"
+    comparison_table_path = results_directory / (
+        f"gauss_s{gauss_stages}_eps1e-10_dipoles.csv"
+    )
     np.savetxt(
         comparison_table_path,
         np.asarray(comparison_rows),
@@ -242,10 +295,21 @@ def main():
     for method in METHODS:
         print(METHOD_LABELS[method])
         for item in datasets[method]:
-            print(
+            message = (
                 f"  dt={item['dt']:.2f}: energy_range="
                 f"{item['energy_range']:.12e}, rhs={item['rhs_evaluations']}"
             )
+            if item["stale_cache_hits"] >= 0:
+                message += (
+                    f", cache_hits={item['stale_cache_hits']}, "
+                    f"transforms={item['stale_cache_misses']}"
+                )
+            if item["lab_hamiltonian_updates"] >= 0:
+                message += (
+                    f", lab_updates={item['lab_hamiltonian_updates']}, "
+                    f"transforms={item['orbital_transform_updates']}"
+                )
+            print(message)
     for row in comparison_rows:
         dt, stale_max, stale_rms, corrected_max, corrected_rms, cache_max = row
         print(

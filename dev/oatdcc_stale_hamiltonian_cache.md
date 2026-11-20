@@ -243,6 +243,59 @@ path during the propagation. The result does not validate the old cache in
 general; it shows that the bug is sensitive to RHS call ordering and is masked
 here by the cyclic stage evaluation described above.
 
+### Gauss `s = 1`, `eps = 1e-10`
+
+With one Gauss stage (implicit midpoint), the fixed-point call sequence is
+
+```text
+c_1, c_1, c_1, ...
+```
+
+so successive trial orbital states are evaluated at exactly the same time.
+This directly activates the stale early return. The default `maxit = 20` was
+insufficient for TDRCCSD at `dt = 0.2`; the iteration ceiling was therefore
+raised to 100 for all methods and time steps while retaining the requested
+`eps = 1e-10` convergence criterion.
+
+The stale ROATDCCD calculation produced an identically zero dipole at every
+time step. Its tiny energy range, `1.3e-15`--`2.7e-15` a.u., is not evidence of
+accurate energy conservation: the erroneous trajectory remains at the
+unperturbed state and never responds to the pulse. Corrected ROATDCCD instead
+reproduces TDRCCSD. The post-pulse energy ranges were
+
+| `dt` | TDRCCSD | stale ROATDCCD | corrected ROATDCCD |
+| ---: | ---: | ---: | ---: |
+| 0.20 | 6.9278e-14 | 1.3323e-15 | 5.0182e-14 |
+| 0.10 | 1.6760e-12 | 1.7764e-15 | 1.1293e-12 |
+| 0.05 | 6.9056e-13 | 2.6645e-15 | 4.5874e-13 |
+
+The maximum dipole differences were
+
+| `dt` | corrected ROATDCCD versus TDRCCSD | stale ROATDCCD versus TDRCCSD |
+| ---: | ---: | ---: |
+| 0.20 | 7.8066e-11 | 8.3519e-4 |
+| 0.10 | 7.8110e-11 | 8.6112e-4 |
+| 0.05 | 7.5452e-11 | 8.6767e-4 |
+
+The corrected differences again lie below the `1e-10` ground-state amplitude
+convergence tolerance.
+
+Instrumentation also shows why the stale solver appears much cheaper:
+
+| `dt` | stale RHS calls | corrected RHS calls | stale early returns | stale full transforms | corrected lab updates | corrected transforms |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0.20 | 40 | 377 | 15 | 51 | 51 | 403 |
+| 0.10 | 52 | 404 | 2 | 101 | 101 | 455 |
+| 0.05 | 102 | 603 | 2 | 201 | 201 | 704 |
+
+The stale early returns freeze the transformed Hamiltonian during the crucial
+first-step fixed-point solve, causing false convergence and the zero-response
+trajectory. The low RHS count is therefore a symptom of the bug, not a useful
+optimization. The corrected split cache behaves as intended: its lab-frame
+update counts equal the stale solver's full-update counts, while it performs
+the additional orbital transformations required for each changing trial
+state.
+
 The production runs and analysis are reproducible with
 `dev/run_corrected_roatdccd_delta_rk4.py` and
 `dev/compare_corrected_roatdccd_results.py`. The associated energy, dipole,

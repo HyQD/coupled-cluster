@@ -26,9 +26,30 @@ DEFAULT_T_FINAL = 5.0
 FIELD_STRENGTH = 1e-3
 POLARIZATION_DIRECTION = 2
 GROUND_STATE_TOLERANCE = 1e-10
-GAUSS_STAGES = 3
+DEFAULT_GAUSS_STAGES = 3
+DEFAULT_GAUSS_MAX_ITERATIONS = 20
 GAUSS_TOLERANCE = 1e-10
 METHODS = ("tdrccsd", "stale_roatdccd", "corrected_roatdccd")
+
+
+class InstrumentedStaleROATDCCD(ROATDCCD):
+    """Count calls and early returns without changing stale-cache behavior."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hamiltonian_update_calls = 0
+        self.stale_cache_hits = 0
+        self.stale_cache_misses = 0
+
+    def update_hamiltonian(self, current_time, y=None, C=None, C_tilde=None):
+        self.hamiltonian_update_calls += 1
+        if self.last_timestep == current_time:
+            self.stale_cache_hits += 1
+        else:
+            self.stale_cache_misses += 1
+        return super().update_hamiltonian(
+            current_time, y=y, C=C, C_tilde=C_tilde
+        )
 
 
 def parse_args():
@@ -36,6 +57,10 @@ def parse_args():
     parser.add_argument("method", choices=METHODS)
     parser.add_argument("--dt", type=float, default=DEFAULT_DT)
     parser.add_argument("--t-final", type=float, default=DEFAULT_T_FINAL)
+    parser.add_argument("--stages", type=int, default=DEFAULT_GAUSS_STAGES)
+    parser.add_argument(
+        "--maxit", type=int, default=DEFAULT_GAUSS_MAX_ITERATIONS
+    )
     return parser.parse_args()
 
 
@@ -55,7 +80,9 @@ def construct_initial_state_and_solver(method, system):
         ground_state = ROACCD(system)
         ground_state.compute_ground_state(tol=GROUND_STATE_TOLERANCE)
         solver_class = (
-            ROATDCCD if method == "stale_roatdccd" else CorrectedROATDCCD
+            InstrumentedStaleROATDCCD
+            if method == "stale_roatdccd"
+            else CorrectedROATDCCD
         )
 
     ground_state_energy = ground_state.compute_energy()
@@ -68,8 +95,14 @@ def main():
     method = args.method
     dt = args.dt
     t_final = args.t_final
+    gauss_stages = args.stages
+    gauss_max_iterations = args.maxit
     if dt <= 0 or t_final <= 0:
         raise ValueError("dt and t-final must be positive")
+    if gauss_stages <= 0:
+        raise ValueError("stages must be positive")
+    if gauss_max_iterations <= 0:
+        raise ValueError("maxit must be positive")
     num_steps = int(round(t_final / dt))
     if not np.isclose(num_steps * dt, t_final):
         raise ValueError("t-final must be an integer multiple of dt")
@@ -77,7 +110,7 @@ def main():
     output_directory = Path(__file__).parent / "results"
     output_directory.mkdir(parents=True, exist_ok=True)
     output_stem = output_directory / (
-        f"{method}_he_ccpvdz_delta_gauss_s{GAUSS_STAGES}_eps1e-10_dt"
+        f"{method}_he_ccpvdz_delta_gauss_s{gauss_stages}_eps1e-10_dt"
         + timestep_label(dt)
     )
 
@@ -107,8 +140,9 @@ def main():
     solver = solver_class(system)
     integrator = complex_ode(solver).set_integrator(
         "GaussIntegrator",
-        s=GAUSS_STAGES,
+        s=gauss_stages,
         eps=GAUSS_TOLERANCE,
+        maxit=gauss_max_iterations,
     )
     integrator.set_initial_value(initial_state, 0.0)
 
@@ -137,7 +171,11 @@ def main():
             make_hermitian=False,
         )
 
-    tableau = GaussIntegrator(s=GAUSS_STAGES, eps=GAUSS_TOLERANCE)
+    tableau = GaussIntegrator(
+        s=gauss_stages,
+        eps=GAUSS_TOLERANCE,
+        maxit=gauss_max_iterations,
+    )
     effective_kick = dt * np.dot(tableau.b, field(dt * tableau.c))
     post_pulse_energy = energy[1:].real
     post_pulse_energy_range = np.ptp(post_pulse_energy)
@@ -159,14 +197,19 @@ def main():
         "effective_gauss_kick": effective_kick,
         "post_pulse_energy_range": post_pulse_energy_range,
         "max_post_pulse_energy_deviation": max_post_pulse_energy_deviation,
-        "gauss_stages": GAUSS_STAGES,
+        "gauss_stages": gauss_stages,
         "gauss_tolerance": GAUSS_TOLERANCE,
+        "gauss_max_iterations": gauss_max_iterations,
         "rhs_evaluations": rhs_evaluations,
         "method": method,
     }
     if isinstance(solver, CorrectedROATDCCD):
         result["lab_hamiltonian_updates"] = solver.lab_hamiltonian_updates
         result["orbital_transform_updates"] = solver.orbital_transform_updates
+    if isinstance(solver, InstrumentedStaleROATDCCD):
+        result["hamiltonian_update_calls"] = solver.hamiltonian_update_calls
+        result["stale_cache_hits"] = solver.stale_cache_hits
+        result["stale_cache_misses"] = solver.stale_cache_misses
     np.savez(output_stem.with_suffix(".npz"), **result)
 
     fig, axes = plt.subplots(2, 1, figsize=(7.2, 6.2), sharex=True)
@@ -187,7 +230,7 @@ def main():
     title = method.replace("_", " ")
     fig.suptitle(
         f"He/cc-pVDZ {title}, length-gauge delta pulse, "
-        f"Gauss s={GAUSS_STAGES}"
+        f"Gauss s={gauss_stages}"
     )
     fig.tight_layout()
     fig.savefig(output_stem.with_suffix(".png"), dpi=180)
@@ -195,6 +238,7 @@ def main():
 
     print(f"Method:                    {method}")
     print(f"Time step:                 {dt:.12e}")
+    print(f"Gauss stages/maxit:        {gauss_stages}/{gauss_max_iterations}")
     print(f"Ground-state energy:       {ground_state_energy.real:.15f}")
     print(f"Nominal pulse strength:    {FIELD_STRENGTH:.12e}")
     print(f"Effective Gauss kick:      {float(effective_kick):.12e}")
@@ -209,6 +253,10 @@ def main():
     if isinstance(solver, CorrectedROATDCCD):
         print(f"Lab Hamiltonian updates:   {solver.lab_hamiltonian_updates}")
         print(f"Orbital transformations:   {solver.orbital_transform_updates}")
+    if isinstance(solver, InstrumentedStaleROATDCCD):
+        print(f"Hamiltonian update calls:  {solver.hamiltonian_update_calls}")
+        print(f"Stale-cache early returns: {solver.stale_cache_hits}")
+        print(f"Full transformations:      {solver.stale_cache_misses}")
     print(f"Saved data: {output_stem.with_suffix('.npz')}")
     print(f"Saved plot: {output_stem.with_suffix('.png')}")
 
