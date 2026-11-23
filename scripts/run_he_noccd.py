@@ -5,7 +5,6 @@ from coupled_cluster.mix import DIIS
 from quantum_systems import construct_psi4_system
 from tdhf import HartreeFock
 
-
 He = """
 He 0.0 0.0 0.0
 symmetry c1

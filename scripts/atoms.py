@@ -7,7 +7,6 @@ from quantum_systems import construct_pyscf_system_rhf
 from coupled_cluster.ccd import OACCD
 from coupled_cluster.ccsd import CoupledClusterSinglesDoubles as CCSD
 
-
 atoms = [
     # "he",
     # "be",

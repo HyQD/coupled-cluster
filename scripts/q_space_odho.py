@@ -6,7 +6,6 @@ from quantum_systems import ODQD
 from coupled_cluster import OATDCCD, CCD
 from hartree_fock import GHF
 
-
 n = 2
 l = 12
 

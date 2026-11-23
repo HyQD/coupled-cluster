@@ -7,7 +7,6 @@ from coupled_cluster import OATDCCD, CCD
 from coupled_cluster.sampler import OATDCCSampleAll
 from coupled_cluster.integrators import GaussIntegrator
 
-
 system = construct_pyscf_system_rhf("he")
 
 ccd = CCD(system, verbose=True)

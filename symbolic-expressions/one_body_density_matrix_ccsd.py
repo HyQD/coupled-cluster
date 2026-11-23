@@ -4,7 +4,6 @@ from one_body_density_matrix import (
 )
 from sympy import latex
 
-
 # Note that the summation indices might not correspond to the labels in the
 # symbol list. This can be remedied by carefully repeated indices with
 # non-repeated indices until the labels properly match the expressions.

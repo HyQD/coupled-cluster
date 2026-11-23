@@ -60,9 +60,7 @@ def construct_initial_state_and_solver(method, system):
         ground_state = ROACCD(system)
         ground_state.compute_ground_state(tol=GROUND_STATE_TOLERANCE)
         solver_class = (
-            StaleROATDCCD
-            if method == "stale_roatdccd"
-            else CorrectedROATDCCD
+            StaleROATDCCD if method == "stale_roatdccd" else CorrectedROATDCCD
         )
 
     ground_state_energy = ground_state.compute_energy()
