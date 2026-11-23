@@ -28,3 +28,7 @@ pyscf
 
 # Install the Gauss-integrator
 git+https://github.com/HyQD/gauss-integrator.git
+
+# Install packages used by development propagation scripts
+git+https://github.com/HyQD/rk4-integrator.git
+git+https://github.com/HyQD/electromagnetic-fields.git
