@@ -5,7 +5,6 @@ from coupled_cluster.ccd import OACCD
 from coupled_cluster.ccsd import CoupledClusterSinglesDoubles
 from configuration_interaction import CISD
 
-
 odqd = ODQD(2, 20, 20, 201)
 odqd.setup_system()
 

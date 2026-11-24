@@ -121,3 +121,7 @@ miniconda.sh
 
 # Pipfile lock
 Pipfile.lock
+
+# Local investigation notes (summarized in the pull request instead)
+dev/oatdcc_stale_hamiltonian_cache.md
+dev/oatdcc_stale_hamiltonian_pr.md

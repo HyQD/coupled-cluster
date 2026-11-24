@@ -1,4 +1,6 @@
 import os
+from unittest.mock import Mock
+
 import pytest
 
 import numpy as np
@@ -28,6 +30,56 @@ class LaserPulse:
             * np.cos(self.omega * delta_t)
             * self.E
         )
+
+
+def test_same_time_hamiltonian_uses_current_orbitals():
+    system = construct_pyscf_system_rhf(
+        molecule="he 0.0 0.0 0.0",
+        basis="cc-pvdz",
+        np=np,
+        add_spin=False,
+        anti_symmetrize=False,
+    )
+    polarization = np.zeros(3)
+    polarization[2] = 1
+    system.set_time_evolution_operator(
+        DipoleFieldInteraction(
+            lambda time: 0.1,
+            polarization_vector=polarization,
+        )
+    )
+    assert system.has_one_body_time_evolution_operator
+    assert not system.has_two_body_time_evolution_operator
+
+    roatdccd = ROATDCCD(system)
+    first_state = roatdccd.amp_template.asarray()
+    second_state = first_state.copy()
+    second_amplitudes = roatdccd.amp_template.from_array(second_state)
+    C = np.eye(system.l, dtype=second_state.dtype)
+    C[0, 1] = 0.2
+    second_amplitudes.C[:] = C
+    second_amplitudes.C_tilde[:] = np.linalg.inv(C)
+
+    system.h_t = Mock(wraps=system.h_t)
+    current_time = 0.25
+    roatdccd.update_hamiltonian(current_time, y=first_state)
+    roatdccd.update_hamiltonian(current_time, y=second_state)
+
+    # Cache the time-dependent laboratory integrals, but transform them with
+    # the orbitals belonging to every evaluated state.
+    assert system.h_t.call_count == 1
+    expected_h_prime = system.transform_one_body_elements(
+        roatdccd.h, second_amplitudes.C, second_amplitudes.C_tilde
+    )
+    expected_u_prime = system.transform_two_body_elements(
+        roatdccd.u, second_amplitudes.C, second_amplitudes.C_tilde
+    )
+    expected_f_prime = system.construct_fock_matrix(
+        expected_h_prime, expected_u_prime
+    )
+    np.testing.assert_allclose(roatdccd.h_prime, expected_h_prime, atol=1e-12)
+    np.testing.assert_allclose(roatdccd.u_prime, expected_u_prime, atol=1e-12)
+    np.testing.assert_allclose(roatdccd.f_prime, expected_f_prime, atol=1e-12)
 
 
 def test_roatdccd_energy_conservation():

@@ -4,7 +4,6 @@ from quantum_systems import construct_pyscf_system_rhf, ODQD
 from coupled_cluster import CCS
 from configuration_interaction import CIS
 
-
 system = construct_pyscf_system_rhf("he")
 
 cis = CIS(system, verbose=True)

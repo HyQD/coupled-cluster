@@ -10,7 +10,6 @@ from coupled_cluster.integrators import GaussIntegrator, RungeKutta4
 import matplotlib.pyplot as plt
 import tqdm
 
-
 system = construct_pyscf_system_rhf(
     molecule="he 0.0 0.0 0.0", basis="cc-pvdz", symmetry=False
 )

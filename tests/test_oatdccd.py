@@ -1,4 +1,6 @@
 import os
+from unittest.mock import Mock
+
 import pytest
 
 import numpy as np
@@ -27,6 +29,54 @@ class LaserPulse:
             * np.cos(self.omega * delta_t)
             * self.E
         )
+
+
+def test_same_time_hamiltonian_uses_current_orbitals():
+    system = construct_pyscf_system_rhf(
+        molecule="he 0.0 0.0 0.0",
+        basis="cc-pvdz",
+        np=np,
+    )
+    polarization = np.zeros(3)
+    polarization[2] = 1
+    system.set_time_evolution_operator(
+        DipoleFieldInteraction(
+            lambda time: 0.1,
+            polarization_vector=polarization,
+        )
+    )
+    assert system.has_one_body_time_evolution_operator
+    assert not system.has_two_body_time_evolution_operator
+
+    oatdccd = OATDCCD(system)
+    first_state = oatdccd.amp_template.asarray()
+    second_state = first_state.copy()
+    second_amplitudes = oatdccd.amp_template.from_array(second_state)
+    C = np.eye(system.l, dtype=second_state.dtype)
+    C[0, 1] = 0.2
+    second_amplitudes.C[:] = C
+    second_amplitudes.C_tilde[:] = np.linalg.inv(C)
+
+    system.h_t = Mock(wraps=system.h_t)
+    current_time = 0.25
+    oatdccd.update_hamiltonian(current_time, y=first_state)
+    oatdccd.update_hamiltonian(current_time, y=second_state)
+
+    # The time-dependent laboratory integrals are cached, while their
+    # orbital-basis representations use the second state's orbitals.
+    assert system.h_t.call_count == 1
+    expected_h_prime = system.transform_one_body_elements(
+        oatdccd.h, second_amplitudes.C, second_amplitudes.C_tilde
+    )
+    expected_u_prime = system.transform_two_body_elements(
+        oatdccd.u, second_amplitudes.C, second_amplitudes.C_tilde
+    )
+    expected_f_prime = system.construct_fock_matrix(
+        expected_h_prime, expected_u_prime
+    )
+    np.testing.assert_allclose(oatdccd.h_prime, expected_h_prime, atol=1e-12)
+    np.testing.assert_allclose(oatdccd.u_prime, expected_u_prime, atol=1e-12)
+    np.testing.assert_allclose(oatdccd.f_prime, expected_f_prime, atol=1e-12)
 
 
 def test_oatdccd_energy_conservation():

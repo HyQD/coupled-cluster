@@ -85,16 +85,13 @@ system = construct_psi4_system(H2, options)
 ccd_groundstate("H2", system)
 
 r = 1.1
-h20 = (
-    """
+h20 = """
 O
 H 1 r
 H 1 r 2 104
 symmetry c1
 r = %f
-"""
-    % r
-)
+""" % r
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(h20, options)
 ccd_groundstate("H2O", system)
@@ -118,9 +115,7 @@ N
 N 1 %f
 symmetry c1
 units bohr
-""" % (
-    r
-)
+""" % (r)
 options = {"basis": "cc-pvdz", "scf_type": "pk", "e_convergence": 1e-8}
 system = construct_psi4_system(N2, options)
 ccd_groundstate("N2", system)
